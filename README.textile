@@ -5,7 +5,7 @@ code that plugs into all popular browsers to provide a new, higher level
 plugin API.  A Plugin API optimized for secure and portable scriptable
 web plugins.
 
-_BrowserPlus is an open source project created and supported by Yahoo!_.
+_BrowserPlus is free and open source sofware created and supported by Yahoo!_.
 
 h3. License
 
