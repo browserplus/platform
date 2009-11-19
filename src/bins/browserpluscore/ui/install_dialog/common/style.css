@@ -1,0 +1,169 @@
+body {
+  font-size: 80%;
+  font-family: 'Lucida Grande', Verdana, Arial, Sans-Serif;
+  color: #333;
+}
+
+#dialog {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 607px;
+  height: 368px;
+  margin: 0px;
+  padding: 0px;
+  background: #E9E9E9;
+}
+
+#description {
+    position:absolute;
+    top:33px;
+    left:20px;
+    font-size: 93%;
+    padding-right:30px;
+}
+
+#this_domain {
+    font-weight:bold;
+    color:#222;
+}
+#request { 
+    font-size: 80%;
+}
+
+#req_by {
+  position: absolute;
+  top: 77px;
+  left: 20px;
+}
+
+#requestedBy {
+  font-weight: bold;
+}
+
+#total_size {
+  position: absolute;
+  top: 77px;
+  right:30px;
+}
+
+#total_size_text {
+  font-weight: bold;
+}
+
+
+
+#component_list {
+  position: absolute;
+  background: white;
+  border: 1px solid #aaa;
+  top: 91px;
+  left: 18px;
+  width: 564px;
+  height: 210px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.component {
+  padding: 0px;
+  margin: 10px 0;
+  width: 564px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+
+
+.component_info {
+  width: 510px;
+  padding: 3px 0px 8px 28px;
+  margin-left: 5px;
+}
+
+.perm_component {
+    background:transparent url(perm.gif) 0 0 no-repeat;
+}
+
+.bplus_component {
+    background:transparent url(bplus_update.gif) 0 0 no-repeat;
+}
+.update_component {
+    background:transparent url(update.gif) 0 0 no-repeat;
+}
+
+.add_component {
+    background:transparent url(add.gif) 0 0 no-repeat;
+}
+
+.component_name {
+    font-size: 90%;
+}
+
+.service_detail_show {
+    background:white url(arrowdown.gif) 0 0 no-repeat;
+}
+
+.service_detail_hide {
+    background:white url(arrowright.gif) 0 0 no-repeat;
+}
+
+.service_detail {
+    cursor: pointer;
+    font-size: 85%;
+    margin-top: 1px;
+    padding-left: 15px;
+	width:495px;
+}
+
+.service_name {
+    background:white url(bullet.gif) 0 0 no-repeat;
+    font-size: 85%;
+    font-weight:bold;
+    margin-left: 13px;
+    margin-top: 5px;
+    padding: 0px 0px 2px 16px;
+}
+
+.service_summary {
+    font-size: 80%;
+    margin-left: 13px;
+    padding-left: 16px;
+}
+
+#button_footer {
+    position: absolute;
+    top: 308px;
+    left:15px;
+    font-size:85%;
+}
+
+
+#allow {
+    margin-left: 10px;
+}
+#deny {
+    margin-left:15px;
+}
+#logo {
+    position:absolute;
+    top:2px;
+    left:20px;
+    width:120px;
+    height:25px;
+    background:transparent url(bp-logo-sm.gif) 0 3px no-repeat;
+}
+
+
+#footerContent {
+	padding:0 10px;
+}
+#legalFooter {
+  font-size: 70%;
+  position: absolute;
+  top: 335px;
+  text-align: left;
+  padding: 4px 0;
+  width: 100%;
+  height:23px;
+  border-top: 1px solid #ccc;
+}

@@ -1,0 +1,165 @@
+/*
+ * This is the configuration file for BrowserPlus 
+ */
+
+{
+    // The type of build this is, which is accessible to JavaScript via
+    // BrowserPlus.getPlatformInfo(); 
+    // Different build types should only differ in signatures accepted
+    // (BrowserPlus.crt) and configured distribution servers.
+    "BuildType": "<%= $cmake["BP_BUILD_TYPE"] %>",    
+
+    // the base url for the "primary" distribution server.  This server will
+    // be the single source of truth for Permissions, and will used to 
+    // attain services
+    "DistServer": "<%= $cmake["BP_PRIMARY_DISTRO_SERVER_URL"] %>",
+
+    // An array of "secondary" distribution servers, which will be checked
+    // in order for services if the primary server has no components
+    // available which match an issued require statement.
+    "SecondaryDistServers": [
+      "<%= $cmake["BP_SECONDARY_DISTRO_SERVER_URL"] %>",
+      "<%= $cmake["BP_TERTIARY_DISTRO_SERVER_URL"] %>"
+    ],
+    
+    // Local mimetypes.  The file extension to mimetype mappings specified at
+    // http://www.webmaster-toolkit.com/mime-types.shtml, 
+    // http://support.microsoft.com/kb/288102, and 
+    // http://developer.apple.com/documentation/AppleApplications/Reference/SafariWebContent/CreatingContentforSafarioniPhone/chapter_2_section_11.html
+    // are builtin.  A file extension maps to a set of mimetypes, e.g. 
+    // ".aiff" -> ["audio/aiff", "audio/x-aiff"]
+    // All file extension comparisons are case insensitive.
+    // Additional mappings may be specified here, or an existing mapping augmented.  
+    // For example, entries to add a ".foo" -> "application/x-foo" mapping and augment the
+    // ".jpg" mimetype with "image/x-myjpeg" would look like:
+    // "LocalMimeTypes" : [
+    //     ["foo", "application/x-foo"],
+    //     ["jpg", "image/x-myjpeg"]
+    // ],   
+
+    // Auto-shutdown daemon if idle for this time.  Use 0 for no auto-shutdown.
+    "MaxIdleSecs": 5,
+
+    // Logging Time Format
+    // format = utc|local|msec
+    //   "utc"              Use UTC time in log messages 
+    //   "local"            Use local time in log messages 
+    //   "msec"             Report process elapsed msec in log messages 
+    "LogTimeFormat": "utc",
+
+    // Supported Logging Levels and Layouts
+    // level = fatal|error|warn|info|debug
+    // layout = raw|source|standard|ThrdLvlFuncMsg|TimeLvlMsg
+    //   "raw"              Format is: just the raw message.
+    //   "source"           Format is: file(line): func - message
+    //   "standard"         Format is: time [pid:tid] level - func: message
+    //   "ThrdLvlFuncMsg"   Format is: [pid:tid] level - func: message
+    //   "TimeLvlMsg"       Format is: time level - message
+
+    // Plugin Minimum Log Level
+    // As a performance tweak, you may set the minimum event level that 
+    // will even be considered by plugin logging. 
+    // Syntax: "PluginLogLevel": level
+    "PluginLogLevel": "info",
+
+    // Plugin Logging Setup
+    // Syntax: "destination": "level[,layout]"
+    //   destination = PluginLogToFile|PluginLogToConsole|PluginLogToDebugger
+    // Multiple destinations may be enabled simultaneously.
+    // PluginLogToDebugger is currently win32-specific (uses OutputDebugString).
+    // Layout defaults to "standard" for File and Console; "source" for Debugger.
+    "PluginLogToFile": "info",
+
+    // BrowserPlus Configuration Panel Logging Setup:
+    // Syntax: "ConfigPanelLogLevel": "level[,layout]"
+    // NOTE: at present, config panel always logs only to file
+	"ConfigPanelLogLevel": "info",
+    
+    // Daemon setup
+    // Syntax: "Options": "option1 option2 etc"
+    // -l         enable logging (same "level[,layout]" syntax as above), logs to file
+    // -fg        run in foreground, log to console
+    // Samples:
+    "Options":"-l=info",
+
+    // Configure Service logging.
+    // Default is to forward logging events from Services on to the logging 
+    // system of the "harness" process (e.g. ServiceRunner, BrowserPlusService).
+    // In this mode, events from all services and their harnesses (and possibly
+    // the BrowserPlusCore daemon, depending on configuration) can all be sent
+    // to the same log.  This is sometimes desirable, sometimes not.
+    // You may also configure the system to send service log events to a 
+    // service-specific log.
+    // Note: all these logging options may be invoked cumulatively.
+    // Note: Be careful to maintain valid json syntax when you [un]comment lines
+    //       in this map - in particular use commas properly!
+    "ServiceLogging":
+    {
+        // Forward log statements at or above specified level to the logging
+        // system used by the service "harness" process.
+        // Syntax: "ForwardToHarnessLog": level
+        "ForwardToHarnessLog": "info"
+
+        // As a performance tweak, you may set the minimum event level that 
+        // will even be considered by service-specific loggers. 
+        // Syntax: "ServiceLogLevel": level
+        //"ServiceLogLevel": "debug"
+
+        // Note: for service logging, due to sparser event information across
+        // the service logging api, the recommended layouts are "TimeLvlMsg" or "raw".
+
+        // Setup log to service-specific file for events at/above the specified level.
+        // Syntax: "LogToFile": "level[,layout]"
+        //"LogToFile": "debug,TimeLvlMsg"
+
+        // Setup log to service-specific console for events at/above the specified level.
+        //"LogToConsole": "debug,TimeLvlMsg"
+
+        // Setup log to debug facilities (e.g. OutputDebugString on win32) 
+        // for service events at/above the specified level.
+        //"LogToDebugger": "debug,TimeLvlMsg"
+    },
+
+    // At the end of each BrowserPlus session a small web request is made
+    // to yahoo to indicate that BrowserPlus was used.  This report includes
+    // * information about the browser being used
+    // * an "installation id", which is a unique token that's generated
+    //   the first time BrowserPlus runs.
+    //
+    // By design, there is *no information* in this request that gives
+    // Yahoo! information about:
+    //   a) the site that the user is visiting (see, "url": false)
+    //   b) who the user is (the installation token cannot be tracked to a
+    //      specific user).
+    //
+    // This information is primarily captured to help Yahoo! understand
+    // adoption and usage of the BrowserPlus platform.
+    "UsageReporting":
+    {
+       "enabled": true,
+       "url": false,
+       "id": true
+    },
+
+    // "Breakpoints" is an array of strings holding named breakpoints.
+    // Platform code checks for specific entries at certain key points, and if 
+    // a matching entry is found here a DebugBreak will be performed.
+    // For developers with Visual Studio installed, the DebugBreak will cause an
+    // opportunity to perform just-in-time attachment of an existing or new 
+    // debugger instance.
+    // The currently-defined breakpoints are listed below:
+    //      runServiceProcess - A DebugBreak is performed in the service 
+    //                          "harness" just prior to service load.
+    //      ax.FinalConstruct - A DebugBreak is performed at entry to 
+    //                          FinalConstruct of the ActiveX plugin.
+    //      PluginInit -        Very early in the NPAPI plugin initialization.
+    //                          A wonderful spot to stop and set more
+    //                          breakpoints.
+    //"Breakpoints": ["runServiceProcess"],
+
+    // How often we check for corelet updates.  We guarantee at least this
+	// much time will pass between checks, though the true time may be
+	// much more if sites which use browserplus are not visited.
+	// The time is in seconds.
+    "CoreletUpdatePollPeriod": 86400
+}

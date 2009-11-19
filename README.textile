@@ -1,0 +1,30 @@
+h2. The BrowserPlus Platform
+
+This is the home of the BrowserPlus platform implementation: portable client
+code that plugs into all popular browsers to provide a new, higher level
+plugin API.  A Plugin API optimized for secure and portable scriptable
+web plugins.
+
+_BrowserPlus is an open source project created and supported by Yahoo!_.
+
+h3. License
+
+All code you find here is provided under the terms of the MPL:
+
+bq.. The contents of this file are subject to the Mozilla Public License
+ Version 1.1 (the "License"); you may not use this file except in
+ compliance with the License. You may obtain a copy of the License at
+ http://www.mozilla.org/MPL/
+ 
+ Software distributed under the License is distributed on an "AS IS"
+ basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ License for the specific language governing rights and limitations
+ under the License.
+ 
+ The Original Code is BrowserPlus &reg;.
+ 
+ The Initial Developer of the Original Code is Yahoo!.
+ Portions created by Yahoo! are Copyright (C) 2006-2009 Yahoo!.
+ All Rights Reserved.
+ 
+p. 

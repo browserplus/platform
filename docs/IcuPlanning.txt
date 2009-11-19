@@ -1,0 +1,58 @@
+Project     Desc                                In 2/6?     Keep?
+=======     ====                                =======     =====
+cintltst    C test suite                        no          no
+common                                          yes         yes
+ctestfw                                         yes
+derb                                            yes
+genbidi     char data (bidi, shaping)           yes         no?
+genbrk      break iterator data                 yes         no?
+gencase     char data (case mappings)           yes         yes?
+genccode                                        yes
+gencmn      processes .dat files                yes
+gencval     conversion aliases                  yes         no?
+genctd                                          yes
+gennames    char data (names)                   yes         no?
+gennorm     char data (normalization)           yes         yes?
+genpname    char data (property aliases)        yes         no?
+genprops    unicode char data (properties)      yes         no?
+genrb       resource bundles                    yes         no?
+gensprep    StringPrep profile data             yes         yes?
+gentest                                         no          no
+genuca      collation                           yes
+i18n        formatting, collation, break, tlit  yes         no?
+icupkg                                          yes
+icuswap                                         yes
+intltest    C++ test suite                      no          no
+io                                              no          no
+iotest      tests icu io lib                    no          no
+layout                                          no          no
+layoutex                                        no          no
+letest                                          no          no
+makeconv    conversion mapping tables           yes         no?
+makedata                                        yes         yes?
+pkgdata     builds the data lib                 yes         yes?
+stubdata    stub data load entry point          yes         yes?
+toolutil                                        yes
+uconv                                           yes
+
+34 Projects
+
+
+
+Win32 Sizes (release):
+
+Date    icudt_s.lib icuuc_s.lib I18nTest.exe
+====    ==========  =========== ============
+2/6     13,911,502  2,907,424   14,635,008
+
+
+
+To Do
+=====
+* Remove ucm*.mk files
+* Remove East Asian CollationElements entries from locales/*.txt
+* Remove unused locale files from locales/resfiles.mk
+    keep root.txt
+* Remove unnecessary projects
+* Minimize data lib to what we need
+* Do for Win32 and Darwin

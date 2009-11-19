@@ -1,0 +1,6 @@
+*.tar.gz
+*.tar.bz2
+*.tgz
+/Darwin
+/Windows
+/Linux

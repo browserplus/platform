@@ -1,0 +1,29 @@
+A terse document describing the repository structure
+
+Rules (Because "form is liberating"):
+  1. no upper case dirs
+  2. tree will be structured functionally
+  3. only use "src" where there are other non-src peers 
+     (e.g. docs, legal)
+  4. Where does a binary go:
+    a. 'bins holds bins installed on users' machines
+    b. 'sdk' holds bins which ship in one of our sdks    
+    c. 'support' holds things required to build/ship the product  
+    d. all other binaries go in tools
+
+Software Organization:
+
+    /docs           - documents, like this one
+    /legal          - legal documents 
+    /src            - source code
+    /src/support    - scripts, localization files... stuff used to
+                      build the software  
+    /src/javascript - javascript code that is "part of" the platform but
+                      is distributed separately from it (usually on a CDN)
+    /src/plugins    - browser specific plugins
+    /src/tools      - source for binaries used for testing or development
+    /src/sdk        - binaries and samples that are distributed in
+                      (one of) our SDKs
+    /src/libs       - code for reusable native libraries
+    /src/bins       - code for binaries that we ultimately ship to end users
+    

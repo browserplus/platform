@@ -1,0 +1,59 @@
+Building on OSX:
+  Setting up your environment:
+    1. install the latest version of XCode (at time of writting 2.5 or 3.0 for tiger/leopard)
+    2. install cmake version 2.6.2 or greater from http://www.cmake.org/cmake/resources/software.html
+    3. install ruby from http://www.ruby-lang.org
+ 
+  Building the tree:    
+    1. mkdir build
+    2. cd build
+    3. cmake .. (or cmake -G Xcode .. to generate an xcode project)
+    4. "make -j3" or "open BrowserPlus.xcodeproj"
+
+
+Building on win32:
+  Setting up your environment:
+    1. install Visual Studio 2008 Pro or equiv and Visual Studio 2008 SP1
+    2. install "Microsoft Windows SDK for Windows 7 and .NET Framework 3.5 Service Pack 1" from http://www.microsoft.com/downloads/details.aspx?displaylang=en&FamilyID=c17ba869-9671-4330-a63e-1fd44e0e2505
+    3. run the sdk configuration tool from c:\Program Files\Microsoft SDKs\Windows\v7.0\Setup\WindowsSdkVer and set v7.0 as the current sdk
+    4. (optional) Add a new user environment variable: 
+          Name: WindowsSdkDir
+          Value: C:\Program File\Microsoft SDKs\Windows\v7.0\
+       This will ensure that in cases where VS launches cmake to regenerate 
+       .vcproj files, this environment variable, which is used in some of
+       our cmake scripts, will be expanded properly.  
+       Without this, invalid .vcproj files can be generated when cmake is 
+       launched by VS.
+    5. (optional) Add %WindowsSdkDir%Bin to your path.
+       This will allow you to easily invoke tools such as mt.exe from your
+       command line.
+    6. install cmake version 2.6.2 or greater from http://www.cmake.org/cmake/resources/software.html
+          during install, select "add cmake to PATH for this user (or all users)"
+    7. install ruby from http://www.ruby-lang.org
+          add C:\ruby\bin to your PATH
+    8. (optional) Install the latest version of doxygen if you would
+       like to have documentation generated for various projects which
+       do this (like ServiceAPI).  (http://www.stack.nl/~dimitiri/doxygen/)
+    9. install the latest JDK from http://java.sun.com/javase/downloads/index.jsp
+          ensure that JAVA_HOME is set correctly (e.g. C:\Program Files\Java\jdk1.6.0_14)
+   10. install the latest ANT from http://ant.apache.org
+          ensure that ANT_HOME is set correctly. 
+          ensure that ant binary directory is in your path (e.g. %ANT_HOME%\bin)
+   11. install the latest ActivePerl: https://www.activestate.com/activeperl/downloads/ 
+          ensure that perl is in your path from a vs command shell (you'll need this at
+          least for building openssl in external/)
+
+  Building the tree
+    1. start a windows command prompt with visual studio env set (e.g. invoke vsvars32.bat)
+    2. cd [yourdevdir]\BrowserPlus\platform\External
+    3. ruby build.rb keepSource (will take a while, only needs to be done once)
+    4. cd [yourdevdir]\BrowserPlus\platform\Core
+    5. mkdir build
+    6. cd build
+    7. cmake -G "Visual Studio 9 2008" ..
+    8. devenv BrowserPlus.sln 
+         or
+       devenv BrowserPlus.sln /Build {Debug,Release}
+         or
+       Launch VS08, open build\BrowserPlus.sln and build via the gui.
+           

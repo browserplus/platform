@@ -1,0 +1,103 @@
+/******************** GENERAL STYLES **********************************/
+
+pre { background-color: #e3e3e3; padding: 0.75em 1.5em; border: 1px solid #ddd; }
+
+pre {
+ white-space: pre-wrap;       /* css-3 */
+ white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+ white-space: -pre-wrap;      /* Opera 4-6 */
+ white-space: -o-pre-wrap;    /* Opera 7 */
+ word-wrap: break-word;       /* Internet Explorer 5.5+ */
+}
+
+
+body {
+    font-size: 72.5%;
+    font-family: 'Lucida Grande', Verdana, Arial, Sans-Serif;
+    color: #333;
+}
+
+body {
+    margin:0px 0px 0px 0px;
+    background-color: white;
+    padding: 0;	
+}
+
+a:link, 
+a:visited {text-decoration:none;}
+
+a:hover,
+li a:hover {text-decoration:underline;}
+
+/* general for content modules */
+
+.timingBox {
+    text-align:  center;
+    padding: 15px 5px 15px 5px;
+}
+
+.moduleContainer {
+    padding: 15px 5px 15px 5px;
+}
+
+.quotedisplay {
+  float: left;
+}
+.quoteimagedisplay {
+  float: right;
+}
+#quoteContent {
+  height: 100px;
+}
+#quoteForm {
+  bottom: auto;
+}
+
+.contentModule
+{
+    align: center;
+    padding: 10px;
+	width: 50%;
+}
+
+.moduleTitle
+{
+    text-align:  center;
+    font-size: 14px;
+	font-weight: bold;
+	border: 1px solid #999;
+}
+
+.moduleTitle a
+{
+    text-decoration: none;
+	color: #777;
+}
+
+.pageContent
+{
+	align:	center;
+}
+
+.moduleContent
+{
+ 	text-align: left;
+    padding: 5px;
+    border: 1px dashed #999;
+    border-top: 0px;
+}
+
+.moduleSubtitle {
+	margin-top: 5px;
+	border-bottom: 1px dashed #999;
+	font-size: 12px;
+	font-weight: bold;
+}
+
+.dropZone
+{
+ 	text-align: left;
+    padding: 5px;
+    border: 2px solid #999;
+}
+

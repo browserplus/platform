@@ -1,0 +1,70 @@
+Compiler Flags
+==============
+
+Note: some flags deemed "inappropriate" for our application are not listed.
+      some flags deemed "appropriate" that are default "on" are not listed.
+
+                        Win32|Debug         Win32|Release
+/DDEBUG                     x
+/D_DEBUG                    x
+/DNDEBUG                                        x
+/DWIN32                     x                   x
+/DWINDOWS                   x                   x
+/D_WINDOWS                  x                   x
+/D_WIN32                    x                   x
+/D_XP_WIN32                 x                   x
+/EHa                                                            catch SEH and C++ exceptions
+/EHs                        ?                   ?               catch C++, assume extern C may throw
+/EHsc                       ?                   ?               catch C++, assume extern C doesn't throw
+/F                                                              Stack size (also can use linker option)
+/Fd                         project.pdb?                        (needed to combine obj and exe pdb's)
+/FR                                                             browser files
+/GL                                             later           whole program optimization (having a cmake issue getting /LTCG flag recognized by linker)
+/Gm                         x                   yes?            c++ minimal rebuild
+/Gy                                                             function-level linking
+/MD                                                             dll CRT
+/MDd                                                            debug dll CRT
+/MT                         x                   x               static CRT
+/MTd                        later                               debug static CRT
+/Od                         x                                   optimization off
+/O1                                             x?              Creates small code (but note small may be faster due to locality)
+/O2                                             x?              Creates fast code
+/RTCs                                                           stack frame run-time checking
+/RTCu                                                           variable used w/o initialization
+/RTC1                       yes?                                same as RTCs+RTCu
+/RTCc                       yes?                                truncation resulting in loss
+/wd                         x                   x               disable specific warnings
+/Wall                                                           enables all warnings
+/Wp64                       later?              later?          detect 64-bit portability problems (maybe use sep config for x64)
+/WX                         ?                   ?               treat warnings as errors
+/W4                         x                   x               warning level 4
+/Y-                         later                               pch-related
+/Yc                         later                               pch-related
+/Yl                         later                               pch-related
+/Yu                         later                               pch-related
+/Zi                         yes?                yes?            standard debug info
+/ZI                                                             Edit-and-Continue debug info
+/Z7                                                             C7-compat debug info
+
+
+Linker Flags
+==============
+                        Win32|Debug         Win32|Release
+/DEBUG                      x                   yes?
+/INCREMENTAL                                                    implied with /DEBUG
+/INCREMENTAL:NO                                 x
+/LTCG                                           later           link-time code generation (implied with /GL, incomp with /INCREMENTAL) ((having a cmake issue getting /LTCG flag recognized by linker)
+/MACHINE:X86                                                    usually auto-determined
+/MANIFEST
+/MANIFEST:NO                x                   x
+/MAP
+/MAPINFO
+/MIDL
+/OPT:IFC                                        ?
+/OPT:REF                                        ?
+/PDB                                                            defaults to project name
+/PDBSTRIPPED                later               later?          if we care, suggest ${project}_stripped.pdb
+/STACK
+/WX                         yes?                yes?
+
+

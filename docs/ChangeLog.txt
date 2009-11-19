@@ -1,0 +1,633 @@
+11/12/2009 - Changes from 2.4.20 to 2.4.21
+  * Fix bug where on non-ascii win32 machine upgrade would leave bogus links in start menu (non-localized, i.e. kProductName)
+  * Improve log statement for crashed services
+  * For Safari/Snow leopard, remove console.log() statements
+
+
+10/02/2009 - Changes from 2.4.19 to 2.4.20
+  * [bug 2970389] Fix crash when BrowserPlus is disabled while a page is loaded
+  * Firefox 2.0 no longer supported, traded for Safari and Snow Leopard support.
+
+
+09/22/2009 - Changes from 2.4.18 to 2.4.19
+  * [bug 2927615] remove code disabling BrowserPlus on snow leopard with support implemented in 2.4.18
+  * [bug 3056396] fix bug which would cause non-primary distro servers to be ignored
+  * [bug 3058554] on safari BrowserPlus prompts will have a title bar
+
+
+09/21/2009 - Changes from 2.4.17 to 2.4.18
+  * Snow leopard support
+  * [bug 2962566] (second try) fix crash on selection of CDROM when no disk is present
+
+
+08/17/2009 - Changes from 2.4.16 to 2.4.17
+  * [bug 2939946] Layout bug in BrowserPlus prompt (footer overflow in certain languages)
+  * [bug 2947867] win32 usability bug in BrowserPlus prompt - allow user to click on arrow to expand description
+  * [bug 2964232] Update code signing keys
+  * [bug 2964066] Fix browser crash when directory selected for which the current user doesn't have permission
+  * [bug 2962566] Fix browser crash when CDROM drive selected without disk in drive
+  * [bug 2962581] Drill rather than selecting when special file is selected on winxp (i.e. My Computer)
+  * [bug 2927615] Return bp.unsupportedClient to Javascirpt for Safari/Snow Leopard, to be fixed shortly.
+
+
+08/13/2009 - Changes from 2.4.15 to 2.4.16
+  * [bug 2949509] Return bp.unsupportedClient from BrowserPlus.init() for FFX2 on Vista
+  * [bug 2947574] Fix browser crash on Win32 when spaces are entered in FileBrowse dialog
+  * [bug 2947586] Change behavior of FileBrowse on win32.  If nothing is selected, nothing is returned.  Previously the parent folder would be returned (and we would recurse).
+  * [bug 2941433] Initial snow leopard support, Safari not yet working.
+  * [bug 2915405] Handle double-clicks on files in the FileBrowse dialog on XP.
+
+
+08/05/2009 - Changes from 2.4.14 to 2.4.15
+  * [bug 2897626] (fixes) silent platform/service update support
+
+
+08/05/2009 - Changes from 2.4.13 to 2.4.14
+  * [bug 2897626] silent platform/service update support
+
+
+08/03/2009 - Changes from 2.4.12 to 2.4.13
+  * [bug 2919152] Fix FFX crash on update.
+  * [bug 2919152] Fix win32/safari restart requirement on update
+  * [bug 2902052] detach DMG at install exit
+  * [bug 2929603] expose "Build Type" to javascript through js API
+  * [bug 2921888] Fix crash when distro server returns HTTP errors
+  * final PP/EULA URLs in product (updates included for IT, FR, and AU)
+
+
+07/27/2009 - Changes from 2.4.11 to 2.4.12
+  * Fix accidental creation of directories under BrowserPlus installation path.
+
+
+07/27/2009 - Changes from 2.4.10 to 2.4.11
+  * [bug 2908279] [bug 2911972] Perform update immediately rather than waiting for
+    BrowserPlusCore to shut down.  This improves the testability of the system, and
+    is inline with user expectation.  Despite the magnitude of this change, the
+    code to complete the update code is distributed with a new platform version, so
+    getting this code in NOW allows for QA to meaningfully test the update
+    experience that will hit end users several months from now, and addresses
+    several open bugs and sources of confusion.
+
+
+07/27/2009 - Changes from 2.4.9 to 2.4.10
+  * [bug 2898226] Fix large file move to deal with popular AntiVirus software
+  * [bug 2910204] Fix regression in 2.4.9 which would prevent re-install with "a newer version is installed" error message
+  * [bug 2897994] Fix skinned installer progress when services are bundled.
+  * [bug 2917492] fix all-in-one installer feature on OSX
+  * updated german EULA and PP links (now live).
+
+
+07/21/2009 - Changes from 2.4.8 to 2.4.9
+  * [bug 2898476] Fix autocomplete selection of files on Windows XP
+  * [bug 2897631] [bug 2899067] [bug 2899096] Complete support for "High DPI" on all windows versions/browsers
+  * [bug 2875576] Increase robustness of Installer, support uninstall/reinstall cases common in QA
+  * [bug 2898787] [bug 2897623] [bug 2898979] Fix several issues in HTTP timeout support
+  * [bug 2888966] Fix selection of shortcuts through File Browse dialog.
+
+
+07/12/2009 - Changes from 2.4.7 to 2.4.8
+  * [bug 2875820] osx service developer improvement, when dlopen() fails on a service library, output at ERROR level the results of dlerror(), to help the befuddled engineer identify the underlying problem.
+  * [bug 2874967] Move bpstate.data file to location where writes to it will not be virtualized on vista and above.
+  * [bug 2876012] One of many fixes to improve logging, and in turn our ability to understand issues in the field.
+  * [bug 2869494] IE Crash fix: on hover over a child with no .id attribute nested inside of a drop target.
+  * [bug 2858594] Rudimentary DPI awareness on vista and above that prevents us from locking up the browser with a dialog that cannot be dismissed when the user is running at high DPI on vista or above.
+  * [bug 2869932] Remove support for IE6 on unupdated machines, sending an error message of unsupported client rather than crashing the browser at instantiation time.  BrowserPlus will still work on other browsers installed on the system.
+  * [bug 2678712] Improvements in the installer in handling installing over a platform that is currently running or partially loaded.. 
+  * [bug 2875595] Drops of files with non-english names not uploading properly.
+
+
+07/07/2009 - Changes from 2.4.6 to 2.4.7
+  * [bug 2739488] rename installer to avoid unwanted escalation on Vista/Win7
+  * latest updated EULA/privacy policy links
+  * latest updated language, including Danish, Swedish, and Norwegian
+  * [bug 2864795] [bug 2857170] change the way we spawn processes to fix a class of potential race conditions (related to unexpected re-entrancy). 
+
+
+06/29/2009 - Changes from 2.4.5 to 2.4.6
+  * [bug 2850350] fix timeout handling on win32 for long running http transactions over low bandwidth connections.
+
+
+06/26/2009 - Changes from 2.4.4 to 2.4.5
+  * Fix regression - IE installation broken (introduced in fix for [bug 2764218])
+  * Disable Java installation accross the board until bug 2850242 is addressed.
+
+
+06/25/2009 - Changes from 2.4.3 to 2.4.4
+  * L10n update - include latest translations (updated CN strings, da-DK, sv-SE, and nb-NO)
+  * [bug 2733225] Improve logging when service allocation failure is encountered
+  * [bug 2764218] Report IE as "Internet Explorer" not "Explorer".
+  * [bug 2765324] Allow service developers to configure BrowserPlus in such a way that their log messages are written to different files
+  * [bug 2825913] Fix issue related to BrowserPlus failing to function after update on FFX2/XP
+  * [bug 2841562] (debug build fix) - handle non-ascii chars when encoding urls
+  * [bug 2843796] turn all dropped paths into posix paths
+
+
+06/12/2009 - Changes from 2.4.2 to 2.4.3
+  * [bug 2822591] Fix regression causing BrowserPlus to fail to function on winxp machines with IE6 (wininet.dll shipped with IE6 doesn't support InternetReadFileExW).
+  * [bug 2822728] Fix "thumbnails not showing up in windows" - ImageAlter stopped working because of an accidental change in the service API, where windows paths for data_dir and corelet_dir were passed with forward slashes instead of back slashes.  This regression was related to our move to boost file system abstractions introduced in 2.4.0.
+  * [bug 2821822] ServiceInstaller.exe (a developer tool shipped in the bpsdk) was causing a UAC prompt and trying to escalate on Vista and above.  Vista tries to escalate by default when it sees 'Installer' in the filename of an executable.  ServiceInstaller.exe will no longer try to escalate unnecesarily.
+  * [bug 2813122] Better handling of trying to delete files/dirs with read-only set.
+  * [bug 2813574] Don't install/uninstall firefox 2 plugin on vista.
+
+
+06/10/2009 - Changes from 2.4.1 to 2.4.2
+  * [bug 2675980] Change internal testing distribution server.
+  * [bug 2806973] fix HTTP redirect handling on win32 - prerequisite for [bug 2813621]
+  * [bug 2807816] fix "crash on every upload" - plug a hole by which services and harness code can interact in evil ways (threadhopper)
+  * [bug 2765264] BPUtils.dll is no longer built nor distributed.  We'll share code with service implementors in a different manner.
+
+06/05/2009 - Changes from 2.4.0 to 2.4.1
+  * [bug 2737703] fix BPInstaller.allDone() in OSX - now correctly shuts down installer
+
+06/05/2009 - Changes from 2.3.2 to 2.4.0
+  * [bug 2737695] allow wildcards in domain names of pre-seeded permissions
+  * [bug 2721369] fix updating from older installer to newer platform update package
+  * [bug 2718091] eased service debugging for win32
+  * [bug 2743411] eased ActiveX plugin debugging
+  * Use precompiled-headers for faster win32 build times.
+  * on win32 all software now built on visual studio 2008
+  * on osx leopard is now primary development platform
+  * No binaries for external software in tree, all built via a lightweight ruby build system
+  * migrate to tr1 c++ extensions where possible
+
+05/19/2009 - Changes from 2.3.1 to 2.3.2
+  * [bug 2734746] ".exe" not required when invoking sdk utilities on win32.
+  * [no bug] fix javascript errors when platform functions are invoked
+    incorrectly
+  * [no bug] fix typos in SDK documentation
+  * [bug 2738756] [bug 2738760] allow installer height & width & title to
+    be controlled from installer.confg (by the skinner)
+
+05/06/2009 - Changes from 2.3.0 to 2.3.1
+  * latest translations from yala
+  * [bug 2736158] setup production signing of installer .jar file
+
+05/04/2009 - Changes from 2.2.6 to 2.3.0
+  * [bug 2726247] resolve 100% cpu usage upon mouse scrolling in npapi plugin
+  * [bug 2582366] clean up excessive noise in plugin log (activex specific)
+  * fixes related to skinnable installer
+  * [bug 2492113] improved handling of unreachable hosts
+  * [bug 2373903] ensure permissions are checked every 24 hours even if BrowserPlus never shuts down
+  * [bug 2647905] firefox installation on xp now supports non-ascii usernames
+
+04/29/2009 - Changes from 2.2.5 to 2.2.6
+  * [bug 2695402] include BPUtils dll in internal SDK.
+  * [bug 2609157] fix handling of network paths in windows
+  * [bug 2714748] ServiceRunner no longer must be invoked with .exe suffix on win32
+  * many uninstaller fixes.
+
+04/27/2009 - Changes from 2.2.4 to 2.2.5
+  * [bug 2647905] administrative privileges no longer required to install on winxp  
+  * [bug 1912532] complete java bootstrap installer
+  * [bug 2698211] update HTTP stack on windows to never automatically append system cookies.
+  * l10n - many fixes
+  * [bug 2562056] uninstaller no longer flashes terminals, icon added
+  * [bug 2674883] correct detection of Chinese locales (Hong Kong/Taiwain/China)
+  * All services now use "user visible" strings, rather than developer names.  For instance, 'InactiveServices' -> 'Service Query Tool'
+  * [bug 2683793] workaround title bar rendering problems (i18n) by using 'productShortName'
+  * update all installation walkthrough images
+
+04/15/2009 - Changes from 2.2.3 to 2.2.4
+  * [bug 2562056] Windows uninstaller now shows prompt dialogs.  Still a
+    couple of flashing cmd windows during uninstall, WIP.
+  * [bug 2582817] No urls are logged above DEBUG level
+  * fixed IE8 nattergram prevention
+  * latest translations from yala included.
+  
+04/10/2009 - Changes from 2.2.2 to 2.2.3
+  * [bug 2605610] Installers/uninstaller now use native code with logging
+  * latest translations from yala included.
+  
+04/08/2009 - Changes from 2.2.1 to 2.2.2
+  * latest translations from yala included.
+  
+04/02/2009 - Changes from 2.2.0 to 2.2.1
+  * [bug 2643664] add 'shutdownDelaySecs' manifest.json flag, to allow the service developer to specify a number of seconds that their service should remain running after the last session drops away.
+  * [bug 2582048] [bug 2605610] [bug 2584491] Extensive L10n fixes & some updated translations
+  * [bug 2648507] fix 'non-responsive daemon' case that was triggered by service installation in one page, while another was running in the background
+  * [bug 1912532] continued work on in-browser java bootstrap installer.  WIP, but you can check it out now.
+  * [bug 2562065] [bug 2582048] installer improvements, now robust against multiple simultaneous instances running, non-admin privileges, and messages localized errors to end user, and provides textual (L10n in progress) installation status to end-user.
+  * [bug 2602106] service authors can now name paramters whatever they want, no more magic (aka, the 't' problem)
+  * all source code now has license header, MPL is the placeholder for now.  Script created to easily update this license header.
+ 
+03/06/2009 - Changes from 2.1.19 to 2.2.0
+  * smoother installer progress
+  * fix bug which required page refresh after installation (especially on win32)
+  * [bug 1958106] firefox cleanly detects plugin uninstall
+
+03/05/2009 - Changes from 2.1.18 to 2.1.19
+  * Yahoo! branding ("A product by Yahoo!") is only displayed to folks with en-US set as their locale.
+  * (bug 2578779) Basic platform functionality now works on non-english localized systems under non-ascii usernames (win32 specific fix)
+  * latest translations from yala included.
+
+03/04/2009 - Changes from 2.1.17 to 2.1.18
+  * bugfixes related to running BrowserPlus on localized systems with non-english username
+  * performance improvements around service and platform installation
+  * new look and feel for installer (thanks Dee Adams!)
+  * significant memory leaks plugged.
+  * [bug 2540160] clicking on links in installer should spawn url in default system browser
+  * [bug 2571532] IE specific javascript errors fixed
+  * [bug 1780232] plugin log no longer grows indefinitely
+  * fixes to installer sdk, allow an installer to correctly install latest platform version
+    not requiring clients/skinners to update each time we do.
+
+02/26/2009 - Changes from 2.1.16 to 2.1.17
+  * bugfixes large and small
+  * localized into 31 locales
+  * IDNA support
+  * localized relative date formatting
+  * skinnable installer SDK now available
+
+02/20/2009 - Changes from 2.1.15 to 2.1.16
+  * installer now has progress
+  * IDNA support in config panel
+  * yala integration complete - localizations to be supported as translations are completed
+  * Installer and Config Panel automatically extract user's language and locale settings
+  * more size efficient error report packaging format
+  * installer improvements to support embedding of .bpkg INSIDE installation .exe (producing a download free installer)
+
+02/13/2009 - Changes from 2.1.14 to 2.1.15
+  * BrowserPlus no longer uses YCP
+  * Services are now run in separate demand spun processes
+  * packaging format changed from S/MIME to tar/LZMA with detached signatures
+  * Custom skinnable installer created to replace innosetup and osx packagemaker
+  * ServiceRunner program, part of the SDK, now allows running and testing of services completely stand-alone from the platform
+  * "DeveloperMode" eliminated, now services, when published locally using ServiceInstaller, are immediately detected
+  * all command line programs now have history and command line editing support (osx only)
+  * all command line programs have automatic command disambiguation
+  * dead code stripping in release mode to reduce code size
+  * HTTP implementation robust against bogus content-length
+  * IDNA support / general i18n preparation
+  * further generalization and cleanup of HTMLRenderLib
+  * no more administrative password required on osx during installation
+  * correct elevation on vista during installation
+  * bug fixes large and small.
+
+12/18/2008 - Changes from 2.1.13 to 2.1.14
+  * documentation updates through and through
+
+12/18/2008 - Changes from 2.1.12 to 2.1.13
+  * auditing of log levels to ensure privacy and surfacing of better information
+  * massive documentation updates in SDK
+  * client pid and user agent now available to services
+  * ued & usability improvements in config panel
+  * cleaner build of sample services and updated documentation
+
+12/15/2008 - Changes from 2.1.11 to 2.1.12
+  * rework SDKs - break into public SDK and internal
+  * language tweaks: s/corelet/service/ in lots of places
+  * better error output when validating services
+  * add "developer mode" to make developer services easier.
+  * fixes to 'zip' implementation
+
+11/24/2008 - Changes from 2.1.9 to 2.1.10
+  * change platform update language to describe new features.
+
+11/21/2008 - Changes from 2.1.8 to 2.1.9
+  * config panel on OSX "restart browserplus" does a kill -9 
+  * when drops include links, we return the mimetype of the target rather than application/unknown
+  * BPProtocol.dll now gets into bpsdk.
+
+11/14/2008 - Changes from 2.1.7 to 2.1.8
+  * move from YHTTP to BPUtils http client - full proxy support
+  * fix user agent reporting on IE to understand specific browser version in
+    usage and bug reports
+  * BPProtocol dynamic library added to Y! internal	SDK.  allows client
+    applications to talk to BrowserPlus.
+
+11/7/2008 - Changes from 2.1.6 to 2.1.7
+  * remove all URLs from default levels to mitigate privacy concerns
+    when bugs are reported
+  * Add host to FileBrowse Pluglet to make spoofing attacks more difficult
+  * Make who is requesting permissions more prominent in permissions dialog
+  * Fix crash bug when specific combinations of parameters
+    are passed to FileBrowse (win32 specific)
+  * Support non-standard Firefox installation directories on (win32 specific)
+
+10/27/2008 - Changes from 2.1.5 to 2.1.6
+  * default check "include logs" in config panel bug report
+  * full google chrome support in platform javascript
+  * new core API function: BrowserPlus.initWhenAvailable()
+  * windows platform update now installs config panel. 
+
+10/25/2008 - Changes from 2.1.4 to 2.1.5
+  * allow deletion of services from config panel
+  * All final platform art integrated
+  * various crash bugs upon corelet unload admist callback invocation
+  * fix DnD on IE under release builds (UMR)
+  * bug reporting implemented in configuration panel
+
+10/24/2008 - Changes from 2.1.3 to 2.1.4
+  * improvements to bplus uninstall from control panel on win32
+  * correct locale detection on IE
+  * new dev certs - old ones expired (doh!)
+
+10/23/2008 - Changes from 2.1.2 to 2.1.3
+  * many bugfixes and stability improvements
+  * ConfigPanel uninstall and restart features implemented on win32
+  * most final art included (certain icons on win32 still missing)
+  * in certain cases callbacks from corelets could be lost, fixed.
+
+10/16/2008 - Changes from 2.1.1 to 2.1.2
+  * Win32 Preference pane included in win32 installer
+  * Google Chrome and IE 6 support
+  * [bug 2217160] Deleted services caused problems with disk scanning optimizations.
+  * fix win32 crash bug on logging
+  * win32 logfiles have \r\n appended for correct display in dumb editors
+  * Uninstaller & Preference pane installed into Program Files on windows
+
+09/26/2008 - Changes from 2.1.0 to 2.1.1
+  * [bug 2239453] fix crash when pluglet call returns
+    an error (like DragAndDrop.RemoveDropTarget for an id which isn't
+	registered) (regression)
+  * [bug 2239583] File Browse now returns correct file handles. (regression)
+  * [bug 2236481] reduce DMG size from 2.1mb to 1.8mb - strip nspr and compile -Os
+  * [bug 2236475] fix minversion in requires statement, was ignored in 2.1.0 (regression)
+  * [no bug] fix crash under certain circumstances when init callback calls
+    require (regression)
+  * fix bug in CoreletPublisher, tmp file collisions would cause second
+    publish step to fail.
+
+09/23/2008 - Changes from 2.0.6 to 2.1.0
+  * New permissions model, no more yahoo-only whitelist
+  * end user control panel on OSX (win32 coming)
+  * eliminated visual studio redistributable requirement
+  * lots of performance optimization
+  * reduced shipping size
+  * new lean & mean IPC library
+  * i18n support in core (both win32 and osx, fixes problem with wide
+    chars in username, services to be audited and fixed shortly)
+  * numerous improvements to developer tools (corelet plublisher/validator)
+  * IE6 / chrome support
+  * mime type filtering and recursive drag support including "gesture" info.
+  * improved error information from public JS api
+  * bugfixes, large and small
+
+06/13/2008 - Changes from 2.0.5 to 2.0.6
+  * fix OSX installer, ensure that BrowserPlus directories have correct
+    permissions upon clean install.
+
+06/12/2008 - Changes from 2.0.4 to 2.0.5
+  * update bug - don't update to older platform version
+  * include LocalWhiteList in configuration file, allowing simple
+    development for sites not on the official whitelist
+  * migrate to cocoa runloop in BrowserPlusCore on osx
+  * DnD fix in ActiveX, don't emit suprious hover messages for child nodes
+    of the outer node being monitored.
+  * more informative error messages on initialization failures, bubble all
+    the way up to javascript
+  * data hiding ala "The Good Parts" throughout public facing javascript
+  * bpinstall surfaces errors directly to user
+  * IE6 and windows Safari promoted to experimental status
+  * YAHOO.bp.clientSystemInfo() added, provides basic client technology
+    summary and "supportLevel", which indicates the level of support that
+	the browser/os combo have.  "supported", "experimental", or "unsupported".
+
+05/26/2008 - Changes from 2.0.3 to 2.0.4
+  * UI fix - Service installation progress updates correctly now on Safari
+  * [bug 1956152] platform crash fix
+
+05/22/2008 - Changes from 2.0.2 to 2.0.3
+  * UI fixes to all platform HTML ui.
+  * more fixes around user experience w.r.t platform blacklisting and
+    uninstall
+  * bpinstall completed with custom per-browser installation instructions
+  * prevent unsupported browsers from initializing b+ (safari/doze)
+
+05/16/2008 - Changes from 2.0.1 to 2.0.2
+  * startup optimizations, minimize usage of plugins refresh() to required
+    cases
+  * platform blacklisting fixes
+  * improvements to bpinstall.js and bputil.js, nascent optional tools that
+    webdevs may use for platform installation and component activation.
+  * service activation UI improvement
+  * other bug fixes large and small.
+
+05/09/2008 - Changes from 2.0.0 to 2.0.1
+  * platform self-update fixes on vista, UAC prompt and escalation
+    required, ensure it happens at the logical moment
+  * improvements to 'Service Update' dialog, mainly visual
+  * new bpinstall.js with improved step by step instructions, thanks atlanta!
+  * several bugfixes in browserplus.js around install detection 
+
+05/02/2008 - Changes from 1.1.1 to 2.0.0
+  * Firefox 3 beta support (experimental)
+  * Major version bump to reflect API breakages (actually in 1.1.1)
+  * improvements to HTML native prompting
+  * Platform update fixed on Vista
+  * General improvements to platform update language and functioning
+  * Log files renamed and moved to an unguessable subdirectory of
+    platform install directory (security requirement, specifically Log
+	service)
+  * YAHOO.bp.isActivated renamed to YAHOO.bp.isServiceActivated for
+    API symmetry
+  * Safari platform update no longer requires browser restart
+  * OSX uninstaller now double clickable.
+
+04/23/2008 - Changes from 1.1.0 to 1.1.1
+  * IE bug fixed.  ActiveX permissions bar would prevent correct
+    dialog functioning.
+
+04/21/2008 - Changes from 1.0.2 to 1.1.0
+  * UI Improvements, all user prompts are now HTML for greater consistency,
+    appearance, and flexibility.
+  * Prompting from Corelets is fully supported, allowing corelet authors
+    to craft their own secure prompting to the end user.
+  * Internationalization support: A locale may be provided to
+    BrowserPlus.init() (aka YAHOO.bp.init()) which will cause all user
+    visible strings to be generated in the language specified, provided
+    translations are available.
+  * "core" service removed.  This was mainly a user-visible implementation
+    artifact, and has now been removed
+  * "InactiveServices" built-in corelet added.  This allows querying of
+    (potentially multiple) distributions services from javascript
+  * Platform self-update:  In the same way that corelet updates are
+    downloaded in the background, now new platform versions are downloaded.
+    The user is prompted inline with the service install dialog.
+    Outside of catastrophes, the user should have to endure initial install
+    experience only once. 
+  * Massive performance enhancements: much time has been spent optimizing
+    the startup time of browserplus.  now on the order of 60ms depending on
+    the client machine.  A large number of locally installed corelets have 
+    a much less detrimental effect on performance.
+  * Complete JS API rework.  These are API BREAKING changes which result
+    from much reviewing and stressing of the browserplus API.  YAHOO.bp is
+    now the supported top level namespace, though a deprecated alias to
+    window.BrowserPlus exists.
+  * Infamous "pidfile" removed, replaces with more sophisticated os specific
+    mechanisms.  Platform is much more resistant to multiple
+    instances of the BrowserPlus daemon.
+  * Installation is System scoped on Windows.  BrowserPlus now is installed
+    in Program Files and appears in the "Add Remove Programs" dialog.
+    Installation is still user-scoped on Darwin to reduce security risk.
+  * Partial Firefox 3 support (uncertain wether full support will be in
+    initial external release, or will come as an update later.  Massive
+    behavioral changis in FFX beta (which we call and report as BUGS)
+    are the holdup)..
+  * Refactoring, Build system improvements, and Bug fixes, large and small. 
+
+03/05/2008 - Changes from 0.6.0 to 1.0.2
+  * fixes to corelet update
+  * whitelist validation checks
+  * improved log message classification
+  * code hardening from security review
+  * IE Drag and Drop fixes
+  * installation progress event throttling
+  * integrated legal approved language throughout
+  * many more bugfixes, large and small.
+
+02/05/2008 - Changes from 0.5.0 to 0.6.0
+  * removal of synchronous BrowserPlus function invocation.  
+  * new component installation/update flow, with new Native UI and
+    changes to BrowserPlus.require() function.  
+  * Installation progress callbacks
+  * localized human readable corelet descriptions throughtout system
+    (includes augmenting manifest.json format)
+  * Many issues around corelet auto update fixed.
+  * "Corelet Update Cache" reintroduced.  installed corelets have always
+    been approved via user interaction.
+  * Size in bytes of required downloads known at install time
+  * Improved system testablity via DistQuery cmd line program
+  * Compatibility with js libraries that modify Object prototype
+  * Configurable usage reporting, with default configuration legal
+    compliant.
+  * Bugfixes large and small.
+
+01/10/2008 - Changes from 0.4.2 to 0.5.0
+  * support for multiple distribution servers
+  * support for multiple signing certs 
+  * Improved file based logging from plugin and BrowserPlusCore (logging
+    from both now default)
+  * Usage reporting
+  * fix whitelisting with URLs with IP addresses
+  * allow ports in URLs for yahoo sites in whitelist
+  * shutdown daemon if invalid permissions are detected
+  * remove path to binary from configuration file
+  * new logging pluglet
+  * Improved DragAndDrop stability on all platforms
+
+12/17/2007 - Changes from 0.4.1 to 0.4.2
+  * support for production builds
+  * handling of missing/deleted/blacklisted corelets improved
+  * handling of refused EULAs improved
+  * Vista UAC prompt no longer causes failed connection.
+  * Many drag and drop fixes, a couple open issues remaining.
+  * disallow synchronous invocation of DragAndDrop.AttachCallbacks,
+    no longer possible to lock up browser from javascript.
+  * synchronous require() statements no longer allowed.  Fixes browser
+    lockup when EULA prompting required.
+  * EULA on OSX now sheet window.
+  * more than 2 dropzones supported in ActiveX
+
+12/17/2007 - Changes from 0.4.0 to 0.4.1
+  * bugfixes large and small
+
+11/26/2007 - Changes from 0.3.0 to 0.4.0
+  * online help is now pretty.
+  * site whitelisting implementation.  Native clients (non-browser, yes
+    we still support that) use bpclient:// scheme
+  * periodic corelet update with poll period in configuration file
+  * corelet blacklisting support
+  * Allow 'any' to be specified as type for corelet arguments
+  * Corelets now have access to URL from which webpage accessing corelet
+    is served.
+  * Partial internationalization implementation (mechanism to pass locale
+    to corelet)
+  * Corelet persistence support.  Corelets passed 'data_dir' at instantiation
+    time that they may store files to.  This data will persist between
+    sessions, and is scoped to coreletname, major version number.  today,
+    corelets are responsible for handling data migration, because corelets
+    completely control disk representation.
+  * Corelet temporary file support.  Corelets passed temp_dir which contains
+    a directory where temporary files may be stored.  This directory will
+    be purged at the end of the session. 
+  * User prompting support, both EULA display and user prompting from
+    corelets.  Added to Corelet API.
+  * full support for UTF8 corelet names.
+  * signing support throughout.  Both for corelets and for "permissions",
+    which are site whitelists, platform whitelists, and corelet blacklists
+  * "killswitch support", aka platform whitelist
+  * Pluglet impelmentation: in-plugin services that provide a cross browser,
+    cross platform API
+  * Drag and Drop moved into a Pluglet, now API is documented through online
+    help
+  * FileBrowse service (pluglet) added for native file browse dialogs.
+  * Massive cleanup of browserplus.js, lots of functionality moved into plugin.
+  * Moved from local TCP to Named Pipes/Stream pipes.
+  * reduced distribution size.  Removal of ICU
+  * Installation directories rethought and changed on all platforms.
+
+09/25/2007 - Changes from M2 (0.2.0) to 0.3.0
+  * now we refer to our shipped software by platform version number instead
+    of milestone number
+  * Addition of BPTPath (path) which supports secure file representation
+    throughout the system
+  * BrowserPlusCore shuts down after n (5 by default) seconds of inactivity
+  * Multiple windows Vista fixes.
+  * Callbacks working for synchronous JS function invocation on all
+    supported browser/platform combinations.
+  * VS runtime installed _before_ regserver is run in installer, fixing
+    initial install problems on windows for systems where visual studio
+    nor the runtime has been installed. 
+  * Changes to corelet API and BrowserPlusCore to support "dependent"
+    corelets and "provider" corelets.  This allows the authoring of
+    intepreter corelets and high level language corelets on top of
+    these.  
+  * manifest.json for corelets must now provide a 'type' key with one of
+    'standalone', 'provider', or 'dependent' values.  Additionally the
+    manifest.json may contain type dependent keys.  Old style native
+    corelets should have a type of 'standalone'
+  * Fix unfiled bugs in dynamic detection of updated corelets
+  * The timestamp on manifest.json in the user scoped corelet directory
+    is the date used to determine if corelet reload is neccesary
+  * lightweight 'yajl' library preferred over heavyweight 'DRV' library
+    for most JSON parsing in system
+  * BrowserPlusCore now refuses to load corelets with unsupported corelet
+    API versions (previous behavior was to not check, and crash)
+  * Installation is now platform version scoped to allow transparent
+    update in the future
+  * Corelets are passed parameters at initialization time to inform of
+    information such as the directory into which the corelet is installed
+  * CoreletPublisher & CoreletValidator handle dependent corelets
+  * Changes to web services API to support more efficient querying and
+    dependent corelets
+  * BrowserPlusCore "foreground" mode (-fg) supports debugging
+
+08/17/2007 - Changes from M1.1 to M2
+  * corelet distribution server
+  * transparent spawning of BrowserPlusCore daemon
+  * live acquisition of corelets from distribution server
+  * BrowserPlus.core.init() detects presence of plugin to allow for
+    install redirect
+  * installers
+  * CoreletPublisher which can publish corelets locally or on the
+    distribution server
+  * improved performance by elimiating polling across the js/corelet
+    boundary
+  * feedback on corelet API integrated (breaking changes):
+    + updated documentation
+    + return of error codes removed to remove redundancy
+    + useless parameters removed
+
+06/26/2007 - Changes from M1 to M1.1
+  * everything we ship links against release runtimes on win32,  allows
+    win32 executables to run on machines without visual studio installed.
+  * ship vcredist_x86.exe in our SDK.   
+  * allow callbacks as function arguments.  This allows the incremental
+    return of results from long running corelet operations. (i.e. upload
+    status, desktop search)
+  * YahooFinance corelet returns more company information.
+  * DesktopSearch corelet incrementally returns results as they become
+    available.
+  * honor "type" argument in DesktopSearch corelet.
+  * fix JSON escaping bug which would disallow newlines and other control
+    chars in return values from corelets.
+  * fix bug which would prevent corelets from being reloaded without
+    restarting BrowserPlusCore
+  * fix bug which would cause corelets to be initialized twice.
+  * improve locking granularity to allow work to be enqueued while a 
+    corelet function is executing.
+  * fix error return codes, don't prepend corelet name twice for
+    dynamic corelets.  
+  * add BrowserPlus.cancelTransaction, allowing an async transaction
+    to be canceled (no callbacks will be called)

@@ -1,0 +1,29 @@
+diff -PNaur libarchive-2.6.2.orig/windows/vc90/libarchive.vcproj libarchive-2.6.2/windows/vc90/libarchive.vcproj
+--- libarchive-2.6.2.orig/windows/vc90/libarchive.vcproj	2008-12-28 12:08:13.000000000 -0800
++++ libarchive-2.6.2/windows/vc90/libarchive.vcproj	2009-05-19 12:27:45.334090000 -0700
+@@ -46,10 +46,10 @@
+ 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;PLATFORM_CONFIG_H=&quot;\&quot;config_windows.h\&quot;&quot;"
+ 				MinimalRebuild="true"
+ 				BasicRuntimeChecks="3"
+-				RuntimeLibrary="3"
++				RuntimeLibrary="1"
+ 				UsePrecompiledHeader="0"
+ 				WarningLevel="3"
+-				DebugInformationFormat="4"
++				DebugInformationFormat="1"
+ 				DisableSpecificWarnings="4996"
+ 			/>
+ 			<Tool
+@@ -109,10 +109,10 @@
+ 				InlineFunctionExpansion="1"
+ 				AdditionalIncludeDirectories=""
+ 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;PLATFORM_CONFIG_H=&quot;\&quot;config_windows.h\&quot;&quot;"
+-				RuntimeLibrary="2"
++				RuntimeLibrary="0"
+ 				UsePrecompiledHeader="0"
+ 				WarningLevel="3"
+-				DebugInformationFormat="3"
++				DebugInformationFormat="1"
+ 				DisableSpecificWarnings="4996"
+ 			/>
+ 			<Tool

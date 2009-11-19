@@ -1,0 +1,73 @@
+#############################################################
+# README for BuildTemplates
+#
+# Created by Lloyd Hilaiel on Mon May 1 2006.
+# Copyright (c) 2006 Yahoo!, Inc. All rights reserved.
+#############################################################
+
+## What is this?
+
+"BuildTemplates" are a set of CMake files which make setting
+up and building a software project easier.
+
+## Please read...
+
+SouceStructureConventions.txt
+
+These are _very_ lightweight conventions that we suggest.  Most of 
+our suggestions are not required in order to use these BuildTemplates.
+
+An exception are the library structuring rules.  Because we dynamically
+determine your public headers while building libraries, we need a bit of
+help (put public headers under an "api/" directory.  You can have as many
+"api" directories as you want).  
+
+## Goals
+
+* Make it so easy to set up a software project that people will actually
+  use this stuff
+
+* Simple CMake macros to facilitate building common components:
+  - libraries (shared and static)
+  - documentation
+  - tests
+  - binaries
+  - sample code
+
+* Support generation of Visual Studio project files, Makefiles, XCode
+  project files, and everything else that CMake supports.
+
+* Support (but do not require) "out of tree builds"
+
+## Features
+
+* Trivial to build a new project and get started
+* Robust dependency management.  You may have your libraries depend on:
+  - 3rd party projects in source form
+  - 3rd party projects in binary form
+  - ad-hoc source projects
+  - ad-hoc binaries (SDK's, etc)
+  - rebuildable source projects (built both using these BuildTemplates
+    and ad-hoc).
+* Dynamic determination of source and header files
+* Dynamic determination of public headers (Your API)
+* Generation of a dist/ directory which may be packaged and shipped
+* Support for simple test generation using the ycpTest library
+  (cppunit, but made easier to use).
+* CROSS PLATFORM
+  - Compile your project with the toolchain native to your OS
+    (Makefiles or visual studio)
+  - Simple naming conventions allow platform specific files in a cross platform
+    project.
+* Out of tree build support
+* Conventions and tools to support internatialized error messages
+* shared and static library generation
+
+## Possible future features
+
+## Built in examples (Tests)
+
+The Tests subdirectory contains various tests of the different
+features provided by BuildTemplates.  This is useful for regression
+testing (obviously), and for perusing to understand the usage of
+various features.

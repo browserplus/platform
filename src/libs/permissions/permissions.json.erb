@@ -1,0 +1,44 @@
+<%
+# a utility function to get all localazations for a specified key
+# and to returnit as a json key
+def getAllLocalizationsForKey(key)
+    data = Hash.new
+	keys = key.split '.'	
+	$l10n.each { |locale,ldata|
+	    data[locale] = ldata[keys[0]][keys[1]]
+	}
+    s = JSON.generator::State.new
+    s.configure({ :indent => "            ", :array_nl => "\n", :object_nl => "\n"})
+    data.to_json(s)
+end	
+%>
+// 
+// The BP_SERVICE_BLACKLIST and BP_PLATFORM_BLACKLIST allow for 
+// blacklist entries which vary between development and production builds.
+// The top-level CMakeLists.txt file sets these variables.  Blacklist
+// entries which are common can either be set in that file, or entered
+// here directly.
+//
+{                
+    // Blacklisted corelets.  Entries are coreletname and version number
+    // (major.minor.micro), e.g. [ "badcorelet", "1.0.2"]
+    //
+    "blacklist" : [
+        <%= $cmake["BP_SERVICE_BLACKLIST"] %>
+    ],
+                  
+    // Blacklisted platform versions (major.minor.micro)
+    //
+    "platformBlacklist" : [
+        <%= $cmake["BP_PLATFORM_BLACKLIST"] %>
+    ],
+     
+    // Service permission localizations
+    //
+    "servicePermissionLocalizations" : {
+        "AllowBrowserPlus" : <%= getAllLocalizationsForKey("permissions.AllowBrowserPlus") %>,
+        "DisallowBrowserPlus" : <%= getAllLocalizationsForKey("permissions.DisallowBrowserPlus") %>,
+        "DisplayNotifications" : <%= getAllLocalizationsForKey("permissions.DisplayNotifications") %>,
+        "ConnectToIRCServer" : <%= getAllLocalizationsForKey("permissions.ConnectToIRCServer") %>
+    }
+}

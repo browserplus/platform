@@ -1,0 +1,17 @@
+do not make changes here!
+
+the YCPUseBuildTemplates branch integrates files from the canonical home
+of BuildTemplates (//ClientPlatform/Tools/BuildTemplates/...) to here.
+
+We do integrations from that branch to pull updates to build templates.
+
+all changes to build templates that are general should go in 
+(//ClientPlatform/Tools/BuildTemplates/...) and then be integrated here.
+
+If you have a local change you want to make to build templates that 
+should not be back integrated into the main templats source, figure
+out some way to do it in the cmake files that use the templates.  If you
+don't have sufficient hooks, let's figure out a way to generalize
+BuildTemplates so that they do what you want.
+
+lloyd (client-devel@yahoo-inc.com)

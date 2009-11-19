@@ -1,0 +1,18 @@
+body {font-family:"Lucida Grande", arial, sans-serif;margin:0;font-size:100.01%;}
+input[type="button"] {width:90px;margin-left:5px;font-size:108%}
+
+#dialog {width:400px;}
+#hd {width:400px;height:260px;background:url(../common/browserplus.jpg);position:relative;}
+#taglinepos {position:absolute;top:100px;left:0px;width:100%;}
+#tagline {text-align:center;color:#bfe3f7;font-size:153.9%;font-weight:bold;}
+
+#bd {position:relative;height:180px;padding:0 10px;}
+#bd h2 {margin:0;font-size:116%;font-weight:bold;padding-top:5px;}
+#bd p {font-size:85%;margin:8px 0;}
+form {margin:0;}
+.buttons {position:absolute;bottom:5px; right:10px; text-align:right;}
+
+
+
+#statusBarContainer { margin-top:20px; width: 380px; height:15px; border: 1px solid #333333; }
+#statusBarProgress { width: 0%; height:15px; background-color: #5575C2; }

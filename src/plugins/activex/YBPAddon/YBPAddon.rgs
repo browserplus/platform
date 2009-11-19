@@ -1,0 +1,11 @@
+HKCR
+{
+	NoRemove AppID
+	{
+		'%APPID%' = s 'YBPAddon'
+		'YBPAddon.DLL'
+		{
+			val AppID = s '%APPID%'
+		}
+	}
+}

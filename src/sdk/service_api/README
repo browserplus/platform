@@ -1,0 +1,212 @@
+/** \mainpage
+
+\section overview Overview
+
+The BrowserPlus ServiceAPI allows you to write native plugins that can
+be loaded by BrowserPlus.  These plugins (or "services") will then be
+automatically scriptable by Javascript in a webpage, or whatever other
+execution environment is coerced to talk to BrowserPlus.
+
+A service is a directory.  It contains a single required file,
+manifest.json, which contains json text that points to the shared library
+(.dll or .so) that implements the service.  The manifest.json also includes
+other information, such as localized end-user visible strings identifying
+at a high level what the service does, and any explicit permissions that
+should be requested from the user.  Here is a sample manifest file for
+a service that displays desktop notifications:
+\code
+{
+  "type": "standalone",
+  "CoreletLibrary": "notify.dll",
+  "strings": {
+    "en": {
+      "title": "Notify",
+      "summary": "A service to deliver desktop notifications."
+    }
+  },
+  "permissions": [
+    "DisplayNotifications"  
+  ]
+}
+\endcode
+
+The other entities in the service's directory are the dynamic library
+itself, and whatever else the service author wishes to include.
+
+\section overview Service Portability
+
+As this API allows for native services to be authored, the first question
+that may arise is how do we support multiple platforms?  At the time
+services are published, they may be marked platform specific, or platform
+dependent.  To support multiple platforms, the only requirement is that
+the same service with the same version exports the same API.  It is up 
+to the service author how they wish to share code (or not) between
+implementations.  
+
+Finally, because services may be written in high level languages
+(Ruby being the only supported language at time of writing), it is possible
+to implement a service as Ruby on one platform, and native code on another.
+
+\section fileOverview File Overview
+
+ The ServiceAPI is a header only SDK.  No libraries are required.
+
+ - bperror.h      -- Error values which go both ways across the
+                     Service/BrowserPlus boundary.
+ - bptypes.h      -- Structures which allow data to be represented that may
+                     be introspected.  The data format defined herein is
+					 how information is transmitted across the
+					 service/BrowserPlus boundary.
+ - bpdefinition.h -- Definitions of structures which are used to
+                     defining the interface of a service.
+ - bpcfunctions.h -- Functions exposed by BrowserPlus which may be invoked
+                     by a service.
+ - bppfunctions.h -- Functions implemented by a service which will be
+                     invoked by BrowserPlus.
+
+ In addition to these C header files, there are efforts to develop higher
+ level C++ frameworks which would make authoring services even easier.  Data
+ mapping across the service boundary is perhaps the most tedious aspect
+ of authoring a native service, and these frameworks aim to address that.
+
+ Feel free to contact us via the means documented elsewhere in this SDK
+ for more information on the status of or to contribute to these C++
+ frameworks.
+
+\section designReqs Design Requirements
+
+ How did we come up with this interface?  We were driven by the following
+ requirements:
+
+ -# The interface should be as simple as possible, but no simpler.
+ -# services must return a description of their interface so that we may
+    dynamically generate the functions in the target language (Javascript,
+    possibly others).  
+ -# non-responsive services should not render the whole system non-responsive.
+ -# The entire interface should be asynchronous to prevent unresponsiveness.
+ -# Complex return values from services must be supported.
+ -# The data representation must allow serialization into different
+    formats, and must be bindable into different languages.
+ -# The API should not preclude cross platform services.
+ -# The API should be flexible enough to allow for interpreter services
+    to be authored, which allows for the authoring of other services in
+	high level languages.
+
+\section serviceTypes Service Types
+
+  There are three different types of services, this type is specified
+  in the service manifest (manifest.json)
+  -# 'standalone' - Binary services implemented as a shared library
+  -# 'provider' - Binary services implemented as a shared library that
+                  implement the BPPAttachPtr and BPPDetachPtr function
+				  pointers.
+  -# 'dependent' - Services (not necessarily binary) that require the
+                   existence of another service to function. 
+
+\section symbolSpelunking Symbol Spelunking
+
+  Exactly one symbol is the contract between services and BrowserPlusCore.
+  This symbol is BPPGetEntryPoints.  All function pointers from service
+  to BrowserPlus or vice versa are passed in a structure.  This means that no
+  import libraries are required, and only one symbol must be exported
+  (or visible) in the service.
+
+\section loadingProcedure Service Loading Procedure
+
+BPP* functions are provided by the service and called by BPCore.
+The service loading procedure is thus:
+
+ -# the dynamic library is loaded.
+ -# the "BPPGetEntryPoint" symbol is extracted and called to get
+    a BPPFunctionTable pointer.  This table contains the version
+    of the service API to which the service was written.
+ -# BPPInitialize() is called which passes control to the service
+    to attain a description of the supported functions and deliver
+    a function table which may be used to call back into BrowserPlus.
+ -# BPPAllocate may be invoked from multiple threads simultaneously
+ -# BPPInvokePtr may be called on different allocated instances
+    following the threading rules documented below.
+ -# BPPDestroy will be called once per allocated instance.
+ -# BPPShutdown will be called immediately before the service is
+    unloaded from memory, and after the last BPPDestroy call.
+
+\section memoryManagement Memory Management
+
+Anything that the service allocates, the service must free.
+Anything that BrowserPlus allocates, BrowserPlus must free.
+All pointers passed into a function traveling either direction are 
+valid only for the duration of the function, the caller may free
+immediately after the function returns.
+
+\section threadModel Threading Model
+
+The threading model of services is designed to minimize
+implementation complexity for service authors, while maximizing
+capabilities and preventing polling.  The essence is this:
+
+  - BPPGetEntryPoints and the BPPInitializePtr is called before any service
+    instances are allocated (BPPAllocate).
+  - BPPShutdownPtr is called after all service instances are destroyed
+    (BPPDestroyPtr).
+  - two functions on a single instance will never be called
+    simultaneously on different threads.
+  - two functions on different instances may be called at the same
+    time from different threads.
+  - all functions (BPPInvokePtr and BPPDestroyPtr) on a single instance
+    will be called from the same thread on which BPPAllocate was called
+    (this simplifies TLS and COM usage inside services).
+  - BPC* functions may be called by the service from any thread
+    and BrowserPlus will protect shared data structures.
+
+\section serviceDescription Defining your service
+
+  After loading a service, BrowserPlus will want to know what functions
+  the service supports and what arguments those functions accept, and the
+  name and version of the service, etc.  All of this information is
+  conveyed through C structures documented in bpdefinition.h.
+
+\section dataBinding Data Binding
+
+  A main purpose of services is usually to get data back to the execution
+  environment that invoked the service.  Before crossing the service <->
+  BrowserPlus boundary, data must be mapped into an intermediate format.
+  Our solution to this problem is very similar to that of NPAPI.
+  bptypes.h defines a set of structures capable of holding all of the
+  different data types we support.
+
+  Working with the structures directly is supported, but leads to complex
+  code.  As mentioned above, there are ongoing efforts to develop service
+  frameworks to simplify the authoring of native services, especially in
+  the area of data binding.  Please contact us if you're interested in
+  using or contributing to these frameworks, or have some of your own
+  work that you would like to share.
+
+\section providerServices Provider Services
+
+  A "provider" service is one that can be required by a "dependent"
+  service.  This mechanism minimally affects the authors of
+  "standalone" services while making it possible to enable services
+  written in high level languages.  Finally, while the design
+  motivation for this mechanism was to support interpreter services,
+  it's conceivable that it could be applied to other use cases.
+
+  A "provider" service may provide a native interface in the same way
+  that "standalone" services do.  In addition the provider will implement
+  the attach and detach functions, and have a "provider" type in its
+  service manifest instead of "standalone".  A provider service will be
+  loaded any time a dependent service that requires it is loaded.  
+  After service initialization, "attach" will be called, indicating
+  that a dependent service is being loaded.  The provider must take the
+  arguments to attach and construct and return the definition of the
+  dependent service.  In the attach call a unique integer "attachment id" will
+  be passed.  This integer allows the provider service to disambiguate
+  between different simultaneous attachments.  This same id will be
+  passed to the "invoke" method of the service during function invocation.
+
+  When the dependent service is unloaded, the detach method of the
+  provider service will be called with the same id passed in the attach.
+  
+  The threading contract guarantees that attach/invoke/detach will all be
+  called on the same thread, which may be different from the
+  thread upon which initialize is called.  
+*/

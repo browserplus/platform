@@ -1,0 +1,64 @@
+{
+    "distroServers": ["<%= $cmake["BP_PRIMARY_DISTRO_SERVER_URL"] %>",
+                      "<%= $cmake["BP_SECONDARY_DISTRO_SERVER_URL"] %>",
+                      "<%= $cmake["BP_TERTIARY_DISTRO_SERVER_URL"] %>" ]
+
+    // specifying the dimensions (and title)of the installer window
+    ,"window": {
+      //"title": "",
+      "width": 400,
+      "height": 440
+    }
+
+// An example of how to specify an included platform bpkg
+// Package name must be of form BrowserPlus_x.x.xx.bpkg
+//    ,"package": "BrowserPlus_<%= $cmake["VersionString"] %>.bpkg"
+//
+// An example of how to seed services
+//    ,"services": [
+//         {"service": "ImageAlter"},
+//         {"service": "FlickrUploader", "minversion": "2.0.0"}
+//      ]
+//
+// An example of how to seed permissions.  Domains can either be
+// exact strings, or wildcard patterns using '*' as the wildcard.
+// Domain patterns must end in ".somehost.somedomain", which cannot
+// contain wildcards.  Filename patterns begins with / and match
+// POSIX pathnames (even on Windows).
+// - The first example grants "AllowBrowserPlus" permission to 
+//   browserplus.yahoo.com
+// - The second example grants "AllowBrowserPlus" permission to any host in 
+//   yahoo.com. 
+// - The third example grants "AllowBrowserPlus" permission to any html
+//   page within /*/somedir/*
+//   ,"permissions": {
+//       "browserplus.yahoo.com" : ["AllowBrowserPlus"],
+//       "*.yahoo.com" : ["AllowBrowserPlus"],
+//       "/*/somedir/*.html" : ["AllowBrowserPlus"]
+//   }
+//
+// An example of how to seed auto-update permissions.  Auto-update means
+// that platform and/or specific service updates will be silently applied.
+// Domains are as in the above example.
+// - The first example allows automatic updates for the platform and the 
+//   Uploader and Zipper services to any host in yahoo.com
+//   browserplus.yahoo.com
+// - The second example denies silent platform updates for grumpy.com
+// - The third example allows automatic platform updated for any html
+//   page within /*/somedir/*
+//   , "autoUpdatePermissions": {
+//        "*.yahoo.com": {
+//            "platform": true,
+//            "services": {
+//                "Uploader": true,
+//                "Zipper": true
+//            }
+//        },
+//        "grumpy.com": {
+//            "platform": false
+//        },
+//        "/*somedir/*.html": {
+//            "platform": true
+//        }
+//     }
+}

@@ -1,0 +1,423 @@
+/**
+ * ***** BEGIN LICENSE BLOCK *****
+ * The contents of this file are subject to the Mozilla Public License
+ * Version 1.1 (the "License"); you may not use this file except in
+ * compliance with the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ * 
+ * Software distributed under the License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ * License for the specific language governing rights and limitations
+ * under the License.
+ * 
+ * The Original Code is BrowserPlus (tm).
+ * 
+ * The Initial Developer of the Original Code is Yahoo!.
+ * Portions created by Yahoo! are Copyright (C) 2006-2009 Yahoo!.
+ * All Rights Reserved.
+ * 
+ * Contributor(s): 
+ * ***** END LICENSE BLOCK *****
+ */
+
+#include <string>
+#include <sstream>
+#include <iostream>
+#include "common.h"
+#include "NPAPIPlugin.h"
+#include "PluginCommonLib/PluginCommonLib.h"
+#include "BPProtocol/BPProtocol.h"
+#include "BPUtils/BPLog.h"
+#include "BPUtils/bpdebug.h"
+#include "BPUtils/bpthread.h"
+#include "BPUtils/bpfile.h"
+
+
+// Windows cruft...
+#ifdef WIN32
+// unused args warning
+#pragma warning (disable : 4100)
+#pragma warning (disable : 4201)
+
+#define strcasecmp _stricmp
+
+class LibLoadTracer {
+public:
+    // can't log here, it either isn't set up yet
+    // or has been torn down
+    LibLoadTracer() {
+        bp::debug::breakpoint( "PluginInit" );
+
+        std::cerr << "LOAD BrowserPlus " 
+                  << BP_VERSION_MAJOR << "." << BP_VERSION_MINOR << "." << BP_VERSION_MICRO
+                  << std::endl;
+    }
+    ~LibLoadTracer() {
+        std::cerr << "UNLOAD BrowserPlus " 
+                  << BP_VERSION_MAJOR << "." << BP_VERSION_MINOR << "." << BP_VERSION_MICRO
+                  << std::endl;   
+    }
+};
+
+static LibLoadTracer traceLoad;
+
+#include <atlbase.h>
+// The module attribute causes DllMain, DllRegisterServer and DllUnregisterServer to be automatically implemented for you
+//[ module(dll,
+//       uuid = "{1A8E0B91-9DAC-4efd-8D5B-E4559B4A5C74}", 
+//       name = "npybrowserplus", 
+//       helpstring = "npybrowserplus 1.0 Type Library",
+//       resource_name = "IDR_NPYBP") ]
+[ module(dll,
+         uuid = "{1A8E0B91-9DAC-4efd-8D5B-E4559B4A5C74}", 
+         name = "npybrowserplus", 
+         helpstring = "npybrowserplus 1.0 Type Library") ]
+class NPYBPModule
+{
+public:
+    // Override CAtlDllModuleT members
+    BOOL WINAPI DllMain(DWORD dwReason, LPVOID lpReserved);
+};
+
+
+BOOL WINAPI NPYBPModule::DllMain(DWORD dwReason, LPVOID lpReserved)
+{
+    if (dwReason == DLL_PROCESS_DETACH) {
+        BPLOG_INFO("DLL_PROCESS_DETACH called");
+        if (lpReserved == NULL) {
+            BPLOG_INFO("Calling BPShutdown from DLLMain");
+            BPShutdown();
+        }
+    } else if (dwReason == DLL_PROCESS_ATTACH) {
+        BPLOG_INFO_STRM("DLL_PROCESS_ATTACH called " << 
+                        (lpReserved ? "dynamic" : "static") 
+                        << " load");
+    } else if (dwReason == DLL_THREAD_ATTACH) {
+        BPLOG_INFO_STRM("DLL_THREAD_ATTACH called, threadId = "
+                        << bp::thread::Thread::currentThreadID());
+    } else if (dwReason == DLL_THREAD_DETACH) {
+        BPLOG_INFO_STRM("DLL_THREAD_DETACH called, threadId = "
+                        << bp::thread::Thread::currentThreadID());
+    } else {
+        BPLOG_INFO_STRM("unknown dwReason: " << dwReason);
+    }
+
+    return true;
+}
+#endif
+
+// everything here must have C linkage
+//
+extern "C" {
+
+// Browser function table
+NPNetscapeFuncs gBrowserFuncs;
+
+// forward declarations
+NPClass* getPluginClass(void);
+NPError NPP_New(NPMIMEType pluginType, NPP instance, uint16 mode,
+                int16 argc, char* argn[], char* argv[], NPSavedData* saved);
+NPError NPP_Destroy(NPP instance, NPSavedData** save);
+NPError NPP_SetWindow(NPP instance, NPWindow* window);
+NPError NPP_NewStream(NPP instance, NPMIMEType type, NPStream* stream,
+                      NPBool seekable, uint16* stype);
+NPError NPP_DestroyStream(NPP instance, NPStream* stream, NPReason reason);
+int32 NPP_WriteReady(NPP instance, NPStream* stream);
+int32 NPP_Write(NPP instance, NPStream* stream, int32 offset, 
+                int32 len, void* buffer);
+void NPP_StreamAsFile(NPP instance, NPStream* stream, const char* fname);
+void NPP_Print(NPP instance, NPPrint* platformPrint);
+int16 NPP_HandleEvent(NPP instance, void* event);
+void NPP_URLNotify(NPP instance, const char* URL, 
+                   NPReason reason, void* notifyData);
+NPError NPP_GetValue(NPP instance, NPPVariable variable, void* value);
+NPError NPP_SetValue(NPP instance, NPNVariable variable, void* value);
+
+NPError OSCALL
+#ifdef XP_WIN
+NP_Initialize(NPNetscapeFuncs* browserFuncs)
+#else
+NP_Initialize(NPNetscapeFuncs* browserFuncs, 
+              NPPluginFuncs*)
+#endif
+{
+    bp::plugin::setupLogging( bp::file::Path("bpnpapi.log") );
+    BPInitialize();
+    gBrowserFuncs = *browserFuncs;
+    return NPERR_NO_ERROR;
+}
+
+
+NPError OSCALL
+NP_GetEntryPoints(NPPluginFuncs* pluginFuncs)
+{
+    pluginFuncs->version = (NP_VERSION_MAJOR << 8) + NP_VERSION_MINOR;
+    pluginFuncs->size = sizeof(pluginFuncs);
+    pluginFuncs->newp = NPP_New;
+    pluginFuncs->destroy = NPP_Destroy;
+    pluginFuncs->setwindow = NPP_SetWindow;
+    pluginFuncs->newstream = NPP_NewStream;
+    pluginFuncs->destroystream = NPP_DestroyStream;
+    pluginFuncs->asfile = NPP_StreamAsFile;
+    pluginFuncs->writeready = NPP_WriteReady;
+    pluginFuncs->write = NPP_Write;
+    pluginFuncs->print = NPP_Print;
+    pluginFuncs->event = NPP_HandleEvent;
+    pluginFuncs->urlnotify = NPP_URLNotify;
+    pluginFuncs->getvalue = NPP_GetValue;
+    pluginFuncs->setvalue = NPP_SetValue;
+    return NPERR_NO_ERROR;
+}
+
+
+NPError OSCALL
+NP_Shutdown(void)
+{
+    // BPShutdonw();
+    return NPERR_NO_ERROR;
+}
+
+
+char*
+NP_GetMIMEDescription(void)
+{
+    // I don't believe that Mac npapi actually uses this. 
+    // It seems that the Localized.rsrc is what's used, but
+    // let's keep this versioned for consistency
+    return "<%= $cmake["MimeType"] %>";
+}
+
+
+NPError
+NPP_Initialize()
+{
+    // can't setup logging here, safari doesn't call this
+    std::cerr << "NPP_Initialize" << std::endl;
+    return NPERR_NO_ERROR;
+}
+
+
+void
+NPP_Shutdown()
+{
+    BPLOG_INFO("NPP_Shutdown");
+}
+
+
+// here the plugin creates an instance of our BrowserPlus object which 
+// will be associated with this newly created plugin instance and 
+// will do all the neccessary job
+NPError 
+NPP_New(NPMIMEType pluginType, 
+        NPP instance, 
+        uint16 mode, 
+        int16 argc, 
+        char* argn[], 
+        char* argv[], 
+        NPSavedData* saved)
+{
+    BPLOG_INFO_STRM("NPP_New" << "(" << instance << ")");
+    if (instance == NULL) {
+        return NPERR_INVALID_INSTANCE_ERROR;
+    }
+    
+#ifdef MACOSX
+    // Check if the browser supports the CoreGraphics drawing model
+    BPLOG_INFO("ask browser for drawing model");
+    NPBool supportsCoreGraphics = FALSE;
+    NPError err = gBrowserFuncs.getvalue(instance,
+                                         NPNVsupportsCoreGraphicsBool,
+                                         &supportsCoreGraphics);
+    if (err != NPERR_NO_ERROR) {
+        BPLOG_WARN_STRM("query browser drawing model failed, err = " << err);
+        return NPERR_INCOMPATIBLE_VERSION_ERROR;
+    }
+    if (!supportsCoreGraphics) {
+        BPLOG_WARN_STRM("browser does not support core graphics");
+        return NPERR_INCOMPATIBLE_VERSION_ERROR;
+    }
+    // Set the drawing model
+    err = gBrowserFuncs.setvalue(instance,
+                                 NPPVpluginDrawingModel,
+                                 (void*)NPDrawingModelCoreGraphics);
+    if (err != NPERR_NO_ERROR) {
+        BPLOG_WARN_STRM("set browser drawing model failed, err = " << err);
+        return NPERR_INCOMPATIBLE_VERSION_ERROR;
+    }
+#endif
+    
+    NPAPIPlugin * bp = new NPAPIPlugin(instance);
+    if (bp == NULL) {
+        return NPERR_OUT_OF_MEMORY_ERROR;
+    }
+    
+    instance->pdata = (void*)bp;
+    
+    // get things allocated... 
+    (void) bp->scriptableObject();
+    
+    return NPERR_NO_ERROR;
+}
+
+
+// here is the place to clean up and destroy the BrowserPlus object
+NPError 
+NPP_Destroy(NPP instance, 
+            NPSavedData** save)
+{
+    BPLOG_INFO_STRM("NPP_Destroy" << "(" << instance << ")");
+    if (instance == NULL) {
+        return NPERR_INVALID_INSTANCE_ERROR;
+    }
+    
+    NPAPIPlugin * bp = (NPAPIPlugin*) instance->pdata;
+    if (bp != NULL) {
+        delete bp;
+    }
+    return NPERR_NO_ERROR;
+}
+
+
+// during this call we know when the plugin window is ready or
+// is about to be destroyed so we can do some gui specific
+// initialization and shutdown
+NPError
+NPP_SetWindow(NPP instance, 
+              NPWindow* window)
+{    
+    BPLOG_INFO_STRM("NPP_SetWindow" << "(" << instance << ")");
+    if (instance == NULL) return NPERR_INVALID_INSTANCE_ERROR;
+    if (window == NULL) return NPERR_GENERIC_ERROR;
+    
+    NPAPIPlugin* bp = (NPAPIPlugin*)instance->pdata;
+    if (bp == NULL) return NPERR_GENERIC_ERROR;
+    
+    bp->setWindow(window);
+    
+    return NPERR_NO_ERROR;
+}
+
+
+NPError 
+NPP_GetValue(NPP instance, 
+             NPPVariable variable, 
+             void* value)
+{
+    NPError rv = NPERR_NO_ERROR;
+    if (instance == NULL) return NPERR_INVALID_INSTANCE_ERROR;
+    
+    NPAPIPlugin* plugin = (NPAPIPlugin*)instance->pdata;
+    if (plugin == NULL) return NPERR_GENERIC_ERROR;
+    
+    switch (variable) {
+        case NPPVpluginNameString:
+            *((char**)value) = "Yahoo! Browser Plus";
+            break;
+        case NPPVpluginDescriptionString:
+            *((char**)value) = "Yahoo! Browser Plus NPAPI Plugin";
+            break;
+        case NPPVpluginScriptableNPObject:
+            *(NPObject**)value = plugin->scriptableObject();
+            break;
+        default:
+            rv = NPERR_GENERIC_ERROR;
+    }
+    return rv;
+}
+
+
+NPError
+NPP_SetValue(NPP instance,
+             NPNVariable variable,
+             void* value)
+{
+        return NPERR_NO_ERROR;
+}
+
+
+NPError 
+NPP_NewStream(NPP instance, 
+              NPMIMEType type, 
+              NPStream* stream,
+              NPBool seekable, 
+              uint16* stype)
+{
+    return NPERR_GENERIC_ERROR;
+}
+
+
+NPError 
+NPP_DestroyStream(NPP instance, 
+                  NPStream* stream, 
+                  NPReason reason)
+{
+    return NPERR_GENERIC_ERROR;
+}
+
+
+int32 
+NPP_WriteReady(NPP instance,
+               NPStream* stream)
+{
+    return 0;
+}
+
+
+int32 
+NPP_Write(NPP instance,
+          NPStream* stream,
+          int32 offset, 
+          int32 len,
+          void* buffer)
+{
+    return 0;
+}
+
+
+void 
+NPP_StreamAsFile(NPP instance,
+                 NPStream* stream, 
+                 const char* fname)
+{
+}
+
+
+void
+NPP_Print(NPP instance,
+          NPPrint* platformPrint)
+{
+}
+
+
+int16 
+NPP_HandleEvent(NPP instance,
+                void* event)
+{
+        return 0;
+}
+
+
+void 
+NPP_URLNotify(NPP instance,
+              const char* url,
+              NPReason reason, 
+              void* notifyData)
+{
+}
+
+
+NPObject*
+NPP_GetScriptableInstance(NPP instance)
+{
+    if (!instance) return NULL;
+    
+    NPObject *npobj = NULL;
+    NPAPIPlugin* plugin = (NPAPIPlugin*)instance->pdata;
+    if (plugin != NULL)
+        npobj = plugin->scriptableObject();
+    
+    return npobj;
+}
+
+};
+

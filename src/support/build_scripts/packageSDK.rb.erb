@@ -1,0 +1,255 @@
+#!/usr/bin/env ruby
+
+# <%= $cmake["NoEditWarning"] %>
+#
+
+##########################################################
+# packageSDK.rb
+# 
+# Package a browserplus SDK from a build tree
+#
+# Created by Gordon Durand on Fri Oct 5 2007
+# Copyright (c) 2007 Yahoo! Inc.  All rights reserved
+##########################################################
+
+require 'rbconfig'
+require 'fileutils'
+require 'pathname'
+include Config
+
+if $intDir == nil || $buildDir == nil
+  puts "Usage: ruby -s #{$0} [-verbose=<anything>] -intDir=<CMAKE_CFG_INTDIR> -buildDir=<BUILD_DIR>"
+  puts "  (e.g. ruby -s #{$0} -intDir=Debug -buildDir=`pwd`/build)"
+  exit 1
+end
+
+bpVersion = "<%= $cmake["VersionString"] %>"
+$beVerbose = defined?($verbose) ? $verbose : false
+
+$platform = nil
+libSuffix = nil
+exeSuffix = nil
+if CONFIG['arch'] =~ /mswin/
+  # you have my profound sympathy...
+  $platform = 'Windows'
+  libSuffix = '.dll'
+  staticLibSuffix = '.lib'
+  exeSuffix = '.exe'
+else
+  $platform = 'Darwin'
+  libSuffix = '.dylib'
+  staticLibSuffix = '.a'
+  exeSuffix = ''
+end
+
+puts "Packaging BrowserPlus SDK"
+
+$topDir = File.dirname(File.dirname(File.dirname(File.expand_path(__FILE__))))
+
+# make a pass thru dir removing .svn and .git turds
+def flushTurds(dir) 
+    Dir["#{dir}/**/.svn"].each do |name|
+        FileUtils.rm_rf(name, :verbose => $beVerbose)
+    end
+    Dir["#{dir}/**/.git*"].each do |name|
+        FileUtils.rm_rf(name, :verbose => $beVerbose)
+    end
+end
+
+# ugh, cp_r doesn't follow symlinks
+def myCP_R(src, dest)
+  if $platform == "Darwin"
+    puts "cp -RL #{src} #{dest}" if $beVerbose 
+    system("cp -RL #{src} #{dest}")
+  else
+    FileUtils.cp_r(src, dest, :verbose => $beVerbose)
+  end
+end
+
+# moral equivalent of "which"
+def which(cmd)
+  envSep = $platform == "Darwin" ? ':' : ';'
+  ENV['PATH'].split(envSep).each do |dir|
+    candidate = Pathname.new(dir) + cmd
+    # can't use executable?, it doesn't work on the mighty Vista
+    return candidate if File.exists?(candidate)
+  end
+  return nil
+end
+    
+# setup dir names
+#
+externalsDir = File.join($topDir, "../external/#{$platform}")
+buildDir = $buildDir
+sdkDir = File.join(buildDir, "bpsdk")
+internalSdkDir = File.join(buildDir, "bpsdk_internal")
+bpclientDir = File.join(internalSdkDir, "CommandLineClient")
+utilsDir = File.join(internalSdkDir, "BPUtils")
+protocolDir = File.join(internalSdkDir, "ProtocolLibrary")
+signingDir = File.join(internalSdkDir, "signing")
+shippingBinsDir = File.join(buildDir, "ShippingBinaries")
+
+# make sure dirs exist
+#
+FileUtils.rm_rf(sdkDir, :verbose => $beVerbose)
+FileUtils.rm_rf(internalSdkDir, :verbose => $beVerbose)
+FileUtils.rm_rf(shippingBinsDir, :verbose => $beVerbose)
+dirs = [shippingBinsDir, sdkDir, bpclientDir, 
+        utilsDir, protocolDir, signingDir]
+dirs.each do |d|
+  FileUtils.mkdir_p(d, :verbose => $beVerbose)
+end
+
+# first comes BPUtils library
+#
+utilsBuildDir = "#{buildDir}/dist"
+FileUtils.mkdir_p("#{utilsDir}/include", :verbose => $beVerbose)
+
+myCP_R("#{utilsBuildDir}/include/BPUtils", "#{utilsDir}/include")
+
+FileUtils.mkdir_p("#{utilsDir}/lib")
+Dir["#{utilsBuildDir}/lib/#{$intDir}/*BPUtils*"].each do |lib|
+  FileUtils.install(lib, "#{utilsDir}/lib", :verbose => $beVerbose)
+end
+
+# BPUtils needs boost libs, preserve symlinks on unix
+#
+Dir["#{externalsDir}/lib/#{$intDir}/libboost*"].each do |lib|
+  if File.symlink?(lib) 
+    src = File.basename(lib);
+    target = File.readlink(lib)
+    FileUtils.symlink(target, "#{utilsDir}/lib/#{src}", :verbose => $beVerbose)
+  else
+    FileUtils.install(lib, "#{utilsDir}/lib", :verbose => $beVerbose)
+  end
+end
+
+# Now for BPProtocol
+#
+protoBuildDir = "#{buildDir}/dist"
+FileUtils.mkdir_p("#{protocolDir}/include", :verbose => $beVerbose)
+myCP_R("#{protoBuildDir}/include/BPProtocol", "#{protocolDir}/include")
+FileUtils.mkdir_p("#{protocolDir}/lib")
+Dir["#{protoBuildDir}/lib/#{$intDir}/*BPProtocol*"].each do |lib|
+  FileUtils.install(lib, "#{protocolDir}/lib", :verbose => $beVerbose)
+end
+
+# copy appropriate files from ServiceAPI to SDK
+FileUtils.mkdir_p("#{sdkDir}/include/ServiceAPI", :verbose => $beVerbose)
+Dir["#{$topDir}/sdk/service_api/api/ServiceAPI/*.h"].each do |f|
+  FileUtils.install(f, "#{sdkDir}/include/ServiceAPI", :verbose => $beVerbose)
+end
+
+# command line client goes to sdk.  bp daemon goes to shipping binaries
+# where makeInstaller and installLocally will find it.
+#
+bpClientExe = "#{buildDir}/dist/bin/#{$intDir}/bpclient#{exeSuffix}"
+FileUtils.install(bpClientExe, bpclientDir, :mode => 0755, :verbose => $beVerbose)
+
+bpCoreExe = "#{buildDir}/dist/bin/#{$intDir}/BrowserPlusCore#{exeSuffix}"
+FileUtils.install(bpCoreExe, shippingBinsDir, :mode => 0755, :verbose => $beVerbose)
+
+# BrowserPlusInstaller, BrowserPlusUpdater, and BrowserPlusUninstaller
+# go into shipping binaries where they will be signed 
+# and makeInstaller will find it.
+#
+installerExe = "#{buildDir}/dist/bin/#{$intDir}/BrowserPlusInstaller#{exeSuffix}"
+FileUtils.install(installerExe, shippingBinsDir, :mode => 0755, :verbose => $beVerbose)
+updaterExe = "#{buildDir}/dist/bin/#{$intDir}/BrowserPlusUpdater#{exeSuffix}"
+FileUtils.install(updaterExe, shippingBinsDir, :mode => 0755, :verbose => $beVerbose)
+uninstallerExe = "#{buildDir}/dist/bin/#{$intDir}/BrowserPlusUninstaller#{exeSuffix}"
+FileUtils.install(uninstallerExe, shippingBinsDir, :mode => 0755, :verbose => $beVerbose)
+
+
+# Internal corelet validator and publisher
+#
+installerExe = "#{buildDir}/dist/bin/#{$intDir}/ServiceInstaller#{exeSuffix}"
+publisherExe = "#{buildDir}/dist/bin/#{$intDir}/ServicePublisher#{exeSuffix}"
+runnerExe = "#{buildDir}/dist/bin/#{$intDir}/ServiceRunner#{exeSuffix}"
+
+FileUtils.mkdir_p("#{internalSdkDir}/bin", :verbose => $beVerbose)
+FileUtils.install(installerExe, "#{internalSdkDir}/bin", :mode => 0755, :verbose => $beVerbose)
+FileUtils.install(publisherExe, "#{internalSdkDir}/bin", :mode => 0755, :verbose => $beVerbose)
+FileUtils.install(runnerExe, "#{internalSdkDir}/bin", :mode => 0755, :verbose => $beVerbose)
+
+# External service installer and service runner
+#
+FileUtils.mkdir_p("#{sdkDir}/bin", :verbose => $beVerbose)
+FileUtils.install(installerExe, "#{sdkDir}/bin", :mode => 0755, :verbose => $beVerbose)
+FileUtils.install(runnerExe, "#{sdkDir}/bin", :mode => 0755, :verbose => $beVerbose)
+
+# Plugins go to shipping binaries dir where makeInstaller and installLocally
+# will find them
+#
+npapi = ''
+if $platform == "Darwin"
+  npapi = "#{buildDir}/plugins/npapi/#{$intDir}/BrowserPlus.plugin"
+else
+  npapi = "#{buildDir}/plugins/npapi/#{$intDir}/npybrowserplus.dll"
+end
+myCP_R(npapi, shippingBinsDir)
+if $platform == "Windows"
+  activex = "#{buildDir}/plugins/activex/YBPAddon/#{$intDir}/YBPAddon.dll"
+  FileUtils.install(activex, shippingBinsDir, :mode => 0755, :verbose => $beVerbose)
+end
+
+# preference panes
+if $platform == "Darwin"
+  prefPane = "#{buildDir}/bins/config_panel/src/Darwin/BrowserPlusPrefs.prefPane"
+  myCP_R(prefPane, shippingBinsDir)
+else
+  prefPane = "#{buildDir}/bins/config_panel/src/Windows/#{$intDir}/BrowserPlusPrefs.exe"
+  myCP_R(prefPane, shippingBinsDir)
+end
+
+# Throw in stuff to sign corelets with test certificates
+#
+FileUtils.mkdir_p(signingDir, :verbose => $beVerbose)
+bpSignerExe = "#{buildDir}/dist/bin/#{$intDir}/bpsigner#{exeSuffix}"
+FileUtils.install(bpSignerExe, signingDir, :verbose => $beVerbose)
+FileUtils.install("#{$topDir}/support/signing/devel_certs/BrowserPlus.pvk", signingDir, :verbose => $beVerbose)
+FileUtils.install("#{$topDir}/support/signing/devel_certs/BrowserPlus.crt", signingDir, :verbose => $beVerbose)
+FileUtils.install("#{$topDir}/support/signing/devel_certs/README.txt", signingDir, :verbose => $beVerbose)
+
+# Generate some documentation
+#
+doxyCmd = which("doxygen#{exeSuffix}")
+if !doxyCmd
+  puts "Doxygen not found, skipping documentation"
+else
+  Dir.chdir("#{$topDir}/sdk/service_api") do
+    ENV['DXY_OUTPUT'] = "#{sdkDir}/docs";
+    system("doxygen ServiceAPI.dxy")
+  end
+end
+
+# Put native sample service in SDK
+sampleCoreletFiles = []
+if $platform == "Windows"
+  sampleCoreletFiles = %w[README.txt service.cpp manifest.json.windows SampleService.vcproj SampleService.sln InstallThisService.bat SampleServiceTest.html]
+else
+  sampleCoreletFiles = %w[README.txt service.cpp manifest.json Makefile SampleServiceTest.html]
+end
+FileUtils.mkdir_p("#{sdkDir}/samples/NativeService")
+sampleCoreletFiles.each do |f|
+  FileUtils.install("#{$topDir}/sdk/sample_services/NativeService/#{f}", "#{sdkDir}/samples/NativeService", :verbose => $beVerbose)
+end
+
+# Put ruby sample service in SDK
+sampleCoreletFiles = %w[README.html hello.rb manifest.json]
+FileUtils.mkdir_p("#{sdkDir}/samples/RubyService")
+sampleCoreletFiles.each do |f|
+  FileUtils.install("#{$topDir}/sdk/sample_services/RubyService/#{f}",
+                    "#{sdkDir}/samples/RubyService", :verbose => $beVerbose)
+end
+
+# README and ChangeLog
+#
+FileUtils.install("#{$topDir}/libs/installer/misc/README.txt", sdkDir, :verbose => $beVerbose)
+FileUtils.install("#{$topDir}/libs/installer/misc/README_INTERNAL.txt", File.join(internalSdkDir, "README.txt"), :verbose => $beVerbose)
+FileUtils.install("#{$topDir}/../docs/ChangeLog.txt", internalSdkDir, :verbose => $beVerbose)
+
+# clean out any source control turds from output dirs
+flushTurds(sdkDir)
+flushTurds(internalSdkDir)
+flushTurds(shippingBinsDir)

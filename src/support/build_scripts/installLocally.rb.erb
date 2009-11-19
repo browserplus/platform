@@ -1,0 +1,34 @@
+#!/usr/bin/env ruby
+
+# <%= $cmake["NoEditWarning"] %>
+#
+
+##########################################################
+# installLocally.rb
+# 
+# Install BrowserPlus locally
+#
+# Created by Gordon Durand on Fri Oct 5 2007
+# Copyright (c) 2007 Yahoo! Inc.  All rights reserved
+##########################################################
+
+require 'fileutils'
+require 'pathname'
+
+require 'rbconfig'
+include Config
+
+puts "installing locally..."
+$topDir = File.dirname(File.dirname(File.dirname(File.expand_path(__FILE__))))
+installerExe = File.join($topDir, "build", "installer", "BrowserPlusInstaller")
+updatePkg = File.join($topDir, "build", "BrowserPlus_<%= $cmake["VersionString"] %>.bpkg")
+if CONFIG['arch'] =~ /mswin/
+    installerExe.gsub!(/\//, '\\')
+    updatePkg.gsub!(/\//, '\\')
+end
+if system("#{installerExe} -nogui=1 -verbose=1 -pkg=#{updatePkg}")
+    puts "BrowserPlusInstaller succeeded"
+else
+    puts "BrowserPlusInstaller failed with exitstatus " + $?.to_s
+end
+

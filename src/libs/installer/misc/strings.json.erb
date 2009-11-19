@@ -1,0 +1,75 @@
+<%
+# a utility function to get all localizations for a specified key
+# and to return it as a json object
+def getAllLocalizationsForKey(key)
+    data = Hash.new
+	keys = key.split '.'	
+	$l10n.each { |locale,ldata|
+	    data[locale] = ldata[keys[0]][keys[1]]
+	}
+    s = JSON.generator::State.new
+    s.configure({ :indent => "            ", :array_nl => "\n", :object_nl => "\n"})
+    data.to_json(s)
+end	
+%>
+/* <%= $cmake["NoEditWarning"] %>
+ *
+ * This file contains all localized strings for the BrowserPlus Installer.
+ */
+
+{
+    "kProductNameShort":
+<%= getAllLocalizationsForKey("common.productNameShort") %>,
+
+    "kInstallerTitle":
+<%= getAllLocalizationsForKey("installer.kInstallerTitle") %>,
+
+    "kNotAdmin":
+<%= getAllLocalizationsForKey("installer.kNotAdmin") %>,
+
+	"kInstallerAlreadyRunning":
+<%= getAllLocalizationsForKey("installer.kInstallerAlreadyRunning") %>,	
+
+    "kStartingInstallation":
+<%= getAllLocalizationsForKey("installer.kStartingInstallation") %>,
+
+    "kCopyingDaemonBits":
+<%= getAllLocalizationsForKey("installer.kCopyingDaemonBits") %>,
+
+    "kUpdatingPermissions":
+<%= getAllLocalizationsForKey("installer.kUpdatingPermissions") %>,
+
+    "kInstallingPlugins":
+<%= getAllLocalizationsForKey("installer.kInstallingPlugins") %>,
+
+    "kInstallingPreferencePane":
+<%= getAllLocalizationsForKey("installer.kInstallingPreferencePane") %>,
+
+    "kInstallingBundledServices":
+<%= getAllLocalizationsForKey("installer.kInstallingBundledServices") %>,
+
+    "kInstallingUninstaller":
+<%= getAllLocalizationsForKey("installer.kInstallingUninstaller") %>,
+
+    "kFinishingUp":
+<%= getAllLocalizationsForKey("installer.kFinishingUp") %>,
+
+    "kErrorEncountered":
+<%= getAllLocalizationsForKey("installer.kErrorEncountered") %>,
+
+    "kConfigLink":
+<%= getAllLocalizationsForKey("installer.kConfigLink") %>,
+
+    "kUninstallLink":
+<%= getAllLocalizationsForKey("installer.kUninstallLink") %>,
+
+    "kPlatformDownloading":
+<%= getAllLocalizationsForKey("installer.kPlatformDownloading") %>,
+
+    "kServicesDownloading":
+<%= getAllLocalizationsForKey("installer.kServicesDownloading") %>,
+
+    "kNewerVersionInstalled":
+<%= getAllLocalizationsForKey("installer.kNewerVersionInstalled") %>
+
+}

@@ -1,0 +1,84 @@
+body {
+    font-family:"Myriad Pro", arial, sans-serif;
+    margin:0;
+    font-size:100.01%;
+}
+
+input[type="button"] {width:90px;margin-left:5px;}
+
+#dialog {width:400px;}
+
+#hd {width:400px;
+    height:260px;
+    background:url(../common/browserplus.jpg);
+    position:relative;
+}
+
+#titlepos {position:absolute;
+    top:15px;
+    left:0px;
+    width:100%;}
+
+#title {
+    text-align:center;
+    color:#fff;
+    font-size:24pt;}
+
+#taglinepos {
+	position:absolute;
+	top:50px;
+	left:0px;
+	width:100%;
+}
+
+#tagline {
+    text-align:center;
+    color:#fff;
+    font-size:18pt;
+}
+
+#bd {
+    position:relative;
+    height:180px;
+    padding:0 10px;
+}
+
+h2 {
+    margin:0;
+    font-size:14pt;
+    font-weight:bold;
+    padding-top:5px;
+}
+
+p {
+    font-size:10pt; 
+    margin:8px 0;
+}
+
+form {
+    margin:0;
+}
+
+.buttons {
+    position:absolute;
+    bottom:5px;
+    right:10px;
+    text-align:right;
+}
+
+#statusBarContainer { 
+    margin-top:20px;
+    width:380px;
+    height:15px;
+    border:1px solid #333; 
+}
+
+#statusBarProgress { 
+    width: 0%;
+    height:15px;
+    background-color: #5575c2;
+}
+
+#progressText {
+    text-align:center;
+}

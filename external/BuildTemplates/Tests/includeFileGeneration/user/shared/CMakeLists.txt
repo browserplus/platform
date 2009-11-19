@@ -1,0 +1,2 @@
+SET(user_LINK_SHARED Foo Bar)
+YBT_BUILD(BINARY user)

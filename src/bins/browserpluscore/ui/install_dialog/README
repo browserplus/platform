@@ -1,0 +1,53 @@
+The "BrowserPlus Request" user prompt.
+
+The prompt implemented in the HTML & JS here is displayed to the user
+when they visit a site that uses browserplus.  The prompt is displayed
+when require() is called by the page, effectively initializing the 
+platform.
+
+The prompt contains two classes of information, "permissions" and 
+"software updates/installs".  
+
+JS API
+
+The platform specific native code in:
+//BrowserPlus/Product/Core/Main/Browser/Common/src/UserPrompt/...
+is capable of rendering this HTML inside a native window.  That same code
+also exposes a couple functions that the dialog uses to access information
+required to display.  A top level object is mapped into javascript,
+called 'BPDialog", which exposes the following functions:
+
+// actually display the dialog.  note that the HTML is rendered and
+// javascript begins executing BEFORE the window is displayed to the
+// end user.  This design allows rendering of the initial window before
+// it is displayed, and also leaves the control of the ultimate dialog
+// sizing up to the HTML
+BPDialog.show(number height, number width);
+
+// log information into the plugin's log.  This is a development tool.
+BPDialog.log(string message);
+
+// access the arguments to the dialog as a javascript object.
+// The object is actually built up by the server.  The object today
+// has the following attributes:
+//  "platformUpdates" - When present, One or more browserplus platform
+//                      updates.  You will only have more than one when
+//                      multiple updates are available for multiple different
+//                      installed major versions of the software.  This
+//                      is somewhat theoretical today, but the
+//                      ui should handle it.  A list of maps, map attributes
+//                      are the same as for services, below.                   
+//  "permissions" - A list of localized strings, permissions that the
+//                  page is requesting through it's use of services.
+//  "services" - a list of maps, each map contains name, version, title,
+//               summary, boolean update, integer downloadSize (which is
+//               zero for updates, and positive for installations)
+//  "domain" - a string with the domain of the page that caused the
+//             prompt (by calling require())   
+Object BPDialog.args();
+
+// A function which will cause the dialog to end, and return results in the
+// form of a javascript object.  The return value is a string, one of
+// form possible responses:
+// Allow, AlwaysAllow, Deny, AlwaysDeny 
+BPDialog.complete(Object result);

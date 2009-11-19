@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>BrowserPlus Installer</title>
+  <link rel="stylesheet" type="text/css" href="style.css" media="screen">
+  <link rel="stylesheet" type="text/css" href="installer.css" media="screen" />
+</head>
+<body>
+    <div id="dialog">
+        <div id="hd">
+            <div id="taglinepos"><div id="tagline"></div></div>
+        </div>
+        <div id="bd">
+            <div id="splashPage">
+                <h2 id="splashTitle"></h2>
+                <p id="splashBody"></p>
+                <form name="installaction" id="quoteForm" action="#">
+                    <p>
+                        <input id="terms" type="checkbox" checked>
+                        <label for="terms" id="accept"></label>
+                    </p>
+                    <div class="buttons">
+                        <input id="cancel" name="cancel" type="button" value="Cancel"/>
+                        <input id="begin" name="begin" type="button" value="Install"/>
+                    </div>
+                </form>
+            </div>
+            <div id="progressPage" style="display:none">
+                <h2 id="progressTitle"></h2>
+                <p id="progressBody"></p>
+                <div id="statusBarContainer">
+                    <div id="statusBarProgress"></div>
+                </div>
+            </div>
+            <div id="donePage" style="display:none">
+                <h2 id="doneTitle"></h2>
+                <p id="doneBody"></p>
+                <form name="goodbye" id="quoteForm" action="#">
+                    <div class="buttons">
+                        <input id="alldone" name="alldone" type="button" value="Finish"/>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+<script language="javascript" type="text/javascript" src="lang.js"></script>
+<script language="javascript" type="text/javascript" src="installer.js"></script>
+</html>

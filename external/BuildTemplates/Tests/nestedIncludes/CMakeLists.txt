@@ -1,0 +1,5 @@
+PROJECT(YStockQuote)
+SET(YBT_NESTED_INCLUDES 1)
+SET(YBT_PATH ../..)
+INCLUDE("${YBT_PATH}/BuildTemplates.cmake")
+SUBDIRS(lib bin)

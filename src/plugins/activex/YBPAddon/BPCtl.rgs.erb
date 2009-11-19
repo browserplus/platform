@@ -1,0 +1,19 @@
+HKCU
+{
+	NoRemove Software
+	{
+
+	NoRemove Classes
+	{
+
+	NoRemove CLSID
+	{
+		NoRemove {<%= $cmake["ActiveXGuid"] %>}
+		{
+			InprocServer32 = s '%MODULE%'
+		}
+	}
+
+    }
+    }
+}

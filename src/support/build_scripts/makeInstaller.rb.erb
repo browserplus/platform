@@ -1,0 +1,330 @@
+#!/usr/bin/env ruby
+
+# <%= $cmake["NoEditWarning"] %>
+#
+
+##########################################################
+# makeInstaller.rb
+# 
+# Make a browserplus install/update package from an SDK
+#
+# Created by Gordon Durand on Fri Oct 5 2007
+# Copyright (c) 2007 Yahoo! Inc.  All rights reserved
+##########################################################
+
+###########################################
+#
+#  NOTE!!
+# 
+#  If you add files to the update package, make sure to update
+#  the platform install/update scripts in libs/installer/
+#
+###########################################
+
+
+require 'rbconfig'
+require 'fileutils'
+require 'pathname'
+include Config
+
+if ARGV[0] =~ /help/ || $intDir == nil
+    puts "Usage: ruby -s #{$0} [-verbose=<anything>] -intDir=<CMAKE_CFG_INTDIR>"
+    puts "  (e.g. ruby -s #{$0} -verbose=1) -intDir=Debug)"
+    exit 1
+end
+
+topDir = File.dirname(File.dirname(File.dirname(File.expand_path(__FILE__))))
+
+beVerbose = defined?($verbose) ? $verbose : false
+bpVersion = "<%= $cmake["VersionString"] %>"
+certType = "<%= $cmake["BP_CERTIFICATE_TYPE"] %>"
+
+platform = nil
+libSuffix = nil
+exeSuffix = nil
+if CONFIG['arch'] =~ /mswin/
+    # you have my profound sympathy...
+    platform = 'Windows'
+    libSuffix = '.dll'
+    exeSuffix = '.exe'
+    instSuffix = exeSuffix
+else
+    platform = 'Darwin'
+    libSuffix = '.dylib'
+    exeSuffix = ''
+    instSuffix = ".dmg"
+end
+
+# make a pass thru dir removing .svn and .git turds
+def flushTurds(dir, verbose) 
+    Dir["#{dir}/**/.svn"].each do |name|
+        FileUtils.rm_rf(name, :verbose => $beVerbose)
+    end
+    Dir["#{dir}/**/.git*"].each do |name|
+        FileUtils.rm_rf(name, :verbose => $beVerbose)
+    end
+end
+
+# find build directory, externals
+buildDir = File.join(topDir, "build")
+externalsDir = File.expand_path(File.join(topDir, "..", "External"))
+
+shippingBinsDir = File.join(topDir, "build", "ShippingBinaries")
+
+# Get signing passwords.  
+authenticodePassword = nil
+bpPassword = 'FreeYourBrowser'
+if certType == 'prod'
+    STDOUT.print("BrowserPlus production signing password: ")
+    bpPassword = STDIN.gets
+    if bpPassword == nil
+      puts "\n\rWARNING: This is a PRODUCTION BUILD, run makeInstaller.rb by hand."
+      puts "A platform update package will NOT be generated at this time" 
+      exit 1
+    end
+    bpPassword.chomp!
+    
+    if platform == "Windows"
+        # sign all exe, dll, cab files in production build
+        STDOUT.print("Authenticode signing password: ")
+        authenticodePassword = STDIN.gets
+        if authenticodePassword == nil
+            puts "\n\rWARNING: This is a PRODUCTION BUILD, run makeInstaller.rb by hand."
+            puts "An installer will NOT be generated at this time" 
+            exit 1
+        end
+        authenticodePassword.chomp!
+    end
+end
+
+# sign all exe, dll, cab files in production build.  They are signed in shippingBinaries
+# so that the signed versions will be copied to update dir
+if platform == "Windows" && certType == 'prod'
+    toSign = ''
+    Dir["#{shippingBinsDir}/**/*.{exe,dll,cab}"].each do|f|
+        toSign = toSign + ' ' + f
+    end
+    if toSign != ''
+        # certType argument not really needed, sign.rb will use authenticode 
+        # certs for .exe,.dll,.cab files
+        system("ruby #{topDir}/signing/sign.rb sign -certType=prod -authenticodePassword=#{authenticodePassword} #{toSign}")
+    end
+end
+
+# setup paths into update dir
+updateDir = File.join(topDir, "build", "update")
+FileUtils.rm_rf(updateDir, :verbose => $beVerbose)
+FileUtils.mkdir_p(updateDir)
+updateDaemonDir = File.join(updateDir, "daemon")
+updatePluginsDir = File.join(updateDir, "plugins")
+updatePrefPaneDir = File.join(updateDir, "prefPane")
+updatePermsDir = File.join(updateDir, "permissions")
+localizeUIScript = File.join(topDir, "support", "l10n", "localizeUI.rb")
+
+# 
+# platformInfo.json
+#
+FileUtils.install("#{topDir}/libs/installer/platformInfo.json",
+                  updateDir, :verbose => $beVerbose)
+
+#
+# daemon
+#
+FileUtils.mkdir_p(updateDaemonDir, :mode => 0755, :verbose => $beVerbose)
+FileUtils.install("#{shippingBinsDir}/BrowserPlusCore#{exeSuffix}",
+                  updateDaemonDir, :verbose => $beVerbose)
+FileUtils.install("#{topDir}/bins/browserpluscore/BrowserPlus.config",
+                  updateDaemonDir, :verbose => $beVerbose)
+FileUtils.install("#{topDir}/bins/browserpluscore/strings.json",
+                  updateDaemonDir, :verbose => $beVerbose)
+
+# Legalese
+FileUtils.install(File.join(topDir, "..", "legal", "LICENSE.txt"),
+                  updateDaemonDir,
+                  :verbose => $beVerbose)
+
+# install HTML user interface next to the daemon
+updateUIDir = File.join(updateDaemonDir, "ui")
+FileUtils.mkdir_p(updateUIDir, :mode => 0755, :verbose => $beVerbose)
+
+Dir.glob(File.join(topDir, "bins", "browserpluscore", "ui", "*")) do |x|
+    if (File.directory?(x))
+        srcDir = x
+        tgtDir = File.join(updateUIDir, File.basename(x))
+        FileUtils.rm_rf(tgtDir, :verbose => $beVerbose)
+        system("ruby -s #{localizeUIScript} -indir=#{srcDir} -outdir=#{tgtDir} -verbose=1")
+    end
+end
+
+# on windows install preference panel ui as well
+if platform == "Windows"
+    tgtDir = File.join(updateDaemonDir, "ui", "preference_panel")
+    srcDir = File.join(topDir, "bins", "config_panel", "ui")
+    FileUtils.mkdir_p(tgtDir, :mode => 0755, :verbose => $beVerbose)
+    FileUtils.rm_rf(tgtDir, :verbose => $beVerbose)
+    system("ruby -s #{localizeUIScript} -indir=#{srcDir} -outdir=#{tgtDir} -verbose=1")
+end
+
+#
+# plugins. 
+#
+FileUtils.mkdir_p(updatePluginsDir, :mode => 0755, :verbose => $beVerbose)
+if platform == "Darwin"
+    FileUtils.cp_r("#{shippingBinsDir}/BrowserPlus.plugin",
+                   "#{updatePluginsDir}/BrowserPlus_#{bpVersion}.plugin",
+                   :verbose => $beVerbose)
+else
+    ieDir = File.join(updatePluginsDir, "IE") 
+    FileUtils.mkdir_p(ieDir, :verbose => $beVerbose)
+    FileUtils.install("#{shippingBinsDir}/YBPAddon.dll", 
+                      "#{ieDir}/YBPAddon_#{bpVersion}.dll",
+                      :verbose => $beVerbose)
+    
+    npapiDir = File.join(updatePluginsDir, "NPAPI")
+    FileUtils.mkdir_p(npapiDir, :verbose => $beVerbose)
+    FileUtils.install("#{shippingBinsDir}/npybrowserplus.dll", 
+                      "#{npapiDir}/npybrowserplus_#{bpVersion}.dll",
+                      :verbose => $beVerbose)
+end
+
+#
+# preferences panel
+#
+FileUtils.mkdir_p(updatePrefPaneDir, :mode => 0755, :verbose => $beVerbose)
+if platform == "Darwin"
+    FileUtils.cp_r("#{shippingBinsDir}/BrowserPlusPrefs.prefPane",
+                   "#{updatePrefPaneDir}/BrowserPlusPrefs.prefPane",
+                   :verbose => $beVerbose)
+else
+    FileUtils.cp("#{shippingBinsDir}/BrowserPlusPrefs.exe",
+                 "#{updatePrefPaneDir}/BrowserPlusPrefs.exe",
+                 :verbose => $beVerbose)
+end
+
+FileUtils.mkdir_p(updatePermsDir, :mode => 0755, :verbose => $beVerbose)
+FileUtils.install("#{topDir}/support/signing/devel_certs/BrowserPlus.crt", 
+                  updatePermsDir, 
+                  :verbose => $beVerbose)
+
+# executables go into updateDir
+FileUtils.install("#{shippingBinsDir}/BrowserPlusUpdater#{exeSuffix}",
+                  "#{updateDir}/BrowserPlusUpdater#{exeSuffix}",
+                  :mode => 0755, :verbose => $beVerbose)
+FileUtils.install("#{topDir}/libs/installer/misc/strings.json",
+                  "#{updateDir}/strings.json",
+                  :mode => 0644, :verbose => $beVerbose)
+FileUtils.install("#{shippingBinsDir}/BrowserPlusUninstaller#{exeSuffix}",
+                  "#{updateDir}/BrowserPlusUninstaller#{exeSuffix}",
+                  :mode => 0755, :verbose => $beVerbose)
+FileUtils.install("#{shippingBinsDir}/BrowserPlusUpdater#{exeSuffix}",
+                  "#{updateDir}/BrowserPlusUpdater#{exeSuffix}",
+                  :mode => 0755, :verbose => $beVerbose)
+
+# windows also needs:
+#    uninstallOldPlatform.bat, a script needed during the transition to user-scoped installs
+#    ybang.ico, an icon 
+if platform == "Windows"
+    FileUtils.install("#{topDir}/libs/installer/miscScripts/win/uninstallOldPlatform.bat",
+                      "#{updateDir}/uninstallOldPlatform.bat",
+                      :mode => 0755, :verbose => $beVerbose)
+    FileUtils.install("#{topDir}/libs/installer/misc/ybang.ico",
+                      "#{updateDir}/ybang.ico",
+                      :mode => 0644, :verbose => $beVerbose)
+end
+
+# make a pass thru updateDir removing .svn and .git turds
+flushTurds(updateDir, $beVerbose)
+
+# make platform update bpkg
+puts "Making platform update bpkg"
+bpkg = "#{buildDir}/dist/bin/#{$intDir}/bpkg#{exeSuffix}"
+publicKey = "#{topDir}/support/signing/devel_certs/BrowserPlus.crt"
+privateKey = "#{topDir}/support/signing/devel_certs/BrowserPlus.pvk"
+FileUtils.rm_f("#{topDir}/build/BrowserPlus_#{bpVersion}.bpkg")
+system("#{bpkg} pack -publicKey #{publicKey} -privateKey #{privateKey} -password #{bpPassword} -in #{updateDir} -out #{topDir}/build/BrowserPlus_#{bpVersion}.bpkg")
+puts "Created #{topDir}/build/BrowserPlus_#{bpVersion}.bpkg"
+
+# Now make installer itself
+puts "Making installer"
+installerDir = File.join(buildDir, "installer")
+FileUtils.mkdir_p(installerDir)
+FileUtils.install("#{shippingBinsDir}/BrowserPlusInstaller#{exeSuffix}",
+                  "#{installerDir}/BrowserPlusInstaller#{exeSuffix}",
+                  :mode => 0755, :verbose => $beVerbose)
+FileUtils.install("#{topDir}/bins/installer/installer.config",
+                  "#{installerDir}/installer.config",
+                  :mode => 0644, :verbose => $beVerbose)
+FileUtils.install("#{updatePermsDir}/BrowserPlus.crt",
+                  "#{installerDir}/BrowserPlus.crt",
+                  :mode => 0644, :verbose => $beVerbose)
+FileUtils.install("#{topDir}/libs/installer/misc/strings.json",
+                  "#{installerDir}/strings.json",
+                  :mode => 0644, :verbose => $beVerbose)
+
+# copy install ui files to installer
+uiSrcDir = "#{topDir}/bins/installer/ui"
+uiTgtDir = "#{installerDir}/ui"
+
+# blow away target dir
+FileUtils.rm_rf(uiTgtDir, :verbose => $beVerbose)
+
+# use the localizeUI script to generate proper localized installer interface
+# files
+system("ruby -s #{localizeUIScript} -indir=#{uiSrcDir} -outdir=#{uiTgtDir} -verbose=1")
+
+# make a pass thru installerDir removing .svn and .git turds
+flushTurds(installerDir, $beVerbose)
+
+# now copy in platform specific files required to generate the binaries
+# we'll actually ship (.exe or .dmg)
+if platform == "Darwin"
+    FileUtils.install("#{topDir}/libs/installer/misc/BrowserPlusInstaller.template.dmg",
+                      "#{installerDir}/",
+                      :mode => 0644, :verbose => $verbose)
+
+    FileUtils.install("#{topDir}/libs/installer/miscScripts/mac/buildInstaller.rb",
+                      "#{installerDir}/",
+                      :mode => 0644, :verbose => $verbose)
+
+    FileUtils.install("#{topDir}/libs/installer/misc/bplus_icon.icns",
+                      "#{installerDir}/", :mode => 0644, :verbose => $verbose)
+else
+    # Windows specific stuff includes:
+    #  1. bootstrapping binary
+    #  2. bptar.exe
+    #  3. elzma.exe
+    #  4. uninstallOldPlatform.bat script (needed for transition to user-scoped installs)
+    btTgtDir = "#{installerDir}/buildtools"
+    FileUtils.mkdir_p(btTgtDir, :mode => 0755, :verbose => $beVerbose)
+
+    FileUtils.install("#{buildDir}/dist/bin/#{$intDir}/bptar.exe",
+                      btTgtDir, :mode => 0644, :verbose => $beVerbose)
+
+    FileUtils.install("#{buildDir}/dist/bin/#{$intDir}/BrowserPlusBootstrapper.exe",
+                      btTgtDir, :mode => 0644, :verbose => $beVerbose)
+
+    FileUtils.install("#{buildDir}/dist/bin/#{$intDir}/BrowserPlusBootstrapper.exe",
+                      btTgtDir, :mode => 0644, :verbose => $beVerbose)
+
+    FileUtils.install("#{externalsDir}/Windows/bin/elzma.exe",
+                      btTgtDir, :mode => 0644, :verbose => $beVerbose)
+
+    FileUtils.install("#{topDir}/libs/installer/miscScripts/win/buildInstaller.rb",
+                      "#{installerDir}/",
+                      :mode => 0644, :verbose => $verbose)
+    FileUtils.install("#{topDir}/libs/installer/miscScripts/win/uninstallOldPlatform.bat",
+                      "#{installerDir}/",
+                      :mode => 0644, :verbose => $verbose)
+end
+
+# remove previous installer
+FileUtils.rm_f(File.join(buildDir, "BrowserPlus_#{bpVersion}#{instSuffix}"))
+
+# and finally, let's generate the end-user installer
+system("ruby -s \"#{installerDir}/buildInstaller.rb\" -fname=\"BrowserPlus_#{bpVersion}#{exeSuffix}\" -outDir=\"#{buildDir}\"")
+
+# and let's sign that installer on windows 
+if platform == "Windows" && authenticodePassword != nil
+  toSign = File.join(buildDir, "BrowserPlus_#{bpVersion}#{exeSuffix}")
+  system("ruby #{topDir}/support/signing/sign.rb sign -certType=prod -authenticodePassword=#{authenticodePassword} #{toSign}")
+end

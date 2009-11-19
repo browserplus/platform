@@ -1,0 +1,73 @@
+<html>
+
+	<head>
+		<script type="text/javascript" src="http://bp.yahooapis.com/<%= $cmake["VersionString"]%>/browserplus-min.js"></script>
+
+		<script type="text/javascript">
+			$BP = BrowserPlus;
+
+			// the "service specification" that we'll activate
+			var SampleService = {
+				service: "SampleService",
+				version: "1",
+				minversion: "1.0.0"
+			};
+
+			$BP.init(function(r) {
+				function bplusInitialized() {
+					// this function will be called when BrowserPlus is ready,
+					// either after the user goes and installs it, or immediately if
+					// BrowserPlus was already installed.
+
+					// so... require some services!
+					BrowserPlus.require({services: [ SampleService ]},
+						function(r) {
+							if (r.success) {
+								BrowserPlus.SampleService.SayHello(
+									{ who: "new BrowserPlus Service developer!" },
+									function(res) {
+										alert(res.value);
+									} );
+							}
+						});
+				}
+
+				if (r.success) {
+					// BrowserPlus is installed and ready to go!
+					alert("Yahoo! BrowserPlus installed, v" + $BP.getPlatformInfo().version);
+					bplusInitialized();
+				} else if (r.error == "bp.notInstalled") {
+					// BrowserPlus isn't installed, but the client browser/operating system
+					// is supported!  we can render a link to let our users know that
+					// more features are available if they install the thing.
+					BrowserPlus.initWhenAvailable({}, bplusInitialized);
+					alert("Get BrowserPlus! You can do it!");
+				} else if (r.error == "bp.unsupportedClient") {
+					// Uh oh, they're running a browser we don't yet support.  We should
+					// probably disable features that require browserplus, and rendering
+					// an installation link for BrowserPlus is useless.
+				} else {
+					// yikes!  Unexpected error!
+					throw(r.error + ": " + r.verboseError);
+				}
+			});
+		</script>
+
+		<style type="text/css">
+		.page_header {
+			background-color: #61356D;
+			color: #FFFFFF;
+			font:25px sans-serif;
+			text-align:center;
+			width:100%;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="page_header">
+			<BR><B>BrowserPlus</B>&trade; Service SDK's SampleService Test Page<BR><BR>
+		</div>
+	</body>
+
+</html>

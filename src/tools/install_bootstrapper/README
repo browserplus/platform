@@ -1,0 +1,17 @@
+Bootstrapper - this is a little binary that is a bootstrapping installer
+for Win32.
+
+Here's how it works:
+
+1. this binary reads the last four byte of the executable file in which it's
+   distributed.  Those four bytes are a little endian encoding of how much
+   data is appended to the binary
+2. this binary then unlzma compresses those bytes, and untars them into
+   a temporary directory
+3. this binary then executes a well named process inside the resultant
+   tar file to conduct the installation.
+
+the process of building an installer is appending tar/lzma data to this
+bootstrap binary, then a 4 byte little endian encoding of the size of
+said data.  crazy, huh?
+

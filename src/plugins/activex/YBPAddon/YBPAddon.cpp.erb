@@ -1,0 +1,80 @@
+/**
+ * ***** BEGIN LICENSE BLOCK *****
+ * The contents of this file are subject to the Mozilla Public License
+ * Version 1.1 (the "License"); you may not use this file except in
+ * compliance with the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ * 
+ * Software distributed under the License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ * License for the specific language governing rights and limitations
+ * under the License.
+ * 
+ * The Original Code is BrowserPlus (tm).
+ * 
+ * The Initial Developer of the Original Code is Yahoo!.
+ * Portions created by Yahoo! are Copyright (C) 2006-2009 Yahoo!.
+ * All Rights Reserved.
+ * 
+ * Contributor(s): 
+ * ***** END LICENSE BLOCK *****
+ */
+
+// <%= $cmake["NoEditWarning"] %>
+// YBPAddon.cpp : Implementation of DLL Exports.
+
+
+#include "stdafx.h"
+#include "resource.h"
+
+#include "BPProtocol/BPProtocol.h"
+#include "BPUtils/BPLog.h"
+#include "BPUtils/bpfile.h"
+#include "PluginCommonLib/PluginCommonLib.h"
+
+
+// The module attribute causes DllMain, DllRegisterServer and DllUnregisterServer to be automatically implemented for you
+[ module(dll, uuid = "{<%= $cmake["TypeLibGuid"] %>}", 
+		 name = "YBPAddon", 
+		 helpstring = "YBPAddon 1.0 Type Library",
+		 resource_name = "IDR_YBPADDON") ]
+class CYBPAddonModule
+{
+public:
+    // Override CAtlDllModuleT members
+    BOOL WINAPI DllMain(DWORD dwReason, LPVOID lpReserved);
+};
+		 
+
+BOOL WINAPI CYBPAddonModule::DllMain(DWORD dwReason, LPVOID lpReserved)
+{
+    switch (dwReason)
+    {
+        case DLL_PROCESS_ATTACH:
+            // Debugging helpers.
+            _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF |
+                           _CRTDBG_LEAK_CHECK_DF |
+                           _CRTDBG_CHECK_ALWAYS_DF);
+            _CrtSetReportMode(_CRT_ERROR,
+                              _CRTDBG_MODE_DEBUG |
+                              _CRTDBG_MODE_WNDW);
+            _CrtSetReportMode(_CRT_ASSERT,
+                              _CRTDBG_MODE_DEBUG |
+                              _CRTDBG_MODE_WNDW);
+
+            
+            bp::plugin::setupLogging( bp::file::Path( L"bpactivex.log" ) );
+            
+            BPInitialize();
+            break;
+            
+        case DLL_PROCESS_DETACH:
+            BPLOG_INFO_STRM("dll process detach: " << 
+                            ((lpReserved == NULL) ? "FreeLibrary called" :
+                                                    "process terminating"));
+            if (lpReserved == NULL) BPShutdown();
+            break;
+    }
+    
+    return __super::DllMain(dwReason, lpReserved);
+}

@@ -1,0 +1,71 @@
+#generalList {
+  width: 503px;
+  height: 197px;
+  top: 44px;
+}
+
+#generalTab {
+    border-left:1px solid #888;
+}
+#generalIcon {
+  background:url(bp_logo_40.gif) 0 0 repeat;
+  position: absolute;
+  width:40px;
+  height:40px;
+  top: 0;
+  left: 0;
+}
+
+#generalBody {
+    position:absolute;
+    top:254px;
+    left:4px;
+}
+
+#generalAsk  {
+    position:relative;
+}
+
+#generalAskAlwaysId {
+    position:absolute;
+    top:0px;
+    left:0px;
+} 
+
+#generalAskAlwaysText {
+    position:absolute;
+    top:2px;
+    left:25px;
+    height:35px;
+}
+
+.clearline {
+    height:20px;
+    clear:both;
+}
+
+#generalEnableButton {
+    float:left;
+} 
+#generalEnabled {
+    float:left;
+    padding-top:3px;
+    margin-left:10px;
+}
+
+#generalUninstallButton {
+    float:left;
+} 
+
+#generalInstallationStatus {
+    float:left;
+    padding-top:3px;
+    margin-left:10px;
+} 
+
+.description {
+    float:left;
+    clear:both;
+    margin-top:4px;
+    width:495px;
+}

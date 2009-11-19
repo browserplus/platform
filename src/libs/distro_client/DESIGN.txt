@@ -1,0 +1,76 @@
+rough overview of the DistributionClient library design and
+responsibilities.
+
+Responsibilities:
+
+1. The web services protocol between the distribution server and
+   client software is completely abstracted in the DistQuery lib.
+2. The DistQuery lib handles querying of multiple distribution servers
+   with priority
+3. Handling of downloading of "pending" corelet updates.
+4. handling of installation of corelet updates.
+5. Handling of dependency analysis and topological sorting for
+   both "requires" and determining which/wether updates are available.
+
+
+Code Organization
+
+PUBLIC        +-----------------+  +-------------------+
+API           | DistQuery.h     |  | CoreletUnpacker.h |
+              +-----------------+  +-------------------+
+                  |                         V
+                  V                +---------------------+
+       +---------------+           | CoreletUnpacker.cpp |
+       | DistQuery.cpp |           +---------------------+
+       +---------------+
+               |
+               V                   +------------------------+
+       +------------------+ -----> | PendingUpdateCache     |
+      /| CoreletQuery     |        +------------------------+
+     / +------------------+ \
+    /          |              -->  +------------------+
+   |           V                   | WSProtocol       |
+   |   +------------------+   -->  +------------------+
+   |   | QueryCache       | /
+   |   +------------------+
+   \
+    V
+    +---------------------------+
+    | CoreletQueryUtil          |
+    +---------------------------+
+
+
+DistQuery is the key abstraction/client entry point for all
+interactions with the distribution server and pending update cache.  A
+DistQuery instance handles any number of simultaneous outstanding
+queries.
+
+CoreletQuery has a nearly identical interface to DistQuery, but performs
+all of the actual work.  CoreletQuery does _not_ handle multiple 
+simultaneous requests.  The main reason that distquery and coreletquery
+are distinct, is because the management of multiple simultaneous queries
+is thought complex enough to justify it's own abstraction.
+
+QueryCache is responsible for attaining a complete list of available 
+corelets from multiple distribution servers.  QueryCache will merge
+the lists of available corelets into a single list, and performs very
+short term caching of this list (~60s).  This short term caching is to
+alleviate higher level code of the need to keep state around.
+
+CoreletQueryUtil is where generally useful synchronous algorithms
+performed on lists of corelets and requirements are performed.
+Topological sort and requirement satisfaction is implemented in this
+abstraction.
+
+WSProtocol is where all protocol strings are stored.  Also, basic 
+knowledge around formulating correct distribution server URLs is 
+abstracted here.
+  
+The PendingUpdateCache is an abstraction of the disk representation
+of the Corelet Update cache.  It is responsible for generating in memory
+lists of the available updates, storing updates to disk (using corelet
+unpacker) and for installing these updates into the corelet installation
+directory.
+ 
+CoreletUnpacker encapsulates logic required to validate and unpack a 
+corelet bpkg from the distribution server.

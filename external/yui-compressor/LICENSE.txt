@@ -1,0 +1,9 @@
+License: All code specific to YUI Compressor is issued under a BSD
+license. YUI Compressor extends and implements code from Mozilla's
+Rhino project. Rhino is issued under the Mozilla Public License (MPL),
+and MPL applies to the Rhino source and binaries that are distributed
+with YUI Compressor, including Rhino modifications made by YUI
+Compressor. YUI Compressor also makes use of and distributes a binary
+of JArgs; the JArgs BSD license applies to this binary.
+
+(from http://developer.yahoo.com/yui/compressor/)

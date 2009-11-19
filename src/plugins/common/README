@@ -1,0 +1,11 @@
+This directory contains common utilities for use by all browser plugins.
+
+Tools (do/will)exist here such as:
+1.  An abstraction to attain the correct thread of execution provied
+    that the thread is using a native operating system event pump.
+2.  JSON parsing for parsing arguments passed in from javascript
+3.  FileObfuscation utilities to support secure resource representation.
+
+This code is designed to be small, portable, and easy to reuse.  
+It benefits us to move any duplicate code in multiple plugins to this 
+library.

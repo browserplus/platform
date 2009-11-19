@@ -1,0 +1,5 @@
+PROJECT(depender)
+SET(YBT_PATH ../../..)
+INCLUDE("${YBT_PATH}/BuildTemplates.cmake")
+SET (dependerBinaryThatLinksALibFromDependee_LINK_SHARED YStockQuote)
+YBT_BUILD(BINARY dependerBinaryThatLinksALibFromDependee)

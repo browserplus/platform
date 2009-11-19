@@ -1,0 +1,55 @@
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+#include "winres.h"
+#undef APSTUDIO_READONLY_SYMBOLS
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "bpicon.ico"
+
+   
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+   FILEVERSION <%= $cmake["WindowsVersionInfo"] %>
+   PRODUCTVERSION <%= $cmake["WindowsVersionInfo"] %>
+   FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+   FILEFLAGS 0x1L
+#else
+   FILEFLAGS 0x0L
+#endif
+   FILEOS 0x4L
+   FILETYPE 0x2L
+   FILESUBTYPE 0x0L
+BEGIN
+   BLOCK "StringFileInfo"
+   BEGIN
+       BLOCK "040904e4"
+       BEGIN
+           VALUE "CompanyName", "Yahoo! Inc."
+           VALUE "FileDescription", "BrowserPlus Uninstaller"
+           VALUE "FileVersion", "<%= $cmake["VersionString"] %>.0"
+           VALUE "LegalCopyright", "Copyright (c) 2007-2009 Yahoo! Inc.  All rights reserved."
+           VALUE "InternalName", "BrowserPlusUninstaller.exe"
+           VALUE "OriginalFilename", "BrowserPlusUninstaller.exe"
+           VALUE "ProductName", "Y! BrowserPlus"
+           VALUE "ProductVersion", "<%= $cmake["VersionString"] %>.0"
+       END
+   END
+   BLOCK "VarFileInfo"
+   BEGIN
+       VALUE "Translation", 0x409, 1252
+   END
+END
+   

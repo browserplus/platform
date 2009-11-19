@@ -1,0 +1,32 @@
+The BrowserPlus testing framework.
+
+This directory contains CMake macros and a small library to easily 
+create new tests that statically link CppUnit.
+
+Using the framework is:
+1. creating headers & sources which constiute the tests
+2. include "TestingFramework/TestingFramework.h"
+3. use cmake to add the test to the build
+   BPAddTest(${BINARY_NAME} ${SOURCES})
+
+The test will be added to the default build and will be run as part of 
+the "AllTests" build target.
+
+A typical test class will look like this:
+//////////////////////////////////////////////////////////////////////
+class Test : public CPPUNIT_NS::TestCase
+{
+  CPPUNIT_TEST_SUITE(Test);
+  CPPUNIT_TEST(testHelloWorld);
+  CPPUNIT_TEST_SUITE_END();
+
+public:
+  void setUp(void) {}
+  void tearDown(void) {} 
+
+protected:
+  void testHelloWorld(void) { std::cout << "Hello, world!" << std::endl; }
+};
+
+CPPUNIT_TEST_SUITE_REGISTRATION(Test);
+//////////////////////////////////////////////////////////////////////

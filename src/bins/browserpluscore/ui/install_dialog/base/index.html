@@ -1,0 +1,63 @@
+<%
+
+def replaceLinks(inText, links)
+  links.each { |x|
+    inText.gsub!("{#{x[:key]}}") { |match|
+      "<a href=\"#{x[:link]}\">#{x[:text]}</a>"
+    }
+  }
+  inText
+end
+
+%>
+<!-- Force IE to host this page in the Internet zone. -->
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <link rel="stylesheet" type="text/css" href="../common/style.css">
+        <title></title>
+    </head>
+    <body>
+        <div id="dialog">
+            <div id="logo"></div>
+            <div id="description">
+                <span id="requestPermission"></span>
+            </div>
+            <div id="request">
+                <div id="req_by">
+                    <span id="requestedBy"><%= prompt.requestedBy %></span>&nbsp;<span id="requested_domain"></span>
+                </div>
+                <div id="total_size">
+                    <span id="total_size_text"></span>&nbsp;<span id="total_size_number"></span>
+                </div>
+            </div>
+            <div id="component_list">
+                <!-- here's where we'll dynamically add content -->
+            </div>
+            <div id="button_footer">
+                <input id="permanent_checkbox_input" type="checkbox"> 
+                <label for="permanent_checkbox_input"><span id="permanentDecision"><%= prompt.permanentDecision %></span></label> 
+
+                <button id="deny"><%= prompt.deny %></button> 
+                <button id="allow"><%= prompt.allow %></button>
+            </div>
+            <div id="legalFooter"><div id="footerContent"><%=
+replaceLinks(prompt.legalFooter, [
+	{
+	  :key => 'EULA',
+      :link => common.eulaLink_no_trans,
+      :text => common.eula
+	},
+	{
+	  :key => 'privacyPolicy',
+      :link => common.privacyPolicyLink_no_trans,
+      :text => common.privacyPolicy
+	}])
+%></div></div>
+        </div>
+    </body>
+    <script type="text/javascript" src="../common/yahoo-dom-event.js"></script>
+    <script type="text/javascript" src="service_install.js"></script>
+</html>

@@ -1,0 +1,69 @@
+<%
+# a utility function to get all localizations for a specified key
+# and to return it as a json object
+def getAllLocalizationsForKey(key)
+    data = Hash.new
+	keys = key.split '.'	
+	$l10n.each { |locale,ldata|
+	    data[locale] = ldata[keys[0]][keys[1]]
+	}
+    s = JSON.generator::State.new
+    s.configure({ :indent => "            ", :array_nl => "\n", :object_nl => "\n"})
+    data.to_json(s)
+end	
+%>
+/* <%= $cmake["NoEditWarning"] %>
+ */
+ 
+/*
+ * This is the localized strings file for BrowserPlus 
+ */
+
+{
+    // Platform description
+    "RequireRequest::kPlatformDescriptionKey":
+<%= getAllLocalizationsForKey("platform.RequireRequest::kPlatformDescriptionKey") %>,
+    
+    // FileBrowsePluglet
+    "FileBrowsePluglet::kSelectKey": 
+<%= getAllLocalizationsForKey("platform.FileBrowsePluglet::kSelectKey") %>,
+
+    "FileBrowsePluglet::kFileFolderNameKey": 
+<%= getAllLocalizationsForKey("platform.FileBrowsePluglet::kFileFolderNameKey") %>,
+
+    "FileBrowsePluglet::kFileNameKey": 
+<%= getAllLocalizationsForKey("platform.FileBrowsePluglet::kFileNameKey") %>,
+
+    "FileBrowsePluglet::kAllFilesFoldersKey": 
+<%= getAllLocalizationsForKey("platform.FileBrowsePluglet::kAllFilesFoldersKey") %>,
+
+    "FileBrowsePluglet::kSelectFilesFoldersKey": 
+<%= getAllLocalizationsForKey("platform.FileBrowsePluglet::kSelectFilesFoldersKey") %>,
+
+    "FileBrowsePluglet::kSelectFolderKey": 
+<%= getAllLocalizationsForKey("platform.FileBrowsePluglet::kSelectFolderKey") %>,
+
+    "FileBrowsePluglet::kSelectFilesKey": 
+<%= getAllLocalizationsForKey("platform.FileBrowsePluglet::kSelectFilesKey") %>,
+
+    // Uninstaller
+    "productNameShort": 
+<%= getAllLocalizationsForKey("common.productNameShort") %>,
+
+    "uninstallNotification":
+<%= getAllLocalizationsForKey("uninstaller.uninstallNotification") %>,
+
+    "uninstallPrompt":
+<%= getAllLocalizationsForKey("uninstaller.uninstallPrompt") %>,
+
+    // Config Panel
+    "configPanelTitle":
+<%= getAllLocalizationsForKey("installer.kConfigLink") %>,
+
+	// Inactive Services built-in
+	"inactiveServicesTitle": 
+<%= getAllLocalizationsForKey("services.InactiveServices::title") %>,
+
+	"inactiveServicesSummary": 
+<%= getAllLocalizationsForKey("services.InactiveServices::summary") %>
+}

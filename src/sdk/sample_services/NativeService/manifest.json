@@ -1,0 +1,10 @@
+{
+  "type": "standalone",
+  "CoreletLibrary": "@ServiceLibrary@",
+  "strings": { 
+    "en": { 
+      "title": "Sample Service", 
+      "summary": "A stub service which demonstrates how to write native code to extend the capabilities of BrowserPlus."
+    }
+  }
+}

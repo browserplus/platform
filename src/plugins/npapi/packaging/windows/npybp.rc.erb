@@ -1,0 +1,139 @@
+//Microsoft Developer Studio generated resource script.
+//
+
+// <%= $cmake["NoEditWarning"] %>
+//
+
+#include "resource.h"
+#include "HTMLRender/HTMLDialogRes_Windows.h"
+
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION <%= $cmake["WindowsVersionInfo"] %>
+ PRODUCTVERSION <%= $cmake["WindowsVersionInfo"] %>
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904e4"
+        BEGIN
+            VALUE "Comments", "\0"
+            VALUE "CompanyName", "Yahoo! Inc.\0"
+            VALUE "FileDescription", "npybrowserplus_<%= $cmake["VersionString"] %>\0"
+            VALUE "FileExtents", "\0"
+            VALUE "FileOpenName", "npybrowserplus_<%= $cmake["VersionString"] %>\0"
+            VALUE "FileVersion", "<%= $cmake["WindowsVersionInfo"] %>\0"
+            VALUE "InternalName", "npybrowserplus_<%= $cmake["VersionString"] %>\0"
+            VALUE "LegalCopyright", "Copyright © 2007-2008\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "MIMEType", "<%= $cmake["WindowsNPAPIMimeTypes"] %>\0"
+            VALUE "OriginalFilename", "npybrowserplus_<%= $cmake["VersionString"] %>.dll\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "Yahoo! BrowserPlus Plugin\0"
+            VALUE "ProductVersion", "<%= $cmake["WindowsVersionInfo"] %>\0"
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// REGISTRY
+//
+
+IDR_NPYBP            REGISTRY                "npybrowserplus.rgs"
+   
+#endif    // !_MAC
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_HTMLDIALOG DIALOGEX 0, 0, 405, 205
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION
+CAPTION "Dialog"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL "",IDC_IE,"{8856F961-340A-11D0-A96B-00C04FD705A2}",WS_TABSTOP,0,0,405,205
+END
+   
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

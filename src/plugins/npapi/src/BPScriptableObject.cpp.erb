@@ -1,0 +1,348 @@
+/**
+ * ***** BEGIN LICENSE BLOCK *****
+ * The contents of this file are subject to the Mozilla Public License
+ * Version 1.1 (the "License"); you may not use this file except in
+ * compliance with the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ * 
+ * Software distributed under the License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ * License for the specific language governing rights and limitations
+ * under the License.
+ * 
+ * The Original Code is BrowserPlus (tm).
+ * 
+ * The Initial Developer of the Original Code is Yahoo!.
+ * Portions created by Yahoo! are Copyright (C) 2006-2009 Yahoo!.
+ * All Rights Reserved.
+ * 
+ * Contributor(s): 
+ * ***** END LICENSE BLOCK *****
+ */
+
+/*
+ *  BrowserPlus.c
+ *  BrowserPlusPlugin
+ *
+ *  Created by Gordon Durand on 5/2/07.
+ *  Copyright 2007 Yahoo! Inc. All rights reserved.
+ *
+ * TODO:
+ *  + utility routine to turn a std::string into a NPString
+ */
+
+// Disable "nameless struct/union" warnings that come from winnt.h that is 
+// evidently included through some npapi header.
+#ifdef WIN32
+#pragma warning (disable: 4201)
+#endif
+
+#include "BPScriptableObject.h"
+#include "GenericJSObject.h"
+#include "BPUtils/BPUtils.h"
+#include "PluginCommonLib/PluginCommonLib.h"
+#include "nputils.h"
+#include "NPAPIPlugin.h"
+#include "NPAPIObject.h"
+#include "NPAPIVariant.h"
+
+#include <sstream>
+
+#ifdef WIN32
+// disable unused arg warning and constant conditional expr 
+// (latter caused by npvariant macros)
+#pragma warning (disable : 4127 4100)
+#pragma warning (disable : 4201)
+
+#define snprintf _snprintf
+#endif
+ 
+static const char* sVersionString = "<%= $cmake["VersionString"] %>";
+
+static bool sIdentifiersInitialized = false;
+
+/*
+ * Properties of the scriptable plugin
+ */
+#define ID_VERSION_PROPERTY         0
+#define NUM_PROPERTY_IDENTIFIERS    1
+
+static NPIdentifier pluginPropertyIdentifiers[NUM_PROPERTY_IDENTIFIERS];
+static const NPUTF8* pluginPropertyIdentifierNames[NUM_PROPERTY_IDENTIFIERS] = {
+    "version"
+};
+
+/* BrowserPlus methods
+*/
+#define ID_INITIALIZE_METHOD                0
+#define ID_ENUMERATESERVICES_METHOD         1
+#define ID_REQUIRESERVICE_METHOD            2
+#define ID_DESCRIBESERVICE_METHOD           3
+#define ID_EXECUTEMETHOD_METHOD             4
+#define ID_INFO_METHOD                      5
+#define NUM_METHOD_IDENTIFIERS              6
+
+static NPIdentifier pluginMethodIdentifiers[NUM_METHOD_IDENTIFIERS];
+static const NPUTF8* pluginMethodIdentifierNames[NUM_METHOD_IDENTIFIERS] = {
+    "Initialize",
+    "EnumerateServices",
+    "RequireService",
+    "DescribeService",
+    "ExecuteMethod",
+    "Info"
+};
+
+static NPObject*
+allocateBPScriptableObject(NPP npp,
+                           NPClass* theClass)
+{
+    return new BPScriptableObject(npp);
+}
+
+
+DECLARE_NPOBJECT_CLASS_WITH_BASE(BPScriptableObject,
+                                 allocateBPScriptableObject);
+
+NPObject *
+BPScriptableObject::createObject(NPP npp)
+{
+    NPObject * obj;
+
+    obj = gBrowserFuncs.createobject(npp,
+                                     GET_NPOBJECT_CLASS(BPScriptableObject));
+
+    if (obj) gBrowserFuncs.retainobject(obj);
+    
+    return obj;
+}
+
+BPScriptableObject::BPScriptableObject(NPP instance)
+    : ScriptablePluginObjectBase(instance)
+{
+    BPLOG_INFO_STRM("new scripable object (" << this << "), sIdentifiersInitialized ="
+                    << sIdentifiersInitialized);
+
+    if (!sIdentifiersInitialized) {
+        gBrowserFuncs.getstringidentifiers(pluginPropertyIdentifierNames, 
+                                           NUM_PROPERTY_IDENTIFIERS,
+                                           pluginPropertyIdentifiers);
+        gBrowserFuncs.getstringidentifiers(pluginMethodIdentifierNames,
+                                           NUM_METHOD_IDENTIFIERS, 
+                                           pluginMethodIdentifiers);
+        sIdentifiersInitialized = true;
+    }
+    m_version.assign(static_cast<const char*>(sVersionString));
+
+    m_plugin = (NPAPIPlugin*) instance->pdata;
+}
+
+BPScriptableObject::~BPScriptableObject()
+{
+    BPLOG_INFO_STRM("-> Teardown scriptable object (" << this << ")");
+}
+
+bool 
+BPScriptableObject::hasMethod(NPIdentifier name)
+{
+    for (int i = 0; i < NUM_METHOD_IDENTIFIERS; i++) {
+        if (name == pluginMethodIdentifiers[i]) {
+            return true;
+        }
+    }
+    return ScriptablePluginObjectBase::hasMethod(name);    
+}
+
+
+bool 
+BPScriptableObject::invoke(NPIdentifier name, 
+                           const NPVariant* args,
+                           uint32_t argCount,
+                           NPVariant* resultVariant)
+{
+    NPAPIVariant result;
+
+    // a debug message
+    char* func = gBrowserFuncs.utf8fromidentifier(name);
+    BPLOG_DEBUG_STRM("invoke " << (func ? func : "NULL") << " with " <<
+                    argCount << " args");
+    gBrowserFuncs.memfree(func);
+        
+    bool rval = false;
+    if (name == pluginMethodIdentifiers[ID_INITIALIZE_METHOD])
+    {
+        // accepts an argument map and a callback arg
+        // (javascript object upon which we may invoke "call" to 
+        //  call the method)
+        if (argCount != 2
+            || !NPVARIANT_IS_OBJECT(args[0])
+            || !NPVARIANT_IS_OBJECT(args[1])) {
+            return false;
+        } 
+        NPAPIVariant argMap((NPVariant*) args);
+        NPAPIObject callback(args[1].value.objectValue);
+        rval = m_plugin->session().initialize(&argMap, &callback, &result);
+    }
+    else if (name == pluginMethodIdentifiers[ID_ENUMERATESERVICES_METHOD])
+    {
+        // accepts a single callback arg
+        // (javascript object upon which we may invoke "call" to 
+        //  call the method)
+        if (argCount != 1 || !NPVARIANT_IS_OBJECT(args[0])) return false;
+
+        NPAPIObject callback(args[0].value.objectValue);
+        rval = m_plugin->session().enumerateServices(&callback, &result);
+    }
+    else if (name == pluginMethodIdentifiers[ID_DESCRIBESERVICE_METHOD] ||
+             name == pluginMethodIdentifiers[ID_REQUIRESERVICE_METHOD])
+    {
+        // args[0]: argument object
+        // args[1]: callback
+        if (argCount != 2 || 
+            !NPVARIANT_IS_OBJECT(args[0]) ||
+            !NPVARIANT_IS_OBJECT(args[1]))
+        {
+            return false;
+        }
+
+        NPObject * callback = args[1].value.objectValue;
+        
+        NPAPIVariant argMap((NPVariant *) args);
+        NPAPIObject callbackObj(callback);
+        if (name == pluginMethodIdentifiers[ID_REQUIRESERVICE_METHOD]) {
+            rval = m_plugin->session().requireServices(&argMap,
+                                                       &callbackObj,
+                                                       &result);
+        } else {
+            rval = m_plugin->session().describeService(&argMap,
+                                                       &callbackObj,
+                                                       &result);
+        }
+    } else if (name ==
+               pluginMethodIdentifiers[ID_EXECUTEMETHOD_METHOD])
+    {
+        // args[0]: service name (i.e. "core")
+        // args[1]: service version string (i.e. "1.0.0")
+        // args[2]: method on service (i.e. "Version")
+        // args[3]: object containing parameters
+        // args[4]: callback
+        NPObject * callback = NULL;
+        const NPVariant * arguments = NULL;            
+
+        // validate correct number and type of arguments
+        if (argCount != 5 ||
+            !NPVARIANT_IS_STRING(args[0]) ||
+            !NPVARIANT_IS_STRING(args[1]) ||
+            !NPVARIANT_IS_STRING(args[2]) ||
+            !NPVARIANT_IS_OBJECT(args[3]) ||
+            !NPVARIANT_IS_OBJECT(args[4]))
+        {
+            return false;
+        }
+
+        std::string service, version, method;
+        NPString tmpStr;
+
+        tmpStr = NPVARIANT_TO_STRING(args[0]);
+        service.append(static_cast<const char*>(tmpStr.utf8characters),
+                       tmpStr.utf8length);
+
+        tmpStr = NPVARIANT_TO_STRING(args[1]);
+        version.append(static_cast<const char*>(tmpStr.utf8characters),
+                       tmpStr.utf8length);
+        
+        tmpStr = NPVARIANT_TO_STRING(args[2]);
+        method.append(static_cast<const char*>(tmpStr.utf8characters),
+                      tmpStr.utf8length);
+        
+        // argument map may not be null
+        arguments = &(args[3]);
+
+        callback = args[4].value.objectValue;
+
+        NPAPIVariant npapiArgs((NPVariant *) arguments);
+        NPAPIObject npapiCallback(callback);
+
+        // now we've got everything we need!
+        rval = m_plugin->session().executeMethod(
+            service, version, method,
+            &npapiArgs, &npapiCallback, &result);
+    } else if (name ==
+               pluginMethodIdentifiers[ID_INFO_METHOD])
+    {
+        bp::Map m;
+        std::stringstream ss;
+        ss << BP_VERSION_MAJOR << "."
+           << BP_VERSION_MINOR << "."
+           << BP_VERSION_MICRO;
+        m.add("version", new bp::String(ss.str()));
+        m.add("os", new bp::String(bp::os::PlatformAsString()));
+        m.add("buildType", new bp::String(bp::pluginutil::getBuildType()));
+        rval = npu::evaluateJSON(m_npp, m, result.varPtr());
+    } else {
+        char* funcName = gBrowserFuncs.utf8fromidentifier(name);
+        BPLOG_INFO_STRM("Plugin method " << 
+                        (funcName ? funcName : "NULL") << " not found!"); 
+        gBrowserFuncs.memfree(funcName);
+        return ScriptablePluginObjectBase::invoke(name, args,
+                                                  argCount,
+                                                  resultVariant);
+        
+    }
+
+    result.copyTo(resultVariant);
+    
+    return rval;
+}
+
+
+bool 
+BPScriptableObject::hasProperty(NPIdentifier name)
+{
+    for (int i = 0; i < NUM_PROPERTY_IDENTIFIERS; i++) {
+        if (name == pluginPropertyIdentifiers[i]){
+            return true;
+        }
+    }
+    return ScriptablePluginObjectBase::hasProperty(name);
+}
+
+
+bool 
+BPScriptableObject::getProperty(NPIdentifier name,
+                                NPVariant* result)
+{
+    bool rval = false;
+    if (name == pluginPropertyIdentifiers[ID_VERSION_PROPERTY]) {
+        char* vStr = (char*)gBrowserFuncs.memalloc(m_version.length()+1);
+        if (!vStr) {
+            return false;
+        }
+        memcpy(vStr, m_version.c_str(), m_version.length());
+        STRINGZ_TO_NPVARIANT(m_version.c_str(), *result);
+        rval = true;
+    } else {
+        rval = ScriptablePluginObjectBase::getProperty(name, result);
+    }
+    return rval;
+}
+
+
+bool 
+BPScriptableObject::setProperty(NPIdentifier name, 
+                                const NPVariant* variant)
+{
+    bool rval = false;
+    rval = ScriptablePluginObjectBase::setProperty(name, variant);
+    return rval;
+}
+
+ResultsObject::ResultsObject(NPObject * obj) {
+    this->obj = obj;
+    gBrowserFuncs.retainobject(obj);
+}
+
+ResultsObject::~ResultsObject()
+{
+    gBrowserFuncs.releaseobject(obj);        
+}
+

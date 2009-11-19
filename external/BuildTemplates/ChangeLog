@@ -1,0 +1,43 @@
+2006-11-21    <lth@PARALLEL-DOZE>
+
+	* A fix win32 problems related to Include file generation.
+	  When performing mixed mode linking using an include file,
+	  the include file must not specify BT generated libraries in the
+	  dependency list,  we require the client to explicitly specify
+	  them which allows the freedom to link individual generated
+	  libraries as static/shared.
+
+2006-11-17  Lloyd Trevor Hilaiel  <lloydh@binocular.hilaiel.com>
+
+	* add YBT_NO_HEADERS_IN_DIST which allows a client to
+	  disable the copying of header files to the dist/include
+	  directory (uber header included)
+
+2006-11-17  Lloyd Hilaiel  <lth@tumno.local>
+
+	* Integrate changes from //ClientPlatform/Tools/BuildTemplates	
+	* YBT_PATH is no longer required to include build templates,
+	  just use INCLUDE relative to CMakeLists.txt file
+	* generate pdb files
+	* PCH support (currently win32 only)
+	* Add _REQUIRES YBT_BUILD(LIBRARY) argument for support of mixed
+	  mode linking
+	* use -undefined dynamic_lookup on Darwing to support mixed mode
+	  linking
+	* WIN32_LEAN_AND_MEAN now default.  disable with
+	  SET(YBT_WIN32_LEAN "NO")
+	* respect TARGET_LINK_DIR when XXX_LINK or XXX_REQUIRES is
+	  specified.  This supports "Include file generation"
+	* add YBT_GENERATE_INCLUDE_FILE public macro.  This allows one
+	  to create a CMakeFile that may be included from a different
+	  CMake project to export required context to use generated
+	  libraries.  include paths, link directories, and library
+	  dependencies
+	* add YBT_NESTED_INCLUDES to support nested include directories.
+	* .def, .idl, and .xpidl now included in build via implicit source
+	  discovery.
+	* dlls output in bin/ directory, libs in lib/ directory
+	* only copy files on windows if they're different
+	* YBT_PLATFORM_SEPARATOR lets clients specify an alternate string
+	  for separating filename from platform when using implicit
+	  source file specification.  (default is '_')

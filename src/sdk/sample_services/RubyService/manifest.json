@@ -1,0 +1,14 @@
+{
+	"type": "dependent",
+	"uses": {
+		"corelet": "RubyInterpreter",
+		"version": "4"
+	},
+	"arguments": {"ScriptFile": "hello.rb"},
+    "strings": {
+        "en": {
+            "title": "Hello World Service",
+            "summary": "A sample service which displays the string \"Hello World\"."
+        }
+    }
+}

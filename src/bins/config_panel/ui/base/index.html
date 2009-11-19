@@ -1,0 +1,120 @@
+<html>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="../common/style.css" />
+    <link rel="stylesheet" type="text/css" href="../common/general_style.css" />
+    <link rel="stylesheet" type="text/css" href="../common/services_style.css" />
+    <link rel="stylesheet" type="text/css" href="../common/permissions_style.css" />
+    <link rel="stylesheet" type="text/css" href="../common/troubleshooting_style.css" />
+    <title></title>
+<body>
+    <div id="displayArea">
+        <ul id="sitenav">
+            <li id="generalTab" class="curnavitem"><%= config.generalTab %></li>
+            <li id="servicesTab"><%= config.servicesTab %></li>
+            <li id="permissionsTab"><%= config.permissionsTab %></li>
+            <li id="troubleshootingTab"><%= config.troubleshootingTab %></li>  
+        </ul>
+
+        <div id="displayAreaInner">
+
+            <div id="generalPane" class="contentPanes">
+                <div id="generalIcon" class="paneIcon"></div>
+                <div id="generalTitle" class="panelName"><%= config.generalTitle %></div>
+                <div class="panelDesc">
+                    <span id="generalSitesUsing"><%= config.generalSitesUsing %></span> <span id="numSites"> 0 </span>
+                </div>
+                <div id="generalList" class="entryList"></div>
+
+                <div id="generalBody">
+
+                    <div id="generalAsk">
+                        <input id="generalAlwaysAskId" type="checkbox" /> 
+                        <label for="generalAlwaysAskId" id="generalAskAlwaysText"><%= config.generalAskAlwaysText %></label>
+                    </div>
+
+                    <div class="clearline"></div>
+
+                    <button id="generalEnableButton"><%= config.generalEnable %></button>
+                    <div id="generalEnabled"><%= config.generalEnabled %></div> 
+                    <div id="generalEnabledDescription" class="description"><%= config.generalEnabledDescription %></div> 
+
+                    <div class="clearline"></div>
+
+                    <button id="generalUninstallButton"><%= config.generalUninstallButton %></button>
+                    <div id="generalInstallationStatus">
+                        <span id="generalVersionText"></span>&nbsp;
+                        <span id="generalVersion"></span>
+                    </div> 
+                    <div id="generalUninstallDescription" class="description"><%= config.generalUninstallDescription %></div> 
+
+                </div>
+
+            </div>
+
+            <div id="servicesPane" class="contentPanes">
+                <div id="servicesIcon" class="paneIcon" ></div>
+                <div id="servicesTitle" class="panelName"><%= config.servicesTitle %></div>
+                <div class="panelDesc">
+                    <span id="servicesActivelyUsing"><%= config.servicesActivelyUsing %></span> <span id="numServices">0</span>
+                </div>
+                <div id="servicesList" class="entryList"></div>
+            </div>
+
+            <div id="permissionsPane" class="contentPanes">
+                <div id="permIcon" class="paneIcon"></div>
+                <div id="permissionsTitle" class="panelName"><%= config.permissionsTitle %></div>
+                <div class="panelDesc"><span id="permissionsGranted"><%= config.permissionsGranted %></span> <span id="numPerms"></span></div>
+
+                <div id="permsList" class="entryList"></div>
+
+                <div id="permsRemoveButtons">
+	                <button id="permissionsRemoveAll"><%= config.permissionsRemoveAll %></button> 
+                </div> 
+
+                <div id="permissionsOverviewText"><%= config.permissionsOverviewText %></div>
+            </div>
+
+            <div id="troubleshootingPane" class="contentPanes">
+                <div id="troubleshootDesc" class="title"><%= config.troubleshootDesc %></div>
+
+                <table id="troubleshootTable">
+                    <tr>
+                        <td class="stepNumber"><span id="troubleshoot1"><%= config.troubleshoot1 %></span></td>
+                        <td class="stepBody">
+                            <button id="troubleshootRestart"><%= config.troubleshootRestart %></button> <span id="troubleshootConnectStatus"><%= config.troubleshootConnectStatus %></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="stepNumber"><span id="troubleshoot2"><%= config.troubleshoot2 %></span></td>
+                        <td><span id="troubleshoot2Body"><%= config.troubleshoot2Body %></span></td>
+                    </tr>
+                    <tr>
+                        <td class="stepNumber"><span id="troubleshoot3"><%= config.troubleshoot3 %></span></td>
+                        <td><span id="troubleshoot3Body"><%= config.troubleshoot3Body %></span></td>
+                    </tr>
+                    <tr>
+                        <td class="stepNumber"><span id="troubleshoot4"><%= config.troubleshoot4 %></span></td>
+                        <td><span id="troubleshoot4Body"><%= config.troubleshoot4Body %></span></td>
+                    </tr>
+                </table>
+
+                <div id="troubleReport">
+                    <textarea id="troubleDescription" rows="13" cols="68"></textarea>
+                </div>
+                <div id="troubleAction">
+                    <input id="troubleshootIncludeLogs" type="checkbox" checked/>
+                    <label for="troubleshootIncludeLogs">
+                        <span id="troubleshootLogfile"><%= config.troubleshootLogfile %></span> (<span id="troubleshootLogSize">0.00 KB</span>)
+                    </label>
+                    <button id="troubleshootSend"><%= config.troubleshootSend %></button>
+                    <span id="troubleshootSendStatus"></span>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="../common/yahoo-dom-event.js"></script>
+    <script type="text/javascript" src="main.js"></script>
+</body>
+</html>

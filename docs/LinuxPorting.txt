@@ -1,0 +1,25 @@
+A quick, dirty, and dynamic tasklist of stuff to do to get BrowserPlus
+running on linux
+
+1. Events!  BrowserPlus is implemented as async event driven code.  This
+   requires that the "main" thread has a "runloop" mechanism, where
+   blocking occurs when no other work is enqueued.  On windows we leverage
+   GetMessage() and PostMessage().  On osx we leverage the CFRunLoop.
+   We need a similar mechanism on linux that interoperates with browsers
+   and can fit behind the abstractions in:
+     src/libs/bputils/src/Utils/api/bprunloop.h  
+   and
+     src/libs/bputils/src/Utils/api/bpthreadhopper.h     
+
+2. A Http Client!  On osx and windows we use OS provided HTTP client
+   implementations.  On linux we'll have to choose a svelte 3rd party
+   library thats appropriately licensed.  This will have to fit behind
+   our HTTP abstractions here:
+     src/libs/bputils/src/Http/Client/api/HttpTransaction.h
+
+   WARNING: how do we handle proxies!?
+
+3. Rendering HTML.
+
+4. Drag and Drop. 
+

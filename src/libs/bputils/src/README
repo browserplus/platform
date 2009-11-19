@@ -1,0 +1,17 @@
+What components belong at this level?
+
+Generally
+
+1. os abstractions not specific to any one component in the system
+2. parsing/memory management utilities needed all over
+
+Specifically
+1. utf16->utf8 conversion
+2. fork/exec functionality
+3. named pipe abstractions
+4. json parsing library
+5. url parsing
+6. extract platform name/version abstraction
+
+Note: For information on consuming the BPUtils_s static lib from the BPSDK, 
+      see UsageNotes.txt

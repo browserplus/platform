@@ -1,0 +1,7 @@
+// Windows Template Library - WTL version 8.0
+// Copyright (C) Microsoft Corporation. All rights reserved.
+//
+// This file is a part of the Windows Template Library.
+// The use and distribution terms for this software are covered by the
+// Microsoft Permissive License (Ms-PL) which can be found in the file
+// Ms-PL.txt at the root of this distribution.

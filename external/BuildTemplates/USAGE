@@ -1,0 +1,193 @@
+#############################################################
+# USAGE BuildTemplates -- how do I use this stuff?
+#
+# Created by Lloyd Hilaiel on Mon May 1 2006.
+# Copyright (c) 2006 Yahoo!, Inc. All rights reserved.
+#############################################################
+
+## What is this document?
+
+This document gives an overview of "BuildTemplates", which is a set of
+lightweight CMake macros that handle most of the common work around
+building a set of libraries and binaries.
+
+## A note about out-of-source builds.
+
+Out of source builds are when all build ouptut (i.e. generated files)
+are placed in a different directory than your source.  We fully support
+and advocate out of source builds, see documentation in
+BuildTemplates.cmake, and check out what cmake has to say:
+
+http://www.cmake.org/Wiki/CMake_FAQ#CMake_does_not_generate_a_.22make_distclean.22_target._Why.3F
+
+## A note about cmake output
+
+We indicate differnet messages by prepending two char codes.
+You can turn on verbose output by defining YBT_VERBOSE.  You can
+enable debug output by defining YBT_DEBUG (which implies YBT_VERBOSE)
+see BuildTemplates.cmake for documentation.
+
+## The short story, 9 steps to a more robust build system
+
+1. create your directory structure:
+2. copy in or create source files
+3. copy in "BuildTemplates".
+4. Write a top level CMake file. 
+5. Write a CMake file for your librar(y|ies)
+6. Write a CMake file for your binar(y|ies) (if pertinent)
+7. Write a CMake file for your test(s)
+8. Write a CMake file for your sample(s)
+9. Call it a day!
+
+Time investment?  More than 30 minutes and something's broken.  Let's
+fix it.
+
+## Long Story: (1) directory structure
+
+give SourceStructureConventions.txt a read.
+
+Or just create a couple directories that look like this:
+  PROJECT/bin 
+  PROJECT/lib
+  PROJECT/tests
+  PROJECT/samples
+
+## Long Story: (2) copying in source files
+
+if you've got an existing project you're migrating, copy files into
+their place.  If you encounter problems, solutions are likely
+rethinking your source structure a bit.  
+
+Note: By default our build system will interpret underscores ('_') as separators 
+for platform specific files and these files will be treated specially.  If you 
+don't want this behavior you may want to modify the build templates variable
+YBT_PLATFORM_SEPARATOR.
+
+## Long Story: (3) copy in BuildTemplates
+
+left as an excercise for the reader!
+
+## Long Story: (4) the top level cmake file
+
+---------- CMakeLists.txt ----------------------------------------------
+# define your project name
+PROJECT(MyProjectName)
+
+# set the path to the build templates (this is an "argument" to the
+# subsequently included file, hence the cmake variable name
+# "YBT_PATH" may not be changed
+SET(YBT_PATH "BuildTemplates")
+
+# And include the main build template file which gives you access to 
+# BuildTemplate's CMake macros throughout your source tree
+INCLUDE("${YBT_PATH}/BuildTemplates.cmake")
+
+# now define the subdirectories that contain files to build
+SUBDIRS(bin lib tests samples)
+
+# all done.
+------------------------------------------------------------------------
+
+## Long Story: (5) the cmake file for libraries
+
+---------- lib/CMakeLists.txt-------------------------------------------
+######
+# this is a CMakeLists.txt file to build "myLibrary"
+######
+
+# State our dependencies, which will set include and link paths
+# XXX
+
+# Set the library version
+SET(myLibrary_MAJOR_VERSION 1) 
+SET(myLibrary_MINOR_VERSION 0) 
+
+# Specify which sources should be compiled into this library.  There
+# are a couple options:
+#  1. explicitly state source and headers (public and private)
+#  2. allow the YBT_BUILD macro to dynamically determine source and headers
+#  3. #2, but specific "IGNORE PATTERNS" which is a regex of files to ignore
+#
+# Example of #1 (explicit statment of source files):
+#   FILE(GLOB myLibrary_SOURCES *.cpp) 
+#   SET(myLibrary_PRIVATE_HEADERS this.h that.h) 
+#   SET(myLibrary_PUBLIC_HEADERS one.h two.h) 
+#
+# Example of #3 (dynamic with ignore patterns):
+#   (put your headers in api/ subdirectories)
+#   SET(myLibrary_IGNORE_PATTERNS .*RPCMarshall.*)
+# 
+# Example of #1
+#   (put your headers in api/ subdirectories, and do nothing)
+#
+
+# Declare the library, which does the following:
+#  - finds required source and headers based on the means of specifying
+#    source files you choose (see above)
+#  - creates rules to build static and shared versions of this library
+#    (XXX: all them permutations of static libraries on windows??
+#          http://www.gamedev.net/reference/articles/article1583.asp)
+YBT_BUILD(LIBRARY myLibrary)
+------------------------------------------------------------------------
+
+## Long Story: (6) the cmake file for binaries
+
+---------- bin/CMakeLists.txt-------------------------------------------
+######
+# this is a CMakeLists.txt file to build myBinary
+######
+
+# State the libraries to use headers from and link against.  also
+# specify how to link (static or dynamic).
+# XXX
+
+# The same source inclusion rules apply as for "libraries" above
+
+# Declare the binary, which does the following:
+#  - finds required source and headers in and benath this directory
+#  - creates rules to build the binary
+YBT_BUILD(BINARY myBinary)
+------------------------------------------------------------------------
+
+## Long Story: (7) the cmake file for tests
+---------- tests/CMakeLists.txt-----------------------------------------
+######
+# this is a CMakeLists.txt file to build myTest
+######
+
+# State the libraries to use headers from and link against.  also
+# specify how to link (static or dynamic).
+# XXX
+
+# The same source inclusion rules apply as for "libraries" above
+
+# Declare the binary, which does the following:
+#  - finds required source and headers in and benath this directory
+#  - creates rules to build the test binary
+#  - sets the binary output directory to dist/test/
+#  - adds the YCPTest library to the SHARED link line
+YBT_BUILD(TEST myTest)
+------------------------------------------------------------------------
+
+## Long Story: (8) the cmake file for samples
+---------- samples/CMakeLists.txt---------------------------------------
+######
+# this is a CMakeLists.txt file to build mySample
+######
+
+# State the libraries to use headers from and link against.  also
+# specify how to link (static or dynamic).
+# XXX
+
+# The same source inclusion rules apply as for "libraries" above
+
+# Declare the sample, which does the following:
+#  - finds required source and headers in and benath this directory
+#  - creates rules to build the sample program
+#  - schedules source files for installation in your dist/ directory
+YBT_BUILD(SAMPLE mySample)
+------------------------------------------------------------------------
+
+## Long Story: (9) calling it a day.
+
+Guinness.  Jameson.  Or a cup of tea. 

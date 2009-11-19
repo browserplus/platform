@@ -1,0 +1,51 @@
+Settings needed to consume the BPUtils_s static lib
+
+ =============
+| For Windows |
+ =============
+
+General Build Settings
+======================
+Character Set: Use Multi-Byte Character Set
+_DEBUG not defined even for Debug builds
+Runtime Library: Multi-threaded (/MT)
+
+
+Include Paths (In-tree, explicit includes)
+==========================================
+[...]\Core\build\BPUtils\dist\include
+
+
+Include Paths (In-tree, uber-header)
+====================================
+[...]\Core\build\BPUtils\dist\include
+[...]\Core\build\BPProtocol\dist\include
+[...]\external\Windows\include
+
+
+Include Files (explicit includes)
+=================================
+#include "BPUtils/[specific header]"
+
+
+Include Files (uber-header)
+===========================
+#include "BPUtils/BPUtils.h"
+
+
+Import Library Paths (In-tree)
+==============================
+[...]Core\build\BPUtils\dist\lib\[debug|release]
+[...]\external\Windows\lib
+
+
+Import Libraries
+==========================
+BPUtils_s.lib yajl_s.lib rpcrt4.lib
+
+
+
+ ============
+| For Darwin |
+ ============
+

@@ -1,0 +1,52 @@
+BrowserPlus packaging format
+
+This document covers the packaging format employed by the BrowserPlus
+platform for the distribution of platform updates and services.
+
+Overview
+
+BrowserPlus packages are nothing more than a couple conventions.
+These files have an extension '.bpkg'.  A package is a LZMA compressed
+tarfile containing two files:
+
+somepkg.bpg - >
+  signature.smime
+  contents.tar
+
+signature.smime is an mime representation of a signature of the
+contents.tar format
+
+contents.tar is a tarball of the contents of the package.  The
+contents of contest.tar will be different for platform updates and for
+services.  In both cases, the tarfile should have relative pathing
+rooted at the directory into which it will be unpacked.  That is to
+say, we will create a directory, change into that directory, and
+unpack the contents.tar file.
+
+Data Format
+
+.lz is an LZMA compressed stream wrapped in header and footer which
+contains a CRC32 value to ensure data integrity.  The easylzma library
+(http://lloyd.github.com/easylzma) is a public domain tool which can
+generate lzip format either programatically or on the command line.
+Additionally, the lzip project maintains GNU Licensed command line
+tools to read and write this format
+(http://www.nongnu.org/lzip/lzip.html)
+
+Note, the extension is important, as at some point we may wish to change
+the compressed disk format.
+
+Services
+
+For services, the contents.tar file will contain the full contents of
+the service.  i.e.
+
+contents.tar.lz ->
+  manifest.json
+  implementation.rb
+
+Platform
+
+XXX: document me gordon
+
+

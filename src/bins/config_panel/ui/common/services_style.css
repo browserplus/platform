@@ -1,0 +1,18 @@
+#servicesIcon {
+    background:url(services_40.gif) 0 0 repeat;
+    position: absolute;
+    width:40px;
+    height:40px;
+    top: 0;
+    left: 0;
+}
+
+#servicesList {
+    width: 503px;
+    height: 455px;
+    top: 44px;
+}
+
+.realname {
+    display: none;
+}

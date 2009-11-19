@@ -1,0 +1,95 @@
+<%
+# functions to help munge {} replacement vars 
+def replaceLinks(inText, links)
+  links.each { |x|
+    inText.gsub!("{#{x[:key]}}") { |match|
+      "<a href=\"#{x[:link]}\">#{x[:text]}</a>"
+    }
+  }
+  inText
+end
+%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>BrowserPlus Installer</title>
+    <link rel="stylesheet" type="text/css" href="style.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="local.css" media="screen">
+</head>
+<body>
+    <div id="dialog">
+        <div id="hd">
+            <div id="titlepos"><div id="title"><%= common.productNameShortWithMark %></div></div>
+            <div id="taglinepos"><div id="tagline"><%= installer.tagline %></div></div>
+            <div id="credit"></div>
+        </div>
+        <div id="bd">
+            <div id="splashPage" style="display:none">
+                <h2 id="splashTitle"><%= installer.progressTitle %></h2>
+                <p id="splashBody"><%=
+installer.splashBody.gsub("{endlink}","</a>").gsub(
+	"{homelink}", "<a href=\"#{common.homePageLink_no_trans}\">");
+%></p>
+                <form name="installaction" id="quoteForm" action="#">
+                    <p>
+                        <input id="terms" type="checkbox" checked>
+                        <label for="terms" id="accept"><%=
+
+replaceLinks(installer.accept, [
+	{
+	  :key => 'EULA',
+      :link => common.eulaLink_no_trans,
+      :text => common.eula
+	},
+	{
+	  :key => 'privacyPolicy',
+      :link => common.privacyPolicyLink_no_trans,
+      :text => common.privacyPolicy
+	}])
+ 
+%></label>
+                    </p>
+                    <div class="buttons">
+                        <input id="cancel" name="cancel" type="button" value="<%= installer.cancel %>">
+                        <input id="begin" name="begin" type="button" value="<%= installer.begin %>"/>
+                    </div>
+                </form>
+            </div>
+            <div id="progressPage" style="display:none">
+                <h2 id="progressTitle"><%= installer.progressTitle %></h2>
+                <p id="progressBody"><%= installer.progressBody %></p>
+                <div id="statusBarContainer">
+                    <div id="statusBarProgress"></div>
+                </div>
+                <p id="progressText"></p>
+            </div>
+            <div id="donePage" style="display:none">
+                <h2 id="doneTitle"><%= installer.doneTitle %></h2>
+                <p id="doneBody"><%=
+installer.doneBody.gsub("{endlink}","</a>").gsub(
+	"{demolink}", "<a href=\"#{common.demosLink_no_trans}\">");
+%></p>
+                <form name="goodbye" id="quoteForm" action="#">
+                    <div class="buttons">
+                        <input id="alldone" name="alldone" type="button" value="<%= installer.alldone %>"/>
+                    </div>
+                </form>
+            </div>
+            <div id="errorPage" style="display:none">
+                <h2 id="errorTitle"><%= installer.errorTitle %></h2>
+                <p id="errorBody"><%= installer.errorBody %></p>
+				<p id="specificError"></p>
+                <form name="errorForm" action="#">
+                    <div class="buttons">
+                        <input id="errorButton" name="errorButton" type="button" value="<%= installer.alldone %>"/>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+<script language="javascript" type="text/javascript" src="../common/yahoo-min.js"></script>
+<script language="javascript" type="text/javascript" src="../common/event-min.js"></script>
+<script language="javascript" type="text/javascript" src="installer.js"></script>
+</html>

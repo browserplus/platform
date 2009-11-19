@@ -1,0 +1,153 @@
+#############################################################
+# YCP proposed source structuring conventions
+#
+# Created by Lloyd Hilaiel on Mon May 1 2006.
+# Copyright (c) 2006 Yahoo!, Inc. All rights reserved.
+#############################################################
+
+## Why conventions?
+
+Q: Why should I structure my project according to some conventions,
+   I've got some principles that work well, and I don't want any advice,
+   thanks...
+
+A: Yeah, I feel the same way.  Source structure is a matter of taste
+and conventions should only be applied if there are clear benefits.
+In this case they are:
+
+  * Loose conventions allow Y! developers to move between projects more
+    easily
+  * Strict conventions allow for more automation in the build system
+  * Similarly strucutured packages allow for sharing of tools (like
+    these templates, packaging tools, etc).
+
+## First let's define what A project is:
+
+A project is a combination of any of the following:
+
+  * static libraries
+  * shared libraries
+  * header files 
+  * binary programs
+  * documentation
+  * sample applications
+  * tests  
+
+And temporal/generated stuff
+  * binary libraries (static and shared)
+  * binary programs
+  * shipping header files
+  * shipping sample code
+  * shipping documentation
+
+## High Level,  how should a project be structured?
+
+//some/perforce/path/PROJECTNAME/lib
+                                /lib/LIBNAME1/
+                                /lib/LIBNAME2/
+                                /bin
+                                /bin/PROGNAME1/
+                                /bin/PROGNAME2/
+                                /samples
+                                /tests
+                                /doc
+
+The high level structure is flexible.  You can structure your project
+differently for a good reason, but if you don't have a good reason,
+please structure it this way.  If you have suggestions about structure,
+let's fix it.
+
+So if you project doesn't produce multiple libraries, don't use the 
+level under lib.  Same for bin.
+
+If it makes sense to subdivide the directory from which you're builing
+a library.  do it!  Use the directory structure to group source files
+to make understanding your library easier.
+
+## How should library (/lib) source be structured?
+
+To support fast visual identification of public includes (and to make
+possible dynamic distinction of internal vs. external headers),
+ALWAYS put public headers under an api/ directory.
+
+example:
+lib/source.cpp
+lib/moreSource.cpp
+lib/firstInternalHeader.h
+lib/secondInternalHeader.h
+lib/api/thePublicHeader.h
+
+How about if you have a library structure into multiple directories?
+
+example:
+lib/parser/api/parser.h
+lib/parser/parserimple.cpp
+lib/parser/internaldefines.h
+lib/lexer/internalheader.h
+lib/lexer/lexerdefs.h
+lib/lexer/lexerimpl.cpp
+lib/util/api/errorcodes.h
+lib/util/errorcodes.cpp
+
+In this example software is grouped using directories, and visually
+(or programatically) you can determine that "parser.h" and "errorcodes.h"
+are the only real headers you need to look at to understand how to use the
+module.  You can also get a good abstract idea about what this software
+does (it's a parser library!).
+
+## Why should I structure /lib like this?
+ 
+* visually easier to understand
+* the public interface of the library is precisely defined, and can
+  be dynamically determined by a program without having to write any
+  build files.   
+
+## How should source for binaries (/bin) be structured?
+
+However you want.  If you're shipping multiple binaries, break them 
+into sub-directories.  
+
+## How should source for samples be structured?
+
+Samples are a bit difficult to deal with.  As you want to produce code
+that builds _both_ in tree as part of the build, and builds in your "sdk".
+
+Structure samples however seems reasonable.  If you choose to use YCP's
+BuildTemplates, we solve the problem of compiling in both locations...
+
+## How should source for tests be structured?
+
+However you want!  May we suggest the ycpTest library?  A thin wrapper
+around cppunit that makes writing tests _simple_.
+
+## Are there any filename restrictions?
+
+By default our build system will interpret underscores ('_') as separators for
+platform specific files and these files will be treated specially.  If you don't
+want this behavior you may want to modify the build templates variable
+YBT_PLATFORM_SEPARATOR.
+
+## How should doc be structured?
+
+We heartily recommend doxygen.  Writing documentation is almost as
+easy as writing comments.  For other tutorial style or design style
+documentation, placing it in doc/ separates it from the code, while
+keeping it in revision control _next_ to the code.  (proximity of
+documentation to code is directly proportional to likelyhood of
+accuracy).
+
+## Where should the generated stuff go?
+
+PROJECTNAME/dist/lib
+PROJECTNAME/dist/bin
+PROJECTNAME/dist/include
+PROJECTNAME/dist/sample
+PROJECTNAME/dist/doc
+
+By placing all of the "stuff intended for consumption" in a "dist"
+directory, it's clearly separated from non-temporal source, and then
+can be zipped up or massaged a bit to generate an SDK.
+
+## how about build files?
+
+PROJECTNAME/build

@@ -1,0 +1,93 @@
+<html>
+  <head>
+    <title> BrowserPlus testing dashboard </title>  
+    <link rel="stylesheet" href="foo.css" type="text/css" media="screen" />
+    </link>
+  </head>
+<body>
+<center>
+ 
+  <div class="timingBox" id="timingDisplay"></div>
+  
+  <div class="contentModule" id="coreletDisplay">
+    <div class="moduleTitle" id="coreletTitleDisplay">Available Corelets</div>
+    <div class="moduleContent">
+      <div id="coreletDisplayArea">loading...</div>   
+    </div>
+  </div>
+  
+  <div class="contentModule" id="blackListDisplay">
+    <div class="moduleTitle">Blacklisted EvilCorelet test</div>
+    <div class="moduleContent">
+	  <center id="evilStatus">
+		Trying to load...
+	  </center>
+    </div>
+  </div>
+  
+  <div class="contentModule">
+    <div class="moduleTitle">Speak to Me</div>
+    <div class="moduleContent"><div id="sayContent">
+	  <center>
+      <form name="sayform" action="#">
+        <input id="sayit" type="text" value="I love vodka"/>
+        <input name="button" value="say it!" type="button"/>
+      </form>
+	  </center>
+    </div></div>
+  </div>
+
+  <div class="contentModule">
+    <div class="moduleTitle">Stock Quotes</div>
+    <div class="moduleContent" id="quoteContent">
+	  <!-- &nbsp; gives us a child to the div node that we can replace with
+		   current stock quote prices --> 
+      <div class="quoteimagedisplay" id="quoteimagetarget"></div>
+	  <form name="quoteform" id="quoteForm" action="#">
+		<input id="symbol" type="text" value="YHOO"/><br></br>
+		<input name="button" value="gimme quote!" type="button"/>
+	  </form>
+	  <p></p>
+      <div class="quotedisplay" id="quotetarget">&nbsp;</div> 
+    </div>
+  </div>
+
+  <div class="contentModule">
+    <div class="moduleTitle">Search your desktop</div>
+	<div class="moduleContent"><div id="searchContent"> 
+      <form name="searchform" action="#">
+        <input id="query" type="text" value="vodka"/>
+        <input name="button" value="search my desktop!" type="button"/>
+      </form>
+      <div id="searchtarget">&nbsp;</div> 
+    </div></div>
+  </div>
+  
+  <div class="contentModule">
+    <div class="moduleTitle">Drop files here</div>
+	<div class="moduleContent" id="dropContent">
+        <center>
+        <form name="dropform" action="#">
+           <input name="button1" type="checkbox" checked="true"/>Photos
+           <input name="button2" type="checkbox" checked="true"/>Music
+           <input name="button3" type="checkbox" checked="true"/>The Big Zipper
+        </form>
+        </center>
+		<div id="photoDropTarget" style="height: 30px" class="dropZone">
+		</div>
+		<div id="musicDropTarget" style="height: 30px" class="dropZone">
+		</div>
+		<div id="allFilesDropTarget" style="height: 30px" class="dropZone">
+		</div>
+	</div>
+  </div>
+
+</center>
+           
+<!-- and the script that the webpage author will write -->
+<script language="javascript" type="text/javascript" src="../../src/browserplus-min.js"></script>
+<script language="javascript" type="text/javascript" src="../../tools/installer/install.js"></script>
+<script language="javascript" type="text/javascript" src="json.js"></script>
+<script language="javascript" type="text/javascript" src="foo.js"></script>
+</body>
+</html>

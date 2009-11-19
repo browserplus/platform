@@ -1,0 +1,72 @@
+This directory contains the 3rd-party software used by BrowserPlus.  
+The packages are downloaded and built by the "build.rb" scripts in 
+the various subdirectories. At the top-level is a build.rb script 
+which simply invokes the package build.rb scripts, as well as a 
+common.rb which captures functionality needed by each build.rb script.
+
+Prerequisites:
+- ruby
+  - for Windows, install from http://www.ruby-lang.org/en/downloads/
+- perl
+  - for Windows, install from http://www.activestate.com/activeperl/  
+- Visual Studio 2008 SP1 on Windows
+
+To build:
+1. cd External
+2. ruby build.rb
+3. wait
+4. The directory Darwin or Windows is populated with the necessary build
+   output.  Note that the lib subdir contains Debug and Release subdirs 
+   which contain debug and release libraries.
+
+Arguments common to all build.rb scripts:
+    verbose  (default false)
+        Turns on ruby verbose file operations, resulting in output when
+        files are copied, moved, etc
+    clean    (default false)
+        Cleans build artifacts and exits
+    rebuild  (default false)
+        Rebuilds target(s).  By default, each build script looks for 
+        one of its artifacts in {Windows|Darwin} to determine if a
+        build is needed.  "rebuild" disables this check and forces
+        a rebuild
+    keepSource (default false)
+        Causes the unpacked 3rd-party source directory to be retained
+        after the build.
+    -buildType=[debug|release|all]  (default all)
+        Restrict the build to only debug or release bits.
+
+If you add an external package, you must add it to the "externals" array 
+in the top build.rb script and provide a package build.rb script which
+fetches the package, builds it, and places results in {Windows|Darwin}.
+Model your script off of an existing package script.
+
+The diff/patch utilities in WinTools/bin come from 
+http://gnuwin32.sourceforge.net/packages/diffutils.htm and
+http://gnuwin32.sourceforge.net/packages/patchutils.htm.
+The 7zip binaries in Wintools/bin come from 
+http://www.7-zip.org
+
+In addition, patch.exe has had an "asInvoker" manifest added to prevent
+Vista from throwing a UAC prompt due to patch's name.
+See http://msdn.microsoft.com/en-us/library/bb756960.aspx
+
+The manifest is added via 
+"mt -manifest asInvoker.manifest -outputresource:patch.exe;#1"
+
+The asInvoker.manifest file is:
+
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+    <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
+      <security>
+        <requestedPrivileges>
+          <requestedExecutionLevel level="asInvoker" uiAccess="false"/>
+        </requestedPrivileges>
+      </security>
+    </trustInfo>
+  </assembly> 
+
+
+
+

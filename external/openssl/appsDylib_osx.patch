@@ -1,0 +1,13 @@
+--- openssl-0.9.8k/apps/Makefile.orig	2009-05-13 09:55:11.000000000 -0700
++++ openssl-0.9.8k/apps/Makefile	2009-05-13 09:56:01.000000000 -0700
+@@ -26,8 +26,8 @@
+ 
+ DLIBCRYPTO=../libcrypto.a
+ DLIBSSL=../libssl.a
+-LIBCRYPTO=-L.. -lcrypto
+-LIBSSL=-L.. -lssl
++LIBCRYPTO=../libcrypto.a
++LIBSSL=../libssl.a
+ 
+ PROGRAM= openssl
+ 

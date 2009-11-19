@@ -1,0 +1,139 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Installing the Ruby Sample Service</title>
+</head>
+<body>
+  <h2>Installing the Ruby Sample Service</h2>
+
+So you wanna write a ruby service for BrowserPlus, eh?  This simple page
+will get you used to the process of building and installing services using
+the browserplus SDK.
+
+<h3> Step 1: Install BrowserPlus </h3>
+
+<div id="gotbp">
+Checking for BrowserPlus...
+</div>
+<div id="downloadLink"></div>
+
+<h3> Step 2: Wait for installation of the RubyInterpreter service </h3>
+
+We will automatically grab the correct interpreter service for you...
+<p>
+<div id="gotruby">
+Checking ...
+</div>
+
+<h3> Step 3: Install the sample </h3>
+
+From bpsdk/samples/RubyService run the following:
+
+<pre>
+$ ../../bin/ServiceInstaller -v .
+</pre>
+
+Congratulations!  You've just installed your first service.  Now hack on
+it a bit.  Note, to OVERWRITE a service you'll need the -f flag to
+ServiceInstaller.
+
+</body>
+<script class="javascript" src="http://bp.yahooapis.com/2.1.11/browserplus-min.js"></script>
+</script>
+<script>
+function emptyNode(target)
+{
+    while (target.childNodes.length > 0) {
+        var kid = target.removeChild(target.firstChild);
+        if (kid) {
+            delete kid;
+        }
+    }
+}
+
+function setContentAreaText(txt)
+{
+    var target = document.getElementById("gotbp");    
+    emptyNode(target);
+    target.appendChild(txt);
+}
+
+function displayInstalledText(info) 
+{
+    var txt = "BrowserPlus is already installed, version " + info.version
+              + " (" + info.os + ")";
+    setContentAreaText(document.createTextNode(txt));
+}
+
+function displayNeedInstallText() 
+{
+    var target = document.createElement("div");
+    target.appendChild(document.createTextNode("BrowserPlus is "));
+    var bnode = document.createElement("b");
+    bnode.appendChild(document.createTextNode("NOT installed!"));
+    var pluglink = document.createElement("a");
+    pluglink.setAttribute(
+        "href",
+        "http://browserplus.yahoo.com/install" +
+        escape(document.location));
+    pluglink.appendChild(document.createTextNode("   get it now"));    
+    target.appendChild(bnode);
+    target.appendChild(pluglink);
+
+    setContentAreaText(target);
+}
+
+function startRubyCoreletInstall()
+{
+    function requireComplete(rez) 
+    {
+        var target = document.getElementById("gotruby");    
+        emptyNode(target);
+        if (rez.success) {
+            var txt = rez.value[0].service + " version " +
+                rez.value[0].version + " installed!";
+            target.appendChild(document.createTextNode(txt));
+        } else {
+            target.appendChild(document.createTextNode(
+                "Problem attaining ruby corelet!  reload to try again?"));
+        }
+    }
+    var target = document.getElementById("gotruby");    
+    emptyNode(target);
+    target.appendChild(document.createTextNode("Downloading..."));
+YAHOO.bp.require({services:[{service: "RubyInterpreter",
+                                 version: "4"}]},
+                         requireComplete);
+}
+
+var bpLoaded = false;
+
+function checkForBP() 
+{
+    navigator.plugins.refresh(false);
+    if (!bpLoaded) {
+        YAHOO.bp.init(
+            function(rez) 
+            {
+                if (rez.success) {
+                    bpLoaded = true;
+                    displayInstalledText(YAHOO.bp.getPlatformInfo());
+                    startRubyCoreletInstall();
+                } else {
+                    displayNeedInstallText();
+                }
+            });
+    }
+}
+
+if (window.addEventListener)
+{
+    window.addEventListener("load", checkForBP, true);
+}
+else if (window.attachEvent)
+{
+    window.attachEvent("onload", checkForBP);
+}
+</script>
+</html>

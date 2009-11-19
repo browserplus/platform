@@ -1,0 +1,31 @@
+#permsList {
+  width: 503px;
+  height: 346px;
+  top: 44px;
+  border: 1px solid #000;
+  background: #fff;
+  position: absolute;
+}
+
+#permIcon {
+    background:url(permission_40.gif) 0 0 repeat;
+    position: absolute;
+    width:40px;
+    height:40px;
+    top: 0;
+    left: 0;
+}
+
+
+#permsRemoveButtons {
+  position: absolute;
+  top: 395px;
+  right: 0px;
+}
+
+#permissionsOverviewText {
+  position: absolute;
+  top: 425px;
+}
+
+

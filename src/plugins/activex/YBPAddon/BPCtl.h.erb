@@ -1,0 +1,310 @@
+/**
+ * ***** BEGIN LICENSE BLOCK *****
+ * The contents of this file are subject to the Mozilla Public License
+ * Version 1.1 (the "License"); you may not use this file except in
+ * compliance with the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ * 
+ * Software distributed under the License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ * License for the specific language governing rights and limitations
+ * under the License.
+ * 
+ * The Original Code is BrowserPlus (tm).
+ * 
+ * The Initial Developer of the Original Code is Yahoo!.
+ * Portions created by Yahoo! are Copyright (C) 2006-2009 Yahoo!.
+ * All Rights Reserved.
+ * 
+ * Contributor(s): 
+ * ***** END LICENSE BLOCK *****
+ */
+
+/*
+ *  BPCtl.h
+ *
+ *  Created by David Grigsby on 06/11/2007.
+ *  Copyright 2007-2008 Yahoo! Inc. All rights reserved.
+ *
+ */
+ 
+/* <%= $cmake["NoEditWarning"] %> 
+ */
+  
+#pragma once
+#include "resource.h"
+#include <atlctl.h>
+
+#include "AxDropManager.h"
+#include "BPProtocol/BPProtocol.h"
+#include "PluginCommonLib/PluginCommonLib.h"
+
+
+// Forward Decls
+class BPSession;
+
+namespace plugin {
+class Object;
+class Variant;
+}
+
+
+
+// IBPCtl
+[
+    object,
+    uuid(6027C8E2-C099-47BB-82DE-D0C480710B88),
+    dual,
+    helpstring("IBPCtl Interface"),
+    pointer_default(unique)
+]
+__interface IBPCtl : public IDispatch
+{
+    [id(1), helpstring("method Initialize")]
+            HRESULT Initialize([in] VARIANT vtArg,
+                               [in] VARIANT vtCallback,
+                               [out,retval] VARIANT* pvtResult );
+    
+    [id(2), helpstring("method EnumerateServices")]
+            HRESULT EnumerateServices([in] VARIANT vtCallback,
+                                      [out,retval] VARIANT* pvtResult );
+    
+    [id(3), helpstring("method RequireService")]
+            HRESULT RequireService([in] VARIANT vtArg,
+                                   [in] VARIANT vtCallback,
+                                   [out,retval] VARIANT* pvtResult );
+    
+    [id(4), helpstring("method ExecuteMethod")]
+            HRESULT ExecuteMethod([in] BSTR bstrServiceName,
+                                  [in] BSTR bstrServiceVer,
+                                  [in] BSTR bstrMethodName,
+                                  [in] VARIANT vtArg,
+                                  [in] VARIANT vtCallback,
+                                  [out,retval] VARIANT* pvtResult );
+
+    [id(5), helpstring("method Ping")]
+            HRESULT Ping();
+    
+    [id(6), helpstring("method DescribeService")]
+            HRESULT DescribeService([in] VARIANT vtArg,
+                                    [in] VARIANT vtCallback,
+                                    [out,retval] VARIANT* pvtResult );
+
+    [id(7), helpstring("method Info")]
+            HRESULT Info([out,retval] VARIANT* pvtResult );
+};
+
+
+
+// _IBPCtlEvents
+[
+    uuid("72135531-BF4D-4B74-9140-B045473EF2FC"),
+    dispinterface,
+    helpstring("_IBPCtlEvents Interface")
+]
+__interface _IBPCtlEvents
+{
+};
+
+// CBPCtl
+[
+    coclass,
+    control,
+    default(IBPCtl, _IBPCtlEvents),
+    threading(apartment),
+
+    vi_progid("Yahoo.BPCtl"),
+    progid("Yahoo.BPCtl.<%= $cmake["VersionString"] %>"),
+    version(<%= $cmake["BrowserPlusPlatform_MAJOR_VERSION"] + "." + $cmake["BrowserPlusPlatform_MINOR_VERSION"] %>),
+    uuid("<%= $cmake["ActiveXGuid"] %>"),
+
+    helpstring("BPCtl Class"),
+    event_source(com),
+    support_error_info(IBPCtl),
+    registration_script("..\\..\\..\\..\\plugins\\activex\\YBPAddon\\BPCtl.rgs")
+]
+class ATL_NO_VTABLE CBPCtl :
+    // TODO: Use IDispatchImpl<IBPCtl> instead of IBPCtl?
+    public IBPCtl,
+    public IPersistStreamInitImpl<CBPCtl>,
+    public IOleControlImpl<CBPCtl>,
+    public IOleObjectImpl<CBPCtl>,
+    public IOleInPlaceActiveObjectImpl<CBPCtl>,
+    public IViewObjectExImpl<CBPCtl>,
+    public IOleInPlaceObjectWindowlessImpl<CBPCtl>,
+    public IObjectWithSiteImpl<CBPCtl>,
+    public IQuickActivateImpl<CBPCtl>,
+    public IDataObjectImpl<CBPCtl>,
+    
+    // TODO: Implement CustomObjectSafety
+    public IObjectSafetyImpl<CBPCtl, INTERFACESAFE_FOR_UNTRUSTED_CALLER|
+                                     INTERFACESAFE_FOR_UNTRUSTED_DATA>,
+    public CComControl<CBPCtl>,
+    public BPPlugin,
+    public AxDropManager
+{
+public:
+    BEGIN_PROP_MAP(CBPCtl)
+        PROP_DATA_ENTRY("_cx", m_sizeExtent.cx, VT_UI4)
+        PROP_DATA_ENTRY("_cy", m_sizeExtent.cy, VT_UI4)
+    END_PROP_MAP()
+
+    BEGIN_MSG_MAP(CBPCtl)
+        CHAIN_MSG_MAP(CComControl<CBPCtl>)
+        DEFAULT_REFLECTION_HANDLER()
+    END_MSG_MAP()
+
+    DECLARE_PROTECT_FINAL_CONSTRUCT()
+
+    // Construction/Destruction    
+    CBPCtl();
+    ~CBPCtl();
+
+    HRESULT FinalConstruct();
+    void FinalRelease();
+    
+    // IOleObject
+    DECLARE_OLEMISC_STATUS(OLEMISC_RECOMPOSEONRESIZE |
+                           OLEMISC_CANTLINKINSIDE |
+                           OLEMISC_INSIDEOUT |
+                           OLEMISC_ACTIVATEWHENVISIBLE |
+                           OLEMISC_SETCLIENTSITEFIRST)
+
+    STDMETHOD(SetClientSite)(IOleClientSite* pClientSite);
+            
+            
+// Handler prototypes:
+//  LRESULT MessageHandler(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
+//  LRESULT CommandHandler(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
+//  LRESULT NotifyHandler(int idCtrl, LPNMHDR pnmh, BOOL& bHandled);
+
+    __event __interface _IBPCtlEvents;
+    
+    // IViewObjectEx
+    DECLARE_VIEW_STATUS(VIEWSTATUS_SOLIDBKGND | VIEWSTATUS_OPAQUE)
+
+            
+    //////////////////////////            
+    // IBPCtl
+    STDMETHOD(Initialize)( VARIANT vtArg,
+                           VARIANT vtCallback,
+                           VARIANT* pvtResult );
+    
+    STDMETHOD(EnumerateServices)( VARIANT vtCallback,
+                                  VARIANT* pvtResult );
+    
+    STDMETHOD(RequireService)( VARIANT vtArg,
+                               VARIANT vtCallback,
+                               VARIANT* pvtResult );
+    
+    STDMETHOD(ExecuteMethod)( BSTR bstrServiceName,
+                              BSTR bstrServiceVer,
+                              BSTR bstrMethodName,
+                              VARIANT vtArg,
+                              VARIANT vtCallback,
+                              VARIANT* pvtResult );
+
+    // Ax-specific method that allows clients to verify this object is up.
+    STDMETHOD(Ping)();
+
+    STDMETHOD(DescribeService)( VARIANT vtArg,
+                                VARIANT vtCallback,
+                                VARIANT* pvtResult );
+
+    STDMETHOD(Info)( VARIANT* pvtResult );
+
+
+    
+    /////////////////////////////////
+    // Misc
+    HRESULT OnDraw(ATL_DRAWINFO& di);
+    
+    STDMETHOD(_InternalQueryService)(REFGUID guidService, REFIID riid,
+                                     void** ppvObject);
+
+
+    /////////////////////////////////
+    // BPPlugin Support
+    plugin::Variant* allocVariant() const;
+    
+    bool callJsFunction( const plugin::Object* pObj,
+                         plugin::Variant* args[], int nArgCount,
+                         plugin::Variant* pvtRet ) const;
+
+    Pluglet* createPluglet( const std::string& sName ) const;
+
+    bool enumerateProperties( const plugin::Object* pObj,
+                              std::vector<std::string>& vsProps ) const;
+
+    bool evaluateJSON( const bp::Object* obj,
+                       plugin::Variant* pvtRet ) const;
+
+    void freeVariant( plugin::Variant* pvt ) const;
+    
+    bool getArrayElement( const plugin::Object* pObj,
+                          int nIdx,
+                          plugin::Variant* pvtElem ) const;
+
+    // Get the length of the provided array object.
+    bool getArrayLength( const plugin::Object* pObj, int& nLength ) const;
+
+    bool getCurrentURL( std::string& sUrl ) const;
+
+    bool getElementProperty( const plugin::Variant* pvtIn,
+                             const std::string& sPropNames,
+                             plugin::Variant* pvtVal ) const;
+
+    bool getProperty( const plugin::Object* pObj,
+                      const std::string& sPropName,
+                      plugin::Variant* pvtVal ) const;
+
+    // Returns HWND of browser window in a void*.
+    void* getWindow() const;
+    
+    // Note we don't discriminate here between array-hood and
+    // error during check.
+    bool isJsArray( const plugin::Object* pObj ) const;
+
+    // Note we don't discriminate here between function-hood and
+    // error during check.
+    bool isJsFunction( const plugin::Object* pObj ) const;
+
+	// return the user agent string
+	std::string getUserAgent() const;
+    
+// Internal Methods    
+protected:
+    bool FetchBrowserWnd( IWebBrowser2* pWebBrowser2,
+                          HWND& phwndBrowser );
+
+    // Gets the IWebBrowser2 for the "local" browser (e.g. frame scenario).
+    bool FetchLocalBrowser( IOleClientSite* pClientSite,
+                            CComPtr<IWebBrowser2>& pBrowser );
+    
+    bool FetchTopBrowser( IOleClientSite* pClientSite,
+                          CComPtr<IWebBrowser2>& pBrowser );
+    
+    bool HandleBrowserAttach( IOleClientSite* pClientSite );
+    
+    bool HandleBrowserDetach();
+
+    
+// Attributes    
+private:
+    IOleClientSite*         m_pClientSite;
+
+    // Local Browser (e.g. in a Frame scenario).
+    CComPtr<IWebBrowser2>   m_spLocalBrowser;
+    
+    // Top-level browser (even in a frame scenario).
+    CComPtr<IWebBrowser2>   m_spTopBrowser;
+    
+    HWND                    m_hwndBrowser;
+    
+    BPSession*              m_pSession;
+
+    // These are pointers to anonymous Js functions we may generate.
+    mutable CComPtr<IDispatch> m_jsfnIsArray;
+    mutable CComPtr<IDispatch> m_jsfnIsFunction;
+};
+
