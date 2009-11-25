@@ -550,7 +550,8 @@ static string
 versionFromPackage(const Path& pkg)
 {
     // name must be BrowserPlus_x.x.xx.bpkg
-    string pkgStr = pkg.utf8();
+    Path fname = pkg.filename();
+    string pkgStr = fname.utf8();
     string rval;
     size_t start = pkgStr.find("_");
     size_t end = pkgStr.find(".bpkg");
