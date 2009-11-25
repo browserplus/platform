@@ -17,7 +17,8 @@ $libSuffix = "a"
 if CONFIG['arch'] =~ /mswin/
     $platform = "Windows"
     $sevenZCmd = "#{topDir}\\WinTools\\bin\\7z.exe"
-    $patchCmd = "#{topDir}\\WinTools\\bin\\patch.exe"
+    # Must call patch "ptch" or we'll get a UAC on Vista.  
+    $patchCmd = "#{topDir}\\WinTools\\bin\\ptch.exe"
     $libSuffix = "lib"
     $cmakeGenerator = "-G \"Visual Studio 9 2008\""
 
