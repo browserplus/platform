@@ -22,21 +22,6 @@
       "<%= $cmake["BP_TERTIARY_DISTRO_SERVER_URL"] %>"
     ],
     
-    // Local mimetypes.  The file extension to mimetype mappings specified at
-    // http://www.webmaster-toolkit.com/mime-types.shtml, 
-    // http://support.microsoft.com/kb/288102, and 
-    // http://developer.apple.com/documentation/AppleApplications/Reference/SafariWebContent/CreatingContentforSafarioniPhone/chapter_2_section_11.html
-    // are builtin.  A file extension maps to a set of mimetypes, e.g. 
-    // ".aiff" -> ["audio/aiff", "audio/x-aiff"]
-    // All file extension comparisons are case insensitive.
-    // Additional mappings may be specified here, or an existing mapping augmented.  
-    // For example, entries to add a ".foo" -> "application/x-foo" mapping and augment the
-    // ".jpg" mimetype with "image/x-myjpeg" would look like:
-    // "LocalMimeTypes" : [
-    //     ["foo", "application/x-foo"],
-    //     ["jpg", "image/x-myjpeg"]
-    // ],   
-
     // Auto-shutdown daemon if idle for this time.  Use 0 for no auto-shutdown.
     "MaxIdleSecs": 5,
 

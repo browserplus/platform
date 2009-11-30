@@ -54,13 +54,19 @@
 #include "boost/filesystem.hpp"
 #include "boost/filesystem/fstream.hpp"
 
-#include "bptime.h"
-#include "bptr1.h"
-
 
 namespace bp {
     namespace file {
 
+        extern const std::string kFileUrlPrefix;      // "file://"
+
+        // mimetypes that we add
+        extern const std::string kFolderMimeType;     // "application/x-folder"
+        extern const std::string kLinkMimeType;       // "application/x-link"
+        extern const std::string kBadLinkMimeType;    // "application/x-badlink"
+
+        // a bunch of typedefs to deal with the fact that Windows uses wpath and
+        // everyone else uses path
 #ifdef WIN32
         typedef boost::filesystem::wpath tBase;
         typedef std::wstring tString;
@@ -77,6 +83,8 @@ namespace bp {
         typedef boost::filesystem::basic_filesystem_error<boost::filesystem::path> tFileSystemError;
 #endif
 
+        // Our path abstraction built on boost::filesystem.  We just add a handful
+        // of convenience methods.
         class Path : virtual public tBase
         {
         public:
@@ -153,34 +161,48 @@ namespace bp {
             typedef enum {
                 eOk,              // node processed
                 eStop,            // terminate the entire visit
-                eStopRecursion    // don't recurse into this node
+                eStopRecursion,   // don't recurse into this node
             } tResult;
 
             virtual ~IVisitor() {}
-            virtual tResult visitNode(const Path& p) = 0;
+
+            /** Visit a node.
+             *  \param p [IN] - real path of node
+             *  \param relativePath [IN] - pseudo-path of node relative
+             *                             to top node.  For shorcuts
+             *                             and aliases, this will not be
+             *                             valid relative path.
+             *  \returns - a tResult which tells visit()/recursiveVisit()
+             *             now to proceed
+             */
+            virtual tResult visitNode(const Path& p,
+                                      const Path& relativePath) = 0;
         };
 
- 
         /** Non-recursive visit of node in a path.
          *  \param p [IN] - path to visit
          *  \param v [IN] - visitor to apply to each node
+         *  \param followLinks [IN] - should links be followed?
          *  \returns - true if all nodes visited, false
          *             if "v" stopped the visit
          */
         bool visit(const Path& p,
-                   IVisitor& v);
+                   IVisitor& v,
+                   bool followLinks);
 
-        /** Recursive visit of node in a path.
+        /** Recursive visit of node in a path.  Links cycle detection
+         *  is performed and cycles are not revisited.
          *  \param p [IN] - path to visit
          *  \param v [IN] - visitor to apply to each node
+         *  \param followLinks [IN] - should links be followed?
          *  \returns - true if all nodes visited, false
          *             if "v" stopped the visit
          */
         bool recursiveVisit(const Path& p,
-                            IVisitor& v);
+                            IVisitor& v,
+                            bool followLinks);
 
         /** Construct a Path from a file:// url.
-         *  is malformed, returned path is empty()
          *  \param url [IN] - url 
          *  \returns - a Path for the file represented
          *             by the url.  If url is malformed,
@@ -188,13 +210,13 @@ namespace bp {
          */
         Path pathFromURL(const std::string& url);
 
-        /** Return a utf8 string for a native string
+        /** Return a utf8 string from a native string
          *  \param native [IN] - string in native (utf8 or wide) encoding
          *  \returns - utf8 equivalent
          */
         std::string utf8FromNative(const tString& native);
 
-        /** Return a native string for a utf8 string
+        /** Return a native string from a utf8 string
          *  \param utf8 [IN] - string in utf8 encoding
          *  \returns - native (utf8 or wide) equivalent
          */
@@ -228,29 +250,14 @@ namespace bp {
         Path getTempPath(const Path& tempDir,
                          const std::string& prefix); 
 
-        /**
-         * return an unsigned long representing the the modification
-         * time of the file.  For now, consider the acutal value to be
-         * opaque, and only it's relation to another value from this
-         * function is interating (i.e. modTime > lastModTime).
-         *
-         * returns zero on failure.
-         */ 
-        BPTime modTime(const Path& path);
-        
         /**  Get path to user's temporary directory.
          *   \returns   path to user's temporary directory (empty on failure)
          */
         Path getTempDirectory();
 
-        /** Does path refer to a symlink (Unix) or a shortcut (windows)?
-         *  \param		path [IN] - source path
-         *  \returns	true if path is a link
-         */
-        bool linkExists(const Path& path);
-        
         /** Delete a file or directory (directory delete is recursive)
-         *  Deleting a non-existent path succeeds.
+         *  Deleting a non-existent path succeeds.  Attempts to forcibly
+         *  remove read-only files/dirs.
          *  \param      path [IN] - directory path
          *  \returns    true upon success
          */
@@ -284,15 +291,15 @@ namespace bp {
          * 
          *  \param      fromPath [IN] - source path
          *  \param      toPath [IN] - destination path
-         *  \param      followLinks [IN] - if true, links are chases
-         *
+         *  \param      followLinks [IN] - if true, links are chased
          *  \returns    true upon success
          */
         bool copy(const Path& fromPath,
                   const Path& toPath,
                   bool followLinks = true);
         
-        /** Move a file or dir to a new location
+        /** Move a file or dir to a new location.  Tries
+         *  a copy/delete if rename() fails.
          *  \param      fromPath [IN] - source path
          *  \param      toPath [IN] - destination path
          *  \returns    true upon success
@@ -301,15 +308,28 @@ namespace bp {
                   const Path& toPath);
         
         /** Remove files which could not be deleted.  This happens
-         *  on Windows XP when moveFileOrDirectory() tries to move something
+         *  on Windows XP when move() tries to move something
          *  which is being virus scanned.  In that case, we fallback 
          *  to a copy/delete.  If the delete fails, we mark the path
-         *  for delayed deletion.  Calling delayDelete() at daemon
-         *  shutdown makes one last attempt to remove the cruft.
+         *  for delayed deletion.  Call delayDelete() at shutdown 
+         *  to make one last attempt to remove the cruft.
          */
         void delayDelete();
 
-        /** Create a symlink (Unix) or shortcut (Windows .lnk)
+        /** Does a path refer to a Unix or NTFS symlink?
+         *  \param		path [IN] - source path
+         *  \returns	true if path is a link
+         */
+        bool isSymlink(const Path& path);
+        
+        /** Does a path refer to a link?  In addition to Unix/NTFS
+         *  symlinks, understands Mac aliases and Windows shortcuts.
+         *  \param		path [IN] - source path
+         *  \returns	true if path is a link
+         */
+        bool isLink(const Path& path);
+        
+        /** Create a Unix symlink or Windows shortcut.
          *   \param     path [IN] - link path
          *   \param     target [IN] - link target, need not exist
          *   \returns   true on success
@@ -317,26 +337,19 @@ namespace bp {
         bool createLink(const Path& path,
                         const Path& target);
 
-        /** Read contents of a symlink (Unix) or shortcut (Windows .lnk)
+        /** Resolve a link to a valid path.  Understands Unix/NTFS symlinks,
+         *  Mac aliases, and Windows shortcuts.  
          *  \param		path [IN] - link path
-         *  \returns	resolved path (empty on failure)
-         */
-        Path readLink(const Path& path);
-        
-        /** Resolve a symlink (Unix) or shortcut (Windows .lnk)
-         *  to a fully qualified path;
-         *  \param		path [IN] - link path
-         *  \param      target [OUT] - resolved path (empty on failure)
+         *  \param      target [OUT] - valid path (empty on failure)
          *  \returns	true if target exists
          */
         bool resolveLink(const Path& path,
                          Path& target);
 
-        /**
-         * Similar to unix touch(1) - create an empty file if
-         * the path doesn't exist (but the parent path does),
-         * or if the path does exist and points to a file, update
-         * the file's modtime
+        /** Similar to unix touch(1) - create an empty file if
+         *  the path doesn't exist (but the parent path does),
+         *  or if the path does exist and points to a file, update
+         *  the file's modtime
          */
         bool touch(const Path& path);
 
@@ -348,9 +361,6 @@ namespace bp {
                                 const Path& path,
                                 int flags);
 
-        /**
-         * get information about a file or directory on disk
-         */
         struct FileInfo 
         {
             // permissions - these are unix style permissions as
@@ -359,24 +369,41 @@ namespace bp {
             // (i.e. 0222 == readonly)
             unsigned int mode; 
             // last modification time
-            BPTime mtime;      
+            std::time_t mtime;      
             // time of creation
-            BPTime ctime;
+            std::time_t ctime;
             // time of last access
-            BPTime atime;
+            std::time_t atime;
             // size in bytes
-            long sizeInBytes;
+            size_t sizeInBytes;
+            // device identifier
+            boost::uint32_t deviceId;
+            // file identifier 
+            boost::uint32_t fileIdHigh;
+            boost::uint32_t fileIdLow;
         };
 
-        /** attain a populated FileInfo structure from a path */
+        /** get information about a file or directory on disk
+         */
         bool statFile(const Path& path,
                       FileInfo& fi);
 
-        /** change file properties to match a FileInfo structure */        
+        /** change file properties to match a FileInfo structure 
+         */        
         bool setFileProperties(const Path& path,
                                const FileInfo& fi);
 
         bool makeReadOnly(const Path& path);
+
+        // what are a path's mimetypes?
+        std::set<std::string> mimeTypes(const Path& path);
+
+        // is a path one of the specified mimetypes?
+        bool isMimeType(const Path& path,
+                        const std::set<std::string>& filter);
+
+        std::vector<std::string> extensionsFromMimeType(
+            const std::string& mimeType);
     }
 }
 

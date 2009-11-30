@@ -220,24 +220,27 @@ bp::pkg::packDirectory(const bpf::Path& keyFile,
     class WriteVisitor : virtual public bpf::IVisitor
     {
     public:
-        WriteVisitor(bp::tar::Create& tar, const bpf::tString& topStr)
-            : m_tar(tar), m_topStr(topStr) {}
-        virtual ~WriteVisitor() {}
-        virtual bpf::IVisitor::tResult visitNode(const bpf::Path& p) {
-            if (p.string().compare(m_topStr) == 0) {
+        WriteVisitor(bp::tar::Create& tar,
+                     const bpf::Path& top) : m_tar(tar), m_top(top) {
+        }
+        virtual ~WriteVisitor() {
+        }
+        virtual bpf::IVisitor::tResult visitNode(const bpf::Path& p,
+                                                 const bpf::Path& relPath) {
+            // we strip away our top-level dir name
+            bpf::Path rel = relPath.relativeTo(m_top);
+            if (rel.empty()) {
                 return bpf::IVisitor::eOk;
             }
-            bpf::tString s = p.string();
-            bpf::Path relative(s.substr(m_topStr.length() + 1, string::npos));
-            if (!m_tar.addFile(p, relative)) {
+            if (!m_tar.addFile(p, rel)) {
                 throw string("couldn't add " + p.utf8()
-                             + " to tar as " + relative.utf8());
+                             + " to tar as " + rel.utf8());
             }
             return bpf::IVisitor::eOk;
         }
     protected:
         bp::tar::Create& m_tar;
-        bpf::tString m_topStr;
+        bpf::Path m_top;
     };
 
 
@@ -256,10 +259,9 @@ bp::pkg::packDirectory(const bpf::Path& keyFile,
             throw string("unable to open " + tarFile.utf8());
         }
 
-        // add children to tar, with correct relative pathnames
-        bpf::tString topStr = inDir.string();
-        WriteVisitor visitor(tar, topStr);
-        recursiveVisit(inDir, visitor);
+        // add children to tar
+        WriteVisitor visitor(tar, inDir.filename());
+        recursiveVisit(inDir, visitor, true);
 
         if (!tar.close()) {
             throw string("unable to close tar file: " + tarFile.utf8());

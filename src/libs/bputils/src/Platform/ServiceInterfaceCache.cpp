@@ -52,8 +52,17 @@ bp::serviceInterfaceCache::isNewerThan(const std::string & name,
     if (name.empty() || version.empty()) return false;
 
     bp::file::Path path = buildPath(name, version);    
-    return (boost::filesystem::exists(path)
-            && bp::file::modTime(path).compare(t) >= 0);
+    bool rval = false;
+    BPTime pathTime(0);
+    if (boost::filesystem::exists(path)) {
+        try {
+            pathTime.set(boost::filesystem::last_write_time(path));
+        } catch (const bp::file::tFileSystemError&) {
+            pathTime = BPTime();
+        }
+        rval = pathTime.compare(t) >= 0;
+    }
+    return rval;
 }
 
   

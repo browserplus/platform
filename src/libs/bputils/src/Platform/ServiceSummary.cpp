@@ -339,7 +339,11 @@ service::Summary::detectCorelet(const bp::file::Path &dirName,
     m_path = dirName;
         
     // now set the modtime
-    m_modDate.set(bp::file::modTime(manifestPath));
+    try {
+        m_modDate.set(boost::filesystem::last_write_time(manifestPath));
+    } catch (const bp::file::tFileSystemError&) {
+        m_modDate.set(0);
+    }
 
     // and set the localization table
     m_localizations = localizations;
@@ -381,7 +385,13 @@ bool
 service::Summary::outOfDate() const
 {
     bp::file::Path manifestPath = m_path / s_manifestFileName;
-    return (0 != m_modDate.compare(BPTime(bp::file::modTime(manifestPath))));
+    BPTime t(0);
+    try {
+        t.set(boost::filesystem::last_write_time(manifestPath));
+    } catch (const bp::file::tFileSystemError&) {
+        t.set(0);
+    }
+    return (0 != m_modDate.compare(t));
 }
 
 int

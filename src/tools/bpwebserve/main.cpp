@@ -28,7 +28,7 @@
 #include <sstream>
 #include <vector>
 #include "BPUtils/bpfile.h"
-#include "BPUtils/bpmimetype.h"
+#include "BPUtils/bptime.h"
 #include "BPUtils/bpstrutil.h"
 #include "BPUtils/HttpRequest.h"
 #include "BPUtils/HttpResponse.h"
@@ -58,7 +58,7 @@ public:
         if (!urlPath.empty()) path /= urlPath;
 
         if (boost::filesystem::is_regular(path)) {
-            std::string mt = *(bp::mimetype::fromPath(path).begin());
+            std::string mt = *(mimeTypes(path).begin());
             response.headers.add(Headers::ksContentType,mt.c_str());
             std::string sBody;
             bp::strutil::loadFromFile(path, sBody);
@@ -100,7 +100,13 @@ public:
                 }
 
                 // modtime
-                response.body.append(bp::file::modTime(pathToKid).asString());
+                BPTime t;
+                try {
+                    t.set(boost::filesystem::last_write_time(pathToKid));
+                } catch (const bp::file::tFileSystemError& e) {
+                    // empty
+                }
+                response.body.append(t.asString());
 
                 // next line
                 response.body.append("\n");

@@ -332,9 +332,9 @@ Create::addFile(const bp::file::Path& fileToAdd,
     archive_entry_clear(ae);
 
     // now include file information
-    archive_entry_set_atime(ae, fi.atime.get(), 0);
-    archive_entry_set_mtime(ae, fi.mtime.get(), 0);
-    archive_entry_set_ctime(ae, fi.ctime.get(), 0);
+    archive_entry_set_atime(ae, fi.atime, 0);
+    archive_entry_set_mtime(ae, fi.mtime, 0);
+    archive_entry_set_ctime(ae, fi.ctime, 0);
     archive_entry_set_mode(ae, static_cast<unsigned short>(fi.mode));
 
     bp::file::Path fileNameInTar = fileNameInTarIn;

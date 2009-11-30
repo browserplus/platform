@@ -30,7 +30,6 @@
 #include "BPHandleMapper.h"
 #include <iostream>
 #include "BPUtils/bpfile.h"
-#include "BPUtils/bpmimetype.h"
 
 std::map<bp::file::Path, BPHandle> s_pathMap;
 std::map<BPHandle, bp::file::Path> s_handleMap;
@@ -49,7 +48,7 @@ BPHandleMapper::pathToHandle(const bp::file::Path& path)
     std::string safeName = bp::file::utf8FromNative(path.filename());
     long size = boost::filesystem::is_regular_file(path) ?
         (long) boost::filesystem::file_size(path) : 0;
-    std::set<std::string> mimeTypes = bp::mimetype::fromPath(path);
+    std::set<std::string> mimeTypes = bp::file::mimeTypes(path);
     BPHandle h("BPTPath", sHandle++, safeName, size, mimeTypes);
     s_pathMap.insert(std::make_pair(path, h));
     s_handleMap.insert(std::make_pair(h, path));

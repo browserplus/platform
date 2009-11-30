@@ -22,7 +22,6 @@
 
 #include "MimeTypeTest.h"
 #include "BPUtils/bpfile.h"
-#include "BPUtils/bpmimetype.h"
 #include "BPUtils/bpstrutil.h"
 
 
@@ -32,16 +31,16 @@ void
 MimeTypeTest::goodExt()
 {
     bp::file::Path p("/Users/foo/bar.jpe");
-    std::set<std::string> t = bp::mimetype::fromPath(p);
+    std::set<std::string> t = bp::file::mimeTypes(p);
     CPPUNIT_ASSERT(t.count("image/jpeg") > 0); 
     p = "/Users/foo/bar.jpeg";
-    t = bp::mimetype::fromPath(p);
+    t = bp::file::mimeTypes(p);
     CPPUNIT_ASSERT(t.count("image/jpeg") > 0);
     p = "/Users/foo/bar.jpeg";
-    t = bp::mimetype::fromPath(p);
+    t = bp::file::mimeTypes(p);
     CPPUNIT_ASSERT(t.count("image/jpeg") > 0);
     p = "/Users/foo/bar.jPeG";
-    t = bp::mimetype::fromPath(p);
+    t = bp::file::mimeTypes(p);
     CPPUNIT_ASSERT(t.count("image/jpeg") > 0);
 }
 
@@ -50,7 +49,7 @@ void
 MimeTypeTest::badExt()
 {
     bp::file::Path p("/Users/foo/bar.wtf");
-    std::set<std::string> t = bp::mimetype::fromPath(p);
+    std::set<std::string> t = bp::file::mimeTypes(p);
     CPPUNIT_ASSERT(t.count("application/unknown") > 0); 
 }
 
@@ -59,7 +58,7 @@ void
 MimeTypeTest::noExt()
 {
     bp::file::Path p("/Users/foo/bar");
-    std::set<std::string> t = bp::mimetype::fromPath(p);
+    std::set<std::string> t = bp::file::mimeTypes(p);
     CPPUNIT_ASSERT(t.count("application/unknown") > 0); 
 }
 
@@ -67,7 +66,7 @@ MimeTypeTest::noExt()
 void
 MimeTypeTest::goodType()
 {
-    std::vector<std::string> ext = bp::mimetype::extensionsFromMimeType("image/jpeg");
+    std::vector<std::string> ext = bp::file::extensionsFromMimeType("image/jpeg");
     CPPUNIT_ASSERT(ext.size() == 5);
     CPPUNIT_ASSERT(ext[0].compare("jfif") == 0);
     CPPUNIT_ASSERT(ext[1].compare("jfif-tbnl") == 0);
@@ -80,7 +79,7 @@ MimeTypeTest::goodType()
 void
 MimeTypeTest::badType()
 {
-    std::vector<std::string> ext = bp::mimetype::extensionsFromMimeType("i-am-bogus");
+    std::vector<std::string> ext = bp::file::extensionsFromMimeType("i-am-bogus");
     CPPUNIT_ASSERT(ext.size() == 0);
 }
 
@@ -88,7 +87,7 @@ MimeTypeTest::badType()
 void
 MimeTypeTest::noType()
 {
-    std::vector<std::string> ext = bp::mimetype::extensionsFromMimeType("");
+    std::vector<std::string> ext = bp::file::extensionsFromMimeType("");
     CPPUNIT_ASSERT(ext.size() == 0);
 }
 
@@ -102,19 +101,37 @@ MimeTypeTest::chaseLink()
 
     bp::file::Path linkPath = dir / "myLink";
 
-    // link to jpeg should be image/jpeg
+    // link to jpeg should be application/x-link,
+    // chasing link should give image/jpeg
     bp::file::Path path = dir / "foo.jpg";
     bp::strutil::storeToFile(path, "hello world");
     bp::file::createLink(linkPath, path);
-    std::set<std::string> t = bp::mimetype::fromPath(linkPath);
+    std::set<std::string> t = bp::file::mimeTypes(linkPath);
+    CPPUNIT_ASSERT(t.count(bp::file::kLinkMimeType) > 0);
+    bp::file::Path resolved;
+    bp::file::resolveLink(linkPath, resolved);
+    CPPUNIT_ASSERT(resolved == path);
+    t = bp::file::mimeTypes(resolved);
     CPPUNIT_ASSERT(t.count("image/jpeg") > 0);
-
-    // link to folder should be application/x-folder
+    
+    // link to folder should be application/x-link,
+    // chasing link should give application/x-folder
     bp::file::Path newDir = dir / "myDir";
     boost::filesystem::create_directories(newDir);
     bp::file::remove(linkPath);
     bp::file::createLink(linkPath, newDir);
-    t = bp::mimetype::fromPath(linkPath);
-    CPPUNIT_ASSERT(t.count("application/x-folder") > 0); 
+    t = bp::file::mimeTypes(linkPath);
+    CPPUNIT_ASSERT(t.count(bp::file::kLinkMimeType) > 0);
+    bp::file::resolveLink(linkPath, resolved);
+    CPPUNIT_ASSERT(resolved == newDir);
+    t = bp::file::mimeTypes(resolved);
+    CPPUNIT_ASSERT(t.count(bp::file::kFolderMimeType) > 0); 
+    
+    // broken link should be application/x-badlink
+    bp::file::remove(linkPath);
+    bp::file::createLink(linkPath, "i_do_not_exist");
+    t = bp::file::mimeTypes(linkPath);
+    CPPUNIT_ASSERT(t.count(bp::file::kBadLinkMimeType) > 0);
+    
     bp::file::remove(dir);
 }

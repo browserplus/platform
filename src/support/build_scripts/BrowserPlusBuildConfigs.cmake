@@ -109,6 +109,10 @@ ELSE ()
     SET(CMAKE_SHARED_LINKER_FLAGS_RELEASE "-Wl,-x")
 ENDIF ()
 
+# define this for a platform build
+#
+ADD_DEFINITIONS(-DBP_PLATFORM_BUILD)
+
 # can't rely on CMAKE_SYSTEM_NAME.  It's set by calling PROJECT() or some
 # such.  So we define system name ourselves based on other, more reliable
 # cmake vars. (lth 7/27/07)

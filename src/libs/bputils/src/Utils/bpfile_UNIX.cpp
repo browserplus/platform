@@ -23,7 +23,7 @@
 /*
  *  bpfile_UNIX.cpp
  *
- *  Copyright 2007 Yahoo! Inc. All rights reserved.
+ *  Copyright 2009 Yahoo! Inc. All rights reserved.
  *
  */
 
@@ -32,8 +32,8 @@
 #include <fcntl.h>
 #include <dirent.h>
 #include <assert.h>
+#include <errno.h>
 #include <sys/time.h>
-
 #include <iostream>
 
 #ifdef MACOSX
@@ -44,55 +44,97 @@
 #endif
 
 #include "api/bpfile.h"
-#include "api/bpstrutil.h"
+
+#ifdef BP_PLATFORM_BUILD
 #include "api/BPLog.h"
+#include "api/bperrorutil.h"
+#else
+#define BPLOG_DEBUG_STRM(x)
+#define BPLOG_INFO_STRM(x)
+#define BPLOG_WARN_STRM(x)
+#define BPLOG_ERROR_STRM(x)
+#endif
 
 using namespace std;
 namespace bfs = boost::filesystem;
 
+namespace bp { namespace file {
+
+static Path
+readLink(const Path& path)
+{
+    Path rval;
+    char buf[PATH_MAX];
+    int r = ::readlink(path.external_file_string().c_str(), buf, sizeof(buf));
+    if (r > 0) {
+        buf[r] = '\0';
+        rval = buf;
+    }
+#ifdef MACOSX
+    // aliases appear as regular files
+    if (rval.empty()) {
+        FSRef ref;
+        if (FSPathMakeRef((const UInt8*)path.external_file_string().c_str(),
+                          &ref, NULL) == noErr) {
+            Boolean isFolder = false, wasAliased = false;
+            (void) FSResolveAliasFile(&ref, true, &isFolder, &wasAliased);
+            if (wasAliased) {
+                if (FSRefMakePath(&ref, (UInt8*)buf, sizeof(buf)) == noErr) {
+                    rval = buf;
+                }
+            }
+        }
+    }
+#endif
+	return rval;
+}
+
 
 #ifndef MACOSX
-bp::file::Path
-bp::file::getTempDirectory()
+Path
+getTempDirectory()
 {
     return Path("/tmp");
 }
 #endif
 
 
-bp::file::tString
-bp::file::nativeFromUtf8(const string& s) 
+tString
+nativeFromUtf8(const string& s) 
 {
     return s;
 }
 
 
 string
-bp::file::utf8FromNative(const tString& s) 
+utf8FromNative(const tString& s) 
 {
     return s;
 }
 
 
-bp::file::Path
-bp::file::getTempPath(const Path& tempDir,
-                      const tString& prefix)
+Path
+getTempPath(const Path& tempDir,
+            const tString& prefix)
 {
     Path rval;
     Path p = tempDir / Path(prefix + "XXXXXX");
     char* tmpl = new char[p.string().size() + 1];
     strcpy(tmpl, p.string().c_str());
     char* s = ::mktemp(tmpl);
-    if (!s) BP_THROW_FATAL("::mktemp fails");
+    if (!s) {
+        boost::system::error_code ec(errno, boost::system::system_category);
+        throw tFileSystemError("::mktemp fails", tempDir, Path(prefix), ec);
+    }
     rval = s;
     delete[] s;
     return rval;
 }
 
 
-bp::file::Path
-bp::file::canonicalPath(const Path& path,
-                        const Path& root)
+Path
+canonicalPath(const Path& path,
+              const Path& root)
 {
     string rval;
     int cfd = -1;
@@ -123,9 +165,9 @@ bp::file::canonicalPath(const Path& path,
 }
 
 
-bp::file::Path
-bp::file::canonicalProgramPath(const Path& path,
-                               const Path& root)
+Path
+canonicalProgramPath(const Path& path,
+                     const Path& root)
 {
     // No action beyond canonicalName necessary on unix
     return canonicalPath(path, root);
@@ -133,9 +175,16 @@ bp::file::canonicalProgramPath(const Path& path,
 
 
 bool 
-bp::file::linkExists(const Path& path)
+isSymlink(const Path& path)
 {
-    if (bfs::is_symlink(path)) {
+    return bfs::is_symlink(path);
+}
+
+
+bool 
+isLink(const Path& path)
+{
+    if (isSymlink(path)) {
         return true;
     }
 
@@ -157,8 +206,8 @@ bp::file::linkExists(const Path& path)
 
 
 bool
-bp::file::createLink(const Path& path,
-					 const Path& target)
+createLink(const Path& path,
+           const Path& target)
 {
     try {
         bfs::create_symlink(target, path);
@@ -172,40 +221,9 @@ bp::file::createLink(const Path& path,
 }
 
 
-bp::file::Path
-bp::file::readLink(const Path& path)
-{
-	Path rval;
-    char buf[PATH_MAX];
-    int r = ::readlink(path.external_file_string().c_str(), buf, sizeof(buf));
-    if (r > 0) {
-        buf[r] = '\0';
-        rval = buf;
-    }
-#ifdef MACOSX
-    // aliases appear as regular files
-    if (rval.empty()) {
-        FSRef ref;
-        if (FSPathMakeRef((const UInt8*)path.external_file_string().c_str(),
-                          &ref, NULL) == noErr) {
-            Boolean isFolder = false, wasAliased = false;
-            (void) FSResolveAliasFile(&ref, true, &isFolder,
-                                      &wasAliased);
-            if (wasAliased) {
-                if (FSRefMakePath(&ref, (UInt8*)buf, sizeof(buf)) == noErr) {
-                    rval = buf;
-                }
-            }
-        }
-    }
-#endif
-	return rval;
-}
-
-
 bool
-bp::file::resolveLink(const Path& path,
-                      Path& target)
+resolveLink(const Path& path,
+            Path& target)
 {
     bool rval = false;
     Path rstr = readLink(path);
@@ -223,7 +241,7 @@ bp::file::resolveLink(const Path& path,
 
 
 bool
-bp::file::touch(const Path& path)
+touch(const Path& path)
 {
     if (bfs::exists(path)) {
         return (utimes(path.external_file_string().c_str(), NULL) == 0);
@@ -240,3 +258,64 @@ bp::file::touch(const Path& path)
 
     return true;
 }
+
+
+bool
+statFile(const Path& p,
+         FileInfo& fi)
+{
+    // init to zero
+    memset(&fi, 0, sizeof(fi));
+
+	if (p.empty()) return false;
+
+    struct stat s;
+    tString nativePath = p.external_file_string();
+    if (::stat(nativePath.c_str(), &s) != 0) return false;
+
+    // set times
+#ifdef MACOSX
+    fi.mtime = s.st_mtimespec.tv_sec;      
+    fi.ctime = s.st_ctimespec.tv_sec;
+    fi.atime = s.st_atimespec.tv_sec;
+#elif defined(LINUX)
+    fi.mtime = s.st_mtime;      
+    fi.ctime = s.st_ctime;
+    fi.atime = s.st_atime;
+#else
+#error "unsupported platform"
+#endif
+
+    // set mode and size
+    fi.mode = s.st_mode;
+    fi.sizeInBytes = s.st_size;
+
+    // set device and file ids
+    fi.deviceId = s.st_rdev;
+    fi.fileIdLow = s.st_ino;
+
+    return true;
+}
+
+
+bool
+setFileProperties(const Path& p,
+                  const FileInfo& fi)
+{
+	if (p.empty()) return false;
+
+    tString nativePath = p.external_file_string();
+
+    chmod(nativePath.c_str(), fi.mode);
+
+    // set file times
+    try {
+        bfs::last_write_time(p, fi.mtime);
+    } catch(const tFileSystemError&) {
+        // empty
+    }
+    return true;
+}
+
+
+}}

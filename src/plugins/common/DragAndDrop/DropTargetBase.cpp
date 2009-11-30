@@ -33,7 +33,6 @@
 #include "BPHandleMapper.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
-#include "BPUtils/bpmimetype.h"
 #include "PluginCommonLib/bppluginutil.h"
 
 using namespace std;
@@ -169,12 +168,12 @@ DropTargetBase::canAcceptDrop()
                         break;
                     }
                 } else {
-                    if (linkExists(path)) {
+                    if (isLink(path)) {
                         if (!resolveLink(path, path)) {
                             continue;
                         }
                     }
-                    if (bp::mimetype::pathMatchesFilter(path, m_mimetypes)) {
+                    if (isMimeType(path, m_mimetypes)) {
                         m_dropState = CanAccept;
                         break;
                     }
@@ -196,7 +195,7 @@ DropTargetBase::dropItems()
     vector<Path>::iterator it = m_dragItems.begin();
     while (it != m_dragItems.end()) {
         Path path(*it);
-        if (linkExists(path)) {
+        if (isLink(path)) {
             if (!resolveLink(path, path)) {
                 it = m_dragItems.erase(it);
                 continue;
@@ -231,24 +230,25 @@ DropTargetBase::directoryContainsMimeType(const Path& path)
               m_numChecked(0), m_found(false) {
         }
         virtual ~MyVisitor() {}
-        virtual tResult visitNode(const bp::file::Path& p) {
+        virtual tResult visitNode(const bp::file::Path& p,
+                                  const bp::file::Path&) {
             if (m_numChecked >= m_limit) {
                 return eStop;
             }
             m_numChecked++;
             Path resolved = p;
-            if (linkExists(p)) {
+            if (isLink(p)) {
                 if (!resolveLink(p, resolved)) {
                     return eOk;
                 }
             }
             if (boost::filesystem::is_directory(resolved)) {
-                if (m_mimeTypes.count(bp::mimetype::kFolderMimeType)) {
+                if (m_mimeTypes.count(kFolderMimeType)) {
                     m_found = true;
                     return eStop;
                 }
             } else if (boost::filesystem::is_regular_file(resolved)) {
-                if (bp::mimetype::pathMatchesFilter(resolved, m_mimeTypes)) {
+                if (isMimeType(resolved, m_mimeTypes)) {
                     m_found = true;
                     return eStop;
                 }
@@ -262,7 +262,7 @@ DropTargetBase::directoryContainsMimeType(const Path& path)
     };
     
     MyVisitor v(m_mimetypes, m_limit);
-    (void) recursiveVisit(path, v);
+    (void) recursiveVisit(path, v, true);
     return v.m_found;
 }
 

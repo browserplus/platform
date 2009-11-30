@@ -40,7 +40,6 @@ class FileLinkTest : public CPPUNIT_NS::TestCase
 {
     CPPUNIT_TEST_SUITE(FileLinkTest);
     CPPUNIT_TEST(createLink);
-    CPPUNIT_TEST(readLink);
     CPPUNIT_TEST(brokenLink);
 #ifndef WIN32
     // Not a valid test on windows, which cannot handle
@@ -56,7 +55,6 @@ class FileLinkTest : public CPPUNIT_NS::TestCase
     
   protected:
     void createLink();
-    void readLink();
     void brokenLink();
     void circularLink();
 

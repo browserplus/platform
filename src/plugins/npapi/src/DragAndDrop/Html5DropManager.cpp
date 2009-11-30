@@ -420,7 +420,7 @@ extractPathArguments(NPP npp,
         CHECK_RETURN(name.compare(bp::file::utf8FromNative(path.filename())) == 0,
                      "name mismatch");
         bp::file::Path resolvedPath = path;
-        if (bp::file::linkExists(path)) {
+        if (bp::file::isLink(path)) {
             CHECK_RETURN(bp::file::resolveLink(path, resolvedPath),
                          "unable to resolve link");
         }

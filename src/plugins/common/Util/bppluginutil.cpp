@@ -31,7 +31,6 @@
 #include <assert.h>
 #include "api/BPHandleMapper.h"
 #include "BPUtils/bpfile.h"
-#include "BPUtils/bpmimetype.h"
 #include "BPUtils/bpconfig.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/ProductPaths.h"
@@ -127,6 +126,42 @@ bp::pluginutil::applyFilters(const vector<bp::file::Path>& selection,
                              unsigned int flags,
                              unsigned int limit)
 {
+    class MyVisitor : virtual public bp::file::IVisitor {
+    public:
+        MyVisitor(const set<string>& mimetypes,
+                  int parentID,
+                  size_t limit,
+                  bp::List& list)
+        : m_mimetypes(mimetypes), m_parentID(parentID),
+        m_limit(limit), m_num(0), m_list(list) {
+        }
+        virtual ~MyVisitor() {
+        }
+        bp::file::IVisitor::tResult visitNode(const bp::file::Path& p,
+                                              const bp::file::Path&) {
+            if (m_num >= m_limit) {
+                return eStop;
+            }
+            if (bp::file::isMimeType(p, m_mimetypes)) {
+                if (m_parentID) {
+                    bp::Map* itemMap = new bp::Map;
+                    itemMap->add("handle", new bp::Path(p));
+                    itemMap->add("parent", new bp::Integer(m_parentID));
+                    m_list.append(itemMap);
+                } else {
+                    m_list.append(new bp::Path(p));
+                }
+                m_num++;
+            }
+            return eOk;
+        }
+        const set<string>& m_mimetypes;
+        int m_parentID;
+        size_t m_limit;
+        size_t m_num;
+        bp::List& m_list;
+    };
+    
     unsigned int num = 0;
     bp::List* l = NULL;
     bp::Map* m = NULL;
@@ -144,7 +179,6 @@ bp::pluginutil::applyFilters(const vector<bp::file::Path>& selection,
     
     for (unsigned int i = 0; (num < limit) && (i < selection.size()); ++i) {
         bp::file::Path item = selection[i];
-
         int parentID = 0;
         if (flags & kIncludeGestureInfo) {
             bp::Path* itemPath = new bp::Path(item);
@@ -154,52 +188,15 @@ bp::pluginutil::applyFilters(const vector<bp::file::Path>& selection,
             selList->append(itemPath);
         }
         
-        // does selection item match?
-        if (bp::mimetype::pathMatchesFilter(item, mimetypes)) {
-            if (flags & kIncludeGestureInfo) {
-                bp::Map* itemMap = new bp::Map;
-                itemMap->add("handle", new bp::Path(item));
-                itemMap->add("parent", new bp::Integer(parentID));
-                fileList->append(itemMap);
-            } else {
-                l->append(new bp::Path(item));
-            }
-            num++;
-        }
-        
+        // visit selected item (and maybe it's kids)
+        MyVisitor v(mimetypes, parentID, limit - num,
+                    parentID ? *fileList : *l);
         if (flags & kRecurse) {
-            // now go after the kids, being aware of links
-            bp::file::Path target = item;
-            if (linkExists(item)) {
-                if (!resolveLink(item, target)) {
-                    continue;
-                }
-            }
-            if (boost::filesystem::is_directory(target)) {
-                bp::file::tRecursiveDirIter end;
-                for (bp::file::tRecursiveDirIter it(target);
-                     (num < limit) && (it != end); ++it) {
-                    bp::file::Path kid(it->path());
-                    bp::file::Path resolved = kid;
-                    if (bp::file::linkExists(kid)) {
-                        if (!bp::file::resolveLink(kid, resolved)) {
-                            continue;
-                        }
-                    }
-                    if (bp::mimetype::pathMatchesFilter(resolved, mimetypes)) {
-                        if (flags & kIncludeGestureInfo) {
-                            bp::Map* itemMap = new bp::Map;
-                            itemMap->add("handle", new bp::Path(kid));
-                            itemMap->add("parent", new bp::Integer(parentID));
-                            fileList->append(itemMap);
-                        } else {
-                            l->append(new bp::Path(kid));
-                        }
-                        num++;
-                    }
-                }
-            }
-        }   
+            (void) recursiveVisit(item, v, true);
+        } else {
+            v.visitNode(item, item);
+        }
+        num += v.m_num;
     }
     
     return (flags & kIncludeGestureInfo) ? dynamic_cast<bp::Object*>(m)

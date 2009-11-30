@@ -27,7 +27,6 @@
 #include "BPUtils/bpstrutil.h"
 
 using namespace std;
-using namespace std::tr1;
 using namespace bp::file;
 namespace bfs = boost::filesystem;
 
@@ -47,25 +46,12 @@ FileLinkTest::createLink()
 }
 
 
-void 
-FileLinkTest::readLink()
-{
-	createLink();
-
-	Path src = m_dir / "link_to_target"; 
-	Path target = bp::file::readLink(src);
-	CPPUNIT_ASSERT(!target.empty());
-}
-
-
 void
 FileLinkTest::brokenLink()
 {
     Path target = m_dir / "non_existent";
     Path src = m_dir / "broken_link.lnk";
     bp::file::createLink(src, target);
-    Path contents = bp::file::readLink(src);
-    CPPUNIT_ASSERT(contents == target);
     Path resolved;
     bool exists = resolveLink(src, resolved);
     CPPUNIT_ASSERT(!exists && resolved.empty());
@@ -92,18 +78,19 @@ FileLinkTest::circularLink()
     // now make links from dir1 to dir2 and dir2 to dir1
     Path link1 = dir1 / "link1";
     bp::file::createLink(link1, dir2);
-    CPPUNIT_ASSERT(linkExists(link1));
+    CPPUNIT_ASSERT(isLink(link1));
     Path link2 = dir2 / "link2";
     bp::file::createLink(link2, dir1);
-    CPPUNIT_ASSERT(linkExists(link2));
+    CPPUNIT_ASSERT(isLink(link2));
     
-    // make sure that a recursive visitor will bottom out
+    // make sure that a recursive visitor will detect this evil
     size_t limit = 6;
     class MyVisitor : virtual public IVisitor {
     public:
         MyVisitor(size_t limit) : m_numChecked(0), m_limit(limit) {}
         virtual ~MyVisitor() {}
-        virtual tResult visitNode(const Path& p) {
+        virtual tResult visitNode(const Path& p,
+                                  const Path& /*relativePath*/) {
             if (m_numChecked >= m_limit) {
                 return eStop;
             }
@@ -114,8 +101,8 @@ FileLinkTest::circularLink()
         size_t m_limit;
     };
     MyVisitor v(limit);
-    CPPUNIT_ASSERT(!recursiveVisit(dir1, v));
-    CPPUNIT_ASSERT(v.m_numChecked == limit);
+    CPPUNIT_ASSERT(recursiveVisit(dir1, v, true));
+    CPPUNIT_ASSERT(v.m_numChecked < limit);
 }
 
 

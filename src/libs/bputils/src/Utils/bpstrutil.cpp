@@ -49,6 +49,7 @@
 
 #include "bperrorutil.h"
 #include "bpfile.h"
+#include "bptr1.h"
 
 
 namespace bp {

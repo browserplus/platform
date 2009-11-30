@@ -38,6 +38,7 @@
 #include "bpfile.h"
 #include "bpstrutil.h"
 #include "bptypeutil.h"
+#include "bptime.h"
 #include "ProductPaths.h"
 
 
@@ -74,7 +75,12 @@ updateCache()
         if (s_phashPath.empty()) return false;
     }
 
-    BPTime modTime = bp::file::modTime(s_phashPath);
+    BPTime modTime(0);
+    try {
+        modTime.set(boost::filesystem::last_write_time(s_phashPath));
+    } catch (const bp::file::tFileSystemError&) {
+        // empty
+    }
 
     // if modTime == 0 it means the file doesn't exist
     if (modTime.compare(s_lastRead) > 0) {

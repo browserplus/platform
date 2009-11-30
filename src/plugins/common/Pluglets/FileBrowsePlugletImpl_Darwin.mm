@@ -25,7 +25,6 @@
 #import "PluginCommonLib/FileBrowsePluglet.h"
 #import "BPUtils/bpfile.h"
 #import "BPUtils/bplocalization.h"
-#import "BPUtils/bpmimetype.h"
 #import "BPUtils/bpurl.h"
 #import "BPUtils/BPLog.h"
 #import <sstream>
@@ -122,7 +121,7 @@ getBrowseTitle(const char* key,
     if (boost::filesystem::is_directory(path)) {
         return YES;
     }
-    return bp::mimetype::pathMatchesFilter(path, *m_mimetypes) ? YES : NO;
+    return bp::file::isMimeType(path, *m_mimetypes) ? YES : NO;
 }
 @end
 
@@ -191,7 +190,7 @@ FileBrowsePluglet::execute(unsigned int tid,
     if (recurse) {
         [panel setCanChooseDirectories:YES];
     } else {
-        if (mimetypes.count(bp::mimetype::kFolderMimeType) == 1) {
+        if (mimetypes.count(bp::file::kFolderMimeType) == 1) {
             [panel setCanChooseDirectories:YES];
             if (mimetypes.size() == 1) {
                 [panel setCanChooseFiles:NO];
