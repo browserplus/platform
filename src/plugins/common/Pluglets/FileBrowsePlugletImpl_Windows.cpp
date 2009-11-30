@@ -46,7 +46,6 @@
 #include "BPUtils/bpfile.h"
 #include "BPUtils/bplocalization.h"
 #include "BPUtils/BPLog.h"
-#include "BPUtils/bpmimetype.h"
 #include "BPUtils/bpurl.h"
 #include "BPUtils/bpstrutil.h"
 #include "BPUtils/OS.h"
@@ -503,7 +502,7 @@ FileBrowsePluglet::execute(unsigned int tid,
         for (iter = mimetypes.begin(); iter != mimetypes.end(); ++iter) {
             filterName.append(bp::strutil::utf8ToWide(*iter));
             filterName.append(L", ");
-            vector<string> e = bp::mimetype::extensionsFromMimeType(*iter);
+            vector<string> e = bp::file::extensionsFromMimeType(*iter);
             for (unsigned int i  = 0; i < e.size(); ++i) {
                 const string& s = e[i];
                 extensions.insert(s);

@@ -75,7 +75,7 @@ updateCache()
         if (s_phashPath.empty()) return false;
     }
 
-    BPTime modTime(0);
+    BPTime modTime((long)0);
     try {
         modTime.set(boost::filesystem::last_write_time(s_phashPath));
     } catch (const bp::file::tFileSystemError&) {

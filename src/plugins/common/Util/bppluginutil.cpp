@@ -131,9 +131,9 @@ bp::pluginutil::applyFilters(const vector<bp::file::Path>& selection,
         MyVisitor(const set<string>& mimetypes,
                   int parentID,
                   size_t limit,
-                  bp::List& list)
-        : m_mimetypes(mimetypes), m_parentID(parentID),
-        m_limit(limit), m_num(0), m_list(list) {
+                  bp::List* list)
+        : m_mimetypes(mimetypes), m_parentID( parentID),
+          m_limit(limit), m_num(0), m_list(list) {
         }
         virtual ~MyVisitor() {
         }
@@ -147,21 +147,21 @@ bp::pluginutil::applyFilters(const vector<bp::file::Path>& selection,
                     bp::Map* itemMap = new bp::Map;
                     itemMap->add("handle", new bp::Path(p));
                     itemMap->add("parent", new bp::Integer(m_parentID));
-                    m_list.append(itemMap);
+                    m_list->append(itemMap);
                 } else {
-                    m_list.append(new bp::Path(p));
+                    m_list->append(new bp::Path(p));
                 }
                 m_num++;
             }
             return eOk;
         }
-        const set<string>& m_mimetypes;
+        set<string> m_mimetypes;
         int m_parentID;
         size_t m_limit;
         size_t m_num;
-        bp::List& m_list;
+        bp::List* m_list;
     };
-    
+
     unsigned int num = 0;
     bp::List* l = NULL;
     bp::Map* m = NULL;
@@ -190,7 +190,7 @@ bp::pluginutil::applyFilters(const vector<bp::file::Path>& selection,
         
         // visit selected item (and maybe it's kids)
         MyVisitor v(mimetypes, parentID, limit - num,
-                    parentID ? *fileList : *l);
+                    parentID ? fileList : l);
         if (flags & kRecurse) {
             (void) recursiveVisit(item, v, true);
         } else {

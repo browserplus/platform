@@ -129,7 +129,7 @@ MimeTypeTest::chaseLink()
     
     // broken link should be application/x-badlink
     bp::file::remove(linkPath);
-    bp::file::createLink(linkPath, "i_do_not_exist");
+    bp::file::createLink(linkPath, bp::file::Path("i_do_not_exist"));
     t = bp::file::mimeTypes(linkPath);
     CPPUNIT_ASSERT(t.count(bp::file::kBadLinkMimeType) > 0);
     

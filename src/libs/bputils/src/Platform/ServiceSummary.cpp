@@ -385,7 +385,7 @@ bool
 service::Summary::outOfDate() const
 {
     bp::file::Path manifestPath = m_path / s_manifestFileName;
-    BPTime t(0);
+    BPTime t((long)0);
     try {
         t.set(boost::filesystem::last_write_time(manifestPath));
     } catch (const bp::file::tFileSystemError&) {

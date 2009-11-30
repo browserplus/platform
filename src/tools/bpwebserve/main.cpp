@@ -103,7 +103,7 @@ public:
                 BPTime t;
                 try {
                     t.set(boost::filesystem::last_write_time(pathToKid));
-                } catch (const bp::file::tFileSystemError& e) {
+                } catch (const bp::file::tFileSystemError&) {
                     // empty
                 }
                 response.body.append(t.asString());
