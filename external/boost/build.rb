@@ -105,6 +105,7 @@ Dir.chdir(pkgDir) do
         end
 
         $buildTypes.each() do |buildType|
+            FileUtils.rm_rf("stage")
             FileUtils.mkdir_p("#{$libInstallDir}/#{buildType}")
             buildLibs.each() do |l|
                 puts "building #{buildType} #{l}..."
@@ -115,7 +116,7 @@ Dir.chdir(pkgDir) do
 
             # copy static libs
             puts "copying #{buildType} libraries..."
-            Dir.glob("#{buildDir}/**/#{buildType.downcase}/**/libboost*.#{$libSuffix}").each do |l|
+            Dir.glob("stage/lib/libboost*.#{$libSuffix}").each do |l|
                 target = File.join($libInstallDir, buildType, File.basename(l))
                 FileUtils.cp(l, target, :verbose => $verbose)
             end
