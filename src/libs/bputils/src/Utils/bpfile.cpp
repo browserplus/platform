@@ -913,7 +913,7 @@ doVisit(const bp::file::Path& p,          // node to visit
     }
 
     // don't revisit circular links
-    if (recursive && isCircular(p, pathStack)) {
+    if (isCircular(p, pathStack)) {
         return true;
     }
 
@@ -932,9 +932,9 @@ doVisit(const bp::file::Path& p,          // node to visit
         if (recursive) {
             // remember ourselves for cycle detection
             pathStack.push_back(DirEntry::fromPath(target));
+            relativeDir /= p.filename();
 
             // visit all children
-            relativeDir /= p.filename();
             int lastLevel = 0;
             tRecursiveDirIter end;
             for (tRecursiveDirIter iter(target); iter != end; ++iter) {
@@ -954,7 +954,6 @@ doVisit(const bp::file::Path& p,          // node to visit
                         iter.no_push();
                         continue;
                     }
-                    pathStack.push_back(DirEntry::fromPath(nodeTarget));
                 }
 
                 // Maintain pathStack and relativeDir.  Iterator 
@@ -970,6 +969,7 @@ doVisit(const bp::file::Path& p,          // node to visit
                            << ", relativeDir = " << relativeDir;
                         throw ss.str();
                     }
+                    pathStack.push_back(DirEntry::fromPath(nodeTarget));
                     relativeDir /= node.parent_path().filename();
                 } else if (thisLevel < lastLevel) {
                     for (int i = 0; i < lastLevel - thisLevel; i++) {
@@ -1006,6 +1006,7 @@ doVisit(const bp::file::Path& p,          // node to visit
                                 }
                                 IVisitor& m_delegate;
                             };
+                            pathStack.push_back(DirEntry::fromPath(nodeTarget));
                             relativeDir /= node.filename();
                             DelegatingVisitor dv(v);
                             tRecursiveDirIter end2;
@@ -1016,13 +1017,14 @@ doVisit(const bp::file::Path& p,          // node to visit
                                     return false;
                                 }
                             }
+                            pathStack.pop_back();
                             relativeDir = relativeDir.parent_path();
                         }
                     }
                 }
             }
-            relativeDir = relativeDir.parent_path();
             pathStack.pop_back();
+            relativeDir = relativeDir.parent_path();
         } else {
             relativeDir /= p.parent_path().filename();
             tDirIter end;
