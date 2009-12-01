@@ -39,7 +39,8 @@
 #include <regex>
 #else
 #include <tr1/memory>
-#include <boost/tr1/regex.hpp>
+// do not include <boost/tr1/regex.hpp>, it breaks objective-c files
+// instead, non-win32 users of regex must include the header
 #endif
 
 #endif // _BPTR1_H_

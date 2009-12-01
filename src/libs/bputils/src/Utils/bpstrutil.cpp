@@ -45,7 +45,9 @@
 #include <Carbon/Carbon.h>
 #endif
 
-//#include "boost/algorithm/string/split.hpp"
+#ifndef WIN32
+#include <boost/tr1/regex.hpp>
+#endif
 
 #include "bperrorutil.h"
 #include "bpfile.h"
