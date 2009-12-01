@@ -2,7 +2,7 @@ The BrowserPlus platform uses several 3rd party open source libraries
 and tools.  This file summarizes the tools used, their purpose, and
 the licenses under which they're released.
 
-* Boost version 1.39.0 (boost license: http://www.boost.org/users/license.html)
+* Boost version 1.41.0 (boost license: http://www.boost.org/users/license.html)
   (C++ abstractions and utilties)
   [http://boost.org] 
 

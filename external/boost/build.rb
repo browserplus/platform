@@ -6,10 +6,10 @@ require "../common"
 parseArgs()
 
 topDir = File.dirname(File.expand_path(__FILE__))
-version = "1_39_0"
+version = "1_41_0"
 pkg = "boost_#{version}"
 tarball = "#{pkg}.tar.bz2"
-md5 = "a17281fd88c48e0d866e1a12deecbcc0"
+md5 = "8bb65e133907db727a2a825c5400d0a6"
 url = "http://downloads.sourceforge.net/boost/#{tarball}"
 
 pkgDir = File.join(topDir, pkg)
@@ -118,17 +118,6 @@ Dir.chdir(pkgDir) do
             Dir.glob("#{buildDir}/**/#{buildType.downcase}/**/libboost*.#{$libSuffix}").each do |l|
                 target = File.join($libInstallDir, buildType, File.basename(l))
                 FileUtils.cp(l, target, :verbose => $verbose)
-
-                # Make symlinks to libs on non-windows systems.
-                # The autolink stuff on windows eliminates the need for this
-                if $platform != "Windows"
-                    longName = File.basename(l)
-                    shortName = longName[0, longName.index('-')] + "." + $libSuffix
-                    puts "making symlink for #{shortName}..."
-                    Dir.chdir(File.join($libInstallDir, buildType)) do
-                        FileUtils.ln_sf(longName, shortName, :verbose => $verbose)
-                    end
-                end
             end
         end
     end 

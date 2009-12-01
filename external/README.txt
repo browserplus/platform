@@ -5,7 +5,7 @@ which they're released.
 3rd party software, when possible, is downloaded directly from the provider
 and built on the developers machine as a pre-build step.  
 
-* Boost version 1.39.0 (boost license: http://www.boost.org/users/license.html)
+* Boost version 1.41.0 (boost license: http://www.boost.org/users/license.html)
   (C++ abstractions and utilties)
   [http://boost.org] 
 
