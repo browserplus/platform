@@ -44,8 +44,10 @@ and built on the developers machine as a pre-build step.
   (An embeddable C web server implementation)
   [http://code.google.com/p/mongoose/]
 
-* msft/wtl headers (Microsoft Permissive License (Ms-PL))
+* msft/wtl headers (Microsoft Public License (Ms-PL), formerly the Microsoft "Permissive" License)
   (Several headers which provide wtl support)
+  license: http://www.microsoft.com/opensource/licenses.mspx#Ms-PL
+  product: http://www.microsoft.com/downloads/details.aspx?familyid=E5BA5BA4-6E6B-462A-B24C-61115E846F0C&displaylang=en
 
 * npapi headers (MPL license)    
   (header files required to compile NPAPI style plugins that work with
