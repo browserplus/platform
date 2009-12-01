@@ -1,8 +1,8 @@
 ############################################################
 #  Created by Lloyd Hilaiel on May 1 2006
-#  Copyright (c) Yahoo!, Inc 2006
+#  Copyright (c) Yahoo!, Inc 2006-2009
 #
-#  This file is the main include for using YCP's "Build Templates" 
+#  This file is the main include for using "BuildTemplates" 
 #  By including this file, you gain access to all of the build
 #  macros provided by these templates.
 #
