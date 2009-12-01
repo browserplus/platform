@@ -49,9 +49,12 @@ and built on the developers machine as a pre-build step.
   license: http://www.microsoft.com/opensource/licenses.mspx#Ms-PL
   product: http://www.microsoft.com/downloads/details.aspx?familyid=E5BA5BA4-6E6B-462A-B24C-61115E846F0C&displaylang=en
 
-* npapi headers (MPL license)    
+* npapi headers (MPL licensed)
   (header files required to compile NPAPI style plugins that work with
-   many modern web browsers)
+   many modern web browsers -- The canonical maintainer of the headers
+   is mozilla, and we redistribute several header files extracted from the
+   Mozilla GeckoSDK)
+  [https://developer.mozilla.org/En/Gecko_SDK]
  
 * openssl version 0.9.8k (BSD-style license)
   (A C library providing implementations of various cryptographic routines)
