@@ -5,9 +5,6 @@ which they're released.
 3rd party software, when possible, is downloaded directly from the provider
 and built on the developers machine as a pre-build step.  
 
-* BuildTemplates - A collection of scripts built on top of CMake released under
-  a BSD license.  Provided by Yahoo!.
-
 * Boost version 1.39.0 (boost license: http://www.boost.org/users/license.html)
   (C++ abstractions and utilties)
   [http://boost.org] 

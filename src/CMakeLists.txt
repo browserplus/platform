@@ -23,7 +23,7 @@ SET(YBT_NESTED_INCLUDES 1)
 
 # set include paths to build configs cmake and build templates cmake
 SET(YBP_BuildTemplates
-  "${CMAKE_CURRENT_SOURCE_DIR}/../external/BuildTemplates/BuildTemplates.cmake"
+  "${CMAKE_CURRENT_SOURCE_DIR}/support/BuildTemplates/BuildTemplates.cmake"
 )
 
 SET(YBP_BuildConfigs
