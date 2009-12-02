@@ -8,7 +8,7 @@
 require 'pathname'
 
 $pathToLicense =
-  File.join(File.dirname(__FILE__), "..", "..", "..", "COPYING")
+  File.join(File.dirname(__FILE__), "..", "..", "..", "LICENSE.txt")
 $licenseContent = File.new($pathToLicense).read
 
 LICENSE_BEGIN_MARK = "***** BEGIN LICENSE BLOCK *****"
