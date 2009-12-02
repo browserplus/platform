@@ -41,7 +41,7 @@ FileLinkTest::createLink()
     CPPUNIT_ASSERT(bp::strutil::storeToFile(target, "this is a target file\n"));
 
 	// create link to target
-	Path src = m_dir / "link_to_target";
+	Path src = m_dir / "link_to_target.lnk";
     CPPUNIT_ASSERT(bp::file::createLink(src, target));
 }
 
@@ -76,10 +76,10 @@ FileLinkTest::circularLink()
     CPPUNIT_ASSERT(bfs::exists(file2));
     
     // now make links from dir1 to dir2 and dir2 to dir1
-    Path link1 = dir1 / "link1";
+    Path link1 = dir1 / "link1.lnk";
     bp::file::createLink(link1, dir2);
     CPPUNIT_ASSERT(isLink(link1));
-    Path link2 = dir2 / "link2";
+    Path link2 = dir2 / "link2.lnk";
     bp::file::createLink(link2, dir1);
     CPPUNIT_ASSERT(isLink(link2));
     

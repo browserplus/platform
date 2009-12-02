@@ -233,9 +233,8 @@ isLink(const Path& path)
         return true;
     }
 
-    // now try for shortcuts
-    Path target = readShortcut(path);
-    return !target.empty();
+    // shortcuts must have .lnk suffix on windows
+    return (path.extension().compare(L".lnk") == 0);
 }
 
 
@@ -247,6 +246,9 @@ createLink(const Path& path,
     IShellLinkW* psl = NULL; 
 	IPersistFile* ppf = NULL;
 
+    // shortcuts must have .lnk suffix on windows
+    Path linkPath = path;
+    linkPath.replace_extension(L"lnk");
 	try {
 		HRESULT hr = CoInitialize(NULL);
 		if (FAILED(hr)) {
@@ -273,7 +275,7 @@ createLink(const Path& path,
 		}
 
 		// persist it
-		hr = ppf->Save((LPCOLESTR) path.external_file_string().c_str(), TRUE);
+		hr = ppf->Save((LPCOLESTR) linkPath.external_file_string().c_str(), TRUE);
 		if (FAILED(hr)) {
 			throw string("unable to persist shortcut");
 		}
