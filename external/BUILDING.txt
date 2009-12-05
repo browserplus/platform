@@ -41,32 +41,11 @@ in the top build.rb script and provide a package build.rb script which
 fetches the package, builds it, and places results in {Windows|Darwin}.
 Model your script off of an existing package script.
 
-The diff/patch utilities in WinTools/bin come from 
+To build this software on windows you'll need diff.exe and patch.exe from
 http://gnuwin32.sourceforge.net/packages/diffutils.htm and
 http://gnuwin32.sourceforge.net/packages/patchutils.htm.
-The 7zip binaries in Wintools/bin come from 
-http://www.7-zip.org
 
-In addition, patch.exe has had an "asInvoker" manifest added to prevent
-Vista from throwing a UAC prompt due to patch's name.
-See http://msdn.microsoft.com/en-us/library/bb756960.aspx
+NOTE: you should rename patch.exe to ptch.exe so we don't get hit with
+UACs at build time.
 
-The manifest is added via 
-"mt -manifest asInvoker.manifest -outputresource:patch.exe;#1"
-
-The asInvoker.manifest file is:
-
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-  <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
-    <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
-      <security>
-        <requestedPrivileges>
-          <requestedExecutionLevel level="asInvoker" uiAccess="false"/>
-        </requestedPrivileges>
-      </security>
-    </trustInfo>
-  </assembly> 
-
-
-
-
+You'll also need 7z.exe which you can get from http://www.7-zip.org

@@ -30,19 +30,6 @@ begin
         end 
     end
 
-    if $platform == "Windows"
-        # copy 7zip from wintools so that clients can
-        # find it in externals/windows/bin
-        puts ""
-        puts "**************************************************"
-        puts "copying 7z..."
-        Dir.chdir("#{topDir}/WinTools/bin") do
-            Dir.glob("7z.*").each() do |f|
-                FileUtils.cp(f, "#{topDir}/#{$platform}/bin/#{f}", :verbose => $verbose)
-            end
-        end 
-    end
-
     if $clean
         puts "Removing previous build..."
         FileUtils.rm_rf("#{topDir}/#{$platform}")
