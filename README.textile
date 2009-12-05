@@ -2,7 +2,7 @@ h2. The BrowserPlus Platform
 
 This is the home of the BrowserPlus platform implementation: portable client
 code that plugs into all popular browsers to provide a new, higher level
-plugin API.  A Plugin API optimized for secure and portable scriptable
+plugin API.  A Plugin API optimized for portable, secure, and scriptable
 web plugins.
 
 _BrowserPlus is free and open source sofware created and supported by Yahoo!_.
