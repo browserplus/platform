@@ -16,24 +16,46 @@ $patchCmd = "patch"
 $libSuffix = "a"
 if CONFIG['arch'] =~ /mswin/
     $platform = "Windows"
-    $sevenZCmd = "#{topDir}\\WinTools\\bin\\7z.exe"
+    $sevenZCmd = "7z.exe"
     # Must call patch "ptch" or we'll get a UAC on Vista.  
-    $patchCmd = "#{topDir}\\WinTools\\bin\\ptch.exe"
+    $patchCmd = "ptch.exe"
     $libSuffix = "lib"
     $cmakeGenerator = "-G \"Visual Studio 9 2008\""
 
-    if $platform == "Windows"
-        rv = system("devenv /? > devenv.out 2>&1")
-        FileUtils.rm_f("devenv.out")
-        if !rv
-            puts ""
-            puts "******************************************"
-            puts "devenv not in search path, run vsvars.bat"
-            puts "******************************************"
-            puts ""
-            exit -1
-        end
+    rv = system("devenv /? > devenv.out 2>&1")
+    FileUtils.rm_f("devenv.out")
+    if !rv
+        puts ""
+        puts "******************************************"
+        puts "devenv not in search path, run vsvars.bat"
+        puts "******************************************"
+        puts ""
+        exit -1
     end
+
+  rv = system("#{$sevenZCmd} > devenv.out 2>&1")    
+    FileUtils.rm_f("devenv.out")
+    if !rv
+        puts ""
+        puts "************************************************************"
+        puts "7z.exe not in search path, install from http://www.7-zip.org"
+        puts "************************************************************"
+        puts ""
+        exit -1
+    end
+
+    rv = system("#{$patchCmd} --help > devenv.out 2>&1")    
+    FileUtils.rm_f("devenv.out")
+    if !rv
+        puts ""
+        puts "************************************************************"
+        puts "ptch.exe not in search path, install from (and then RENAME!):"
+        puts "http://gnuwin32.sourceforge.net/packages/patchutils.htm"
+        puts "************************************************************"
+        puts ""
+        exit -1
+    end
+
 
 elsif CONFIG['arch'] =~ /darwin/
     $platform = "Darwin"
