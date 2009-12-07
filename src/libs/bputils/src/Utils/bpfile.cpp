@@ -13,13 +13,12 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
- * All rights reserved.
+ * Portions created by Yahoo! are Copyright (C) 2006-2009 Yahoo!.
+ * All Rights Reserved.
  * 
  * Contributor(s): 
  * ***** END LICENSE BLOCK *****
  */
-
 
 /*
  *  bpfile.cpp
@@ -933,10 +932,9 @@ doVisit(const bp::file::Path& p,          // node to visit
         if (recursive) {
             // remember ourselves for cycle detection
             pathStack.push_back(DirEntry::fromPath(target));
-            relativeDir /= p.filename();
 
             // visit all children
-            int lastLevel = 0;
+            int lastLevel = -1;
             tRecursiveDirIter end;
             for (tRecursiveDirIter iter(target); iter != end; ++iter) {
                 // resolve link if chasing

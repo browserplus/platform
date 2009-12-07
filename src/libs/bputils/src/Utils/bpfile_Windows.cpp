@@ -13,13 +13,12 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
- * All rights reserved.
+ * Portions created by Yahoo! are Copyright (C) 2006-2009 Yahoo!.
+ * All Rights Reserved.
  * 
  * Contributor(s): 
  * ***** END LICENSE BLOCK *****
  */
-
 
 /*
  *  bpfile_Windows.cpp
@@ -215,7 +214,7 @@ isSymlink(const Path& p)
 {
     bool rval = false;
     WIN32_FIND_DATAW findData;
-    HANDLE h = FindFirstFile(p.external_file_string().c_str(), &findData);
+    HANDLE h = FindFirstFileW(p.external_file_string().c_str(), &findData);
     if (h) {
         if ((findData.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)
             && (findData.dwReserved0 == IO_REPARSE_TAG_SYMLINK)) {
@@ -234,8 +233,9 @@ isLink(const Path& path)
         return true;
     }
 
-    // shortcuts must have .lnk suffix on windows
-    return (path.extension().compare(L".lnk") == 0);
+    // now try for shortcuts
+    Path target = readShortcut(path);
+    return !target.empty();
 }
 
 
@@ -247,9 +247,6 @@ createLink(const Path& path,
     IShellLinkW* psl = NULL; 
 	IPersistFile* ppf = NULL;
 
-    // shortcuts must have .lnk suffix on windows
-    Path linkPath = path;
-    linkPath.replace_extension(L"lnk");
 	try {
 		HRESULT hr = CoInitialize(NULL);
 		if (FAILED(hr)) {
@@ -276,7 +273,7 @@ createLink(const Path& path,
 		}
 
 		// persist it
-		hr = ppf->Save((LPCOLESTR) linkPath.external_file_string().c_str(), TRUE);
+		hr = ppf->Save((LPCOLESTR) path.external_file_string().c_str(), TRUE);
 		if (FAILED(hr)) {
 			throw string("unable to persist shortcut");
 		}
@@ -302,17 +299,29 @@ resolveLink(const Path& path,
 {
     target.clear();
     if (isSymlink(path)) {
-        // If target exists, we just resolve to "path" since it 
-        // is a valid name.  There's GetFinalPathNameByHandle(),
-        // but it isn't present on XP
         HANDLE h = CreateFileW(path.external_file_string().c_str(),
                                0, FILE_SHARE_DELETE|FILE_SHARE_READ|FILE_SHARE_WRITE,
                                NULL, OPEN_EXISTING, 
                                FILE_FLAG_BACKUP_SEMANTICS, NULL);
-        if (h != INVALID_HANDLE_VALUE) {
-            target = path;
-            CloseHandle(h);
+        if (h == INVALID_HANDLE_VALUE) {
+            return false;
         }
+        HMODULE hm = LoadLibrary(_TEXT("kernel32.dll"));
+        if (hm != NULL) {
+            typedef DWORD (WINAPI *PGFPNBY)(HANDLE, LPTSTR, DWORD, DWORD);
+            PGFPNBY fp = (PGFPNBY) GetProcAddress(hm, "GetFinalPathNameByHandleW");
+            if (fp) {
+                wchar_t buf[32768];
+                ZeroMemory(buf, sizeof(buf));
+                DWORD ret = (*fp)(h, buf, sizeof(buf), FILE_NAME_NORMALIZED);
+                if (ret != 0) {
+                    // returned pathname uses \\?\ syntax, strip that
+                    target = &buf[4];
+                }
+            }
+            FreeLibrary(hm);
+        }
+        CloseHandle(h);
     } else {
         // now try shortcuts
         target = readShortcut(path);
@@ -440,7 +449,7 @@ bool
 setFileProperties(const Path& p,
                   const FileInfo& fi)
 {
-	if (p.empty()) return false;
+    if (p.empty()) return false;
 
     tString nativePath = p.external_file_string();
 
