@@ -138,11 +138,6 @@ FileUtils.install("#{topDir}/bins/browserpluscore/BrowserPlus.config",
 FileUtils.install("#{topDir}/bins/browserpluscore/strings.json",
                   updateDaemonDir, :verbose => $beVerbose)
 
-# copy in 3rd party attributions that must make it to the end users' disk
-FileUtils.install(File.join(topDir, "..", "external", "ATTRIBUTIONS.txt"),
-                  updateDaemonDir,
-                  :verbose => $beVerbose)
-
 # install HTML user interface next to the daemon
 updateUIDir = File.join(updateDaemonDir, "ui")
 FileUtils.mkdir_p(updateUIDir, :mode => 0755, :verbose => $beVerbose)
