@@ -44,10 +44,9 @@ FileLinkTest::createLink()
 	Path src = m_dir / "link_to_target.lnk";
     CPPUNIT_ASSERT(bp::file::createLink(src, target));
 
-    // ensure that link resolves to target
+    // ensure that link resolves to target 
     Path resolved;
     CPPUNIT_ASSERT(bp::file::resolveLink(src, resolved));
-    CPPUNIT_ASSERT(resolved == target);
     CPPUNIT_ASSERT(boost::filesystem::equivalent(resolved, target));
 }
 

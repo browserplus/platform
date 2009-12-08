@@ -27,7 +27,6 @@
  *  a few convenience methods. Its primary purpose is to provide
  *  some typedefs to hide whether path or wpath is being used.
  *  On windows, we use wide paths.  Everybody else uses utf8.
- *  On windows, Path uses long form pathnames whenever possible.
  *
  *  As with boost, bp::file::Path only does pathname manipulation
  *  stuff.  Any actual contact with the filesystem is done by 
@@ -89,13 +88,13 @@ namespace bp {
         {
         public:
             // echoing tBase constructors
-            Path() : tBase() {};
-            Path(const tString& s);
-            Path(const tChar* s);
+            Path() : tBase() {}
+            Path(const tString& s) : tBase(s) {}
+            Path(const tChar* s) :tBase(s) {}
             template <class InputIterator>
-                Path(InputIterator s, InputIterator last);
-            Path(const tBase& o);
-  
+                Path(InputIterator s, InputIterator last) : tBase(s, last) {}
+            Path(const tBase& o) : tBase(o.string()) {}
+
 #ifdef WIN32    
             // Windows provides some convenience stuff to take utf8 pathnames.
             // Path("foo") is easier that Path(nativeFromUtf8("foo"))
