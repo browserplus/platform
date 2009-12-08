@@ -55,6 +55,24 @@ using namespace std;
 
 namespace bp { namespace file {
 
+static tString
+longName(const tString& filename)
+{
+    tString s(L"\\\\?\\");
+    s.append(filename);
+    tString rval;
+    wchar_t buf[32768];
+    DWORD n = ::GetLongPathNameW(s.c_str(), buf, sizeof(buf));
+    if (n > 0) {
+        buf[n] = 0;
+        rval = &buf[4];
+    } else {
+        rval = filename;
+    }
+    return rval;
+}
+
+
 static Path
 readShortcut(const Path& path)
 {
@@ -107,6 +125,27 @@ readShortcut(const Path& path)
 	return rval;
 }
 
+
+Path::Path(const tString& s) : tBase(longName(s))
+{
+}
+
+
+Path::Path(const tChar* s) : tBase(longName(wstring(s)))
+{
+}
+
+
+template <class InputIterator>
+Path::Path(InputIterator s, InputIterator last) : tBase(s, last)
+{
+}
+
+
+Path::Path(const tBase& o) : tBase(longName(o.string()))
+{
+}
+  
 
 string
 utf8FromNative(const tString& native)
@@ -233,9 +272,8 @@ isLink(const Path& path)
         return true;
     }
 
-    // now try for shortcuts
-    Path target = readShortcut(path);
-    return !target.empty();
+    // shortcuts have .lnk suffix
+    return extension(path) == L".lnk";
 }
 
 

@@ -111,6 +111,7 @@ MimeTypeTest::chaseLink()
     bp::file::Path resolved;
     bp::file::resolveLink(linkPath, resolved);
     CPPUNIT_ASSERT(resolved == path);
+    CPPUNIT_ASSERT(boost::filesystem::equivalent(resolved, path));
     t = bp::file::mimeTypes(resolved);
     CPPUNIT_ASSERT(t.count("image/jpeg") > 0);
     
@@ -124,6 +125,7 @@ MimeTypeTest::chaseLink()
     CPPUNIT_ASSERT(t.count(bp::file::kLinkMimeType) > 0);
     bp::file::resolveLink(linkPath, resolved);
     CPPUNIT_ASSERT(resolved == newDir);
+    CPPUNIT_ASSERT(boost::filesystem::equivalent(resolved, newDir));
     t = bp::file::mimeTypes(resolved);
     CPPUNIT_ASSERT(t.count(bp::file::kFolderMimeType) > 0); 
     

@@ -27,6 +27,7 @@
  *  a few convenience methods. Its primary purpose is to provide
  *  some typedefs to hide whether path or wpath is being used.
  *  On windows, we use wide paths.  Everybody else uses utf8.
+ *  On windows, Path uses long form pathnames whenever possible.
  *
  *  As with boost, bp::file::Path only does pathname manipulation
  *  stuff.  Any actual contact with the filesystem is done by 
@@ -58,15 +59,15 @@
 namespace bp {
     namespace file {
 
-        extern const std::string kFileUrlPrefix;      // "file://"
+        extern const std::string kFileUrlPrefix;   // "file://"
 
         // mimetypes that we add
-        extern const std::string kFolderMimeType;     // "application/x-folder"
-        extern const std::string kLinkMimeType;       // "application/x-link"
-        extern const std::string kBadLinkMimeType;    // "application/x-badlink"
+        extern const std::string kFolderMimeType;  // "application/x-folder"
+        extern const std::string kLinkMimeType;    // "application/x-link"
+        extern const std::string kBadLinkMimeType; // "application/x-badlink"
 
-        // a bunch of typedefs to deal with the fact that Windows uses wpath and
-        // everyone else uses path
+        // a bunch of typedefs to deal with the fact that Windows uses
+        // wpath and everyone else uses path
 #ifdef WIN32
         typedef boost::filesystem::wpath tBase;
         typedef std::wstring tString;
@@ -83,18 +84,17 @@ namespace bp {
         typedef boost::filesystem::basic_filesystem_error<boost::filesystem::path> tFileSystemError;
 #endif
 
-        // Our path abstraction built on boost::filesystem.  We just add a handful
-        // of convenience methods.
+        // Our path abstraction built on boost::filesystem.
         class Path : virtual public tBase
         {
         public:
             // echoing tBase constructors
-            Path() : tBase() {}
-            Path(const tString& s) : tBase(s) {}
-            Path(const tChar* s) : tBase(s) {}
+            Path() : tBase() {};
+            Path(const tString& s);
+            Path(const tChar* s);
             template <class InputIterator>
-                Path(InputIterator s, InputIterator last) : tBase(s, last) {}
-            Path(const tBase& o) : tBase(o.string()) {}
+                Path(InputIterator s, InputIterator last);
+            Path(const tBase& o);
   
 #ifdef WIN32    
             // Windows provides some convenience stuff to take utf8 pathnames.
@@ -422,29 +422,44 @@ namespace bp {
 // are not in the bp::file namespace, allowing them to be
 // found by clients without requiring "using namespace bp::file"
 
-inline bp::file::Path operator/(const bp::file::Path& lhs, const std::string& rhs) {
+inline bp::file::Path operator/(const bp::file::Path& lhs,
+                                const std::string& rhs) {
     return bp::file::Path(lhs) /= rhs;
 }
-inline bp::file::Path operator/(const bp::file::Path& lhs, const char* rhs) {
+
+inline bp::file::Path operator/(const bp::file::Path& lhs,
+                                const char* rhs) {
     return bp::file::Path(lhs) /= rhs;
 }
-inline bp::file::Path operator/(const std::string& lhs, const bp::file::Path& rhs) {
+
+inline bp::file::Path operator/(const std::string& lhs,
+                                const bp::file::Path& rhs) {
     return bp::file::Path(lhs) /= rhs;
 }
-inline bp::file::Path operator/(const char* lhs, const bp::file::Path& rhs) {
+
+inline bp::file::Path operator/(const char* lhs,
+                                const bp::file::Path& rhs) {
     return bp::file::Path(lhs) /= rhs;
 }
+
 // and now using a tBase, allows things like p.parent_path() / "foo"
-inline bp::file::Path operator/(const bp::file::tBase& lhs, const std::string& rhs) {
+inline bp::file::Path operator/(const bp::file::tBase& lhs,
+                                const std::string& rhs) {
     return bp::file::Path(lhs) /= rhs;
 }
-inline bp::file::Path operator/(const bp::file::tBase& lhs, const char* rhs) {
+
+inline bp::file::Path operator/(const bp::file::tBase& lhs,
+                                const char* rhs) {
     return bp::file::Path(lhs) /= rhs;
 }
-inline bp::file::Path operator/(const std::string& lhs, const bp::file::tBase& rhs) {
+
+inline bp::file::Path operator/(const std::string& lhs,
+                                const bp::file::tBase& rhs) {
      return bp::file::Path(lhs) /= rhs;
 }
-inline bp::file::Path operator/(const char* lhs, const bp::file::tBase& rhs) {
+
+inline bp::file::Path operator/(const char* lhs,
+                                const bp::file::tBase& rhs) {
     return bp::file::Path(lhs) /= rhs;
 }
 #endif

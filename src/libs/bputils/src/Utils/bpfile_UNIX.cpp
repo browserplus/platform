@@ -90,6 +90,27 @@ readLink(const Path& path)
 }
 
 
+Path::Path(const tString& s) : tBase(s)
+{
+}
+
+
+Path::Path(const tChar* s) : tBase(s)
+{
+}
+
+
+template <class InputIterator>
+Path::Path(InputIterator s, InputIterator last) : tBase(s, last)
+{
+}
+
+
+Path::Path(const tBase& o) : tBase(o.string())
+{
+}
+  
+
 #ifndef MACOSX
 Path
 getTempDirectory()
