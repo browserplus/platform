@@ -372,6 +372,10 @@ namespace bp {
 
         struct FileInfo 
         {
+            FileInfo() : mode(0), mtime(0), ctime(0), atime(0), 
+                         sizeInBytes(0), deviceId(0),
+                         fileIdHigh(0), fileIdLow(0) {
+            }
             // permissions - these are unix style permissions as
             // would be passed into chmod(3).  On windows we'll
             // perform a reasonable approximation.
