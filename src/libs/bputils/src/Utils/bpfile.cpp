@@ -917,9 +917,11 @@ doVisit(const bp::file::Path& p,          // node to visit
         return true;
     }
 
-    // visit this node
-    if (v.visitNode(target, relativeDir/p.filename()) == IVisitor::eStop) {
-        return false;
+    // don't visit top directory of a non-recursive visit
+    if (recursive || !relativeDir.empty() || !bfs::is_directory(target)) {
+        if (v.visitNode(target, relativeDir/p.filename()) == IVisitor::eStop) {
+            return false;
+        }
     }
 
     // all done if this is a link and we're not chasing

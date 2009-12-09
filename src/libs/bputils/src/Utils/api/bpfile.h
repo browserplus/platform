@@ -178,7 +178,8 @@ namespace bp {
                                       const Path& relativePath) = 0;
         };
 
-        /** Non-recursive visit of node in a path.
+        /** Non-recursive visit of nodes in a path.  If path is a directory,
+         *  it will not be visited, but its children will.
          *  \param p [IN] - path to visit
          *  \param v [IN] - visitor to apply to each node
          *  \param followLinks [IN] - should links be followed?  If false,
@@ -194,7 +195,8 @@ namespace bp {
                    IVisitor& v,
                    bool followLinks);
 
-        /** Recursive visit of node in a path.  Links cycle detection
+        /** Recursive visit of nodes in a path.  If path is a directory,
+         *  both it and its children will be visited.  Link cycle detection
          *  is performed and cycles are not revisited.
          *  \param p [IN] - path to visit
          *  \param v [IN] - visitor to apply to each node
