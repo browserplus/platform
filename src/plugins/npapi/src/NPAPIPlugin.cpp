@@ -33,16 +33,17 @@
 #endif
 
 #include "BPScriptableObject.h"
-#include "DragAndDrop/DnDPlugletNPAPI.h"
+#include "DragAndDrop/DnDPlugletFactoryNPAPI.h"
 #include "NPAPIObject.h"
 #include "NPAPIPlugin.h"
 #include "NPAPIVariant.h"
 #include "nputils.h"
-#include "PluginCommonLib/FileBrowsePluglet.h"
-#include "PluginCommonLib/LogPluglet.h"
+#include "PluginCommonLib/FileBrowsePlugletFactory.h"
+#include "PluginCommonLib/LogPlugletFactory.h"
 #include "WindowedPluglet.h"
 
 #include <vector>
+#include <list>
 
 NPAPIPlugin::NPAPIPlugin(NPP npp)
     : BPPlugin(), m_npp(npp), m_scriptableObject(NULL), m_session(this),
@@ -129,18 +130,22 @@ NPAPIPlugin::callJsFunction( const plugin::Object* oFunc,
                              ((NPAPIVariant *) pvtRet)->varPtr());
 }
 
-Pluglet*
-NPAPIPlugin::createPluglet( const std::string& sName ) const
+std::list<Pluglet*>
+NPAPIPlugin::createPluglets( const std::string& sName ) const
 {
+    std::list<Pluglet*> rval;
     if (!sName.compare("DragAndDrop")) {
-        return new DnDPlugletNPAPI(m_npp, (BPPlugin *) this);
+        DnDPlugletFactoryNPAPI factory;
+        rval = factory.createPluglets(m_npp, (BPPlugin *) this);
     } else if (!sName.compare("FileBrowser")) {
-        return new FileBrowsePluglet((BPPlugin *) this);
+        FileBrowsePlugletFactory factory;
+        rval = factory.createPluglets((BPPlugin *) this);
     } else if (!sName.compare("Log")) {
-        return new LogPluglet((BPPlugin *) this);
+        LogPlugletFactory factory;
+        rval = factory.createPluglets((BPPlugin *) this);
     }
     
-    return NULL;
+    return rval;
 }
 
 bool

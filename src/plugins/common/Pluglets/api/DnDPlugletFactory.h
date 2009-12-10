@@ -20,39 +20,18 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include "Pluglet.h"
-#include "BPPlugin.h"
+#ifndef __DNDPLUGLETFACTORY_H__
+#define __DNDPLUGLETFACTORY_H__
 
-Pluglet::Pluglet(BPPlugin * plugin,
-                 const bp::service::Description& desc)
-    : m_plugin(plugin), m_desc(desc)
+#include "PlugletFactory.h"
+
+// Class just exists to capture dnd pluglet descriptions in
+// inherited m_descriptions.  Derived classes add createPluglets()
+class DnDPlugletFactory : virtual public PlugletFactory
 {
-}
+ public:
+    DnDPlugletFactory();
+    virtual ~DnDPlugletFactory() {}
+};
 
-Pluglet::~Pluglet()
-{
-}
-
-std::string 
-Pluglet::locale()
-{
-    if (m_locale.empty()) {
-        setLocale("en-US");
-    }
-    return m_locale;
-}
-
-void 
-Pluglet::setLocale(const std::string& locale)
-{
-    m_locale = locale;
-}
-
-
-const bp::service::Description *
-Pluglet::describe()
-{
-    return &m_desc;
-}
-
-
+#endif

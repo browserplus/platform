@@ -68,7 +68,24 @@ DropTargetBase::DropTargetBase(const string& name,
       m_state(DropTargetBase::Idle),
       m_dropState(DropTargetBase::Unknown),
       m_enabled(true),
-      m_limit(limit)
+      m_limit(limit),
+      m_version("1.0.0")
+{
+}
+    
+
+DropTargetBase::DropTargetBase(const string& name,
+                               const string& version)
+    : m_name(name),
+      m_mimetypes(), 
+      m_includeGestureInfo(false),
+      m_dragItems(), 
+      m_previousDragItems(),
+      m_state(DropTargetBase::Idle),
+      m_dropState(DropTargetBase::Unknown),
+      m_enabled(true),
+      m_limit(0),
+      m_version(version)
 {
 }
     
@@ -82,7 +99,8 @@ DropTargetBase::DropTargetBase(const DropTargetBase& dtb)
       m_state(dtb.m_state),
       m_dropState(Unknown),
       m_enabled(dtb.m_enabled),
-      m_limit(dtb.m_limit)
+      m_limit(dtb.m_limit),
+      m_version(dtb.m_version)
 {
 }
 
@@ -191,26 +209,41 @@ DropTargetBase::canAcceptDrop()
 bp::Object*
 DropTargetBase::dropItems()
 {
-    // resolve links
-    vector<Path>::iterator it = m_dragItems.begin();
-    while (it != m_dragItems.end()) {
-        Path path(*it);
-        if (isLink(path)) {
-            if (!resolveLink(path, path)) {
-                it = m_dragItems.erase(it);
-                continue;
-            } else {
-                *it = path;
+    bp::Object* rval = NULL;
+
+    if (m_version.find("1.") == 0) {
+        // version 1 api resolves links here, applies 
+        // mimetype and limits, etc
+        vector<Path>::iterator it = m_dragItems.begin();
+        while (it != m_dragItems.end()) {
+            Path path(*it);
+            if (isLink(path)) {
+                if (!resolveLink(path, path)) {
+                    it = m_dragItems.erase(it);
+                    continue;
+                } else {
+                    *it = path;
+                }
             }
+            ++it;
         }
-        ++it;
+        unsigned int flags = bp::pluginutil::kRecurse;
+        if (m_includeGestureInfo) flags |= bp::pluginutil::kIncludeGestureInfo;
+        rval = bp::pluginutil::applyFilters(m_dragItems, m_mimetypes,
+                                            flags, m_limit);
+    } else {
+        // version 2 and above api just gives you what was dropped
+        bp::List* l = new bp::List;
+        vector<Path>::const_iterator it;
+        for (it = m_dragItems.begin(); it != m_dragItems.end(); ++it) {
+            Path path(*it);
+            l->append(new bp::Path(path));
+        }
+        rval = l;
     }
-        
-    unsigned int flags = bp::pluginutil::kRecurse;
-    if (m_includeGestureInfo) flags |= bp::pluginutil::kIncludeGestureInfo;
-    return bp::pluginutil::applyFilters(m_dragItems, m_mimetypes,
-                                        flags, m_limit);
+    return rval;
 }
+
 
 std::string
 DropTargetBase::name()

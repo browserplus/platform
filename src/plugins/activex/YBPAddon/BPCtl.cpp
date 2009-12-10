@@ -51,7 +51,6 @@
 #include "PluginCommonLib/FileBrowsePluglet.h"
 #include "PluginCommonLib/LogPluglet.h"
 
-
 using namespace std;
 
 
@@ -414,8 +413,8 @@ CBPCtl::callJsFunction( const plugin::Object* poFunc,
 }
 
 
-Pluglet*
-CBPCtl::createPluglet( const std::string& sName ) const
+list<Pluglet*>
+CBPCtl::createPluglets( const std::string& sName ) const
 {
     BPPlugin* pPlugin = const_cast<CBPCtl*>(this);
 
@@ -425,8 +424,7 @@ CBPCtl::createPluglet( const std::string& sName ) const
         // AxDropManager for connection point reasons.
         const IDropManager* pCDM = this;
         IDropManager* pDropMgr = const_cast<IDropManager*>(pCDM);
-
-        return new DnDPluglet( pPlugin, pDropMgr );
+        return AxDnDPlugletFactory::createPluglets( pPlugin, pDropMgr );
     }
     else if (sName == "FileBrowser")
     {

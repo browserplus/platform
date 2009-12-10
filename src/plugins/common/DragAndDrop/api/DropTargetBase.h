@@ -54,6 +54,8 @@ class DropTargetBase
                    const std::set<std::string>& mimeTypes,
                    bool includeGestureInfo,
                    unsigned int limit);
+    DropTargetBase(const std::string& name,
+                   const std::string& version);
     DropTargetBase(const DropTargetBase& dtc);
     virtual ~DropTargetBase();
 
@@ -85,6 +87,7 @@ class DropTargetBase
     DropState m_dropState;
     bool m_enabled;
     unsigned int m_limit;
+    std::string m_version;
 };
 
 #endif

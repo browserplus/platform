@@ -47,9 +47,9 @@ BPSession::BPSession(BPPlugin* pPlugin)
     m_plugletRegistry = new PlugletRegistry;
     
     // register all the pluglets
-    m_plugletRegistry->registerPluglet(m_plugin->createPluglet("DragAndDrop"));
-    m_plugletRegistry->registerPluglet(m_plugin->createPluglet("FileBrowser"));
-    m_plugletRegistry->registerPluglet(m_plugin->createPluglet("Log"));
+    m_plugletRegistry->registerPluglets(m_plugin->createPluglets("DragAndDrop"));
+    m_plugletRegistry->registerPluglets(m_plugin->createPluglets("FileBrowser"));
+    m_plugletRegistry->registerPluglets(m_plugin->createPluglets("Log"));
 
     // allocate a protocol handle 
     m_protoHand = BPAlloc();
@@ -128,6 +128,11 @@ BPSession::findLoadedService(const std::string & service,
 
     if (!wantver.parse(version.c_str()) || !wantminver.parse(minversion)) {
         return false;
+    }
+
+    // XXX
+    for (it = m_loadedServices.begin(); it != m_loadedServices.end(); it++) {
+        BPLOG_INFO_STRM("loaded service: " << it->name() << " / " << it->versionString());
     }
 
     for (it = m_loadedServices.begin(); it != m_loadedServices.end(); it++)

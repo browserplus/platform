@@ -56,6 +56,8 @@ public:
                            const std::set<std::string>& mimeTypes,
                            bool includeGestureInfo,
                            unsigned int limit);
+    virtual bool addTarget(const std::string& name,
+                           const std::string& version);
     virtual bool removeTarget(const std::string& name);
     virtual bool enableTarget(const std::string& name,
                               bool enable);
@@ -111,6 +113,8 @@ protected:
                           const std::set<std::string>& mimeTypes,
                           bool includeGestureInfo,
                           unsigned int limit);
+        DropTargetContext(const std::string& name,
+                          const std::string& version);
         DropTargetContext(const DropTargetContext& dtc);
         virtual ~DropTargetContext() {}
         bool insideRegion(short int x, short int y);

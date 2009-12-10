@@ -54,7 +54,8 @@ class Pluglet
 {
   public:
     /** allocate a pluglet */
-    Pluglet(class BPPlugin * plugin);
+    Pluglet(class BPPlugin * plugin,
+            const bp::service::Description& desc);
 
     /** destroy a pluglet */
     virtual ~Pluglet();
@@ -74,7 +75,7 @@ class Pluglet
     /**
      * Return the pluglet interface
      */
-    virtual const bp::service::Description * describe() = 0;
+    virtual const bp::service::Description * describe();
 
     /** 
      * Get/set locale().  Default is "en-US"

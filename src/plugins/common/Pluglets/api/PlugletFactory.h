@@ -20,39 +20,22 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include "Pluglet.h"
-#include "BPPlugin.h"
+/**
+ * A pluglet factory base class
+ */
 
-Pluglet::Pluglet(BPPlugin * plugin,
-                 const bp::service::Description& desc)
-    : m_plugin(plugin), m_desc(desc)
+#ifndef __PLUGLETFACTORY_H__
+#define __PLUGLETFACTORY_H__
+
+#include "BPUtils/ServiceDescription.h"
+#include "BPUtils/bptypeutil.h"
+#include "ServiceAPI/bpdefinition.h"
+#include <list>
+
+class PlugletFactory
 {
-}
+  protected:
+    std::list<bp::service::Description> m_descriptions;
+};
 
-Pluglet::~Pluglet()
-{
-}
-
-std::string 
-Pluglet::locale()
-{
-    if (m_locale.empty()) {
-        setLocale("en-US");
-    }
-    return m_locale;
-}
-
-void 
-Pluglet::setLocale(const std::string& locale)
-{
-    m_locale = locale;
-}
-
-
-const bp::service::Description *
-Pluglet::describe()
-{
-    return &m_desc;
-}
-
-
+#endif

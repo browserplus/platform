@@ -34,11 +34,13 @@
 
 #include "PluginCommonLib/Pluglet.h"
 #include "PluginCommonLib/BPPlugin.h"
+#include <list>
 
 class LogPluglet : public Pluglet
 {
 public:
-    LogPluglet( BPPlugin* plugin );
+    LogPluglet( BPPlugin* plugin,
+                const bp::service::Description& desc );
     ~LogPluglet();
 
     void execute( unsigned int tid,
@@ -49,8 +51,6 @@ public:
                   plugletExecutionFailureCB failureCB,
                   plugletInvokeCallbackCB callbackCB,
                   void* callbackArgument);
-
-    const bp::service::Description * describe();
 };
 
 #endif

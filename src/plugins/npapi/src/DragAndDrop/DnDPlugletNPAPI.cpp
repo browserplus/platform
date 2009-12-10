@@ -33,9 +33,10 @@
 
 
 DnDPlugletNPAPI::DnDPlugletNPAPI(NPP instance, 
-                                 BPPlugin* plugin)
+                                 BPPlugin* plugin,
+                                 const bp::service::Description& desc)
     // must explicitly invoke Pluglet ctor
-    : Pluglet(plugin), DnDPluglet(plugin, NULL), m_npp(instance)
+    : Pluglet(plugin, desc), DnDPluglet(plugin, NULL, desc), m_npp(instance)
 {
 }
 

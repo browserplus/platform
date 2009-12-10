@@ -20,39 +20,25 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include "Pluglet.h"
-#include "BPPlugin.h"
+/*
+ *  DnDPlugletFactoryNPAPI.h
+ *  BrowserPlusPlugin
+ *
+ *  Copyright 2009 Yahoo! Inc. All rights reserved.
+ *
+ */
+#ifndef __DNDPLUGLETFACTORYNPAPI_H__
+#define __DNDPLUGLETFACTORYNPAPI_H__
 
-Pluglet::Pluglet(BPPlugin * plugin,
-                 const bp::service::Description& desc)
-    : m_plugin(plugin), m_desc(desc)
+#include "common.h"
+#include "PluginCommonLib/DnDPlugletFactory.h"
+#include "PluginCommonLib/Pluglet.h"
+
+class DnDPlugletFactoryNPAPI : virtual public DnDPlugletFactory
 {
-}
+ public:
+    std::list<Pluglet*> createPluglets(NPP instance, 
+                                       BPPlugin* plugin);
+};
 
-Pluglet::~Pluglet()
-{
-}
-
-std::string 
-Pluglet::locale()
-{
-    if (m_locale.empty()) {
-        setLocale("en-US");
-    }
-    return m_locale;
-}
-
-void 
-Pluglet::setLocale(const std::string& locale)
-{
-    m_locale = locale;
-}
-
-
-const bp::service::Description *
-Pluglet::describe()
-{
-    return &m_desc;
-}
-
-
+#endif

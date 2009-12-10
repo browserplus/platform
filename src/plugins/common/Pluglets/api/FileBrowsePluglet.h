@@ -29,6 +29,7 @@
 
 #include "PluginCommonLib/Pluglet.h"
 #include "PluginCommonLib/BPPlugin.h"
+#include <list>
 
 class FileBrowsePluglet : public Pluglet
 {
@@ -42,7 +43,8 @@ class FileBrowsePluglet : public Pluglet
     static const char* kSelectFilesKey;
     static const char* kSelectFolderKey;
 
-    FileBrowsePluglet(BPPlugin * plugin);
+    FileBrowsePluglet(BPPlugin * plugin,
+                      const bp::service::Description& desc);
     virtual ~FileBrowsePluglet();
 
     /** defined per plugin per platform */
@@ -54,9 +56,6 @@ class FileBrowsePluglet : public Pluglet
                  plugletExecutionFailureCB failureCB,
                  plugletInvokeCallbackCB   callbackCB,
                  void * callbackArgument);
-
-    /** define once in Browser Common library */
-    const bp::service::Description * describe();
 };
 
 #endif

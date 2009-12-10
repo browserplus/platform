@@ -34,89 +34,19 @@
 
 using std::string;
 
-
-BPArgumentDefinition s_logArguments[] =
-{
-    {
-        "location",
-        "The location (e.g. method name) from which the log event is emitted.",
-        BPTString,
-        true
-    },
-    {
-        "message",
-        "The message to be logged.",
-        BPTString,
-        true
-    }
-};
-
-
-BPFunctionDefinition s_logFunctions[] =
-{
-    {
-        "Fatal",
-        "Log a fatal error to the Browserplus plugin logging facility.",
-        sizeof(s_logArguments)/sizeof(s_logArguments[0]),
-        s_logArguments
-    },
-    {
-        "Error",
-        "Log an error to the Browserplus plugin logging facility.",
-        sizeof(s_logArguments)/sizeof(s_logArguments[0]),
-        s_logArguments
-    },
-    {
-        "Warn",
-        "Log a warning to the Browserplus plugin logging facility.",
-        sizeof(s_logArguments)/sizeof(s_logArguments[0]),
-        s_logArguments
-    },
-    {
-        "Info",
-        "Log an informational message to the Browserplus plugin logging facility.",
-        sizeof(s_logArguments)/sizeof(s_logArguments[0]),
-        s_logArguments
-    },
-    {
-        "Debug",
-        "Log a debug message to the Browserplus plugin logging facility.",
-        sizeof(s_logArguments)/sizeof(s_logArguments[0]),
-        s_logArguments
-    }
-};
-
-
-// a description of this pluglet.
-static BPCoreletDefinition s_logPlugletDef =
-{
-    "Log",
-    1, 0, 1,
-    "Log to BrowserPlus's logfile on disk.  The available levels in order of "
-    "severity are Fatal, Error, Warn, Info, Debug.",
-    sizeof(s_logFunctions)/sizeof(s_logFunctions[0]),
-    s_logFunctions
-};
-
 bool getArguments( const bp::Object& oArguments,
                    string& sLocation, string& sMessage );
 
 
-LogPluglet::LogPluglet(BPPlugin * plugin) :
-Pluglet(plugin)
+LogPluglet::LogPluglet(BPPlugin * plugin,
+                       const bp::service::Description & desc) 
+    :Pluglet(plugin, desc)
 {
-    m_desc.fromBPCoreletDefinition(&s_logPlugletDef);
 }
 
 
 LogPluglet::~LogPluglet()
 {
-}
-
-const bp::service::Description *
-LogPluglet::describe()
-{
-    return &m_desc;
 }
 
 

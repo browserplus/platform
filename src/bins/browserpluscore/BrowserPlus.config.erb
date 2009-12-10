@@ -45,7 +45,7 @@
     // As a performance tweak, you may set the minimum event level that 
     // will even be considered by plugin logging. 
     // Syntax: "PluginLogLevel": level
-    "PluginLogLevel": "info",
+    "PluginLogLevel": "debug",
 
     // Plugin Logging Setup
     // Syntax: "destination": "level[,layout]"
@@ -53,19 +53,19 @@
     // Multiple destinations may be enabled simultaneously.
     // PluginLogToDebugger is currently win32-specific (uses OutputDebugString).
     // Layout defaults to "standard" for File and Console; "source" for Debugger.
-    "PluginLogToFile": "info",
+    "PluginLogToFile": "debug",
 
     // BrowserPlus Configuration Panel Logging Setup:
     // Syntax: "ConfigPanelLogLevel": "level[,layout]"
     // NOTE: at present, config panel always logs only to file
-	"ConfigPanelLogLevel": "info",
+	"ConfigPanelLogLevel": "debug",
     
     // Daemon setup
     // Syntax: "Options": "option1 option2 etc"
     // -l         enable logging (same "level[,layout]" syntax as above), logs to file
     // -fg        run in foreground, log to console
     // Samples:
-    "Options":"-l=info",
+    "Options":"-l=debug",
 
     // Configure Service logging.
     // Default is to forward logging events from Services on to the logging 
@@ -83,7 +83,7 @@
         // Forward log statements at or above specified level to the logging
         // system used by the service "harness" process.
         // Syntax: "ForwardToHarnessLog": level
-        "ForwardToHarnessLog": "info"
+        "ForwardToHarnessLog": "debug"
 
         // As a performance tweak, you may set the minimum event level that 
         // will even be considered by service-specific loggers. 

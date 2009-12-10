@@ -122,6 +122,40 @@ bool DropChannel::connect( const std::string& sElementId,
 }
 
 
+bool DropChannel::connect( const std::string& sElementId,
+                           unsigned int majorVersion)
+{
+    if (!isAvailable())
+    {
+        BPLOG_ERROR( "Attempted to connect to channel in use!" );
+        return false;
+    }
+
+    CComPtr<IHTMLElement> elem;
+    if (!bp::ie::getDocElementById( m_pDropMgr->browser(), sElementId,
+                                    elem ))
+    {
+        BPLOG_ERROR( "getDocElementById failed!" );
+        return false;
+    }
+
+    m_elemSource = elem;
+
+    // We need the Drop Manager's help to actually wire up the channel.
+    if (!m_pDropMgr->connectDropChannel( m_nChanNum, m_elemSource ))
+    {
+        BPLOG_ERROR( "connectDropChannel failed!" );
+        m_elemSource = 0;
+        return false;
+    }
+
+    // set base class gunk
+    m_majorVersion = majorVersion;
+    
+    return true;
+}
+
+
 bool DropChannel::disconnect()
 {
     if (!m_elemSource)

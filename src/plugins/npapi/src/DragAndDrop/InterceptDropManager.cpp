@@ -124,6 +124,14 @@ InterceptDropManager::DropTargetContext::DropTargetContext(const string& name,
 }
 
 
+InterceptDropManager::DropTargetContext::DropTargetContext(const string& name,
+                                                           const string& version)
+    : DropTargetBase(name, version), 
+      m_top(0), m_bottom(0), m_left(0), m_right(0)
+{
+}
+
+
 InterceptDropManager::DropTargetContext::DropTargetContext(const DropTargetContext& dtc)
     : DropTargetBase(dtc),
       m_top(dtc.m_top), m_bottom(dtc.m_bottom),
@@ -168,6 +176,17 @@ InterceptDropManager::addTarget(const string& name,
 {
     if (m_targets.find(name) != m_targets.end()) return false;
     DropTargetContext dtc(name, mimeTypes, includeGestureInfo, limit);
+    m_targets[name] = dtc;
+    return true;
+}
+
+
+bool
+InterceptDropManager::addTarget(const string& name,
+                                const string& version)
+{
+    if (m_targets.find(name) != m_targets.end()) return false;
+    DropTargetContext dtc(name, version);
     m_targets[name] = dtc;
     return true;
 }

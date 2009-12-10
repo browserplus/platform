@@ -36,6 +36,7 @@
 
 #include <string>
 #include <vector>
+#include <list>
 #include "BPUtils/bptypeutil.h"
 
 
@@ -60,9 +61,9 @@ public:
                                  plugin::Variant* args[], int nArgCount,
                                  plugin::Variant* pvtRet ) const = 0;
     
-    // Creates appropriate plugin-specific pluglet.
-    // Callers own the returned ptr.
-    virtual Pluglet* createPluglet( const std::string& sName ) const = 0;
+    // Creates appropriate plugin-specific pluglets.
+    // Callers own the returned ptrs.
+    virtual std::list<Pluglet*> createPluglets( const std::string& sName ) const = 0;
 
     virtual bool enumerateProperties( const plugin::Object* pObj,
                                       std::vector<std::string>& vsProps ) const = 0;
