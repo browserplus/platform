@@ -261,6 +261,7 @@ void __stdcall HtmlDialog::OnNavigateComplete2( IDispatch* /*pDisp*/,
     }
 }
 
+
 bool HtmlDialog::dpiAware()
 {
     static bool dpiAware = false;
@@ -285,6 +286,7 @@ bool HtmlDialog::dpiAware()
     return dpiAware;
 }
 
+
 float HtmlDialog::dpiScale()
 {
     static float gScale = 0.0;
@@ -296,6 +298,28 @@ float HtmlDialog::dpiScale()
     }
 
     return gScale;
+}
+
+
+bool HtmlDialog::getZoomPercent( int& nZoomPercent )
+{
+    if (!m_spBrowser) {
+        BPLOG_ERROR( "getZoomPercent called with null m_spBrowser." );
+        return false;
+    }
+    
+    CComVariant vtOut;
+    HRESULT hr = m_spBrowser->ExecWB( OLECMDID_OPTICAL_ZOOM,
+                                      OLECMDEXECOPT_DONTPROMPTUSER,
+                                      NULL,
+                                      &vtOut );
+    if (FAILED( hr )) {
+        BPLOG_COM_ERROR( "ExecWB( OLECMDID_OPTICAL_ZOOM ) failed.", hr );
+        return false;
+    }
+
+    nZoomPercent = vtOut.lVal;
+    return true;
 }
 
 
