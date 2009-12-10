@@ -50,7 +50,7 @@ if CONFIG['arch'] =~ /mswin/
         puts ""
         puts "************************************************************"
         puts "ptch.exe not in search path, install from (and then RENAME!):"
-        puts "http://gnuwin32.sourceforge.net/packages/patchutils.htm"
+        puts "http://gnuwin32.sourceforge.net/packages/patch.htm"
         puts "************************************************************"
         puts ""
         exit -1
