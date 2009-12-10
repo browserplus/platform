@@ -37,6 +37,7 @@
 
 #include <assert.h>
 #include <sstream>
+#include <string.h>
 
 using namespace bp;
 

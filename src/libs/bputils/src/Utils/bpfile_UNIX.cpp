@@ -35,6 +35,7 @@
 #include <errno.h>
 #include <sys/time.h>
 #include <iostream>
+#include <string.h>
 
 #ifdef MACOSX
 #include <CoreFoundation/CoreFoundation.h>

@@ -34,6 +34,7 @@
 
 #include "bpurl.h"
 #include <sstream>
+#include <string.h>
 
 #define FILE_URL_PREFIX "file://"
 
