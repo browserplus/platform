@@ -58,21 +58,23 @@ escapeArgs(const std::vector<std::string>& args)
 {
     wchar_t space(' ');
     wchar_t quote('"');
+    wchar_t backslash('\\');
     std::wstring escaped;
     for (size_t i = 0; i < args.size(); i++) {
         if (i > 0) {
             escaped.append(&space, 1);
         }
         std::wstring a = bp::strutil::utf8ToWide(args[i]);
+        escaped.append(&quote, 1);
         for (size_t j = 0; j < a.length(); j++) {
-            if (a[j] == space) {
-                escaped.append(&quote, 1);
-                escaped.append(&(a[j]), 1);
+            if (a[j] == quote) {
+                escaped.append(&backslash, 1);
                 escaped.append(&quote, 1);
             } else {
                 escaped.append(&(a[j]), 1);
             }
         }
+        escaped.append(&quote, 1);
     }
     return escaped;
 }
