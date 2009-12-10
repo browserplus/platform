@@ -272,6 +272,14 @@ bp::paths::getDomainPermissionsPath()
 }
 
 
+Path
+bp::paths::getInstallIDPath()
+{
+    Path path = getProductTopDirectory() / "InstallID";
+    return path;
+}
+
+
 string
 bp::paths::versionString(int major,
                          int minor,

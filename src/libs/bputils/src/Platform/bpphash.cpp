@@ -54,6 +54,13 @@ public:
         m_pConfigMap->add(sKey, new bp::String(sValue));
         return true;
     }
+    
+    void removeStringValue(const std::string& sKey)
+    {
+        if (m_pConfigMap) {
+            m_pConfigMap->kill(sKey.c_str());
+        }
+    }
 
     std::string toString()
     {
@@ -115,4 +122,15 @@ bp::phash::set(const std::string & key, const std::string& val)
     }
     
     return true;
+}
+
+
+void
+bp::phash::remove(const std::string & key)
+{
+    std::string val;
+    if (get(key, val)) {
+        s_cache.removeStringValue(key);
+        bp::strutil::storeToFile(s_phashPath, s_cache.toString());
+    }
 }
