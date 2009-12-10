@@ -22,6 +22,7 @@
 
 #include <iostream>
 
+#include "BPUtils/ARGVConverter.h"
 #include "BPUtils/APTArgParse.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
@@ -149,6 +150,10 @@ private:
 int
 main(int argc, const char ** argv)
 {
+    // handle non-ascii args on win32
+    APT::ARGVConverter conv;
+    conv.convert(argc, argv);
+
     // Services run in a separate process.  Running services in a separate
     // process requires a distinct executable, given combined limitations
     // of win32 and osx, and given the fact that services themselves are
