@@ -123,7 +123,7 @@ bool DropChannel::connect( const std::string& sElementId,
 
 
 bool DropChannel::connect( const std::string& sElementId,
-                           unsigned int majorVersion)
+                           const std::string& sVersion )
 {
     if (!isAvailable())
     {
@@ -150,7 +150,7 @@ bool DropChannel::connect( const std::string& sElementId,
     }
 
     // set base class gunk
-    m_majorVersion = majorVersion;
+    m_version = sVersion;
     
     return true;
 }

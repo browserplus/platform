@@ -55,7 +55,7 @@ public:
                   bool includeGestureInfo,
                   unsigned int limit );
     bool connect( const std::string& sSourceId,
-                  unsigned int majorVersion );
+                  const std::string& sVersion );
     bool disconnect();
 
 private:

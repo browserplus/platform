@@ -27,19 +27,17 @@
  *  Copyright 2009 Yahoo! Inc. All rights reserved.
  *
  */
-#ifndef __DNDPLUGLETFACTORYNAX_H__
-#define __DNDPLUGLETFACTORYAX_H__
-
+#include "PluginCommonLib/DnDPluglet.h"
 #include "DnDPlugletFactoryAx.h"
 
-static std::list<Pluglet*> 
-DnDPlugletFactoryAx::createPluglets( BPPlugin* pPlugin
+std::list<Pluglet*> 
+DnDPlugletFactoryAx::createPluglets( BPPlugin* pPlugin,
                                      IDropManager* pDropMgr )
 {
     std::list<Pluglet*> rval;
     std::list<bp::service::Description>::const_iterator it;
-    for (it = m_descriptions.begin(); it != m_description.end(); ++it) {
-        rval.push_back(DnDPluglet( pPlugin, pDropMgr, it->versionString()));
+    for (it = m_descriptions.begin(); it != m_descriptions.end(); ++it) {
+        rval.push_back(new DnDPluglet( pPlugin, pDropMgr, *it ) );
     }
     return rval;
 }

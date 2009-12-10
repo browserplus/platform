@@ -30,14 +30,15 @@
 #ifndef __DNDPLUGLETFACTORYNAX_H__
 #define __DNDPLUGLETFACTORYAX_H__
 
-#include "common.h"
 #include "PluginCommonLib/DnDPlugletFactory.h"
+#include "PluginCommonLib/IDropManager.h"
+#include "PluginCommonLib/Pluglet.h"
 
 class DnDPlugletFactoryAx : virtual public DnDPlugletFactory
 {
  public:
-    static std::list<Pluglet*> createPluglets( BPPlugin* pPlugin
-                                               IDropManager* pDropMgr );
+    std::list<Pluglet*> createPluglets( BPPlugin* pPlugin,
+                                        IDropManager* pDropMgr );
 };
 
 #endif
