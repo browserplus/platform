@@ -275,7 +275,7 @@ bp::paths::getDomainPermissionsPath()
 Path
 bp::paths::getInstallIDPath()
 {
-    Path path = getProductTopDirectory() / "InstallID";
+    Path path = getPluginWritableDirectory().parent_path() / "InstallID";
     return path;
 }
 
