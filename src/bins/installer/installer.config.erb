@@ -1,7 +1,10 @@
 {
-    "distroServers": ["<%= $cmake["BP_PRIMARY_DISTRO_SERVER_URL"] %>",
-                      "<%= $cmake["BP_SECONDARY_DISTRO_SERVER_URL"] %>",
-                      "<%= $cmake["BP_TERTIARY_DISTRO_SERVER_URL"] %>" ]
+    // One should replace the contents of the distroServers array with
+    // a list of servers that should be queried for software
+    "distroServers": [
+      BP_PRIMARY_DISTRO_SERVER_URL,
+      BP_SECONDARY_DISTRO_SERVERS
+    ]
 
     // specifying the dimensions (and title)of the installer window
     ,"window": {
