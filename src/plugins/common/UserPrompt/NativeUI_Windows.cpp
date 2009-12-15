@@ -185,6 +185,8 @@ bp::Object* PromptApiProvider::invoke( const std::string& sFuncName,
         m_pDlg->show( (int) (nWidth * scale), 
                       (int) (nHeight * scale) );
 
+        m_pDlg->setZoomPercent( 100 );
+        
         return new bp::Null;
     }
     else
