@@ -1,18 +1,17 @@
 #!/usr/bin/env ruby
 
 # <%= $cmake["NoEditWarning"] %>
-#
 
 ##########################################################
 # makeInstaller.rb
 # 
+# Build up a collection of retargetable artifacts at the end of a build,
+# This is everything that would be required to build installers and 
+# update bpkgs which contain a specifiable set of 
 # Make a browserplus install/update package from an SDK
 #
 # Created by Gordon Durand on Fri Oct 5 2007
-# Copyright (c) 2007 Yahoo! Inc.  All rights reserved
-##########################################################
-
-###########################################
+# Copyright (c) 2009 Yahoo! Inc.  All rights reserved
 #
 #  NOTE!!
 # 
@@ -20,7 +19,6 @@
 #  the platform install/update scripts in libs/installer/
 #
 ###########################################
-
 
 require 'rbconfig'
 require 'fileutils'
@@ -37,7 +35,6 @@ topDir = File.dirname(File.dirname(File.dirname(File.expand_path(__FILE__))))
 
 beVerbose = defined?($verbose) ? $verbose : false
 bpVersion = "<%= $cmake["VersionString"] %>"
-certType = "<%= $cmake["BP_CERTIFICATE_TYPE"] %>"
 
 platform = nil
 libSuffix = nil
@@ -68,51 +65,15 @@ end
 # find build directory, externals
 buildDir = File.join(topDir, "build")
 externalsDir = File.expand_path(File.join(topDir, "..", "External"))
-
+buildDir = File.join(topDir, "build")
+artifactsName = "#{bpVersion}_#{platform.downcase}#{($intDir == "Debug" ? "_d" : "")}"
+artifactsDir = File.join(buildDir, artifactsName)
 shippingBinsDir = File.join(topDir, "build", "ShippingBinaries")
 
-# Get signing passwords.  
-authenticodePassword = nil
-bpPassword = 'FreeYourBrowser'
-if certType == 'prod'
-    STDOUT.print("BrowserPlus production signing password: ")
-    bpPassword = STDIN.gets
-    if bpPassword == nil
-      puts "\n\rWARNING: This is a PRODUCTION BUILD, run makeInstaller.rb by hand."
-      puts "A platform update package will NOT be generated at this time" 
-      exit 1
-    end
-    bpPassword.chomp!
-    
-    if platform == "Windows"
-        # sign all exe, dll, cab files in production build
-        STDOUT.print("Authenticode signing password: ")
-        authenticodePassword = STDIN.gets
-        if authenticodePassword == nil
-            puts "\n\rWARNING: This is a PRODUCTION BUILD, run makeInstaller.rb by hand."
-            puts "An installer will NOT be generated at this time" 
-            exit 1
-        end
-        authenticodePassword.chomp!
-    end
-end
-
-# sign all exe, dll, cab files in production build.  They are signed in shippingBinaries
-# so that the signed versions will be copied to update dir
-if platform == "Windows" && certType == 'prod'
-    toSign = ''
-    Dir["#{shippingBinsDir}/**/*.{exe,dll,cab}"].each do|f|
-        toSign = toSign + ' ' + f
-    end
-    if toSign != ''
-        # certType argument not really needed, sign.rb will use authenticode 
-        # certs for .exe,.dll,.cab files
-        system("ruby #{topDir}/signing/sign.rb sign -certType=prod -authenticodePassword=#{authenticodePassword} #{toSign}")
-    end
-end
+puts "Retargetable artifacts to be left in #{artifactsDir}"
 
 # setup paths into update dir
-updateDir = File.join(topDir, "build", "update")
+updateDir = File.join(artifactsDir, "update")
 FileUtils.rm_rf(updateDir, :verbose => $beVerbose)
 FileUtils.mkdir_p(updateDir)
 updateDaemonDir = File.join(updateDir, "daemon")
@@ -230,18 +191,9 @@ end
 # make a pass thru updateDir removing .svn and .git turds
 flushTurds(updateDir, $beVerbose)
 
-# make platform update bpkg
-puts "Making platform update bpkg"
-bpkg = "#{buildDir}/dist/bin/#{$intDir}/bpkg#{exeSuffix}"
-publicKey = "#{topDir}/support/signing/devel_certs/BrowserPlus.crt"
-privateKey = "#{topDir}/support/signing/devel_certs/BrowserPlus.pvk"
-FileUtils.rm_f("#{topDir}/build/BrowserPlus_#{bpVersion}.bpkg")
-system("#{bpkg} pack -publicKey #{publicKey} -privateKey #{privateKey} -password #{bpPassword} -in #{updateDir} -out #{topDir}/build/BrowserPlus_#{bpVersion}.bpkg")
-puts "Created #{topDir}/build/BrowserPlus_#{bpVersion}.bpkg"
-
 # Now make installer itself
 puts "Making installer"
-installerDir = File.join(buildDir, "installer")
+installerDir = File.join(artifactsDir, "install")
 FileUtils.mkdir_p(installerDir)
 FileUtils.install("#{shippingBinsDir}/BrowserPlusInstaller#{exeSuffix}",
                   "#{installerDir}/BrowserPlusInstaller#{exeSuffix}",
@@ -312,14 +264,32 @@ else
                       :mode => 0644, :verbose => $verbose)
 end
 
+# let's copy in the generate.rb script which is the main driver
+# of bpkg/installer generation
+FileUtils.install("#{topDir}/support/build_scripts/generate.rb",
+                  "#{artifactsDir}/",
+                  :mode => 0755, :verbose => $verbose)
+
+# and generate.rb needs a tool or two to do its duty
+FileUtils.mkdir_p("#{artifactsDir}/tools")
+FileUtils.install("#{buildDir}/dist/bin/#{$intDir}/bpkg#{exeSuffix}",
+                  "#{artifactsDir}/tools",
+                  :mode => 0755, :verbose => $verbose)
+
 # remove previous installer
-FileUtils.rm_f(File.join(buildDir, "BrowserPlus_#{bpVersion}#{instSuffix}"))
+# FileUtils.rm_f(File.join(buildDir, "BrowserPlus_#{bpVersion}#{instSuffix}"))
+
+# Get signing passwords.  
+authenticodePassword = nil
+bpPassword = 'FreeYourBrowser'
 
 # and finally, let's generate the end-user installer
-system("ruby -s \"#{installerDir}/buildInstaller.rb\" -fname=\"BrowserPlus_#{bpVersion}#{exeSuffix}\" -outDir=\"#{buildDir}\"")
+# system("ruby -s \"#{installerDir}/buildInstaller.rb\" -fname=\"BrowserPlus_#{bpVersion}#{exeSuffix}\" -outDir=\"#{buildDir}\"")
 
 # and let's sign that installer on windows 
-if platform == "Windows" && authenticodePassword != nil
-  toSign = File.join(buildDir, "BrowserPlus_#{bpVersion}#{exeSuffix}")
-  system("ruby #{topDir}/support/signing/sign.rb sign -certType=prod -authenticodePassword=#{authenticodePassword} #{toSign}")
-end
+# if platform == "Windows" && authenticodePassword != nil
+#   toSign = File.join(buildDir, "BrowserPlus_#{bpVersion}#{exeSuffix}")
+#   system("ruby #{topDir}/support/signing/sign.rb sign -certType=prod -authenticodePassword=#{authenticodePassword} #{toSign}")
+# end
+
+

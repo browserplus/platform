@@ -1,0 +1,102 @@
+#!/usr/bin/env ruby
+#
+# A script to generate installers and bpkgs for the BrowserPlus platform.
+# The idea is that given one bundle of build artifacts its possible to
+# quickly generate different .exe/.dmg/.bpkg packages that are possibly
+# skinned and/or parameterized to a specific set of distribution servers 
+# and/or signing certificates.
+# 
+# Possible Inputs:
+#   -pubKey    path to public signing key 
+#   -privKey   path to private signing key
+#   -pass      password associated with keypair
+#   -authKey   path authenticode signing key (only meaningful on win32)
+#   -outdir    path where output should be left (should be a directory)
+#   -prefix    filename prefix to append to installer and bpkg
+#   -primary   hostname of primary distribution server
+#   -secondary hostname of secondary distribution server (may be repeated)
+#   
+# Potentially Helpful Hints
+#
+#   * pubKey will be guessed from privKey or vice versa if you don't
+#     provide both
+#
+
+require 'fileutils'
+require 'pp'
+
+## step 0: determine and output configuration
+$version = "<%= $cmake["VersionString"] %>"
+$topDir = File.dirname(__FILE__)
+$workDir = File.join($topDir, "work")
+ARGV.each { |arg|
+  k,v = arg.sub(/^-/, "").split '='
+  # -secondary is special, it may be multiply provided
+  if k == "secondary"
+    $secondary = Array.new if !$secondary
+    $secondary.push(v)
+  else 
+    eval "$#{k} = '#{v}'"
+  end
+}
+
+# let's automatically fill out what we can
+gv = global_variables
+$pubKey = $privKey.sub(/\.[^.]*$/, ".crt") if !$pubKey && $privKey
+$privKey = $pubKey.sub(/\.[^.]*$/, ".pvk") if $pubKey && !$privKey
+$outdir = Dir.getwd.to_s if !$outdir
+
+# verify and output command configuration
+puts "Verifying configuration:"
+[ "pubKey", "privKey", "outdir", "prefix", "primary", "pass",
+  "secondary" ].each {|k|
+  raise "missing required cmdline param: -#{k}" if (!gv.include? "$#{k}")
+  v = eval("$#{k}")
+  v = v.join(", ") if v.is_a? Array
+  puts "  $#{k}:\t#{v}"
+}
+
+# perform some argument validation
+raise "cannot find file: #{$pubKey}" if !File.exist? $pubKey
+raise "cannot find file: #{$privKey}" if !File.exist? $privKey
+
+FileUtils.mkdir_p $outdir
+
+$bpkg = File.join($topDir, "tools", "bpkg")
+if !File.executable? $bpkg
+  $bpkg = $bpkg + ".exe"
+  raise "can't find bpkg executable" if !File.executable? $bpkg
+end
+
+## step 1: copy into build directry
+if File.exist? $workDir
+  puts "Removing previous build artifacts"
+  FileUtils.rm_rf($workDir)
+end
+
+puts "Copying artifacts into work directory (#{$workDir})"
+FileUtils.mkdir_p($workDir)  
+FileUtils.cp_r(File.join($topDir, "install"), $workDir)
+FileUtils.cp_r(File.join($topDir, "update"), $workDir)
+
+# step 2: sub in distribution servers
+# XXX
+
+# step 3: authenticode sign binaries if required
+# XXX
+
+# step 4: generate bpkg
+puts "Making platform update bpkg"
+bpkgName = "#{$prefix}_#{$version}.bpkg"
+bpkgPath = File.join($outdir, bpkgName)
+updateDir = File.join($workDir, "update")
+rv = system("#{$bpkg} pack -publicKey #{$pubKey} -privateKey #{$privKey} -password #{$pass} -in #{updateDir} -out #{bpkgPath}")
+raise "error generating bpkg" if !rv
+puts "Created #{bpkgName}"    
+
+# step 5: generate "net" installer
+buildInstallerScript = File.join($workDir, "install", "buildInstaller.rb")
+system("ruby -s \"#{buildInstallerScript}\" -fname=\"#{$prefix}_#{$version}\" -outDir=\"#{$outdir}\"")
+
+# step 6: generate "offline" installer
+# XXX
