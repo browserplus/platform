@@ -70,6 +70,10 @@ if !File.executable? $bpkg
   raise "can't find bpkg executable" if !File.executable? $bpkg
 end
 
+# prepent http:// to server names if needed
+$secondary = $secondary.collect { |x| x =~ /^http/ ? x : "http://" + x }
+$primary = "http://" + $primary if $primary !~ /^http/
+
 ## step 1: copy into build directry
 if File.exist? $workDir
   puts "Removing previous build artifacts"
@@ -84,9 +88,12 @@ FileUtils.cp_r(File.join($topDir, "update"), $workDir)
 # step 2: sub configuration files to provide distribution servers
 #         and drop in pubkey
 secondaryJson = $secondary.collect { |x| "\"#{x}\"" }.join(",")
+allServersJson = [$primary].concat($secondary).collect { |x| "\"#{x}\"" }.join(",")
+
 subs = {
   /BP_PRIMARY_DISTRO_SERVER_URL/ => "\"#{$primary}\"",
   /BP_SECONDARY_DISTRO_SERVERS/ => secondaryJson, 
+  /BP_ALL_DISTRO_SERVERS/ => allServersJson, 
   /BP_BUILD_TYPE/ => "\"#{$buildType}\""
 }
 
@@ -95,7 +102,7 @@ subs = {
   File.join("install", "installer.config")
 ].each { |f|
   f = File.join($workDir, f)
-  puts "substituting #{$workDir}"
+  puts "Updating #{f}"
   contents = File.open(f, "r") { |myf| myf.read }
   subs.each { |pat, rep| contents.sub!(pat, rep) }
   File.open(f, "w+") { |myf| myf.write contents }  
@@ -128,4 +135,20 @@ buildInstallerScript = File.join($workDir, "install", "buildInstaller.rb")
 system("ruby -s \"#{buildInstallerScript}\" -fname=\"#{$prefix}_#{$version}\" -outDir=\"#{$outdir}\"")
 
 # step 6: generate "offline" installer
-# XXX
+
+# first we'll copy in the bpkg
+FileUtils.cp(bpkgPath, File.join($workDir, "install"))
+
+# now let's sub in the name of the bpkg
+instCfgContents = ""
+instCfgPath = File.join($workDir, "install", "installer.config")
+File.open(instCfgPath, "r") { |f|
+  f.lines.each { |l|
+    l = "  ,\"package\": \"#{bpkgName}\"" if l =~ /"package":/
+    instCfgContents = instCfgContents + l
+  }
+}
+File.open(instCfgPath, "w+") { |f| f.write instCfgContents }
+
+# build it!
+system("ruby -s \"#{buildInstallerScript}\" -fname=\"#{$prefix}_#{$version}_full\" -outDir=\"#{$outdir}\"")
