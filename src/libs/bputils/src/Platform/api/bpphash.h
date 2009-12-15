@@ -53,6 +53,9 @@ namespace bp {
          */ 
         bool set(const std::string & key, const std::string& val);
 
+        /** remove a key from the application wide persistent disk store
+         */ 
+        void remove(const std::string & key);
     }
 }
 

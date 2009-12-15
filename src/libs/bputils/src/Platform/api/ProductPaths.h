@@ -216,6 +216,11 @@ namespace bp {
         bp::file::Path getDomainPermissionsPath();
         
         /**
+         *  Get path to installation ID file.  
+         */
+        bp::file::Path getInstallIDPath();
+        
+        /**
          *   Form version string (e.g. "1.0.1")
          *   Letting all args default gets current version.
          */
@@ -253,7 +258,7 @@ namespace bp {
         std::string getEphemeralIPCName();
 
         /**
-         *   "IPC Lock Naem" is a user & platform scoped name which is
+         *   "IPC Lock Name" is a user & platform scoped name which is
          *   approriate to use when establishing a lock to gaurantee
          *   that no other BrowserPlusCore processes are running.
          *   On Windows this is a Mutex name BrowserPlusCore_<USER>_<platform>

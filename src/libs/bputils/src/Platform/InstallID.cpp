@@ -23,6 +23,8 @@
 #include "InstallID.h"
 #include "BPUtils/bpuuid.h"
 #include "BPUtils/bpphash.h"
+#include "BPUtils/bpstrutil.h"
+#include "BPUtils/ProductPaths.h"
 
 namespace bp {
 namespace plat {
@@ -30,19 +32,27 @@ namespace plat {
 
 std::string getInstallID()
 {
+    bp::file::Path path = bp::paths::getInstallIDPath();
+
+    // see if InstallID exists in phash.  If so, migrate it
+    // to new InstallID file
     const std::string ksInstallIdPhashKey = "InstallID";
-    
     std::string sId;
     if (bp::phash::get( ksInstallIdPhashKey, sId ))
     {
-        return sId;
+        (void) bp::strutil::storeToFile( path, sId );
+        bp::phash::remove( ksInstallIdPhashKey );
     }
 
+    // Dig installID out of file if it exists.
+    // If not, create and persist.
     // intentionally do not log on failure here, leave that
     // to higher level code
-    if (bp::uuid::generate( sId ))
-    {
-        (void) bp::phash::set( ksInstallIdPhashKey, sId );
+    if (!bp::strutil::loadFromFile( path, sId )) {
+        if (bp::uuid::generate( sId ))
+        {
+            (void) bp::strutil::storeToFile( path, sId );
+        }
     }
 
     return sId;
