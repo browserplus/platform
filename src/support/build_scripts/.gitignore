@@ -1,3 +1,4 @@
 /installLocally.rb
 /makeInstaller.rb
 /packageSDK.rb
+/generate.rb
