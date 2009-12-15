@@ -136,7 +136,7 @@ FileBrowsePluglet::execute(unsigned int tid,
                            plugletInvokeCallbackCB   callbackCB,
                            void * callbackArgument)
 {
-    if (strcmp(function, "OpenBrowseDialog")) {
+  if (strcmp(function, "OpenBrowseDialog")) {
         std::string s("unknown FileBrowse function " 
                       + std::string(function) + " called");
         failureCB(callbackArgument, tid, pluginerrors::InvalidParameters,
@@ -229,14 +229,16 @@ FileBrowsePluglet::execute(unsigned int tid,
         if (includeGestureInfo) flags |= bp::pluginutil::kIncludeGestureInfo;
         obj = bp::pluginutil::applyFilters(selection, mimetypes, flags, limit);
     } else {
-        // version 2 and above api just gives you what was dropped
+        // version 2 and above api just gives you what was selected
+        bp::Map* m = new bp::Map;
         bp::List* l = new bp::List;
         vector<bp::file::Path>::const_iterator it;
         for (it = selection.begin(); it != selection.end(); ++it) {
             bp::file::Path path(*it);
             l->append(new bp::Path(path));
         }
-        obj = l;
+        m->add("files", l);
+        obj = m;
     }
         
     // return results

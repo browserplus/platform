@@ -68,10 +68,10 @@ BPArgumentDefinition s_browseArguments[] = {
 BPFunctionDefinition s_browseFunctions[] = {
     {
         "OpenBrowseDialog",
-        "Present the user with a native browse dialog.  Return value is a list of "
-        "filehandles for the selected items.  On OSX and Windows XP, multiple files "
-        "and folders may be selected.  On Windows Vista, multiple files or a single "
-        "folder may be selected.",
+        "Present the user with a native browse dialog.  Return value is a "
+        "list of filehandles for the selected items.  On OSX and Windows XP, "
+        "multiple files and folders may be selected.  On Windows Vista and "
+        "Windows 7, multiple files or a single folder may be selected.",
         sizeof(s_browseArguments)/sizeof(s_browseArguments[0]),
         s_browseArguments
     }
@@ -92,8 +92,10 @@ BPFunctionDefinition s_browseFunctions2[] = {
     {
         "OpenBrowseDialog",
         "Present the user with a native browse dialog.  On OSX and Windows XP, "
-		"multiple files and folders may be selected.  On Windows Vista, multiple "
-		"files or a single folder may be selected.",
+		"multiple files and folders may be selected.  On Windows Vista and "
+        "Windows 7, multiple files or a single folder may be selected.  "
+        "Return value has key \"files\" which contains a list of filehandles "
+        "for the selected items.",
         0, NULL
     }
 };
