@@ -15,6 +15,7 @@
 #   -prefix    filename prefix to append to installer and bpkg
 #   -primary   hostname of primary distribution server
 #   -secondary hostname of secondary distribution server (may be repeated)
+#   -buildType a short buildtype tag, i.e. ymail, prod, dev, or beta.
 #   
 # Potentially Helpful Hints
 #
@@ -29,11 +30,12 @@ require 'pp'
 $version = "<%= $cmake["VersionString"] %>"
 $topDir = File.dirname(__FILE__)
 $workDir = File.join($topDir, "work")
+$secondary = Array.new if !$secondary
+$buildType = "unknown"
 ARGV.each { |arg|
   k,v = arg.sub(/^-/, "").split '='
   # -secondary is special, it may be multiply provided
   if k == "secondary"
-    $secondary = Array.new if !$secondary
     $secondary.push(v)
   else 
     eval "$#{k} = '#{v}'"
@@ -79,8 +81,35 @@ FileUtils.mkdir_p($workDir)
 FileUtils.cp_r(File.join($topDir, "install"), $workDir)
 FileUtils.cp_r(File.join($topDir, "update"), $workDir)
 
-# step 2: sub in distribution servers
-# XXX
+# step 2: sub configuration files to provide distribution servers
+#         and drop in pubkey
+secondaryJson = $secondary.collect { |x| "\"#{x}\"" }.join(",")
+subs = {
+  /BP_PRIMARY_DISTRO_SERVER_URL/ => "\"#{$primary}\"",
+  /BP_SECONDARY_DISTRO_SERVERS/ => secondaryJson, 
+  /BP_BUILD_TYPE/ => "\"#{$buildType}\""
+}
+
+[
+  File.join("update", "daemon", "BrowserPlus.config"),
+  File.join("install", "installer.config")
+].each { |f|
+  f = File.join($workDir, f)
+  puts "substituting #{$workDir}"
+  contents = File.open(f, "r") { |myf| myf.read }
+  subs.each { |pat, rep| contents.sub!(pat, rep) }
+  File.open(f, "w+") { |myf| myf.write contents }  
+}
+
+# copy in public key
+[
+  File.join("update", "permissions", "BrowserPlus.crt"),
+  File.join("install", "BrowserPlus.crt")
+].each { |f|
+  f = File.join($workDir, f)
+  puts "copy pubkey to #{f}"
+  FileUtils.cp($pubKey, f)
+}
 
 # step 3: authenticode sign binaries if required
 # XXX
