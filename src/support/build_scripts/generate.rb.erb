@@ -9,6 +9,10 @@
 # Possible Inputs:
 #   -pubKey    path to public signing key 
 #   -privKey   path to private signing key
+#   -certStore if you wish to allow browserplus to support updates/services
+#              signed by multiple keys, you can provide an alternate path
+#              to a certStore (combine keys by concatenating public keys
+#              into a single file)
 #   -pass      password associated with keypair
 #   -authKey   path authenticode signing key (only meaningful on win32)
 #   -outdir    path where output should be left (should be a directory)
@@ -21,6 +25,9 @@
 #
 #   * pubKey will be guessed from privKey or vice versa if you don't
 #     provide both
+#   * pubKey/privKey specify the keys to use to *sign* the platform
+#     distribution, certStore specifies the keys to distribute with the
+#     platform for signature validation of downloaded updates and resources
 #
 
 require 'fileutils'
@@ -43,15 +50,16 @@ ARGV.each { |arg|
 }
 
 # let's automatically fill out what we can
-gv = global_variables
 $pubKey = $privKey.sub(/\.[^.]*$/, ".crt") if !$pubKey && $privKey
 $privKey = $pubKey.sub(/\.[^.]*$/, ".pvk") if $pubKey && !$privKey
 $outdir = Dir.getwd.to_s if !$outdir
+$certStore = $pubKey if !$certStore
 
 # verify and output command configuration
 puts "Verifying configuration:"
+gv = global_variables
 [ "pubKey", "privKey", "outdir", "prefix", "primary", "pass",
-  "secondary" ].each {|k|
+  "secondary", "certStore" ].each {|k|
   raise "missing required cmdline param: -#{k}" if (!gv.include? "$#{k}")
   v = eval("$#{k}")
   v = v.join(", ") if v.is_a? Array
@@ -61,6 +69,7 @@ puts "Verifying configuration:"
 # perform some argument validation
 raise "cannot find file: #{$pubKey}" if !File.exist? $pubKey
 raise "cannot find file: #{$privKey}" if !File.exist? $privKey
+raise "cannot find file: #{$certStore}" if !File.exist? $certStore
 
 FileUtils.mkdir_p $outdir
 
@@ -108,14 +117,14 @@ subs = {
   File.open(f, "w+") { |myf| myf.write contents }  
 }
 
-# copy in public key
+# copy in certStore
 [
   File.join("update", "permissions", "BrowserPlus.crt"),
   File.join("install", "BrowserPlus.crt")
 ].each { |f|
   f = File.join($workDir, f)
-  puts "copy pubkey to #{f}"
-  FileUtils.cp($pubKey, f)
+  puts "copy certStore to #{f}"
+  FileUtils.cp($certStore, f)
 }
 
 # step 3: authenticode sign binaries if required
