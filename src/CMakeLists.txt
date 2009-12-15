@@ -38,6 +38,9 @@ INCLUDE(${YBP_BuildConfigs})
 # include platform version defines
 INCLUDE(PlatformVersion.cmake)
 
+# what signing certificates do we use?
+# To make a production build:
+#   "cmake -DBP_BUILD_TYPE:STRING=production -DCMAKE_BUILD_TYPE:STRING=Release .."
 IF (NOT BP_BUILD_TYPE)
   SET(BP_BUILD_TYPE "devel")
 ENDIF ()
