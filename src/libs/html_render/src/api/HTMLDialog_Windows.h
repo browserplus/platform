@@ -100,6 +100,7 @@ public:
     float                   dpiScale();
 
     bool                    getZoomPercent( int& nZoomPercent );
+    bool                    setZoomPercent( int nZoomPercent );
     
     
 // Our dialog id - needs to map to a dialog in a .rc file
