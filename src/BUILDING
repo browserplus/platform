@@ -1,3 +1,15 @@
+Some Influential Environmental Variables;
+
+During build time the built BrowserPlus platform will be installed
+(user-scoped) on your machine.  Certain environment variables allow
+you to control how that installed version is configured:
+
+  BP_LOG_LEVEL - one of info, debug, warn, or error.  Controls how vigorously
+                 BrowserPlus logs in its logfiles.  
+  BP_DISTRO_SERVERS - a comma separated list of hostnames which are the
+                 distribution servers you'd like BrowserPlus to query
+                 for permissions, updates, and services.
+
 Building on OSX:
   Setting up your environment:
     1. install the latest version of XCode (at time of writting 2.5 or 3.0 for tiger/leopard)

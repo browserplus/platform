@@ -14,21 +14,34 @@
 
 require 'fileutils'
 require 'pathname'
-
 require 'rbconfig'
 include Config
 
+if CONFIG['arch'] =~ /mswin/
+    platform = 'windows'
+else
+    platform = 'darwin'
+end
+bpVersion = "<%= $cmake["VersionString"] %>"
+updatePkgName = "BrowserPlus_#{bpVersion}.bpkg"
+buildType = "<%= $cmake["CMAKE_BUILD_TYPE"] %>"
+buildTypeSuffix = (buildType == "Debug" ? "_d" : "")
+
 puts "installing locally..."
 $topDir = File.dirname(File.dirname(File.dirname(File.expand_path(__FILE__))))
-installerExe = File.join($topDir, "build", "installer", "BrowserPlusInstaller")
-updatePkg = File.join($topDir, "build", "BrowserPlus_<%= $cmake["VersionString"] %>.bpkg")
+installerExe = File.join($topDir, "build",
+                         "#{bpVersion}_#{platform}#{buildTypeSuffix}",
+                         "work", "install", "BrowserPlusInstaller")
+updatePkg = File.join($topDir, "build", updatePkgName)
 if CONFIG['arch'] =~ /mswin/
     installerExe.gsub!(/\//, '\\')
     updatePkg.gsub!(/\//, '\\')
 end
-if system("#{installerExe} -nogui=1 -verbose=1 -pkg=#{updatePkg}")
+
+updateCmd = "#{installerExe} -nogui=1 -verbose=1 -pkg=#{updatePkg}"
+puts updateCmd
+if system(updateCmd)
     puts "BrowserPlusInstaller succeeded"
 else
     puts "BrowserPlusInstaller failed with exitstatus " + $?.to_s
 end
-

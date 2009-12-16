@@ -94,15 +94,16 @@ public:
 public:
     CComPtr<IWebBrowser2>   getBrowser();
     std::string             getUrl();
-    void                    show( int nWidth, int nHeight );
 
     bool                    dpiAware();
     float                   dpiScale();
+    
+    // Show the dialog.
+    // nInitialZoomPcnt - 0 means leave zoom unchanged
+    void                    show( int nWidth, int nHeight,
+                                  int nInitialZoomPcnt = 0 );
 
-    bool                    getZoomPercent( int& nZoomPercent );
-    bool                    setZoomPercent( int nZoomPercent );
-    
-    
+   
 // Our dialog id - needs to map to a dialog in a .rc file
 // (and has to be public).
 public:
@@ -146,6 +147,10 @@ private:
     void __stdcall OnNavigateComplete2( IDispatch* pDisp, VARIANT* URL );
 
     
+// Internal Methods    
+    bool                    getZoomPercent( int& nZoomPercent );
+    bool                    setZoomPercent( int nZoomPercent );
+    
 // Internal State
 private:
     std::string             m_sTitle;
@@ -154,6 +159,7 @@ private:
     EventListener*          m_pListener;
     CAxWindow               m_awBrowser;
     CComPtr<IWebBrowser2>   m_spBrowser;
+    int                     m_nZoomRestorePcnt; // 0 means no restore necessary
 };
 
 
