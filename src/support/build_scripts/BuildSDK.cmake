@@ -80,12 +80,6 @@ ADD_CUSTOM_TARGET(MakeInstaller ALL
                   DEPENDS ${allShippingDepends}
                   COMMAND ruby -s \"${rubyMakeInstaller}\" -intDir=${CMAKE_CFG_INTDIR}
                   COMMENT "Make BrowserPlus installer")
-IF (WIN32)
-    ADD_CUSTOM_COMMAND(TARGET MakeInstaller POST_BUILD
-        COMMAND ruby -s \"${rubySign}\" sign ${BP_CERTIFICATE_TYPE} 
-            \"${CMAKE_CURRENT_BINARY_DIR}/BrowserPlus_${VersionString}.exe\"
-            \"${CMAKE_CURRENT_BINARY_DIR}/bpsdk/BrowserPlus_${VersionString}.exe\")
-ENDIF ()
 ADD_DEPENDENCIES(MakeInstaller PackageSDK)
 
 #############################################################
