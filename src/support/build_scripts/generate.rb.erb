@@ -1,0 +1,173 @@
+#!/usr/bin/env ruby
+#
+# A script to generate installers and bpkgs for the BrowserPlus platform.
+# The idea is that given one bundle of build artifacts its possible to
+# quickly generate different .exe/.dmg/.bpkg packages that are possibly
+# skinned and/or parameterized to a specific set of distribution servers 
+# and/or signing certificates.
+# 
+# Possible Inputs:
+#   -pubKey    path to public signing key 
+#   -privKey   path to private signing key
+#   -certStore if you wish to allow browserplus to support updates/services
+#              signed by multiple keys, you can provide an alternate path
+#              to a certStore (combine keys by concatenating public keys
+#              into a single file)
+#   -pass      password associated with keypair
+#   -authKey   path authenticode signing key (only meaningful on win32)
+#   -outdir    path where output should be left (should be a directory)
+#   -prefix    filename prefix to append to installer and bpkg
+#   -primary   hostname of primary distribution server
+#   -secondary hostname of secondary distribution server (may be repeated)
+#   -buildType a short buildtype tag, i.e. ymail, prod, dev, or beta.
+#   -logLevel  platform log-level: debug, info, warn, or error
+#   
+# Potentially Helpful Hints
+#
+#   * pubKey will be guessed from privKey or vice versa if you don't
+#     provide both
+#   * pubKey/privKey specify the keys to use to *sign* the platform
+#     distribution, certStore specifies the keys to distribute with the
+#     platform for signature validation of downloaded updates and resources
+#
+
+require 'fileutils'
+require 'rbconfig'
+include Config
+
+exeSuffix = ""
+if CONFIG['arch'] =~ /mswin/
+  exeSuffix = ".exe"
+end
+
+## step 0: determine and output configuration
+$version = "<%= $cmake["VersionString"] %>"
+$topDir = File.dirname(__FILE__)
+$workDir = File.join($topDir, "work")
+$secondary = Array.new if !$secondary
+$buildType = "unknown"
+$logLevel = "info"
+
+ARGV.each { |arg|
+  k,v = arg.sub(/^-/, "").split '='
+  # -secondary is special, it may be multiply provided
+  if k == "secondary"
+    $secondary.push(v)
+  else 
+    eval "$#{k} = '#{v}'"
+  end
+}
+
+# let's automatically fill out what we can
+$pubKey = $privKey.sub(/\.[^.]*$/, ".crt") if !$pubKey && $privKey
+$privKey = $pubKey.sub(/\.[^.]*$/, ".pvk") if $pubKey && !$privKey
+$outdir = Dir.getwd.to_s if !$outdir
+$certStore = $pubKey if !$certStore
+
+# verify and output command configuration
+puts "Verifying configuration:"
+[ "prefix", "buildType", "logLevel", "primary", "secondary",
+  "certStore", "pubKey", "privKey", "pass", "outdir"
+].each {|k|
+  raise "missing required cmdline param: -#{k}" if (!eval("$#{k}"))
+  v = eval("$#{k}")
+  v = v.join(", ") if v.is_a? Array
+  puts "  $#{k}:\t#{v}"
+}
+
+# perform some argument validation
+raise "cannot find file: #{$pubKey}" if !File.exist? $pubKey
+raise "cannot find file: #{$privKey}" if !File.exist? $privKey
+raise "cannot find file: #{$certStore}" if !File.exist? $certStore
+
+FileUtils.mkdir_p $outdir
+
+$bpkg = File.join($topDir, "tools", "bpkg")
+if !File.executable? $bpkg
+  $bpkg = $bpkg + ".exe"
+  raise "can't find bpkg executable" if !File.executable? $bpkg
+end
+
+# prepent http:// to server names if needed
+$secondary = $secondary.collect { |x| x =~ /^http/ ? x : "http://" + x }
+$primary = "http://" + $primary if $primary !~ /^http/
+
+## step 1: copy into build directry
+if File.exist? $workDir
+  puts "Removing previous build artifacts"
+  FileUtils.rm_rf($workDir)
+end
+
+puts "Copying artifacts into work directory (#{$workDir})"
+FileUtils.mkdir_p($workDir)  
+FileUtils.cp_r(File.join($topDir, "install"), $workDir)
+FileUtils.cp_r(File.join($topDir, "update"), $workDir)
+
+# step 2: sub configuration files to provide distribution servers
+#         and drop in pubkey
+secondaryJson = $secondary.collect { |x| "\"#{x}\"" }.join(",")
+allServersJson = [$primary].concat($secondary).collect { |x| "\"#{x}\"" }.join(",")
+
+subs = {
+  /BP_PRIMARY_DISTRO_SERVER_URL/ => "\"#{$primary}\"",
+  /BP_SECONDARY_DISTRO_SERVERS/ => secondaryJson, 
+  /BP_ALL_DISTRO_SERVERS/ => allServersJson, 
+  /BP_BUILD_TYPE/ => "\"#{$buildType}\"",
+  /BP_LOG_LEVEL/ => "#{$logLevel}"
+}
+
+[
+  File.join("update", "daemon", "BrowserPlus.config"),
+  File.join("install", "installer.config")
+].each { |f|
+  f = File.join($workDir, f)
+  puts "Updating #{f}"
+  contents = File.open(f, "r") { |myf| myf.read }
+  subs.each { |pat, rep| contents.sub!(pat, rep) }
+  File.open(f, "w+") { |myf| myf.write contents }  
+}
+
+# copy in certStore
+[
+  File.join("update", "permissions", "BrowserPlus.crt"),
+  File.join("install", "BrowserPlus.crt")
+].each { |f|
+  f = File.join($workDir, f)
+  puts "copy certStore to #{f}"
+  FileUtils.cp($certStore, f)
+}
+
+# step 3: authenticode sign binaries if required
+# XXX
+
+# step 4: generate bpkg
+puts "Making platform update bpkg"
+bpkgName = "#{$prefix}_#{$version}.bpkg"
+bpkgPath = File.join($outdir, bpkgName)
+updateDir = File.join($workDir, "update")
+rv = system("#{$bpkg} pack -publicKey #{$pubKey} -privateKey #{$privKey} -password #{$pass} -in #{updateDir} -out #{bpkgPath}")
+raise "error generating bpkg" if !rv
+puts "Created #{bpkgName}"    
+
+# step 5: generate "net" installer
+buildInstallerScript = File.join($workDir, "install", "buildInstaller.rb")
+system("ruby -s \"#{buildInstallerScript}\" -fname=\"#{$prefix}_#{$version}#{exeSuffix}\" -outDir=\"#{$outdir}\"")
+
+# step 6: generate "offline" installer
+
+# first we'll copy in the bpkg
+FileUtils.cp(bpkgPath, File.join($workDir, "install"))
+
+# now let's sub in the name of the bpkg
+instCfgContents = ""
+instCfgPath = File.join($workDir, "install", "installer.config")
+File.open(instCfgPath, "r") { |f|
+  f.lines.each { |l|
+    l = "  ,\"package\": \"#{bpkgName}\"" if l =~ /"package":/
+    instCfgContents = instCfgContents + l
+  }
+}
+File.open(instCfgPath, "w+") { |f| f.write instCfgContents }
+
+# build it!
+system("ruby -s \"#{buildInstallerScript}\" -fname=\"#{$prefix}_#{$version}_full#{exeSuffix}\" -outDir=\"#{$outdir}\"")
