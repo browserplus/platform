@@ -301,4 +301,5 @@ generateCmd = generateCmd + " -certStore=#{certStore} -pass=#{pass} -outdir=\"#{
 generateCmd = generateCmd + " -prefix=BrowserPlus -primary=#{primary}"
 secondaries.each { |s|  generateCmd = generateCmd + " -secondary=#{s}" }
 generateCmd = generateCmd + " -buildType=ephemeral"
-puts generateCmd
+system(generateCmd)
+
