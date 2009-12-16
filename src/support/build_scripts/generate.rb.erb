@@ -58,8 +58,8 @@ $certStore = $pubKey if !$certStore
 # verify and output command configuration
 puts "Verifying configuration:"
 gv = global_variables
-[ "pubKey", "privKey", "outdir", "prefix", "primary", "pass",
-  "secondary", "certStore" ].each {|k|
+[ "buildType", "pubKey", "privKey", "outdir", "prefix", "primary",
+  "pass", "secondary", "certStore" ].each {|k|
   raise "missing required cmdline param: -#{k}" if (!gv.include? "$#{k}")
   v = eval("$#{k}")
   v = v.join(", ") if v.is_a? Array

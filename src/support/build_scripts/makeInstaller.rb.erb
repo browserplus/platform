@@ -276,20 +276,29 @@ FileUtils.install("#{buildDir}/dist/bin/#{$intDir}/bpkg#{exeSuffix}",
                   "#{artifactsDir}/tools",
                   :mode => 0755, :verbose => $verbose)
 
-# remove previous installer
-# FileUtils.rm_f(File.join(buildDir, "BrowserPlus_#{bpVersion}#{instSuffix}"))
+# remove previous installers and update pkg
+FileUtils.rm_f(File.join(buildDir, "BrowserPlus_#{bpVersion}#{instSuffix}"))
+FileUtils.rm_f(File.join(buildDir, "BrowserPlus_#{bpVersion}_full#{instSuffix}"))
+FileUtils.rm_f(File.join(buildDir, "BrowserPlus_#{bpVersion}.bpkg"))
 
-# Get signing passwords.  
-authenticodePassword = nil
-bpPassword = 'FreeYourBrowser'
+# generate installers and update pkg
 
-# and finally, let's generate the end-user installer
-# system("ruby -s \"#{installerDir}/buildInstaller.rb\" -fname=\"BrowserPlus_#{bpVersion}#{exeSuffix}\" -outDir=\"#{buildDir}\"")
+# now lets determine distribution servers.
+primary = "browserplus.yahoo.com"
+secondaries = Array.new
+if ENV.has_key? "BP_DISTRO_SERVERS"
+  secondaries = ENV['BP_DISTRO_SERVERS'].split(/,/)
+  primary = secondaries[0]
+  secondaries = secondaries[1,-1]
+end
 
-# and let's sign that installer on windows 
-# if platform == "Windows" && authenticodePassword != nil
-#   toSign = File.join(buildDir, "BrowserPlus_#{bpVersion}#{exeSuffix}")
-#   system("ruby #{topDir}/support/signing/sign.rb sign -certType=prod -authenticodePassword=#{authenticodePassword} #{toSign}")
-# end
+pass = "FreeYourBrowser"
+pubKey = "#{topDir}/support/signing/devel_certs/BrowserPlus.crt"
+certStore = "#{topDir}/support/signing/Combined.crt"
 
-
+generateCmd = "ruby \"#{artifactsDir}/generate.rb\" -pubKey=#{pubKey}"
+generateCmd = generateCmd + " -certStore=#{certStore} -pass=#{pass} -outdir=\"#{buildDir}\"" 
+generateCmd = generateCmd + " -prefix=BrowserPlus -primary=#{primary}"
+secondaries.each { |s|  generateCmd = generateCmd + " -secondary=#{s}" }
+generateCmd = generateCmd + " -buildType=ephemeral"
+puts generateCmd
