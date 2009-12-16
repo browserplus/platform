@@ -32,7 +32,13 @@
 #
 
 require 'fileutils'
-require 'pp'
+require 'rbconfig'
+include Config
+
+exeSuffix = ""
+if CONFIG['arch'] =~ /mswin/
+  exeSuffix = ".exe"
+end
 
 ## step 0: determine and output configuration
 $version = "<%= $cmake["VersionString"] %>"
@@ -145,7 +151,7 @@ puts "Created #{bpkgName}"
 
 # step 5: generate "net" installer
 buildInstallerScript = File.join($workDir, "install", "buildInstaller.rb")
-system("ruby -s \"#{buildInstallerScript}\" -fname=\"#{$prefix}_#{$version}\" -outDir=\"#{$outdir}\"")
+system("ruby -s \"#{buildInstallerScript}\" -fname=\"#{$prefix}_#{$version}#{exeSuffix}\" -outDir=\"#{$outdir}\"")
 
 # step 6: generate "offline" installer
 
@@ -164,4 +170,4 @@ File.open(instCfgPath, "r") { |f|
 File.open(instCfgPath, "w+") { |f| f.write instCfgContents }
 
 # build it!
-system("ruby -s \"#{buildInstallerScript}\" -fname=\"#{$prefix}_#{$version}_full\" -outDir=\"#{$outdir}\"")
+system("ruby -s \"#{buildInstallerScript}\" -fname=\"#{$prefix}_#{$version}_full#{exeSuffix}\" -outDir=\"#{$outdir}\"")
