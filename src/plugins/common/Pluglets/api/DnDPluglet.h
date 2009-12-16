@@ -36,7 +36,9 @@ class DnDPluglet : public virtual Pluglet,
 {
   public:
     DnDPluglet(BPPlugin* plugin,
-               IDropManager* dropMgr);
+               IDropManager* dropMgr,
+               const bp::service::Description& desc);
+
     virtual ~DnDPluglet();
 
     // Pluglet methods
@@ -48,8 +50,6 @@ class DnDPluglet : public virtual Pluglet,
                          plugletExecutionFailureCB failureCB,
                          plugletInvokeCallbackCB callbackCB,
                          void* callbackArgument);
-
-    const bp::service::Description * describe();
 
   protected:
     struct DnDCallbackInfo

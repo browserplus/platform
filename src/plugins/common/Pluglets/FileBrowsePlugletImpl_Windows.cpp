@@ -642,13 +642,25 @@ FileBrowsePluglet::execute(unsigned int tid,
         }
     }
 
-    // vPaths should now be populated with selections.
-    // Apply our filtering and invoke the callback.
-    unsigned int flags = 0;
-    if (recurse) flags |= bp::pluginutil::kRecurse;
-    if (includeGestureInfo) flags |= bp::pluginutil::kIncludeGestureInfo;
-    bp::Object* pObj = bp::pluginutil::applyFilters(vPaths, mimetypes,
-                                                    flags, limit);
+    bp::Object* pObj = NULL;
+    if (m_desc.majorVersion() == 1) {
+        // version 1 applies filtering, recurses, etc
+        unsigned int flags = 0;
+        if (recurse) flags |= bp::pluginutil::kRecurse;
+        if (includeGestureInfo) flags |= bp::pluginutil::kIncludeGestureInfo;
+        pObj = bp::pluginutil::applyFilters(vPaths, mimetypes, flags, limit);
+    } else {
+        // version 2 and above just return what was selected
+        bp::Map* m = new bp::Map;
+        bp::List* l = new bp::List;
+        vector<bp::file::Path>::const_iterator it;
+        for (it = vPaths.begin(); it != vPaths.end(); ++it) {
+            bp::file::Path path(*it);
+            l->append(new bp::Path(path));
+        }
+        m->add("files", l);
+        pObj = m;
+    }
     successCB(callbackArgument, tid, pObj);
     delete pObj;
 }

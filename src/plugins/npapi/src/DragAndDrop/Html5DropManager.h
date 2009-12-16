@@ -48,6 +48,8 @@ public:
                            const std::set<std::string>& mimeTypes,
                            bool includeGestureInfo,
                            unsigned int limit);
+    virtual bool addTarget(const std::string& name,
+                           const std::string& version);
     virtual bool removeTarget(const std::string& name);
     virtual bool enableTarget(const std::string& name,
                               bool enable);
@@ -84,6 +86,11 @@ protected:
                           const std::set<std::string>& mimeTypes,
                           bool includeGestureInfo,
                           unsigned int limit,
+                          Html5DropManager * theMan);
+
+        DropTargetContext(NPP m_npp,
+                          const std::string& name,
+                          const std::string& version,
                           Html5DropManager * theMan);
 
         virtual ~DropTargetContext();

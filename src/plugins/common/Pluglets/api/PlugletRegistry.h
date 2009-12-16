@@ -43,7 +43,7 @@ class PlugletRegistry
     /** destroy a pluglet registry */
     ~PlugletRegistry();
 
-    /** register a new pluglet in the pluglet registry.
+    /** register new pluglets in the pluglet registry.
      *  After registering a pluglet, the PlugletRegistry assumes
      *  responsibility for the memory.  When the registry is freed,
      *  the pluglet will be release.
@@ -51,7 +51,7 @@ class PlugletRegistry
      *  \returns false if an error is encountered (pluglet already
      *           registered with same name 
      */
-    bool registerPluglet(Pluglet * pluglet);
+    bool registerPluglets(std::list<Pluglet *> pluglets);
 
     /**
      * Find a pluglet with a matching name, version, and minversion.

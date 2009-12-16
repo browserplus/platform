@@ -136,7 +136,7 @@ FileBrowsePluglet::execute(unsigned int tid,
                            plugletInvokeCallbackCB   callbackCB,
                            void * callbackArgument)
 {
-    if (strcmp(function, "OpenBrowseDialog")) {
+  if (strcmp(function, "OpenBrowseDialog")) {
         std::string s("unknown FileBrowse function " 
                       + std::string(function) + " called");
         failureCB(callbackArgument, tid, pluginerrors::InvalidParameters,
@@ -144,31 +144,33 @@ FileBrowsePluglet::execute(unsigned int tid,
         return;
     }
 
-    // Dig out args
     bool recurse = true;
-    if (arguments->has("recurse", BPTBoolean)) {
-        recurse = ((bp::Bool*) arguments->get("recurse"))->value();
-    }
-    
     std::set<std::string> mimetypes;
-    if (arguments->has("mimeTypes", BPTList)) {
-        const bp::List* l = (const bp::List*) arguments->get("mimeTypes");
-        for (unsigned int i = 0; i < l->size(); i++) {
-            const bp::String* s = dynamic_cast<const bp::String*>(l->value(i));
-            if (s) {
-                mimetypes.insert(s->value());
-            }
-        }
-    } 
-    
     bool includeGestureInfo = false;
-    if (arguments->has("includeGestureInfo", BPTBoolean)) {
-        includeGestureInfo = ((bp::Bool*) arguments->get("includeGestureInfo"))->value();
-    }
-    
     unsigned int limit = 10000;
-    if (arguments->has("limit", BPTInteger)) {
-        limit = ((bp::Integer*) arguments->get("limit"))->value();
+    if (m_desc.majorVersion() == 1) {
+        // Dig out args
+        if (arguments->has("recurse", BPTBoolean)) {
+          recurse = ((bp::Bool*) arguments->get("recurse"))->value();
+        }
+    
+        if (arguments->has("mimeTypes", BPTList)) {
+            const bp::List* l = (const bp::List*) arguments->get("mimeTypes");
+            for (unsigned int i = 0; i < l->size(); i++) {
+                const bp::String* s = dynamic_cast<const bp::String*>(l->value(i));
+                if (s) {
+                    mimetypes.insert(s->value());
+                }
+            }
+        } 
+    
+        if (arguments->has("includeGestureInfo", BPTBoolean)) {
+            includeGestureInfo = ((bp::Bool*) arguments->get("includeGestureInfo"))->value();
+        }
+    
+        if (arguments->has("limit", BPTInteger)) {
+            limit = ((bp::Integer*) arguments->get("limit"))->value();
+        }
     }
 
     // extract current Url for window title
@@ -185,7 +187,10 @@ FileBrowsePluglet::execute(unsigned int tid,
     string title = getBrowseTitle(FileBrowsePluglet::kSelectFilesFoldersKey,                            
                                   currentUrl, m_locale);
     [panel setTitle: [NSString stringWithUTF8String: title.c_str()]];
-
+    if (m_desc.majorVersion() > 1) {
+        [panel setResolvesAliases: NO];
+    }
+    
     // Can folders be selected?
     if (recurse) {
         [panel setCanChooseDirectories:YES];
@@ -216,12 +221,25 @@ FileBrowsePluglet::execute(unsigned int tid,
         }
     }
     
-    // apply filtering, recursion, etc...
-    unsigned int flags = 0;
-    if (recurse) flags |= bp::pluginutil::kRecurse;
-    if (includeGestureInfo) flags |= bp::pluginutil::kIncludeGestureInfo;
-    bp::Object* obj = bp::pluginutil::applyFilters(selection, mimetypes,
-                                                   flags, limit);
+    bp::Object* obj = NULL;
+    if (m_desc.majorVersion() == 1) {
+        // version 1 api applies filtering, recursion, etc...
+        unsigned int flags = 0;
+        if (recurse) flags |= bp::pluginutil::kRecurse;
+        if (includeGestureInfo) flags |= bp::pluginutil::kIncludeGestureInfo;
+        obj = bp::pluginutil::applyFilters(selection, mimetypes, flags, limit);
+    } else {
+        // version 2 and above api just gives you what was selected
+        bp::Map* m = new bp::Map;
+        bp::List* l = new bp::List;
+        vector<bp::file::Path>::const_iterator it;
+        for (it = selection.begin(); it != selection.end(); ++it) {
+            bp::file::Path path(*it);
+            l->append(new bp::Path(path));
+        }
+        m->add("files", l);
+        obj = m;
+    }
         
     // return results
     successCB(callbackArgument, tid, obj);

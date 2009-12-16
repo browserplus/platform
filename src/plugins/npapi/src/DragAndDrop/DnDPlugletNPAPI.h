@@ -39,7 +39,8 @@ class DnDPlugletNPAPI : public virtual DnDPluglet,
 {
   public:
     DnDPlugletNPAPI(NPP instance, 
-                    BPPlugin* plugin);
+                    BPPlugin* plugin,
+                    const bp::service::Description& desc);
     virtual ~DnDPlugletNPAPI();
 
     // inherited from WindowedPluglet

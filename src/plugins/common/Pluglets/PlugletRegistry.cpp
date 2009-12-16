@@ -22,6 +22,8 @@
 
 #include "PlugletRegistry.h"
 #include <assert.h>
+// XXX
+#include "BPUtils/BPLog.h"
 
 PlugletRegistry::PlugletRegistry()
 {
@@ -37,14 +39,22 @@ PlugletRegistry::~PlugletRegistry()
 }
 
 bool
-PlugletRegistry::registerPluglet(Pluglet * pluglet)
+PlugletRegistry::registerPluglets(std::list<Pluglet *> pluglets)
 {
-    if (pluglet == NULL)
+    if (pluglets.empty())
     {
         return false;
     }
         
-    m_pluglets.push_back(pluglet);
+    std::list<Pluglet*>::iterator it;
+    for (it = pluglets.begin(); it != pluglets.end(); ++it) 
+    {
+        const bp::service::Description* d = (*it)->describe();
+        std::string n = d->name();
+        std::string v = d->versionString();
+        BPLOG_INFO_STRM("register pluglet " << n << " / " << v);
+        m_pluglets.push_back(*it);
+    }
     return true;
 }
 

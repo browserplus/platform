@@ -89,6 +89,30 @@ bool AxDropManager::addTarget( const std::string& sElement,
 }
 
 
+bool AxDropManager::addTarget( const std::string& sElement,
+                               const std::string& sVersion )
+{
+    // Find an available drop channel.
+    tDropChannelVecIt itChan =
+        find_if( m_vDropChannels.begin(), m_vDropChannels.end(),
+                 mem_fun_ref(&DropChannel::isAvailable) );
+    if (itChan == m_vDropChannels.end())
+    {
+        BPLOG_ERROR( "Unable to add target - no available channels!" );
+        return false;
+    }
+    
+    // Connect to the specified dom element over this channel.
+    if (!itChan->connect( sElement, sVersion ))
+    {
+        BPLOG_ERROR( "itChan->connect failed!" );
+        return false;
+    }
+
+    return true;
+}
+
+
 bool AxDropManager::removeTarget( const std::string& sElement )
 {
     // Find the channel using the specified element.

@@ -76,6 +76,8 @@ private:
                            const std::set<std::string>& mimeTypes,
                            bool includeGestureInfo,
                            unsigned int limit);
+    virtual bool addTarget(const std::string& name,
+                           const std::string& version);
     virtual bool removeTarget(const std::string& name);
 
     //IDropTarget methods
@@ -100,6 +102,8 @@ protected:
     virtual void derivedSetWindow(NPWindow* window);
 
 private:
+
+    bool createOverlay(const std::string& name);
 
     std::vector<bp::file::Path> getDragItems(IDataObject* pDataObj);
 
@@ -186,6 +190,105 @@ WindowsDropManager::~WindowsDropManager()
 
 
 bool
+WindowsDropManager::createOverlay(const std::string& name)
+{
+    HWND hwnd = NULL;
+    try {
+        if (m_targets.size() == 1) {
+            if (m_isSafari) {
+                ::RevokeDragDrop(m_hWnd);
+                HRESULT res = ::RegisterDragDrop(m_hWnd, this);
+                if (res != S_OK) {
+                    throw std::string("::RegisterDragDrop failed");
+                }
+            } else {
+                if (m_atom == 0) {
+                    // window class name must be scoped to this instance of 
+                    // dropmanager.  trying to share a classname results in
+                    // lotsa crashes in the presence of multiple dropmanagers
+                    // to avoid name collisions during reloads, form name from
+                    // instance address and timestamp
+                    std::stringstream sstr;
+                    BPTime now;
+                    sstr << "BrowserPlusDropTargetWindowClass-" 
+                         << this << "-" << now.asString();
+                    m_className = sstr.str();
+                    BPLOG_INFO_STRM("Try to register WindowsDropManager class " 
+                                    << m_className);
+                    wstring wclassName = bp::strutil::utf8ToWide(m_className);
+                    WNDCLASSEX wndClass = {
+                        sizeof(WNDCLASSEX),
+                        0,                                          // no style
+                        WindowsDropManager::dropWindowCallback,     // wndProc
+                        0,                                          // no extra bytes
+                        0,                                          // no extra bytes
+                        NULL,                                       // no instance
+                        NULL,                                       // no icon
+                        NULL,                                       // no cursor
+                        NULL,                                       // no background brush
+                        NULL,                                       // no menu
+                        wclassName.c_str(),                         // class name
+                        NULL                                        // no small icon
+                    };
+                    m_atom = ::RegisterClassExW(&wndClass);
+                    if (m_atom == 0) {
+                        if (GetLastError() != ERROR_CLASS_ALREADY_EXISTS) {
+                            throw std::string("::RegisterClassEx failed");
+                        } else {
+                            // if this happens, havoc can ensue with multiple
+                            // frames and reloads.  it may work, it may not
+                            BPLOG_WARN("WindowsDropManager class already existed");
+                        }
+                    }
+                }
+                    
+                // create transparent overlay
+                RECT r;
+                if (!::GetClientRect(m_hWnd, &r)) {
+                    throw std::string("::GetClientRect failed");
+                }
+                wstring wclassName = bp::strutil::utf8ToWide(m_className);
+                m_dndHWnd = CreateWindowExW(WS_EX_ACCEPTFILES 
+                                            | WS_EX_TRANSPARENT
+                                            | WS_EX_NOPARENTNOTIFY,
+                                            wclassName.c_str(), 
+                                            L"",
+                                            WS_CHILD, 
+                                            0, 0,
+                                            r.right - r.left,
+                                            r.bottom - r.top,
+                                            m_hWnd,
+                                            NULL,
+                                            NULL,
+                                            NULL);
+                if (m_dndHWnd == NULL) {
+                    throw std::string("CreateWindowEx failed");
+                }
+                ::SetWindowPos(m_dndHWnd, HWND_TOP, 0, 0, 0, 0,
+                               SWP_NOREDRAW | SWP_NOSENDCHANGING
+                               | SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+                HRESULT res = ::RegisterDragDrop(m_dndHWnd, this);
+                if (res != S_OK) {
+                    throw std::string("RegisterDragDrop failed");
+                }
+                BPLOG_INFO_STRM("added drop target window: " <<
+                                BP_HEX_MANIP << long(m_dndHWnd));
+            }
+        }
+    } catch (const std::string& msg) {
+        std::string errMsg = bp::error::lastErrorString();
+        BPLOG_INFO_STRM("WindowsDropManager::createOverlay" 
+                        << "(" << name << ")" << ":  " << msg
+                        << ": " << errMsg);
+        if (hwnd) ::DestroyWindow(hwnd);
+        InterceptDropManager::removeTarget(name);
+        return false;
+    }
+    return true;
+}
+
+
+bool
 WindowsDropManager::addTarget(const std::string& name,
                               const std::set<std::string>& mimeTypes,
                               bool includeGestureInfo,
@@ -196,98 +299,23 @@ WindowsDropManager::addTarget(const std::string& name,
     bool rval = InterceptDropManager::addTarget(name, mimeTypes,
                                                 includeGestureInfo, limit);
     if (rval) {
-        HWND hwnd = NULL;
-        try {
-            if (m_targets.size() == 1) {
-                if (m_isSafari) {
-                    ::RevokeDragDrop(m_hWnd);
-                    HRESULT res = ::RegisterDragDrop(m_hWnd, this);
-                    if (res != S_OK) {
-                        throw std::string("::RegisterDragDrop failed");
-                    }
-                } else {
-                    if (m_atom == 0) {
-                        // window class name must be scoped to this instance of 
-                        // dropmanager.  trying to share a classname results in
-                        // lotsa crashes in the presence of multiple dropmanagers
-                        // to avoid name collisions during reloads, form name from
-                        // instance address and timestamp
-                        std::stringstream sstr;
-                        BPTime now;
-                        sstr << "BrowserPlusDropTargetWindowClass-" 
-                             << this << "-" << now.asString();
-                        m_className = sstr.str();
-                        BPLOG_INFO_STRM("Try to register WindowsDropManager class " 
-                                        << m_className);
-                        wstring wclassName = bp::strutil::utf8ToWide(m_className);
-                        WNDCLASSEX wndClass = {
-                            sizeof(WNDCLASSEX),
-                            0,                                          // no style
-                            WindowsDropManager::dropWindowCallback,     // wndProc
-                            0,                                          // no extra bytes
-                            0,                                          // no extra bytes
-                            NULL,                                       // no instance
-                            NULL,                                       // no icon
-                            NULL,                                       // no cursor
-                            NULL,                                       // no background brush
-                            NULL,                                       // no menu
-                            wclassName.c_str(),                         // class name
-                            NULL                                        // no small icon
-                        };
-                        m_atom = ::RegisterClassExW(&wndClass);
-                        if (m_atom == 0) {
-                            if (GetLastError() != ERROR_CLASS_ALREADY_EXISTS) {
-                                throw std::string("::RegisterClassEx failed");
-                            } else {
-                                // if this happens, havoc can ensue with multiple
-                                // frames and reloads.  it may work, it may not
-                                BPLOG_WARN("WindowsDropManager class already existed");
-                            }
-                        }
-                    }
-                    
-                    // create transparent overlay
-                    RECT r;
-                    if (!::GetClientRect(m_hWnd, &r)) {
-                        throw std::string("::GetClientRect failed");
-                    }
-                    wstring wclassName = bp::strutil::utf8ToWide(m_className);
-                    m_dndHWnd = CreateWindowExW(WS_EX_ACCEPTFILES 
-                                                | WS_EX_TRANSPARENT
-                                                | WS_EX_NOPARENTNOTIFY,
-                                                wclassName.c_str(), 
-                                                L"",
-                                                WS_CHILD, 
-                                                0, 0,
-                                                r.right - r.left,
-                                                r.bottom - r.top,
-                                                m_hWnd,
-                                                NULL,
-                                                NULL,
-                                                NULL);
-                    if (m_dndHWnd == NULL) {
-                        throw std::string("CreateWindowEx failed");
-                    }
-                    ::SetWindowPos(m_dndHWnd, HWND_TOP, 0, 0, 0, 0,
-                                   SWP_NOREDRAW | SWP_NOSENDCHANGING
-                                   | SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
-                    HRESULT res = ::RegisterDragDrop(m_dndHWnd, this);
-                    if (res != S_OK) {
-                        throw std::string("RegisterDragDrop failed");
-                    }
-                    BPLOG_INFO_STRM("added drop target window: " <<
-                                    BP_HEX_MANIP << long(m_dndHWnd));
-                }
-            }
-        } catch (const std::string& msg) {
-            std::string errMsg = bp::error::lastErrorString();
-            BPLOG_INFO_STRM("WindowsDropManager::addTarget" 
-                            << "(" << name << ")" << ":  " << msg
-                            << ": " << errMsg);
-            if (hwnd) ::DestroyWindow(hwnd);
-            InterceptDropManager::removeTarget(name);
-            return false;
-        }
+        rval = createOverlay(name);
+    } else {
+        BPLOG_INFO_STRM("DropManager::addTarget() failed");
+    }
+    return rval;
+}
+
+
+bool
+WindowsDropManager::addTarget(const std::string& name,
+                              const std::string& version)
+{
+    BPLOG_INFO_STRM("addTarget(" << name << "), " 
+                    << m_targets.size() << " existing targets");
+    bool rval = InterceptDropManager::addTarget(name, version);
+    if (rval) {
+        rval = createOverlay(name);
     } else {
         BPLOG_INFO_STRM("DropManager::addTarget() failed");
     }

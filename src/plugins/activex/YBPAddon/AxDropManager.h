@@ -118,6 +118,8 @@ public:
                             const std::set<std::string>& mimeTypes,
                             bool includeGestureInfo,
                             unsigned int limit );
+    virtual bool addTarget( const std::string& sElement,
+                            const std::string& sVersion );
     virtual bool removeTarget( const std::string& sElement );
     virtual bool enableTarget( const std::string& sElement,
                                bool bEnable );

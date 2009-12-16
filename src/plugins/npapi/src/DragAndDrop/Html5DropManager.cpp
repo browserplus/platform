@@ -276,6 +276,45 @@ Html5DropManager::addTarget(const std::string& element,
 
 
 bool
+Html5DropManager::addTarget(const std::string& element,
+                            const std::string& version)
+{
+    // empty id is meaningless
+    if (element.empty()) return false;
+
+    // check if this is already registered on m_targets
+    if (m_targets.find(element) != m_targets.end()) return false;
+
+    // Ask browser for bounds of element associated with drop target
+    NPVariant args[2];
+    STRINGZ_TO_NPVARIANT(element.c_str(), args[0]);
+    args[1].type = NPVariantType_Void;
+
+    NPVariant result;
+    result.type = NPVariantType_Void;
+
+    // now allocate the context for this drop target
+    DropTargetContext * ctx = new DropTargetContext(m_npp, element, version, this);
+
+    args[1].type = NPVariantType_Object;
+    args[1].value.objectValue = ctx->callbackObject();
+        
+    if (npu::callFunction(m_npp, m_addDropTargetFunc, args, 2, &result))
+    {
+        // if the function is successfully invoked, then we'll add this target
+        m_targets[element] = ctx;
+    }
+    else
+    {
+        BPLOG_WARN_STRM("couldn't add target for id: " << element);        
+        delete ctx;
+    }
+
+    return true;
+}
+
+
+bool
 Html5DropManager::removeTarget(const std::string& element)
 {
     BPLOG_DEBUG_STRM("removeTarget");
@@ -311,6 +350,18 @@ Html5DropManager::DropTargetContext::DropTargetContext(NPP npp,
                                                        unsigned int limit,
                                                        Html5DropManager * theMan)
     : DropTargetBase(name, mimetypes, includeGestureInfo, limit), m_npp(npp), m_go(NULL), m_theMan(theMan)
+{
+    m_go = (BPGenericObject *) BPGenericObject::getObject(npp);
+    m_go->defineFunction(s_onEnter, this);
+    m_go->defineFunction(s_onExit, this);
+    m_go->defineFunction(s_onDrop, this);
+}
+
+Html5DropManager::DropTargetContext::DropTargetContext(NPP npp,
+                                                       const string& name,
+                                                       const string& version,
+                                                       Html5DropManager * theMan)
+    : DropTargetBase(name, version), m_npp(npp), m_go(NULL), m_theMan(theMan)
 {
     m_go = (BPGenericObject *) BPGenericObject::getObject(npp);
     m_go->defineFunction(s_onEnter, this);

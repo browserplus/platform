@@ -20,39 +20,18 @@
  * ***** END LICENSE BLOCK *****
  */
 
+#ifndef __FILEBROWSEPLUGLETFACTORY_H__
+#define __FILEBROWSEPLUGLETFACTORY_H__
+
 #include "Pluglet.h"
-#include "BPPlugin.h"
+#include "PlugletFactory.h"
 
-Pluglet::Pluglet(BPPlugin * plugin,
-                 const bp::service::Description& desc)
-    : m_plugin(plugin), m_desc(desc)
+class FileBrowsePlugletFactory : virtual public PlugletFactory
 {
-}
+  public:
+    FileBrowsePlugletFactory();
+    virtual ~FileBrowsePlugletFactory() {}
+    std::list<Pluglet*> createPluglets(BPPlugin* plugin);
+};
 
-Pluglet::~Pluglet()
-{
-}
-
-std::string 
-Pluglet::locale()
-{
-    if (m_locale.empty()) {
-        setLocale("en-US");
-    }
-    return m_locale;
-}
-
-void 
-Pluglet::setLocale(const std::string& locale)
-{
-    m_locale = locale;
-}
-
-
-const bp::service::Description *
-Pluglet::describe()
-{
-    return &m_desc;
-}
-
-
+#endif

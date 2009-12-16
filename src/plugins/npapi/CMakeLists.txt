@@ -75,6 +75,7 @@ ENDIF()
 
 # headers/sources/resources common to all platforms
 SET(BPHDRS src/common.h src/BPScriptableObject.h 
+    src/DragAndDrop/DnDPlugletFactoryNPAPI.h
     src/DragAndDrop/DropManagerFactory.h
     src/DragAndDrop/InterceptDropManager.h
     src/DragAndDrop/Html5DropManager.h
@@ -86,6 +87,7 @@ SET(BPSRCS
     src/ScriptablePluginObjectBase.cpp
     src/BPScriptableObject.cpp
     src/GenericJSObject.cpp src/nputils.cpp
+    src/DragAndDrop/DnDPlugletFactoryNPAPI.cpp
     src/DragAndDrop/DnDPlugletNPAPI.cpp
     src/DragAndDrop/DropManagerFactory.cpp
     src/DragAndDrop/InterceptDropManager.cpp

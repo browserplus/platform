@@ -40,6 +40,7 @@
 
 #include "AxObject.h"
 #include "AxVariant.h"
+#include "DnDPlugletFactoryAx.h"
 #include "BPUtils/bpdebug.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bpstrutil.h"
@@ -50,7 +51,6 @@
 #include "PluginCommonLib/DnDPluglet.h"
 #include "PluginCommonLib/FileBrowsePluglet.h"
 #include "PluginCommonLib/LogPluglet.h"
-
 
 using namespace std;
 
@@ -414,9 +414,10 @@ CBPCtl::callJsFunction( const plugin::Object* poFunc,
 }
 
 
-Pluglet*
-CBPCtl::createPluglet( const std::string& sName ) const
+list<Pluglet*>
+CBPCtl::createPluglets( const std::string& sName ) const
 {
+    list<Pluglet*> rval;
     BPPlugin* pPlugin = const_cast<CBPCtl*>(this);
 
     if (sName == "DragAndDrop")
@@ -425,21 +426,20 @@ CBPCtl::createPluglet( const std::string& sName ) const
         // AxDropManager for connection point reasons.
         const IDropManager* pCDM = this;
         IDropManager* pDropMgr = const_cast<IDropManager*>(pCDM);
-
-        return new DnDPluglet( pPlugin, pDropMgr );
+        DnDPlugletFactoryAx factory;
+        rval = factory.createPluglets( pPlugin, pDropMgr );
     }
     else if (sName == "FileBrowser")
     {
-        return new FileBrowsePluglet( pPlugin );
+        FileBrowsePlugletFactory factory;
+        rval = factory.createPluglets( pPlugin);
     }
     else if (sName == "Log")
     {
-        return new LogPluglet( pPlugin );
+        LogPlugletFactory factory;
+        rval = factory.createPluglets( pPlugin );
     }
-    else
-    {
-        return 0;
-    }
+    return rval;
 }
 
 

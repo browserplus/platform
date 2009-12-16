@@ -60,10 +60,10 @@ private:
                                  plugin::Variant* args[], int nArgCount,
                                  plugin::Variant* pvtRet ) const;
     
-    // Creates appropriate plugin-specific pluglet.
-    // Callers own the returned ptr.
-    virtual Pluglet* createPluglet( const std::string& sName ) const;
-
+    // Creates appropriate plugin-specific pluglets.
+    // Callers own the returned ptrs.
+    virtual std::list<Pluglet*> createPluglets( const std::string& sName ) const;
+    
     virtual bool enumerateProperties( const plugin::Object* pObj,
                                       std::vector<std::string>& vsProps ) const;
     

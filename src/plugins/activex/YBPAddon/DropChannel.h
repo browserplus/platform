@@ -54,6 +54,8 @@ public:
                   const std::set<std::string>& mimeTypes,
                   bool includeGestureInfo,
                   unsigned int limit );
+    bool connect( const std::string& sSourceId,
+                  const std::string& sVersion );
     bool disconnect();
 
 private:
