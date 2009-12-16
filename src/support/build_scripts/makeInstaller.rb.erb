@@ -289,7 +289,8 @@ secondaries = Array.new
 if ENV.has_key? "BP_DISTRO_SERVERS"
   secondaries = ENV['BP_DISTRO_SERVERS'].split(/,/)
   primary = secondaries[0]
-  secondaries = secondaries[1,-1]
+  secondaries = secondaries[1,10]
+  secondaries = Array.new if secondaries == nil 
 end
 
 pass = "FreeYourBrowser"
