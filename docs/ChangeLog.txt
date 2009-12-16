@@ -1,3 +1,30 @@
+12/16/2009 - Changes from 2.4.21 to 2.5.0
+  * improved handling of shortcuts and symlinks on all plats
+  * [#1] resolve issue where users with two spaces in username can't
+    install services
+  * [#2] fix lockup on Win32 where a "zoom level" > 100% would cause a
+    locked up browser with a dialog that couldn't be dismissed
+  * fix issue where on OSX plugin might not be removed on uninstall
+  * several fixes in logging which could cause corrupted logfiles
+  * ServiceRunner bugfixes to simplify scripted service tests
+  * move OSX/Linux uninstaller to product top dir - no longer do we create
+    an ~/Applications directory at installation time (uninstaller is
+    accessed through System Preferences)
+  * remove console.log() inside HTML5 dnd code (snow leopard/safari)
+  * improved logging around crashed services
+  * Installation id now persistent across platform updates 
+  * results of build now include "retargetable artifacts", in sum for a
+    given release we must only build the platform once to support any number
+    of build types (dev/beta/int/prod/mail/etc) 
+  (inactive ingredients)
+  * Initial (and ongoing) linux porting 
+  * build system: now works with cmake 2.6.X (all) and ruby 1.9 
+  * migrate from shttpd to mongoose (same author, similar project, new name)
+  * latest versions of yajl, boost, and easylzma
+  * massive source restructuring and cleanup to make it easier for a newbie
+    to understand what's what, and where's where.
+  
+
 11/12/2009 - Changes from 2.4.20 to 2.4.21
   * Fix bug where on non-ascii win32 machine upgrade would leave bogus links in start menu (non-localized, i.e. kProductName)
   * Improve log statement for crashed services
