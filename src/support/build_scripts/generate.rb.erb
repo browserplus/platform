@@ -41,6 +41,7 @@ $workDir = File.join($topDir, "work")
 $secondary = Array.new if !$secondary
 $buildType = "unknown"
 $logLevel = "info"
+
 ARGV.each { |arg|
   k,v = arg.sub(/^-/, "").split '='
   # -secondary is special, it may be multiply provided
@@ -59,11 +60,10 @@ $certStore = $pubKey if !$certStore
 
 # verify and output command configuration
 puts "Verifying configuration:"
-gv = global_variables
 [ "prefix", "buildType", "logLevel", "primary", "secondary",
   "certStore", "pubKey", "privKey", "pass", "outdir"
 ].each {|k|
-  raise "missing required cmdline param: -#{k}" if (!gv.include? "$#{k}")
+  raise "missing required cmdline param: -#{k}" if (!eval("$#{k}"))
   v = eval("$#{k}")
   v = v.join(", ") if v.is_a? Array
   puts "  $#{k}:\t#{v}"
