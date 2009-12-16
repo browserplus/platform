@@ -54,7 +54,8 @@ HtmlDialog::HtmlDialog( const std::string& sTitle,
     m_hIcon( hIcon ),
     m_pListener( pListener ),
     m_awBrowser(),
-    m_spBrowser()
+    m_spBrowser(),
+    m_nZoomRestorePcnt( 0 )
 {
 }
 
@@ -76,16 +77,26 @@ std::string HtmlDialog::getUrl()
     return m_sPathToHtml;
 }
 
-void HtmlDialog::show( int nCliWidth, int nCliHeight )
+void HtmlDialog::show( int nCliWidth, int nCliHeight,
+                       int nInitialZoomPcnt )
 {
+    if (nInitialZoomPcnt != 0)
+    {
+        getZoomPercent( m_nZoomRestorePcnt );
+        setZoomPercent( nInitialZoomPcnt );
+    }
+    
     // Figure out what window size will be necessary to get the
     // requested client window width and height.
+    // TODO: compensate for zoom?
     int nWndWidth  = nCliWidth +
                      GetSystemMetrics( SM_CXFIXEDFRAME ) * 2;
     int nWndHeight = nCliHeight +
                      GetSystemMetrics( SM_CYFIXEDFRAME ) * 2 +
                      GetSystemMetrics( SM_CYCAPTION );
 
+    // TODO: log width/height
+    
     // Adjust dialog size.
     SetWindowPos( NULL, 0, 0, nWndWidth, nWndHeight, SWP_NOMOVE|SWP_NOZORDER );
 
@@ -213,9 +224,19 @@ void HtmlDialog::OnClose()
 
 void HtmlDialog::OnDestroy()
 {
+    // TODO: is there a better place for this?
+    // For Windows IE there is a user-scoped persistent zoom value.
+    // We need to restore it if we changed it.
+    // Note: On IE8 anyway it would be preferable to use
+    // OLECMDIDF_OPTICAL_ZOOM_NOPERSIST, but don't know how at the moment.
+    if (m_nZoomRestorePcnt != 0) {
+        setZoomPercent( m_nZoomRestorePcnt );
+    }
+    
     // Release our interface on the browser control.
-    if (m_spBrowser)
+    if (m_spBrowser) {
         m_spBrowser.Release();
+    }
 
     SetMsgHandled(false);
 }
@@ -319,6 +340,7 @@ bool HtmlDialog::getZoomPercent( int& nZoomPercent )
     }
 
     nZoomPercent = vtOut.lVal;
+    BPLOG_INFO_STRM( "IE Zoom is: " << nZoomPercent << "%." );
     return true;
 }
 
@@ -326,7 +348,7 @@ bool HtmlDialog::getZoomPercent( int& nZoomPercent )
 bool HtmlDialog::setZoomPercent( int nZoomPercent )
 {
     if (!m_spBrowser) {
-        BPLOG_ERROR( "getZoomPercent called with null m_spBrowser." );
+        BPLOG_ERROR( "setZoomPercent called with null m_spBrowser." );
         return false;
     }
 
@@ -342,6 +364,7 @@ bool HtmlDialog::setZoomPercent( int nZoomPercent )
         return false;
     }
 
+    BPLOG_INFO_STRM( "IE Zoom set to: " << nZoomPercent << "%." );
     return true;
 }
 

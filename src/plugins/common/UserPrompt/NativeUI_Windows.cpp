@@ -162,7 +162,9 @@ bp::Object* PromptApiProvider::invoke( const std::string& sFuncName,
         {
             throw std::string( "invalid arguments" );
         }
-        
+
+        // Note: the (long long) cast is necessary to select a
+        // specific operator overload.
         int nWidth  = (int) (long long) *(vArgs[0]);
         int nHeight = (int) (long long) *(vArgs[1]);
 
@@ -182,11 +184,8 @@ bp::Object* PromptApiProvider::invoke( const std::string& sFuncName,
             throw std::string( "no dialog was set for provider" );
         }
 
-        m_pDlg->show( (int) (nWidth * scale), 
-                      (int) (nHeight * scale) );
+        m_pDlg->show( (int)(nWidth*scale), (int)(nHeight*scale), 100 );
 
-        m_pDlg->setZoomPercent( 100 );
-        
         return new bp::Null;
     }
     else
