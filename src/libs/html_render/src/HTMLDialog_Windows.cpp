@@ -80,6 +80,10 @@ std::string HtmlDialog::getUrl()
 void HtmlDialog::show( int nCliWidth, int nCliHeight,
                        int nInitialZoomPcnt )
 {
+    BPLOG_INFO_STRM( "Client Width/Height/Zoom: " <<
+                     nCliWidth << "/" << nCliHeight << "/" <<
+                     nInitialZoomPcnt );
+            
     if (nInitialZoomPcnt != 0)
     {
         getZoomPercent( m_nZoomRestorePcnt );
@@ -94,8 +98,7 @@ void HtmlDialog::show( int nCliWidth, int nCliHeight,
     int nWndHeight = nCliHeight +
                      GetSystemMetrics( SM_CYFIXEDFRAME ) * 2 +
                      GetSystemMetrics( SM_CYCAPTION );
-
-    // TODO: log width/height
+    BPLOG_INFO_STRM( "Wnd Width/Height: " << nWndWidth << "/" << nWndHeight );
     
     // Adjust dialog size.
     SetWindowPos( NULL, 0, 0, nWndWidth, nWndHeight, SWP_NOMOVE|SWP_NOZORDER );
@@ -318,6 +321,8 @@ float HtmlDialog::dpiScale()
         ::ReleaseDC(NULL, hdc);       
     }
 
+    BPLOG_INFO_STRM( "dpiScale is: " << gScale );
+    
     return gScale;
 }
 
