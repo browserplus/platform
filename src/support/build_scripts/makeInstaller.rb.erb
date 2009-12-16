@@ -108,7 +108,7 @@ Dir.glob(File.join(topDir, "bins", "browserpluscore", "ui", "*")) do |x|
         srcDir = x
         tgtDir = File.join(updateUIDir, File.basename(x))
         FileUtils.rm_rf(tgtDir, :verbose => $beVerbose)
-        system("ruby -s #{localizeUIScript} -indir=#{srcDir} -outdir=#{tgtDir} -verbose=1")
+        system("ruby -s #{localizeUIScript} -indir=#{srcDir} -outdir=#{tgtDir}")
     end
 end
 
@@ -118,7 +118,7 @@ if platform == "Windows"
     srcDir = File.join(topDir, "bins", "config_panel", "ui")
     FileUtils.mkdir_p(tgtDir, :mode => 0755, :verbose => $beVerbose)
     FileUtils.rm_rf(tgtDir, :verbose => $beVerbose)
-    system("ruby -s #{localizeUIScript} -indir=#{srcDir} -outdir=#{tgtDir} -verbose=1")
+    system("ruby -s #{localizeUIScript} -indir=#{srcDir} -outdir=#{tgtDir}")
 end
 
 #
@@ -217,7 +217,7 @@ FileUtils.rm_rf(uiTgtDir, :verbose => $beVerbose)
 
 # use the localizeUI script to generate proper localized installer interface
 # files
-system("ruby -s #{localizeUIScript} -indir=#{uiSrcDir} -outdir=#{uiTgtDir} -verbose=1")
+system("ruby -s #{localizeUIScript} -indir=#{uiSrcDir} -outdir=#{uiTgtDir}")
 
 # make a pass thru installerDir removing .svn and .git turds
 flushTurds(installerDir, $beVerbose)
