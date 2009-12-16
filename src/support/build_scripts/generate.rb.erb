@@ -20,6 +20,7 @@
 #   -primary   hostname of primary distribution server
 #   -secondary hostname of secondary distribution server (may be repeated)
 #   -buildType a short buildtype tag, i.e. ymail, prod, dev, or beta.
+#   -logLevel  platform log-level: debug, info, warn, or error
 #   
 # Potentially Helpful Hints
 #
@@ -39,6 +40,7 @@ $topDir = File.dirname(__FILE__)
 $workDir = File.join($topDir, "work")
 $secondary = Array.new if !$secondary
 $buildType = "unknown"
+$logLevel = "info"
 ARGV.each { |arg|
   k,v = arg.sub(/^-/, "").split '='
   # -secondary is special, it may be multiply provided
@@ -58,8 +60,9 @@ $certStore = $pubKey if !$certStore
 # verify and output command configuration
 puts "Verifying configuration:"
 gv = global_variables
-[ "buildType", "pubKey", "privKey", "outdir", "prefix", "primary",
-  "pass", "secondary", "certStore" ].each {|k|
+[ "prefix", "buildType", "logLevel", "primary", "secondary",
+  "certStore", "pubKey", "privKey", "pass", "outdir"
+].each {|k|
   raise "missing required cmdline param: -#{k}" if (!gv.include? "$#{k}")
   v = eval("$#{k}")
   v = v.join(", ") if v.is_a? Array
@@ -103,7 +106,8 @@ subs = {
   /BP_PRIMARY_DISTRO_SERVER_URL/ => "\"#{$primary}\"",
   /BP_SECONDARY_DISTRO_SERVERS/ => secondaryJson, 
   /BP_ALL_DISTRO_SERVERS/ => allServersJson, 
-  /BP_BUILD_TYPE/ => "\"#{$buildType}\""
+  /BP_BUILD_TYPE/ => "\"#{$buildType}\"",
+  /BP_LOG_LEVEL/ => "#{$logLevel}"
 }
 
 [

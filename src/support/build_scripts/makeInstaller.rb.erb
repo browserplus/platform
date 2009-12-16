@@ -293,6 +293,11 @@ if ENV.has_key? "BP_DISTRO_SERVERS"
   secondaries = Array.new if secondaries == nil 
 end
 
+logLevel = "info"
+if ENV.has_key? "BP_LOG_LEVEL"
+  logLevel = ENV['BP_LOG_LEVEL']
+end
+
 pass = "FreeYourBrowser"
 pubKey = "#{topDir}/support/signing/devel_certs/BrowserPlus.crt"
 certStore = "#{topDir}/support/signing/Combined.crt"
@@ -301,6 +306,6 @@ generateCmd = "ruby \"#{artifactsDir}/generate.rb\" -pubKey=#{pubKey}"
 generateCmd = generateCmd + " -certStore=#{certStore} -pass=#{pass} -outdir=\"#{buildDir}\"" 
 generateCmd = generateCmd + " -prefix=BrowserPlus -primary=#{primary}"
 secondaries.each { |s|  generateCmd = generateCmd + " -secondary=#{s}" }
-generateCmd = generateCmd + " -buildType=ephemeral"
+generateCmd = generateCmd + " -buildType=ephemeral -logLevel=#{logLevel}"
 system(generateCmd)
 
