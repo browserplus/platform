@@ -24,10 +24,13 @@ else
 end
 bpVersion = "<%= $cmake["VersionString"] %>"
 updatePkgName = "BrowserPlus_#{bpVersion}.bpkg"
+buildType = "<%= $cmake["CMAKE_BUILD_TYPE"] %>"
+buildTypeSuffix = (buildType == "Debug" ? "_d" : "")
 
 puts "installing locally..."
 $topDir = File.dirname(File.dirname(File.dirname(File.expand_path(__FILE__))))
-installerExe = File.join($topDir, "build", "#{bpVersion}_#{platform}",
+installerExe = File.join($topDir, "build",
+                         "#{bpVersion}_#{platform}#{buildTypeSuffix}",
                          "work", "install", "BrowserPlusInstaller")
 updatePkg = File.join($topDir, "build", updatePkgName)
 if CONFIG['arch'] =~ /mswin/

@@ -66,7 +66,10 @@ end
 buildDir = File.join(topDir, "build")
 externalsDir = File.expand_path(File.join(topDir, "..", "External"))
 buildDir = File.join(topDir, "build")
-artifactsName = "#{bpVersion}_#{platform.downcase}#{($intDir == "Debug" ? "_d" : "")}"
+
+buildType = "<%= $cmake["CMAKE_BUILD_TYPE"] %>"
+buildTypeSuffix = (buildType == "Debug" ? "_d" : "")
+artifactsName = "#{bpVersion}_#{platform.downcase}#{buildTypeSuffix}"
 artifactsDir = File.join(buildDir, artifactsName)
 shippingBinsDir = File.join(topDir, "build", "ShippingBinaries")
 
