@@ -171,9 +171,3 @@ File.open(instCfgPath, "w+") { |f| f.write instCfgContents }
 
 # build it!
 system("ruby -s \"#{buildInstallerScript}\" -fname=\"#{$prefix}_#{$version}_full#{exeSuffix}\" -outDir=\"#{$outdir}\"")
-
-# and obliterate work directory 
-if File.exist? $workDir
-  puts "Removing artifacts build work directory"
-  FileUtils.rm_rf($workDir)
-end

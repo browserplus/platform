@@ -27,9 +27,9 @@ updatePkgName = "BrowserPlus_#{bpVersion}.bpkg"
 
 puts "installing locally..."
 $topDir = File.dirname(File.dirname(File.dirname(File.expand_path(__FILE__))))
-installerExe = File.join($topDir, "build",
-                         "pab_#{bpVersion}-#{platform}",
-                         "work", "install", "BrowserPlusInstaller")
+$workDir = File.join($topDir, "build", "pab_#{bpVersion}-#{platform}",
+                     "work")
+installerExe = File.join($workDir, "install", "BrowserPlusInstaller")
 updatePkg = File.join($topDir, "build", updatePkgName)
 if CONFIG['arch'] =~ /mswin/
     installerExe.gsub!(/\//, '\\')
@@ -42,4 +42,10 @@ if system(updateCmd)
     puts "BrowserPlusInstaller succeeded"
 else
     puts "BrowserPlusInstaller failed with exitstatus " + $?.to_s
+end
+
+# and obliterate work directory 
+if File.exist? $workDir
+  puts "Removing artifacts build work directory"
+  FileUtils.rm_rf($workDir)
 end
