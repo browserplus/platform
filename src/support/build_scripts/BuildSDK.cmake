@@ -1,4 +1,4 @@
- # ***** BEGIN LICENSE BLOCK *****
+# ***** BEGIN LICENSE BLOCK *****
 # The contents of this file are subject to the Mozilla Public License
 # Version 1.1 (the "License"); you may not use this file except in
 # compliance with the License. You may obtain a copy of the License at
@@ -35,7 +35,7 @@ SET (arch "i386")
 
 IF (WIN32)
   SET (platform "Win32")
-  SET (tarCmd "${BP_EXTERNAL_DIR}/bin/7z.exe") 	   	
+  SET (tarCmd "7z.exe") 	   	
   SET (tarArgs a -bd -r -y -tzip) 	   	
   SET (tarTarArgs a -bd -r -y -ttar) 	   	
   SET (tarSuffix zip) 	   	
