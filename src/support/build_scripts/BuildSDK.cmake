@@ -44,7 +44,8 @@ ELSEIF (APPLE)
   SET (tarArgs czvhf) 	   	
   SET (tarSuffix tgz) 	   	
 ENDIF () 	 
-SET (installerSdkFileName "installersdk_${VersionString}-${platform}-${arch}.${tarSuffix}")
+SET (pabSdkFileName "pab_${VersionString}-${platform}-${arch}.${tarSuffix}")
+SET (pabDir "pab_${VersionString}-${platform}")
 SET (sdkFileName "bpsdk_${VersionString}-${platform}-${arch}.${tarSuffix}")
 SET (sdkIntFileName "bpsdk_internal_${VersionString}-${platform}-${arch}.${tarSuffix}")
 
@@ -66,7 +67,7 @@ FILE(TO_NATIVE_PATH "${BUILD_SCRIPTS_DIR}/packageSDK.rb"
                  rubyPackageSDK)
 ADD_CUSTOM_TARGET(PackageSDK ALL
                   DEPENDS ${allShippingDepends}
-                  COMMAND ruby -s \"${rubyPackageSDK}\" -buildDir=\"${CMAKE_CURRENT_BINARY_DIR}\" -intDir=${CMAKE_CFG_INTDIR} -buildConfig=${CMAKE_BUILD_TYPE}
+                  COMMAND ruby -s \"${rubyPackageSDK}\" -buildDir=\"${CMAKE_CURRENT_BINARY_DIR}\" -intDir=${CMAKE_CFG_INTDIR}
                   COMMENT "Package BrowserPlus SDK")
 ADD_DEPENDENCIES(PackageSDK JavaScript)
 
@@ -78,7 +79,7 @@ FILE(TO_NATIVE_PATH "${BUILD_SCRIPTS_DIR}/makeInstaller.rb"
                     rubyMakeInstaller)
 ADD_CUSTOM_TARGET(MakeInstaller ALL
                   DEPENDS ${allShippingDepends}
-                  COMMAND ruby -s \"${rubyMakeInstaller}\" -intDir=${CMAKE_CFG_INTDIR} -buildConfig=${CMAKE_BUILD_TYPE}
+                  COMMAND ruby -s \"${rubyMakeInstaller}\" -intDir=${CMAKE_CFG_INTDIR}
                   COMMENT "Make BrowserPlus installer")
 ADD_DEPENDENCIES(MakeInstaller PackageSDK)
 
@@ -89,7 +90,7 @@ ADD_DEPENDENCIES(MakeInstaller PackageSDK)
 FILE(TO_NATIVE_PATH "${BUILD_SCRIPTS_DIR}/installLocally.rb" rubyInstaller)
 ADD_CUSTOM_TARGET(InstallLocally ALL
                   DEPENDS ${allShippingDepends}
-                  COMMAND ruby -s \"${rubyInstaller}\" 
+                  COMMAND ruby -s \"${rubyInstaller}\"
                   COMMENT "Install BrowserPlus on this machine")
 ADD_DEPENDENCIES(InstallLocally MakeInstaller)
 
@@ -111,6 +112,5 @@ ADD_CUSTOM_COMMAND(TARGET CompressSDK
                    COMMENT "Compressing the Internal BrowserPlus SDK")
 
 ADD_CUSTOM_COMMAND(TARGET CompressSDK
-                   COMMAND ${tarCmd} ${tarArgs} ${installerSdkFileName} installer
+                   COMMAND ${tarCmd} ${tarArgs} ${pabSdkFileName} ${pabDir}
                    COMMENT "Compressing the BrowserPlus Installer SDK")
-

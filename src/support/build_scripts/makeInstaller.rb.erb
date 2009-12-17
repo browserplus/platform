@@ -27,7 +27,7 @@ include Config
 
 if ARGV[0] =~ /help/ || $intDir == nil
     puts "Usage: ruby -s #{$0} [-verbose=<anything>] -intDir=<CMAKE_CFG_INTDIR>"
-    puts "  (e.g. ruby -s #{$0} -verbose=1) -intDir=Debug -buildConfig=Debug)"
+    puts "  (e.g. ruby -s #{$0} -verbose=1) -intDir=Debug)"
     exit 1
 end
 
@@ -42,11 +42,13 @@ exeSuffix = nil
 if CONFIG['arch'] =~ /mswin/
     # you have my profound sympathy...
     platform = 'Windows'
+    plat_fname = 'Win32'
     libSuffix = '.dll'
     exeSuffix = '.exe'
     instSuffix = exeSuffix
 else
     platform = 'Darwin'
+    plat_fname = platform
     libSuffix = '.dylib'
     exeSuffix = ''
     instSuffix = ".dmg"
@@ -67,12 +69,11 @@ buildDir = File.join(topDir, "build")
 externalsDir = File.expand_path(File.join(topDir, "..", "External"))
 buildDir = File.join(topDir, "build")
 
-buildTypeSuffix = ($buildConfig == "Debug" ? "_d" : "")
-artifactsName = "#{bpVersion}_#{platform.downcase}#{buildTypeSuffix}"
+artifactsName = "pab_#{bpVersion}-#{plat_fname}"
 artifactsDir = File.join(buildDir, artifactsName)
 shippingBinsDir = File.join(topDir, "build", "ShippingBinaries")
 
-puts "Retargetable artifacts to be left in #{artifactsDir}"
+puts "Parameterizable artifacts bundle to be left in #{artifactsDir}"
 
 # setup paths into update dir
 updateDir = File.join(artifactsDir, "update")

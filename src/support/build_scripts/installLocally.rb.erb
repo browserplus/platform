@@ -18,19 +18,17 @@ require 'rbconfig'
 include Config
 
 if CONFIG['arch'] =~ /mswin/
-    platform = 'windows'
+    platform = 'Win32'
 else
-    platform = 'darwin'
+    platform = 'Darwin'
 end
 bpVersion = "<%= $cmake["VersionString"] %>"
 updatePkgName = "BrowserPlus_#{bpVersion}.bpkg"
-buildType = "<%= $cmake["CMAKE_BUILD_TYPE"] %>"
-buildTypeSuffix = (buildType == "Debug" ? "_d" : "")
 
 puts "installing locally..."
 $topDir = File.dirname(File.dirname(File.dirname(File.expand_path(__FILE__))))
 installerExe = File.join($topDir, "build",
-                         "#{bpVersion}_#{platform}#{buildTypeSuffix}",
+                         "pab_#{bpVersion}-#{platform}",
                          "work", "install", "BrowserPlusInstaller")
 updatePkg = File.join($topDir, "build", updatePkgName)
 if CONFIG['arch'] =~ /mswin/
