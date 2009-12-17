@@ -27,7 +27,7 @@ include Config
 
 if ARGV[0] =~ /help/ || $intDir == nil
     puts "Usage: ruby -s #{$0} [-verbose=<anything>] -intDir=<CMAKE_CFG_INTDIR>"
-    puts "  (e.g. ruby -s #{$0} -verbose=1) -intDir=Debug)"
+    puts "  (e.g. ruby -s #{$0} -verbose=1) -intDir=Debug -buildConfig=Debug)"
     exit 1
 end
 
@@ -67,8 +67,7 @@ buildDir = File.join(topDir, "build")
 externalsDir = File.expand_path(File.join(topDir, "..", "External"))
 buildDir = File.join(topDir, "build")
 
-buildType = "<%= $cmake["CMAKE_BUILD_TYPE"] %>"
-buildTypeSuffix = (buildType == "Debug" ? "_d" : "")
+buildTypeSuffix = ($buildConfig == "Debug" ? "_d" : "")
 artifactsName = "#{bpVersion}_#{platform.downcase}#{buildTypeSuffix}"
 artifactsDir = File.join(buildDir, artifactsName)
 shippingBinsDir = File.join(topDir, "build", "ShippingBinaries")

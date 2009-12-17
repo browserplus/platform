@@ -66,7 +66,7 @@ FILE(TO_NATIVE_PATH "${BUILD_SCRIPTS_DIR}/packageSDK.rb"
                  rubyPackageSDK)
 ADD_CUSTOM_TARGET(PackageSDK ALL
                   DEPENDS ${allShippingDepends}
-                  COMMAND ruby -s \"${rubyPackageSDK}\" -buildDir=\"${CMAKE_CURRENT_BINARY_DIR}\" -intDir=${CMAKE_CFG_INTDIR}
+                  COMMAND ruby -s \"${rubyPackageSDK}\" -buildDir=\"${CMAKE_CURRENT_BINARY_DIR}\" -intDir=${CMAKE_CFG_INTDIR} -buildConfig=${CMAKE_BUILD_TYPE}
                   COMMENT "Package BrowserPlus SDK")
 ADD_DEPENDENCIES(PackageSDK JavaScript)
 
@@ -78,7 +78,7 @@ FILE(TO_NATIVE_PATH "${BUILD_SCRIPTS_DIR}/makeInstaller.rb"
                     rubyMakeInstaller)
 ADD_CUSTOM_TARGET(MakeInstaller ALL
                   DEPENDS ${allShippingDepends}
-                  COMMAND ruby -s \"${rubyMakeInstaller}\" -intDir=${CMAKE_CFG_INTDIR}
+                  COMMAND ruby -s \"${rubyMakeInstaller}\" -intDir=${CMAKE_CFG_INTDIR} -buildConfig=${CMAKE_BUILD_TYPE}
                   COMMENT "Make BrowserPlus installer")
 ADD_DEPENDENCIES(MakeInstaller PackageSDK)
 
