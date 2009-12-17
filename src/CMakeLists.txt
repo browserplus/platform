@@ -73,3 +73,7 @@ ADD_SUBDIRECTORY(javascript)
 ADD_DEPENDENCIES( BPUtils_s PerformSubstitution )
 
 INCLUDE(support/build_scripts/BuildSDK.cmake)
+
+# and drop a time stamp file that can be used by various parts of the
+# build system (for instance, erb substitution)
+FILE(WRITE "${CMAKE_CURRENT_BINARY_DIR}/time.stamp" "")

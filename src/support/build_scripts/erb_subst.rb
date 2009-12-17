@@ -24,10 +24,16 @@ end
 $cmake = eval(File.read($context))
 $l10n = JSON.parse(File.read($l10n))
 
+lastCMakeRun = File.mtime(File.join($output_dir, "time.stamp"))
+
 Dir.glob(File.join("**", "*.erb")).each { |from|
   to = from.sub(/\.erb/, '')
+# [#9] this line would cause substitution to occur inside the build/ directory
+# rather than inside source directory.
+#  to = File.join($output_dir, to)
   if !File.exist?(to) ||
       File.mtime(to) < File.mtime(from) ||
+      File.mtime(to) < lastCMakeRun ||
       File.size(to) == 0
     puts "Generating: #{to}"
     File.open(to, "w") { |o|
