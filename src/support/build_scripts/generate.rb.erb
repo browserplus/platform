@@ -123,7 +123,7 @@ subs = {
   f = File.join($workDir, f)
   puts "Updating #{f}"
   contents = File.open(f, "r") { |myf| myf.read }
-  subs.each { |pat, rep| contents.sub!(pat, rep) }
+  subs.each { |pat, rep| contents.gsub!(pat, rep) }
   File.open(f, "w+") { |myf| myf.write contents }  
 }
 
