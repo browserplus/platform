@@ -72,6 +72,8 @@ buildDir = File.join(topDir, "build")
 artifactsName = "pab_#{bpVersion}-#{plat_fname}"
 artifactsDir = File.join(buildDir, artifactsName)
 shippingBinsDir = File.join(topDir, "build", "ShippingBinaries")
+shippingResDir = File.join(topDir, "build", "ShippingResources",
+                                 bpVersion)
 
 puts "Parameterizable artifacts bundle to be left in #{artifactsDir}"
 
@@ -278,6 +280,15 @@ FileUtils.mkdir_p("#{artifactsDir}/tools")
 FileUtils.install("#{buildDir}/dist/bin/#{$intDir}/bpkg#{exeSuffix}",
                   "#{artifactsDir}/tools",
                   :mode => 0755, :verbose => $verbose)
+
+# finally let's drop our friend browserplus.js in the PAB so that it
+# truly is a standalone package of all interesting parameterizable build
+# artifacts
+jsDir = File.join(artifactsDir, "js")
+FileUtils.mkdir_p(jsDir)
+Dir.glob(File.join(shippingResDir, "*.js")).each { |f|
+  FileUtils.install(f, jsDir, :mode => 0644, :verbose => $beVerbose)
+}
 
 # remove previous installers and update pkg
 FileUtils.rm_f(File.join(buildDir, "BrowserPlus_#{bpVersion}#{instSuffix}"))
