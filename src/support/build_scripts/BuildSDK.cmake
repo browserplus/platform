@@ -37,14 +37,18 @@ IF (WIN32)
   SET (platform "Win32")
   SET (tarCmd "${BP_EXTERNAL_DIR}/bin/7z.exe") 	   	
   SET (tarArgs a -bd -r -y -tzip) 	   	
+  SET (tarTarArgs a -bd -r -y -ttar) 	   	
   SET (tarSuffix zip) 	   	
+  SET (elzmaCmd "${BP_EXTERNAL_DIR}/bin/elzma.exe") 	   	
 ELSEIF (APPLE)
   SET (platform "Darwin")
   SET (tarCmd tar) 	   	
   SET (tarArgs czvhf) 	   	
+  SET (tarTarArgs cvhf) 	   	
   SET (tarSuffix tgz) 	   	
+  SET (elzmaCmd "${BP_EXTERNAL_DIR}/bin/elzma")
 ENDIF () 	 
-SET (pabSdkFileName "pab_${VersionString}-${platform}-${arch}.${tarSuffix}")
+SET (pabSdkFileName "pab_${VersionString}-${platform}-${arch}.tar")
 SET (pabDir "pab_${VersionString}-${platform}")
 SET (sdkFileName "bpsdk_${VersionString}-${platform}-${arch}.${tarSuffix}")
 SET (sdkIntFileName "bpsdk_internal_${VersionString}-${platform}-${arch}.${tarSuffix}")
@@ -112,5 +116,6 @@ ADD_CUSTOM_COMMAND(TARGET CompressSDK
                    COMMENT "Compressing the Internal BrowserPlus SDK")
 
 ADD_CUSTOM_COMMAND(TARGET CompressSDK
-                   COMMAND ${tarCmd} ${tarArgs} ${pabSdkFileName} ${pabDir}
+                   COMMAND ${tarCmd} ${tarTarArgs} ${pabSdkFileName} ${pabDir}
+                   COMMAND ${elzmaCmd} --lzip -v -z ${pabSdkFileName}
                    COMMENT "Compressing the BrowserPlus Installer SDK")
