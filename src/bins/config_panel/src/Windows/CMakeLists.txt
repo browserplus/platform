@@ -30,6 +30,11 @@ SET(SRCS ConfigPanel.cpp ../common/ScriptableConfigObject.cpp)
 
 # setup the build target and linkage
 SET(EXENAME BrowserPlusPrefs)
-ADD_EXECUTABLE(${EXENAME} WIN32 ${SRCS} ${HDRS} ConfigPanel.rc )
+ADD_EXECUTABLE(${EXENAME} WIN32 ${SRCS} ${HDRS}
+               "${CMAKE_CURRENT_BINARY_DIR}/ConfigPanel.rc" )
+# copy the icon over to binary dir so the silly rc compiler can find it
+CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/bpicon.ico"
+               "${CMAKE_CURRENT_BINARY_DIR}/bpicon.ico" COPYONLY)
+
 TARGET_LINK_LIBRARIES(${EXENAME} BPProtocol_s
                       HTMLRender_s BPUtils_s ArchiveLib_s)

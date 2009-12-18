@@ -26,12 +26,12 @@ require 'pathname'
 include Config
 
 if ARGV[0] =~ /help/ || $intDir == nil
-    puts "Usage: ruby -s #{$0} [-verbose=<anything>] -intDir=<CMAKE_CFG_INTDIR>"
-    puts "  (e.g. ruby -s #{$0} -verbose=1) -intDir=Debug)"
+    puts "Usage: ruby -s #{$0} [-verbose=<anything>] -intDir=<CMAKE_CFG_INTDIR> -buildDir=<path>"
+    puts "  (e.g. ruby -s #{$0} -verbose=1) -intDir=Debug -buildDir=path/to/build)"
     exit 1
 end
 
-topDir = File.dirname(File.dirname(File.dirname(File.expand_path(__FILE__))))
+topDir = File.dirname(File.dirname(File.dirname(File.dirname(File.expand_path(__FILE__)))))
 
 beVerbose = defined?($verbose) ? $verbose : false
 bpVersion = "<%= $cmake["VersionString"] %>"
@@ -65,12 +65,10 @@ def flushTurds(dir, verbose)
 end
 
 # find build directory, externals
-buildDir = File.join(topDir, "build")
-externalsDir = File.expand_path(File.join(topDir, "..", "External"))
-buildDir = File.join(topDir, "build")
+externalsDir = File.expand_path(File.join(topDir, "..", "external"))
 
 artifactsName = "pab_#{bpVersion}-#{plat_fname}"
-artifactsDir = File.join(buildDir, artifactsName)
+artifactsDir = File.join($buildDir, artifactsName)
 shippingBinsDir = File.join(topDir, "build", "ShippingBinaries")
 shippingResDir = File.join(topDir, "build", "ShippingResources",
                                  bpVersion)
@@ -90,7 +88,7 @@ localizeUIScript = File.join(topDir, "support", "l10n", "localizeUI.rb")
 # 
 # platformInfo.json
 #
-FileUtils.install("#{topDir}/libs/installer/platformInfo.json",
+FileUtils.install("#{$buildDir}/libs/installer/platformInfo.json",
                   updateDir, :verbose => $beVerbose)
 
 #
@@ -101,7 +99,7 @@ FileUtils.install("#{shippingBinsDir}/BrowserPlusCore#{exeSuffix}",
                   updateDaemonDir, :verbose => $beVerbose)
 FileUtils.install("#{topDir}/bins/browserpluscore/BrowserPlus.config",
                   updateDaemonDir, :verbose => $beVerbose)
-FileUtils.install("#{topDir}/bins/browserpluscore/strings.json",
+FileUtils.install("#{$buildDir}/bins/browserpluscore/strings.json",
                   updateDaemonDir, :verbose => $beVerbose)
 
 # install HTML user interface next to the daemon
@@ -171,7 +169,7 @@ FileUtils.install("#{topDir}/support/signing/devel_certs/BrowserPlus.crt",
 FileUtils.install("#{shippingBinsDir}/BrowserPlusUpdater#{exeSuffix}",
                   "#{updateDir}/BrowserPlusUpdater#{exeSuffix}",
                   :mode => 0755, :verbose => $beVerbose)
-FileUtils.install("#{topDir}/libs/installer/misc/strings.json",
+FileUtils.install("#{$buildDir}/libs/installer/misc/strings.json",
                   "#{updateDir}/strings.json",
                   :mode => 0644, :verbose => $beVerbose)
 FileUtils.install("#{shippingBinsDir}/BrowserPlusUninstaller#{exeSuffix}",
@@ -203,13 +201,13 @@ FileUtils.mkdir_p(installerDir)
 FileUtils.install("#{shippingBinsDir}/BrowserPlusInstaller#{exeSuffix}",
                   "#{installerDir}/BrowserPlusInstaller#{exeSuffix}",
                   :mode => 0755, :verbose => $beVerbose)
-FileUtils.install("#{topDir}/bins/installer/installer.config",
+FileUtils.install("#{$buildDir}/bins/installer/installer.config",
                   "#{installerDir}/installer.config",
                   :mode => 0644, :verbose => $beVerbose)
 FileUtils.install("#{updatePermsDir}/BrowserPlus.crt",
                   "#{installerDir}/BrowserPlus.crt",
                   :mode => 0644, :verbose => $beVerbose)
-FileUtils.install("#{topDir}/libs/installer/misc/strings.json",
+FileUtils.install("#{$buildDir}/libs/installer/misc/strings.json",
                   "#{installerDir}/strings.json",
                   :mode => 0644, :verbose => $beVerbose)
 
@@ -249,13 +247,13 @@ else
     btTgtDir = "#{installerDir}/buildtools"
     FileUtils.mkdir_p(btTgtDir, :mode => 0755, :verbose => $beVerbose)
 
-    FileUtils.install("#{buildDir}/dist/bin/#{$intDir}/bptar.exe",
+    FileUtils.install("#{$buildDir}/dist/bin/#{$intDir}/bptar.exe",
                       btTgtDir, :mode => 0644, :verbose => $beVerbose)
 
-    FileUtils.install("#{buildDir}/dist/bin/#{$intDir}/BrowserPlusBootstrapper.exe",
+    FileUtils.install("#{$buildDir}/dist/bin/#{$intDir}/BrowserPlusBootstrapper.exe",
                       btTgtDir, :mode => 0644, :verbose => $beVerbose)
 
-    FileUtils.install("#{buildDir}/dist/bin/#{$intDir}/BrowserPlusBootstrapper.exe",
+    FileUtils.install("#{$buildDir}/dist/bin/#{$intDir}/BrowserPlusBootstrapper.exe",
                       btTgtDir, :mode => 0644, :verbose => $beVerbose)
 
     FileUtils.install("#{externalsDir}/Windows/bin/elzma.exe",
@@ -271,13 +269,13 @@ end
 
 # let's copy in the generate.rb script which is the main driver
 # of bpkg/installer generation
-FileUtils.install("#{topDir}/support/build_scripts/generate.rb",
+FileUtils.install("#{$buildDir}/support/build_scripts/generate.rb",
                   "#{artifactsDir}/",
                   :mode => 0755, :verbose => $verbose)
 
 # and generate.rb needs a tool or two to do its duty
 FileUtils.mkdir_p("#{artifactsDir}/tools")
-FileUtils.install("#{buildDir}/dist/bin/#{$intDir}/bpkg#{exeSuffix}",
+FileUtils.install("#{$buildDir}/dist/bin/#{$intDir}/bpkg#{exeSuffix}",
                   "#{artifactsDir}/tools",
                   :mode => 0755, :verbose => $verbose)
 
@@ -291,9 +289,9 @@ Dir.glob(File.join(shippingResDir, "*.js")).each { |f|
 }
 
 # remove previous installers and update pkg
-FileUtils.rm_f(File.join(buildDir, "BrowserPlus_#{bpVersion}#{instSuffix}"))
-FileUtils.rm_f(File.join(buildDir, "BrowserPlus_#{bpVersion}_full#{instSuffix}"))
-FileUtils.rm_f(File.join(buildDir, "BrowserPlus_#{bpVersion}.bpkg"))
+FileUtils.rm_f(File.join($buildDir, "BrowserPlus_#{bpVersion}#{instSuffix}"))
+FileUtils.rm_f(File.join($buildDir, "BrowserPlus_#{bpVersion}_full#{instSuffix}"))
+FileUtils.rm_f(File.join($buildDir, "BrowserPlus_#{bpVersion}.bpkg"))
 
 # generate installers and update pkg
 
@@ -317,7 +315,7 @@ pubKey = "#{topDir}/support/signing/devel_certs/BrowserPlus.crt"
 certStore = "#{topDir}/support/signing/Combined.crt"
 
 generateCmd = "ruby \"#{artifactsDir}/generate.rb\" -pubKey=#{pubKey}"
-generateCmd = generateCmd + " -certStore=#{certStore} -pass=#{pass} -outdir=\"#{buildDir}\"" 
+generateCmd = generateCmd + " -certStore=#{certStore} -pass=#{pass} -outdir=\"#{$buildDir}\"" 
 generateCmd = generateCmd + " -prefix=BrowserPlus -primary=#{primary}"
 secondaries.each { |s|  generateCmd = generateCmd + " -secondary=#{s}" }
 generateCmd = generateCmd + " -buildType=ephemeral -logLevel=#{logLevel}"

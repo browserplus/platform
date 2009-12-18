@@ -21,7 +21,12 @@ SET(BrowserPlusBootstrapper_LINK_STATIC ArchiveLib BPUtils)
 
 # Specify sources manually - Build templates for BINARY WIN32 doesn't add 
 # .rc file properly.
-SET(BrowserPlusBootstrapper_SOURCES bootstrap.cpp bootstrap.rc)
+SET(BrowserPlusBootstrapper_SOURCES
+      bootstrap.cpp
+      ${CMAKE_CURRENT_BINARY_DIR}/bootstrap.rc)
+
+# make sure we can find "resource.h" over on alpha centauri (in the binary output directory)
+INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
 
 # Inhibit BuildTemplates from adding its own version resources.
 SET(BrowserPlusBootstrapper_NO_VERSION_RESOURCES 1)
@@ -33,3 +38,7 @@ ADD_DEPENDENCIES(BrowserPlusBootstrapper ArchiveLib_s BPUtils_s)
 
 SET_TARGET_PROPERTIES(BrowserPlusBootstrapper PROPERTIES LINK_FLAGS
                       "/MACHINE:X86")
+
+# copy the icon over to binary dir so the silly rc compiler can find it
+CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/bpicon.ico"
+               "${CMAKE_CURRENT_BINARY_DIR}/bpicon.ico" COPYONLY)

@@ -27,9 +27,7 @@ SET (BP_EXTERNAL_DIR
      "${CMAKE_CURRENT_SOURCE_DIR}/../external/${CMAKE_SYSTEM_NAME}")
 
 SET (BUILD_SCRIPTS_DIR 
-     "${CMAKE_CURRENT_SOURCE_DIR}/support/build_scripts")
-
-MESSAGE("bpext: ${BP_EXTERNAL_DIR}")
+     "${CMAKE_CURRENT_BINARY_DIR}/support/build_scripts")
 
 SET (arch "i386") 	   	
 
@@ -83,7 +81,7 @@ FILE(TO_NATIVE_PATH "${BUILD_SCRIPTS_DIR}/makeInstaller.rb"
                     rubyMakeInstaller)
 ADD_CUSTOM_TARGET(MakeInstaller ALL
                   DEPENDS ${allShippingDepends}
-                  COMMAND ruby -s \"${rubyMakeInstaller}\" -intDir=${CMAKE_CFG_INTDIR}
+                  COMMAND ruby -s \"${rubyMakeInstaller}\" -intDir=${CMAKE_CFG_INTDIR} -buildDir=\"${CMAKE_CURRENT_BINARY_DIR}\"
                   COMMENT "Make BrowserPlus installer")
 ADD_DEPENDENCIES(MakeInstaller PackageSDK)
 
