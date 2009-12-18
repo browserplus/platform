@@ -43,9 +43,3 @@ if system(updateCmd)
 else
     puts "BrowserPlusInstaller failed with exitstatus " + $?.to_s
 end
-
-# and obliterate work directory 
-if File.exist? $workDir
-  puts "Removing artifacts build work directory"
-  FileUtils.rm_rf($workDir)
-end

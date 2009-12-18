@@ -48,6 +48,7 @@ ELSEIF (APPLE)
 ENDIF () 	 
 SET (pabSdkFileName "pab_${VersionString}-${platform}-${arch}.tar")
 SET (pabDir "pab_${VersionString}-${platform}")
+SET (pabWorkDir "${CMAKE_CURRENT_BINARY_DIR}/${pabDir}/work")
 SET (sdkFileName "bpsdk_${VersionString}-${platform}-${arch}.${tarSuffix}")
 SET (sdkIntFileName "bpsdk_internal_${VersionString}-${platform}-${arch}.${tarSuffix}")
 
@@ -114,6 +115,7 @@ ADD_CUSTOM_COMMAND(TARGET CompressSDK
                    COMMENT "Compressing the Internal BrowserPlus SDK")
 
 ADD_CUSTOM_COMMAND(TARGET CompressSDK
+                   COMMAND ${CMAKE_COMMAND} -E remove_directory ${pabWorkDir}
                    COMMAND ${tarCmd} ${tarTarArgs} ${pabSdkFileName} ${pabDir}
                    COMMAND ${elzmaCmd} --lzip -v -z ${pabSdkFileName}
                    COMMENT "Compressing the BrowserPlus Installer SDK")
