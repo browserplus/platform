@@ -113,23 +113,40 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::invoke)
         return;
     }
     
-    // fixup callbacks and  file arguments
+    // fixup callbacks and file arguments
     std::list<bp::service::Argument> l = f.arguments(); 
     std::list<bp::service::Argument>::iterator it;
     int callbackId = 1;
     for (it = l.begin(); it != l.end(); it++) {
         if (it->type() == bp::service::Argument::CallBack) {
             argMap.add(it->name(), new bp::CallBack(callbackId++));
-        } else if (it->type() == bp::service::Argument::Path){
+        } else if (it->type() == bp::service::Argument::Path) {
             // get the string out of the argMap
             std::string str;
-            if (argMap.getString(it->name().c_str(), str))
-            {
+            if (argMap.getString(it->name().c_str(), str)) {
                 bp::file::Path path;
                 if (bp::url::isFileUrl(str)) {
                     path = bp::file::pathFromURL(str);
                 }
                 argMap.add(it->name(), new bp::Path(path));                
+            }
+        } else if (it->type() == bp::service::Argument::List) {
+            // deal with lists of files
+            bp::List* newList = new bp::List;
+            const bp::List* argList = NULL;
+            if (argMap.getList(it->name().c_str(), argList)) {
+                for (size_t i = 0; i < argList->size(); i++) {
+                    // get the string out of the argList
+                    const bp::Object* obj = argList->value(i);
+                    const bp::String* str = dynamic_cast<const bp::String*>(obj);
+                    if (str && bp::url::isFileUrl(str->value())) {
+                        bp::file::Path path = bp::file::pathFromURL(str->value());
+                        newList->append(new bp::Path(path));
+                    } else {
+                        newList->append(obj->clone());
+                    }
+                }
+                argMap.add(it->name(), newList);
             }
         }
     }
