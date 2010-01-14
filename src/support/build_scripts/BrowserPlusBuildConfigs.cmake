@@ -83,6 +83,8 @@ IF(WIN32)
 ELSE ()
     SET(isysrootFlag)
     IF (APPLE)
+      SET (CMAKE_OSX_DEPLOYMENT_TARGET "10.4"
+	       CACHE STRING "Compile for tiger deployment" FORCE)
       SET (CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.4u.sdk"
 	       CACHE STRING "Compile for tiger backwards compat" FORCE)
       SET(isysrootFlag "-isysroot ${CMAKE_OSX_SYSROOT}")

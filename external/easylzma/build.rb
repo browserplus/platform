@@ -57,7 +57,7 @@ applyPatches(pkgDir)
 FileUtils.mkdir_p(buildDir)
 Dir.chdir(buildDir) do
     $buildTypes.each() do |buildType|
-        system("cmake #{$cmakeGenerator} -DCMAKE_BUILD_TYPE:STRING=#{buildType} #{pkgDir}")
+    system("cmake #{$cmakeArgs} #{$cmakeGenerator} -DCMAKE_BUILD_TYPE:STRING=#{buildType} #{pkgDir}")
 
         if $platform == "Windows"
             system("devenv easylzma.sln /Build #{buildType}")
