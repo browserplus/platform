@@ -12,6 +12,7 @@ Patches
     3. Change mg_open_listening_port() to only use INADDR_LOOPBACK.
     4. Change set_ports_option() to return actual port bound (useful 
        for ephemeral).
+    5. Disable console logging statements in DEBUG builds.
 
 
 Note: The source files in mongoose-2.8.tgz have DOS line endings.  
