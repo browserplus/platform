@@ -1422,7 +1422,7 @@ delayDelete()
 
 
 bool
-exists(const Path& path)
+safeExists(const Path& path)
 {
     try {
         return bfs::exists(path);
