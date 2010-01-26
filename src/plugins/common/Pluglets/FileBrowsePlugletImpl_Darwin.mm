@@ -220,7 +220,7 @@ FileBrowsePluglet::execute(unsigned int tid,
             selection.push_back([[url path] UTF8String]);
         }
     }
-	[panel release];
+    [panel release];
 
     bp::Object* obj = NULL;
     if (m_desc.majorVersion() == 1) {
