@@ -52,7 +52,7 @@ BEGIN
         BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "Yahoo! Inc.\0"
-            VALUE "FileDescription", "npybrowserplus_<%= $cmake["VersionString"] %>\0"
+            VALUE "FileDescription", "<%= $cmake["PluginDescription"] %>\0"
             VALUE "FileExtents", "\0"
             VALUE "FileOpenName", "npybrowserplus_<%= $cmake["VersionString"] %>\0"
             VALUE "FileVersion", "<%= $cmake["WindowsVersionInfo"] %>\0"
@@ -62,7 +62,7 @@ BEGIN
             VALUE "MIMEType", "<%= $cmake["WindowsNPAPIMimeTypes"] %>\0"
             VALUE "OriginalFilename", "npybrowserplus_<%= $cmake["VersionString"] %>.dll\0"
             VALUE "PrivateBuild", "\0"
-            VALUE "ProductName", "Yahoo! BrowserPlus Plugin\0"
+            VALUE "ProductName", "<%= $cmake["PluginName"] %>\0"
             VALUE "ProductVersion", "<%= $cmake["WindowsVersionInfo"] %>\0"
             VALUE "SpecialBuild", "\0"
         END
