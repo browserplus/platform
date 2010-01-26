@@ -1422,11 +1422,14 @@ delayDelete()
 
 
 bool
-exists( const Path& path)
+exists(const Path& path)
 {
     try {
-        return bfs::exists( path );
+        return bfs::exists(path);
     } catch(const tFileSystemError& e) {
+        BPLOG_DEBUG_STRM("bfs::exists(" << path << ") failed.");
+        BPLOG_INFO_STRM("bfs::exists failed: " << e.what() <<
+                        ", returning false.");
         return false;
     }
 }
