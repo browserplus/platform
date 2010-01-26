@@ -45,13 +45,7 @@ DropTargetBase::DropTargetBase()
       m_state(DropTargetBase::Idle),
       m_dropState(DropTargetBase::Unknown),
       m_enabled(true),
-// win32 file systems tend to be much slower than osx, on win32 we'll
-// have a limit of 1k files dropped (YIB-2077636)
-#ifdef WIN32
       m_limit(1000)
-#else
-      m_limit(10000)
-#endif
 {
 }
   

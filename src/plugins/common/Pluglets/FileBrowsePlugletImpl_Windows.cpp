@@ -482,7 +482,7 @@ FileBrowsePluglet::execute(unsigned int tid,
         includeGestureInfo = ((bp::Bool*) arguments->get("includeGestureInfo"))->value();
     }
     
-    unsigned int limit = 10000;
+    unsigned int limit = 1000;
     if (arguments->has("limit", BPTInteger)) {
         limit = (unsigned int)(((bp::Integer*) arguments->get("limit"))->value());
     }
