@@ -1,3 +1,17 @@
+01/26/2010 - Changes from 2.5.0 to 2.5.1
+  * Drop file browse recursion limit to 1000 to prevent seeming
+    application hangs.
+  * Fix WinXP Crasher: crash in FileBrowse upon selection of empty dvd drive
+  * Firefox OSX Crasher fixed:
+    https://bugzilla.mozilla.org/show_bug.cgi?id=532968
+  * Improve user visible product name and description for NPAPI Plugin
+    (now "compatible" with mozilla's plugin check)
+  * support building with cmake 2.8
+  * ServiceRunner will now properly handle deeply nested files
+  * several fixes around .erb file (re)substitution (the mechanims by 
+    which source or configuration files are parameterized at build time)
+  * repair build on osx 10.4
+
 12/16/2009 - Changes from 2.4.21 to 2.5.0
   * improved handling of shortcuts and symlinks on all plats
     (fixes win32 crash/hang on 2.4.21 in FileBrowse if selected dir
