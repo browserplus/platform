@@ -220,6 +220,8 @@ FileBrowsePluglet::execute(unsigned int tid,
             selection.push_back([[url path] UTF8String]);
         }
     }
+    [panel setDelegate:nil];
+    [delegate release];
     [panel release];
 
     bp::Object* obj = NULL;
