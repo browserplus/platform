@@ -298,7 +298,8 @@ MyWinProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 }
                 
                 bp::file::Path path(wstr);
-                if (boost::filesystem::exists(path)) {
+                if (bp::file::exists(path)) {
+//              if (boost::filesystem::exists(path)) {
                     ctx->m_paths->push_back(path);
                     valid = true;
                 }
@@ -339,7 +340,8 @@ MyWinProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                                                     &str);
                     if (SUCCEEDED(hr)) {
                         bp::file::Path path(str.pOleStr);
-                        if (boost::filesystem::exists(path)) {
+                        if (bp::file::exists(path)) {
+//                      if (boost::filesystem::exists(path)) {
                             ctx->m_paths->push_back(path);
                             valid = true;
                         }

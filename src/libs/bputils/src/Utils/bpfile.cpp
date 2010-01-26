@@ -1421,6 +1421,17 @@ delayDelete()
 }
 
 
+bool
+exists( const Path& path)
+{
+    try {
+        return bfs::exists( path );
+    } catch(const tFileSystemError& e) {
+        return false;
+    }
+}
+
+
 static void
 copyDir(const Path& from,
         const Path& to)
