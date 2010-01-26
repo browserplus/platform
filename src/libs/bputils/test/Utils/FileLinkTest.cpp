@@ -71,14 +71,14 @@ FileLinkTest::circularLink()
     bfs::create_directory(dir1);
     Path file1 = dir1 / "file1";
     bp::strutil::storeToFile(file1, "I am file 1");
-    CPPUNIT_ASSERT(bfs::exists(file1));
+    CPPUNIT_ASSERT(exists(file1));
     
     // make dir2 containing dir2
     Path dir2 = m_dir / "dir2";
     bfs::create_directory(dir2);
     Path file2 =dir2 / "file2";
     bp::strutil::storeToFile(file2, "I am file 2");
-    CPPUNIT_ASSERT(bfs::exists(file2));
+    CPPUNIT_ASSERT(exists(file2));
     
     // now make links from dir1 to dir2 and dir2 to dir1
     Path link1 = dir1 / "link1.lnk";

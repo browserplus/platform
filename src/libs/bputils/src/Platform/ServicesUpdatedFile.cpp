@@ -55,7 +55,7 @@ ServicesUpdated::servicesChanged()
 {
     bp::file::Path path = bp::paths::getCoreletDirectory();
     path /= SERVICES_UPDATED_FILENAME;
-    if (boost::filesystem::exists(path)) {
+    if (bp::file::exists(path)) {
         (void) bp::file::remove(path);
         return true;
     }

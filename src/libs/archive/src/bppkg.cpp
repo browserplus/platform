@@ -249,7 +249,7 @@ bp::pkg::packDirectory(const bpf::Path& keyFile,
     try {
         // First create tarball of inDir
         //
-        if (!bfs::exists(inDir)) {
+        if (!bpf::exists(inDir)) {
             throw string(inDir.utf8() + " does not exist");
         }
 

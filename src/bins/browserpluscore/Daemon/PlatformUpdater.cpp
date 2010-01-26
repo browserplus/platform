@@ -237,7 +237,7 @@ PlatformUpdaterSingleton::spawnUpdate(const string& version)
     Path cacheDir = getPlatformCacheDirectory() / version;
     Path updater = cacheDir / "BrowserPlusUpdater";
     updater = canonicalProgramPath(updater);
-    if (!boost::filesystem::exists(updater)) {
+    if (!exists(updater)) {
         return false;
     }
     spawnStatus status;

@@ -521,12 +521,12 @@ ScriptableConfigObject::invoke(const string & functionName,
 bool
 ScriptableConfigObject::isInstalled()
 {
-    return boost::filesystem::exists(bp::paths::getBPInstalledPath());
+    return exists(bp::paths::getBPInstalledPath());
 }
 
 
 bool
 ScriptableConfigObject::isEnabled()
 {
-    return isInstalled() && !boost::filesystem::exists(bp::paths::getBPDisabledPath());
+    return isInstalled() && !exists(bp::paths::getBPDisabledPath());
 }

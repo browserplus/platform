@@ -30,7 +30,6 @@
 using namespace std;
 using namespace bp::file;
 using namespace bp::paths;
-namespace bfs = boost::filesystem;
 
 void
 bp::platformutil::removePlatform(const bp::ServiceVersion& version,
@@ -45,13 +44,13 @@ bp::platformutil::removePlatform(const bp::ServiceVersion& version,
     
     if (!force) {
         // Don't try to clean up an installed platform
-        if (bfs::exists(getBPInstalledPath(major, minor, micro))) {
+        if (bp::file::exists(getBPInstalledPath(major, minor, micro))) {
             BPLOG_DEBUG_STRM(version.asString() << " installed, ignored");
             return;
         }
 
         // Don't try to clean up an installing platform
-        if (bfs::exists(getBPInstallingPath(major, minor, micro))) {
+        if (bp::file::exists(getBPInstallingPath(major, minor, micro))) {
             BPLOG_DEBUG_STRM(version.asString() << " installing, ignored");
             return;
         }

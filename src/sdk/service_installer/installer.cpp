@@ -314,7 +314,7 @@ int main(int argc, const char ** argv)
 
         bool overwrote = false;
         bp::file::Path destination = bp::paths::getCoreletDirectory() /coreletName / coreletVersion;
-        if (boost::filesystem::exists(destination)) {
+        if (bp::file::exists(destination)) {
             if (argParser->argumentPresent("f")) {
                 if (!bp::file::remove(destination)) {
                     std::cerr << "error deleting '" << destination << "'"

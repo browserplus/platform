@@ -1340,7 +1340,7 @@ remove(const Path& path)
 {
 
     // easy, path doesn't exist
-    if (path.empty() || !bfs::exists(path)) {
+    if (path.empty() || !exists(path)) {
         return true; 
     }
 
@@ -1422,7 +1422,7 @@ delayDelete()
 
 
 bool
-safeExists(const Path& path)
+exists(const Path& path)
 {
     try {
         return bfs::exists(path);
@@ -1465,12 +1465,12 @@ copy(const Path& src,
         }
 
         // fail if source doesn't exist
-        if (!bfs::exists(src)) {
+        if (!exists(src)) {
             return false;
         }
     
         // fail if destination file exists (no implicit overwrite)
-        if (bfs::exists(dst) && !bfs::is_directory(dst)) {
+        if (exists(dst) && !bfs::is_directory(dst)) {
             return false;
         }
 
@@ -1499,7 +1499,7 @@ copy(const Path& src,
         }
         string toStr = to.utf8();
         if (toStr.rfind("/") == toStr.length()-1) {
-            if (bfs::exists(to) && !bfs::is_directory(to)) {
+            if (exists(to) && !bfs::is_directory(to)) {
                 return false;
             }
             to = toStr.substr(0, toStr.length()-1);

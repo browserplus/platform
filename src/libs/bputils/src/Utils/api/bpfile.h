@@ -333,7 +333,7 @@ namespace bp {
          *  \param		path [IN] - source path
          *  \returns	true if path item exists
          */
-        bool safeExists(const Path& path);
+        bool exists(const Path& path);
 
         /** Does a path refer to a Unix or NTFS symlink?
          *  \param		path [IN] - source path

@@ -54,7 +54,7 @@ bp::serviceInterfaceCache::isNewerThan(const std::string & name,
     bp::file::Path path = buildPath(name, version);    
     bool rval = false;
     BPTime pathTime((long)0);
-    if (boost::filesystem::exists(path)) {
+    if (bp::file::exists(path)) {
         try {
             pathTime.set(boost::filesystem::last_write_time(path));
         } catch (const bp::file::tFileSystemError&) {
@@ -75,7 +75,7 @@ bp::serviceInterfaceCache::get(const std::string & name,
     bp::file::Path path = buildPath(name, version);
     bp::Object * obj = NULL;
 
-    if (boost::filesystem::exists(path)) {
+    if (bp::file::exists(path)) {
         // read cache
         std::string jsonRep;
         if (bp::strutil::loadFromFile(path, jsonRep)) {

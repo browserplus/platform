@@ -336,7 +336,7 @@ bp::paths::getComponentInstallDialogPath(const string & locale)
     
     for (unsigned int i = 0; i < locales.size(); i++) {
         Path path = getProductDirectory()/"ui"/"install_dialog"/locales[i]/"index.html";
-        if (bfs::exists(path)) {
+        if (exists(path)) {
             rval = path;
             break;
         }
@@ -354,7 +354,7 @@ bp::paths::getPreferencePanelUIPath(const string & locale)
     
     for (unsigned int i = 0; i < locales.size(); i++) {
         Path path = getProductDirectory()/"ui"/"preference_panel"/locales[i]/"index.html";
-        if (bfs::exists(path)) {
+        if (exists(path)) {
             rval = path;
             break;
         }

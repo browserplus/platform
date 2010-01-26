@@ -445,7 +445,7 @@ RequireRequest::checkPlatformUpdates()
             Path installedPath = bp::paths::getBPInstalledPath(v.majorVer(),
                                                                v.minorVer(), 
                                                                v.microVer());
-            bool alreadyInstalled = boost::filesystem::exists(installedPath);
+            bool alreadyInstalled = bp::file::exists(installedPath);
             bool olderThanCurrent = (v.compare(thisVersion) < 0);
             if (alreadyInstalled || olderThanCurrent) {
                 BPLOG_INFO_STRM("version " << *it

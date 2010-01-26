@@ -50,7 +50,7 @@ FileCopyTest::sourceFile()
     Path src = m_testSourceDir / "foo.txt";
     Path dst = m_testDestDir / "foo.txt";
     CPPUNIT_ASSERT(copy(src, dst));
-    CPPUNIT_ASSERT(bfs::exists(dst));
+    CPPUNIT_ASSERT(exists(dst));
 
     // case 2
     CPPUNIT_ASSERT(!copy(src, dst));    
@@ -67,7 +67,7 @@ FileCopyTest::sourceFile()
     src = m_testSourceDir / "foo.txt";
     dst = m_testDestDir / "bar.txt";
     CPPUNIT_ASSERT(copy(src, dst));
-    CPPUNIT_ASSERT(bfs::exists(dst));
+    CPPUNIT_ASSERT(exists(dst));
 
     // case 3
     src = m_testSourceDir / "foo.txt";
@@ -76,7 +76,7 @@ FileCopyTest::sourceFile()
     CPPUNIT_ASSERT(bfs::is_directory(dst));
     CPPUNIT_ASSERT(bp::file::copy(src, dst));    
     dst /= "foo.txt";
-    CPPUNIT_ASSERT(bfs::exists(dst));
+    CPPUNIT_ASSERT(exists(dst));
 
     // trailing / on dst dir shouldn't affect operation
     src = m_testSourceDir / "foo.txt";
@@ -87,7 +87,7 @@ FileCopyTest::sourceFile()
     dst = dstStr;
     CPPUNIT_ASSERT(copy(src, dst));    
     dst /= "foo.txt";
-    CPPUNIT_ASSERT(bfs::exists(dst));
+    CPPUNIT_ASSERT(exists(dst));
 
     // source is a file, destination dir and it's parent don't exist (fail)
     dst = m_testDestDir / "doesnt" / "exist";

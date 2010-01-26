@@ -409,7 +409,7 @@ private:
         // Copy uninstallers into  platformDir
         Path uninsScript = bp::paths::getUninstallerPath().filename();
         Path uninsSrc = m_exeDir / uninsScript;
-        if (boost::filesystem::exists(uninsSrc)) {
+        if (exists(uninsSrc)) {
             Path uninsDst = platformDir / uninsScript;
             if (!copy(uninsSrc, uninsDst)) {
                 BP_THROW("unable to copy " + uninsSrc.externalUtf8()
@@ -693,14 +693,14 @@ resolvePath(Path pathToBinary,
 {
     Path resolvedPath = updatePkg;
     
-    if (!updatePkg.empty() && !boost::filesystem::exists(updatePkg))
+    if (!updatePkg.empty() && !exists(updatePkg))
     {
         resolvedPath = pathToBinary.parent_path() / updatePkg;
         
         // if that file doesn't exist, then we won't change the updatePkg
         // path, primarily to keep suspicious looking unexpected changes
         // out of the logfile
-        if (!boost::filesystem::exists(resolvedPath)) {
+        if (!exists(resolvedPath)) {
             resolvedPath = updatePkg;
         }
     }
@@ -768,7 +768,7 @@ main(int argc, const char** argv)
             // handle the case where the path is relative to the binary
             // (YIB-2917492)
             updatePkg = resolvePath(Path(argv[0]), updatePkg);
-            if (!boost::filesystem::exists(updatePkg)) {
+            if (!exists(updatePkg)) {
                 BP_THROW("update package " + updatePkg.externalUtf8()
                          + " not found");
             }
