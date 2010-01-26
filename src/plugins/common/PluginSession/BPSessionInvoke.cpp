@@ -215,9 +215,12 @@ BPSession::executeMethod(const std::string &service,
     args = dynamic_cast<bp::Map *>(argsObj);
     argsObj = NULL;
 
-    BPLOG_DEBUG_STRM(service << "[" << version << "]." << method <<
-                     "(" << args->toPlainJsonString(true) << ")");
-
+    // Log method args at debug level.
+    if (args) {
+        BPLOG_DEBUG_STRM(service << "[" << version << "]." << method <<
+                         "(" << args->toPlainJsonString(true) << ")");
+    }
+    
     // allocate an execution context ptr.
     ExecuteContext * ctx = new ExecuteContext;
     ctx->callback = callback->clone();
