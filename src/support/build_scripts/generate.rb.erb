@@ -162,10 +162,10 @@ FileUtils.cp(bpkgPath, File.join($workDir, "install"))
 instCfgContents = ""
 instCfgPath = File.join($workDir, "install", "installer.config")
 File.open(instCfgPath, "r") { |f|
-  f.lines.each { |l|
+  while (l = f.gets)
     l = "  ,\"package\": \"#{bpkgName}\"" if l =~ /"package":/
     instCfgContents = instCfgContents + l
-  }
+  end
 }
 File.open(instCfgPath, "w+") { |f| f.write instCfgContents }
 
