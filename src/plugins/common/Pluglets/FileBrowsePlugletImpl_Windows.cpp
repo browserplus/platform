@@ -552,6 +552,10 @@ FileBrowsePluglet::execute(unsigned int tid,
         flags |= FOS_ALLOWMULTISELECT | FOS_FORCEFILESYSTEM | FOS_PATHMUSTEXIST
                  | FOS_FILEMUSTEXIST | FOS_DONTADDTORECENT 
                  | FOS_FORCESHOWHIDDEN;
+        if (m_desc.majorVersion() > 1) {
+            flags |= FOS_NODEREFERENCELINKS;
+        }
+
         pDlg->SetOptions(flags);
 
         // add custom controls
@@ -624,6 +628,9 @@ FileBrowsePluglet::execute(unsigned int tid,
 
         ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
         ofn.Flags |= OFN_ALLOWMULTISELECT | OFN_EXPLORER | OFN_ENABLESIZING;
+        if (m_desc.majorVersion() > 1) {
+            ofn.Flags |= OFN_NODEREFERENCELINKS;
+        }
 
         // Our hook allows folder selection.  vPaths
         // populated by MyWinProc();
