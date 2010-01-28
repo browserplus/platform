@@ -84,7 +84,7 @@ static wstring getBrowseTitle( const std::string& sUrl,
 
 static void
 getVistaSelection(IFileOpenDialog* pDlg,
-                  vector<bp::file::Path>* paths)
+                  vector<bpf::Path>* paths)
 {
     paths->clear();
     if (!pDlg) {
@@ -113,7 +113,7 @@ getVistaSelection(IFileOpenDialog* pDlg,
             wstr.append(pwsz);
         }
         CoTaskMemFree(pwsz);
-        bp::file::Path path(wstr);
+        bpf::Path path(wstr);
         if (!path.empty()) {
             paths->push_back(path);
         }
@@ -215,13 +215,13 @@ public:
         return S_OK;
     }
 
-    void setPaths(vector<bp::file::Path>* paths)
+    void setPaths(vector<bpf::Path>* paths)
     {
         m_paths = paths;
     }
 
 private:
-    vector<bp::file::Path>* m_paths;
+    vector<bpf::Path>* m_paths;
 };
 
 
@@ -250,7 +250,7 @@ private:
 // A context passed into hook and then winproc
 typedef struct {
     WNDPROC m_winProc;                  // original dialog winproc
-    vector<bp::file::Path>* m_paths;    // selected files/folders
+    vector<bpf::Path>* m_paths;    // selected files/folders
     string m_locale;
 } Context;
 
@@ -297,8 +297,8 @@ MyWinProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                     wstr = wstr + L"\\" + comboText;
                 }
                 
-                bp::file::Path path(wstr);
-                if (bp::file::exists(path)) {
+                bpf::Path path(wstr);
+                if (bpf::exists(path)) {
                     ctx->m_paths->push_back(path);
                     valid = true;
                 }
@@ -338,8 +338,8 @@ MyWinProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                                                     SHGDN_NORMAL | SHGDN_FORPARSING,
                                                     &str);
                     if (SUCCEEDED(hr)) {
-                        bp::file::Path path(str.pOleStr);
-                        if (bp::file::exists(path)) {
+                        bpf::Path path(str.pOleStr);
+                        if (bpf::exists(path)) {
                             ctx->m_paths->push_back(path);
                             valid = true;
                         }
@@ -502,7 +502,7 @@ FileBrowsePluglet::execute(unsigned int tid,
         for (iter = mimetypes.begin(); iter != mimetypes.end(); ++iter) {
             filterName.append(bp::strutil::utf8ToWide(*iter));
             filterName.append(L", ");
-            vector<string> e = bp::file::extensionsFromMimeType(*iter);
+            vector<string> e = bpf::extensionsFromMimeType(*iter);
             for (unsigned int i  = 0; i < e.size(); ++i) {
                 const string& s = e[i];
                 extensions.insert(s);
@@ -522,7 +522,7 @@ FileBrowsePluglet::execute(unsigned int tid,
     }
 
     // selection ends up here
-    vector<bp::file::Path> vPaths;
+    vector<bpf::Path> vPaths;
 
     // different dialogs for xp and vista
     string osVersion = bp::os::PlatformVersion();
@@ -604,7 +604,7 @@ FileBrowsePluglet::execute(unsigned int tid,
 
         // Set lpstrFile[0] to '\0' so that GetOpenFileNameW does not 
         // use the contents of szFile to initialize itself.
-        wchar_t szFile[MAX_PATH];
+        wchar_t szFile[32768];
         ofn.lpstrFile = szFile;
         ofn.lpstrFile[0] = '\0';
         ofn.nMaxFile = sizeof(szFile) / sizeof(wchar_t);
@@ -647,6 +647,15 @@ FileBrowsePluglet::execute(unsigned int tid,
                       "user canceled browse");
             return;
         }
+
+        // ofn.lpstrFile only seems to be set for a double-clicking
+        // a single item (in spite of what msdn claims).  In the case
+        // of double-clicking broken shortcuts which were "fixed", 
+        // it contains the fixed path, so use it.
+        bpf::Path selPath(ofn.lpstrFile);
+        if (!selPath.empty() && vPaths.size() == 1) {
+            vPaths[0] = selPath;
+        }
     }
 
     bp::Object* pObj = NULL;
@@ -660,9 +669,9 @@ FileBrowsePluglet::execute(unsigned int tid,
         // version 2 and above just return what was selected
         bp::Map* m = new bp::Map;
         bp::List* l = new bp::List;
-        vector<bp::file::Path>::const_iterator it;
+        vector<bpf::Path>::const_iterator it;
         for (it = vPaths.begin(); it != vPaths.end(); ++it) {
-            bp::file::Path path(*it);
+            bpf::Path path(*it);
             l->append(new bp::Path(path));
         }
         m->add("files", l);
