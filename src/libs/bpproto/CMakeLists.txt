@@ -42,22 +42,3 @@ SET(mkdirArg)
 IF (NOT WIN32)
   SET(mkdirArg "-p")
 ENDIF ()
-
-ADD_CUSTOM_COMMAND(TARGET BPProtocol_s POST_BUILD
-                   COMMAND mkdir ${mkdirArg} \"${apiDir}\")
-
-FILE(GLOB headers
-"${CMAKE_CURRENT_SOURCE_DIR}/../ServiceAPI/api/ServiceAPI/bptypes.h"
-"${CMAKE_CURRENT_SOURCE_DIR}/../ServiceAPI/api/ServiceAPI/bperror.h"
-"${CMAKE_CURRENT_SOURCE_DIR}/../ServiceAPI/api/ServiceAPI/bpdefinition.h"
-"${CMAKE_CURRENT_SOURCE_DIR}/../ServiceAPI/api/ServiceAPI/bpuserprompt.h"
-)
-
-FOREACH (header ${headers})
-  GET_FILENAME_COMPONENT(shortname "${header}" NAME)
-  ADD_CUSTOM_COMMAND(TARGET BPProtocol_s POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E echo
-	           "Copying ${shortname} to BPProtocol SDK to include/ServiceAPI/"
-      COMMAND ${CMAKE_COMMAND} -E copy "${header}"
-              "${CMAKE_CURRENT_BINARY_DIR}/dist/include/ServiceAPI")
-ENDFOREACH ()
