@@ -21,8 +21,6 @@ SET(Permissions_MAJOR_VERSION 0)
 SET(Permissions_MINOR_VERSION 1)
 SET(Permissions_LINK_STATIC DistributionClient BPUtils ArchiveLib)
 
-INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../../ServiceAPI/api")
-
 YBT_BUILD(LIBRARY_STATIC Permissions)
 ADD_DEPENDENCIES(Permissions_s DistributionClient_s BPUtils_s ArchiveLib_s)
 

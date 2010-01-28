@@ -24,6 +24,4 @@ SET(${progName}_MINOR_VERSION 1)
 SET(${progName}_LINK_STATIC BPUtils ConsoleLib CoreletManager ServiceRunnerLib
                             Permissions)
 
-INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../../../ServiceAPI/api")
-
 YBT_BUILD(BINARY ${progName})

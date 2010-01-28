@@ -19,8 +19,6 @@
 # ***** END LICENSE BLOCK *****
 SET(testName ArchiveTest) 
 
-INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../../ServiceAPI/api")
-
 SET(${testName}_LINK_STATIC ArchiveLib BPUtils TestingFramework)
 YBT_BUILD(BINARY ${testName})
 ADD_DEPENDENCIES(${testName} ArchiveLib_s)
