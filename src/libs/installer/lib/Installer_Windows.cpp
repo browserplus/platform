@@ -186,11 +186,11 @@ Installer::postflight()
 
     // uninstaller    
     string key = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Yahoo! BrowserPlus";
-    writeString(key, "DisplayName", "Yahoo! BrowserPlus");
     bpf::Path topDir = prodDir.parent_path();
     bpf::Path uninstaller = topDir / "BrowserPlusUninstaller.exe";
     bpf::Path icon = topDir / "ybang.ico";
-    writeString(key, "DisplayName", "Yahoo! BrowserPlus");
+    string displayName = "Yahoo! BrowserPlus " + m_version.asString();
+    writeString(key, "DisplayName", displayName);
     writeString(key, "DisplayIcon", icon.externalUtf8());
     writeString(key, "UninstallString", uninstaller.externalUtf8());
     writeString(key, "Publisher", "Yahoo! Inc.");
