@@ -179,13 +179,8 @@ FileUtils.install("#{shippingBinsDir}/BrowserPlusUpdater#{exeSuffix}",
                   "#{updateDir}/BrowserPlusUpdater#{exeSuffix}",
                   :mode => 0755, :verbose => $beVerbose)
 
-# windows also needs:
-#    uninstallOldPlatform.bat, a script needed during the transition to user-scoped installs
-#    ybang.ico, an icon 
+# windows also needs ybang.ico icon 
 if platform == "Windows"
-    FileUtils.install("#{topDir}/libs/installer/miscScripts/win/uninstallOldPlatform.bat",
-                      "#{updateDir}/uninstallOldPlatform.bat",
-                      :mode => 0755, :verbose => $beVerbose)
     FileUtils.install("#{topDir}/libs/installer/misc/ybang.ico",
                       "#{updateDir}/ybang.ico",
                       :mode => 0644, :verbose => $beVerbose)
@@ -243,7 +238,6 @@ else
     #  1. bootstrapping binary
     #  2. bptar.exe
     #  3. elzma.exe
-    #  4. uninstallOldPlatform.bat script (needed for transition to user-scoped installs)
     btTgtDir = "#{installerDir}/buildtools"
     FileUtils.mkdir_p(btTgtDir, :mode => 0755, :verbose => $beVerbose)
 
@@ -260,9 +254,6 @@ else
                       btTgtDir, :mode => 0644, :verbose => $beVerbose)
 
     FileUtils.install("#{topDir}/libs/installer/miscScripts/win/buildInstaller.rb",
-                      "#{installerDir}/",
-                      :mode => 0644, :verbose => $verbose)
-    FileUtils.install("#{topDir}/libs/installer/miscScripts/win/uninstallOldPlatform.bat",
                       "#{installerDir}/",
                       :mode => 0644, :verbose => $verbose)
 end

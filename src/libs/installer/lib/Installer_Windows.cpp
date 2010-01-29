@@ -45,75 +45,10 @@ namespace bpf = bp::file;
 namespace bfs = boost::filesystem;
 
 
-static bool 
-spawnElevated(const bpf::Path& path,
-              const bpf::Path& workingDir,
-              bp::process::spawnStatus* pStat)
-{
-    // get path and args into writable C buf needed by ShellExecuteEx()
-    const int nBUFLEN = 1024;
-    wchar_t szCommandLine[nBUFLEN];
-    wstring pathStr = path.external_file_string();
-    wstring dirStr = workingDir.external_file_string();
-    memcpy((void *) szCommandLine, (void *) pathStr.c_str(),
-           pathStr.length() * sizeof(wchar_t));
-    szCommandLine[pathStr.length()] = 0;
-
-    // now execute sPath (elevated on Vista) with args
-    SHELLEXECUTEINFOW shex;
-    ZeroMemory(&shex, sizeof(shex));
-    shex.cbSize = sizeof(SHELLEXECUTEINFO);
-    shex.fMask = SEE_MASK_NOCLOSEPROCESS|SEE_MASK_FLAG_NO_UI;
-    shex.hwnd = NULL;
-    string osVersion = bp::os::PlatformVersion();
-    bool isVista = osVersion.compare("6.") >= 0;
-    std::wstring wVerb;
-    if (isVista) wVerb = bp::strutil::utf8ToWide("runas");
-    shex.lpVerb = (wVerb.empty()) ? NULL : wVerb.c_str();
-    shex.lpFile = szCommandLine;
-    shex.lpParameters = NULL;
-    shex.lpDirectory = NULL;
-    if (!dirStr.empty()) {
-        shex.lpDirectory = dirStr.c_str();     
-    }
-    shex.nShow = SW_HIDE;
-    bool bRet = ShellExecuteExW(&shex);
-   
-    if (bRet) {
-        if (pStat) {
-            pStat->errCode = 0;
-            pStat->pid = GetProcessId(shex.hProcess);
-            pStat->handle = shex.hProcess;
-        }
-    } else {
-        if (pStat) {
-            pStat->errCode = GetLastError();
-            pStat->pid = 0;
-        }
-    }
-    return (bRet!=0);
-}
-
-
 void 
 Installer::preflight()
 {
     BPLOG_DEBUG_STRM("begin Installer::preflight()");
-
-    // Remove old system-scoped platform if it exists
-    bpf::Path oldPlatDir = getFolderPath(CSIDL_PROGRAM_FILES) / "Yahoo! BrowserPlus";
-    if (bfs::is_directory(oldPlatDir)) {
-        bpf::Path script= m_dir / "uninstallOldPlatform.bat";
-        BPLOG_DEBUG_STRM("run " << script);
-        bp::process::spawnStatus status;
-        if (spawnElevated(script, script.parent_path(), &status)) {
-            int exitCode;
-            (void) bp::process::wait(status, true, exitCode);
-            BPLOG_WARN_STRM(script << " exit code = " << exitCode);
-        } else {
-            BPLOG_WARN_STRM("unable to spawn " << script);
-        }
-    }
 
     // remove existing start menu items
     bpf::Path dir = getFolderPath(CSIDL_PROGRAMS) / getString(kProductNameShort);
@@ -281,15 +216,6 @@ Installer::postflight()
         }
     }
 
-    // Remove old system-scoped platform if it still exists
-    // after preflight's attempt to kill it
-    bpf::Path oldPlatDir = getFolderPath(CSIDL_PROGRAM_FILES) / "Yahoo! BrowserPlus";
-    if (bfs::is_directory(oldPlatDir)) {
-        BPLOG_DEBUG_STRM(oldPlatDir << " marked for removal at reboot");
-        MoveFileExW(oldPlatDir.external_file_string().c_str(),
-                    NULL, MOVEFILE_DELAY_UNTIL_REBOOT);
-    }
-
     // Try to delete our dir.  It will likely only partially succeed since
     // some files are open and ntfs can't handle that.
     (void) remove(m_dir);
@@ -327,11 +253,11 @@ Installer::disablePlugins(const bp::ServiceVersion& version)
     bool isVistaOrLater = (osVersion.compare("6") >= 0);
     string versionStr = version.asString();
 
-    // Disable user-scoped npapi plugin by zapping the registry
+    // Disable npapi plugin by zapping the registry
     string key = "HKCU\\SOFTWARE\\MozillaPlugins\\@yahoo.com/BrowserPlus,version=" + versionStr;
     recursiveDeleteKey(key);
 
-    // Disable user-scoped IE plugin by zapping the registry
+    // Disable IE plugin by zapping the registry
     bpf::Path path =  getProductDirectory(version.majorVer(),
                                           version.minorVer(),
                                           version.microVer()) 
