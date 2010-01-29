@@ -77,6 +77,10 @@ Installer::Installer(const bpf::Path& dir,
         BP_THROW("Bad version: " + versionString);
     }
 
+    bp::paths::createDirectories(m_version.majorVer(),
+                                 m_version.minorVer(),
+                                 m_version.microVer());
+
     bpf::Path platInfo = m_dir / "platformInfo.json";
     utils::readPlatformInfo(platInfo);
 }

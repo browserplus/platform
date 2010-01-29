@@ -73,11 +73,6 @@ bp::paths::getProductTopDirectory()
 {
     Path prodDir = getCSIDL(CSIDL_LOCAL_APPDATA) 
                    / getCompanyName() / getProductName();
-    try {
-        boost::filesystem::create_directories(prodDir);
-    } catch(const tFileSystemError&) {
-        BP_THROW_FATAL("unable to create " + prodDir.utf8());
-    }
     return prodDir;
 }
 
@@ -114,11 +109,6 @@ bp::paths::getPluginWritableDirectory(int major,
         productDir = getCSIDL(CSIDL_LOCAL_APPDATA);
     }
     productDir /= Path(getCompanyName())/getProductName()/versionString(major, minor, micro);
-    try {
-        boost::filesystem::create_directories(productDir);
-    } catch(const tFileSystemError&) {
-        BP_THROW_FATAL("unable to create " + productDir.utf8());
-    }
     return productDir;
 }
 

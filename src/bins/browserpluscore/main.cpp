@@ -33,6 +33,7 @@
  */
 
 #include "BPUtils/ARGVConverter.h"
+#include "BPUtils/ProductPaths.h"
 #include "Daemon/BPDaemon.h"
 #include "ServiceRunnerLib/ServiceRunnerLib.h"
 
@@ -51,6 +52,9 @@ int main(int argc, const char ** argv)
     // handle non-ascii args on win32
     APT::ARGVConverter conv;
     conv.convert(argc, argv);
+
+    // create needed directories
+    bp::paths::createDirectories();
 
     // the presence of only 2 command line arguments and the -runService
     // flag causes us to run a service, rather than running the Daemon
