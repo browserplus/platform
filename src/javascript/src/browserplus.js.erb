@@ -125,20 +125,9 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
                 if (details.success) {
          			var rv = [];
                     for (var k = 0; k < details.value.length; k++) {
-                        // new style (post 2.0.6) require return value
-                        if (details.value[k].fullDesc) {
-                            _createAPI({value: details.value[k].fullDesc});
-                            rv.push({service: details.value[k].service,
-                                     version: details.value[k].version});
-                        }
-                        // obsolete (2.0.6 and before) require return value
-					    else {
-                            BrowserPlus.describeService(
-                                {service: details.value[k].service,
-                                 version: details.value[k].version},
-                                _createAPI);
-                            rv = details.value;
-						}
+                        _createAPI({value: details.value[k].fullDesc});
+                        rv.push({service: details.value[k].service,
+                                version: details.value[k].version});
                     }
                     details.value = rv;
                 }   
