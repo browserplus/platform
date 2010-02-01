@@ -59,6 +59,8 @@ INCLUDE(support/build_scripts/BPRandDefn.cmake)
 # everyone under here will build with access to the ServiceAPI headers
 INCLUDE_DIRECTORIES(sdk/service_api/api)
 
+ADD_DEFINITIONS(-DBPVERSION=\"${VersionString}\")
+
 # If you add an entry here, you probably also need to add it to 
 # "allShippingDepends" in BuildSDK.cmake
 ADD_SUBDIRECTORY(libs)

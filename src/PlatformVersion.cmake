@@ -70,7 +70,7 @@ ADD_DEFINITIONS(-DBP_VERSION_MAJOR=${BrowserPlusPlatform_MAJOR_VERSION}
                 
 SET(VersionString
     "${BrowserPlusPlatform_MAJOR_VERSION}.${BrowserPlusPlatform_MINOR_VERSION}.${BrowserPlusPlatform_MICRO_VERSION}")    
-    
+
 SET(WindowsVersionInfo 
     "${BrowserPlusPlatform_MAJOR_VERSION},${BrowserPlusPlatform_MINOR_VERSION},${BrowserPlusPlatform_MICRO_VERSION},0")
 
