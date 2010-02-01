@@ -263,12 +263,11 @@ bp::install::utils::registerControl(const vector<string>& vsMimetypes,
             createKey(sKey);
             writeString(sKey, "CLSID", activeXGuid());
         }
-
-        return 0;
-    } catch(int nErr) {
-        //TODO: bp::registry throws bp::Exception, not int.
-        return nErr;
+    } catch (const Exception& e) {
+        BPLOG_WARN_STRM("registerControl failed: " << e.what());
+        return 1;
     }
+    return 0;
 }
 
 
@@ -294,36 +293,64 @@ bp::install::utils::unRegisterControl(const std::vector<std::string>& vsMimetype
 
     // "RegDeleteKey","HKCR\<sProgid>"
     string sKey = sRoot + "\\" + sProgid;
-    recursiveDeleteKey(sKey);
+    try {
+        recursiveDeleteKey(sKey);
+    } catch (const bp::error::Exception& e) {
+        BPLOG_WARN_STRM("unable to delete key " << sKey << ": " << e.what());
+        rval = 1;
+    }
 
     // "RegDeleteKey","HKCR\<sViProgid>"
     sKey = sRoot + "\\" + sViProgid;
-    recursiveDeleteKey(sKey);
+    try {
+        recursiveDeleteKey(sKey);
+    } catch (const bp::error::Exception& e) {
+        BPLOG_WARN_STRM("unable to delete key " << sKey << ": " << e.what());
+        rval = 1;
+    }
 
     // "RegDeleteKey","HKCR\CLSID\<sCoClassUuid>"
     sKey = sRoot + "\\CLSID\\" + sCoClassUuid;
-    recursiveDeleteKey(sKey);
+    try {
+        recursiveDeleteKey(sKey);
+    } catch (const bp::error::Exception& e) {
+        BPLOG_WARN_STRM("unable to delete key " << sKey << ": " << e.what());
+        rval = 1;
+    }
 
     // "RegDeleteKey","HKCR\AppID\<sModuleUuid>"
     sKey = sRoot + "\\AppID\\" + sModuleUuid;
-    recursiveDeleteKey(sKey);
+    try {
+        recursiveDeleteKey(sKey);
+    } catch (const bp::error::Exception& e) {
+        BPLOG_WARN_STRM("unable to delete key " << sKey << ": " << e.what());
+        rval = 1;
+    }
 
     // "RegDeleteKey","HKCR\AppID\YBPAddon.dll"
     string filename = bpf::utf8FromNative(modulePath.filename());
     if (filename.empty()) {
         BPLOG_WARN_STRM("bp::file::fileName(" << modulePath
                         << ") is empty");
-        rval = 1;
     } else {
         sKey = sRoot + "\\AppID\\" + filename;
-        recursiveDeleteKey(sKey);
+        try {
+            recursiveDeleteKey(sKey);
+        } catch (const bp::error::Exception& e) {
+            BPLOG_WARN_STRM("unable to delete key " << sKey << ": " << e.what());
+            rval = 1;
+        }
     }
-
 
     // "RegDeleteKey","HKCR\MIME\Database\Content Type\<mimetype>
     for (size_t i = 0; i < vsMimetypes.size(); i++) {
         sKey = sRoot + "\\MIME\\Database\\Content Type\\" + vsMimetypes[i];
-        deleteKey(sKey);
+        try {
+            deleteKey(sKey);
+        } catch (const bp::error::Exception& e) {
+            BPLOG_WARN_STRM("unable to delete key " << sKey << ": " << e.what());
+            rval = 1;
+        }
     }
 
     return rval;

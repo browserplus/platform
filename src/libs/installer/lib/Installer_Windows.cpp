@@ -78,15 +78,22 @@ Installer::installPlugins()
 {
     BPLOG_DEBUG_STRM("begin Installer::installPlugins()");
 
-    // IE7
-    string key = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Ext\\Stats\\"
-        + activeXGuid() + "\\iexplore";
-    writeInt(key, "Type", 1);
-    writeInt(key, "Flags", 4);
-    // IE8
-    key = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Ext\\Stats\\"
-        + activeXGuid() + "\\iexplore\\AllowedDomains\\*";
-    createKey(key);
+    string key;
+
+    // disable nattergrams, not fatal if it fails
+    try {
+        // IE7
+        key = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Ext\\Stats\\"
+               + activeXGuid() + "\\iexplore";
+        writeInt(key, "Type", 1);
+        writeInt(key, "Flags", 4);
+        // IE8
+        key = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Ext\\Stats\\"
+              + activeXGuid() + "\\iexplore\\AllowedDomains\\*";
+        createKey(key);
+    } catch (const bp::error::Exception& e) {
+        BPLOG_WARN_STRM("unable to disable nattergrams: " << e.what());
+    }
 
     vector<bpf::Path> pluginPaths = getPluginPaths(m_version.majorVer(),
                                                    m_version.minorVer(),
@@ -98,7 +105,8 @@ Installer::installPlugins()
     bpf::Path path = m_dir / "plugins" / "IE";
     doCopy(path, pluginsDir);
     
-    bpf::Path iePath = pluginsDir / bpf::Path("YBPAddon_" + m_version.asString() + ".dll");
+    bpf::Path iePath = pluginsDir / bpf::Path("YBPAddon_" + m_version.asString()
+                                              + ".dll");
     if (registerControl(mimeTypes(), typeLibGuid(), iePath, activeXGuid(),
                         "CBPCtl Object", "Yahoo.BPCtl",
                         "Yahoo.BPCtl." + m_version.asString()) != 0) {
@@ -108,12 +116,14 @@ Installer::installPlugins()
     // Install NPAPI plugin
     BPLOG_DEBUG("installing NPAPI plugin");
     bpf::Path npapiDestDir = npapiPluginDir(pluginsDir);
-    bpf::Path npapiPath = npapiDestDir / bpf::Path("npybrowserplus_" + m_version.asString() + ".dll");
+    bpf::Path npapiPath = npapiDestDir / bpf::Path("npybrowserplus_"
+                                                   + m_version.asString()
+                                                   + ".dll");
 
     bpf::Path npapiSrc = m_dir / "plugins" / "NPAPI";
     doCopy(npapiSrc, npapiDestDir);
     key = "HKEY_CURRENT_USER\\SOFTWARE\\MozillaPlugins\\@yahoo.com/BrowserPlus,version="
-        + m_version.asString();
+          + m_version.asString();
     writeString(key, "Path", npapiPath.externalUtf8());
     writeString(key, "ProductName", "Yahoo! BrowserPlus");
     writeString(key, "Version", m_version.asString());
@@ -160,7 +170,7 @@ Installer::makeLinks()
     bpf::Path lnk = dir / bpf::Path(getString(kConfigLink) + ".lnk");
     bpf::Path target = getProductDirectory(m_version.majorVer(),
                                            m_version.minorVer(),
-                                           m_version.microVer()) / ("BrowserPlusPrefs.exe");
+                                           m_version.microVer()) / "BrowserPlusPrefs.exe";
     if (!createLink(lnk, target)) {
         BP_THROW(lastErrorString("unable to create " +lnk.externalUtf8()));
     }
@@ -184,7 +194,7 @@ Installer::postflight()
                                             m_version.minorVer(),
                                             m_version.microVer());
 
-    // uninstaller    
+    // uninstaller
     string key = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Yahoo! BrowserPlus";
     bpf::Path topDir = prodDir.parent_path();
     bpf::Path uninstaller = topDir / "BrowserPlusUninstaller.exe";
@@ -222,7 +232,9 @@ Installer::postflight()
 
     // Re-register our activex control (it could have 
     // been unregistered by above code if guid hadn't changed)
-    bpf::Path thisIEPluginPath = prodDir / "Plugins" / bpf::Path("YBPAddon_" + m_version.asString() + ".dll");
+    bpf::Path thisIEPluginPath = prodDir / "Plugins" / bpf::Path("YBPAddon_"
+                                                                 + m_version.asString()
+                                                                 + ".dll");
     if (registerControl(mimeTypes(), typeLibGuid(), thisIEPluginPath, activeXGuid(),
                         "CBPCtl Object", "Yahoo.BPCtl",
                         "Yahoo.BPCtl." + m_version.asString()) != 0) {
@@ -230,17 +242,21 @@ Installer::postflight()
     }
 
     // Prevent vista UAC on first daemon launch from IE.  Any old guid will do,
-    // so just use our ax guid
+    // so just use our ax guid.  Not fatal if this fails
     std::string osVersion = bp::os::PlatformVersion();
     if (osVersion.compare("6") >= 0) {
-        bpf::Path daemonPath(prodDir);
-        key = "HKCU\\Software\\Microsoft\\Internet Explorer\\Low Rights\\ElevationPolicy\\"
-            + activeXGuid();
-        createKey(key);
-        writeInt(key, "Policy", 3);
-        writeString(key, "AppName", "BrowserPlusCore.exe");
-        writeString(key, "AppPath", daemonPath.externalUtf8());
-    }
+        try {
+            bpf::Path daemonPath(prodDir);
+            key = "HKCU\\Software\\Microsoft\\Internet Explorer\\Low Rights\\ElevationPolicy\\"
+                  + activeXGuid();
+            createKey(key);
+            writeInt(key, "Policy", 3);
+            writeString(key, "AppName", "BrowserPlusCore.exe");
+            writeString(key, "AppPath", daemonPath.externalUtf8());
+        } catch (const bp::error::Exception& e) {
+            BPLOG_WARN_STRM("attempting to prevent UAC: " << e.what());
+        }
+    }    
 
     BPLOG_DEBUG_STRM("complete Installer::postflight()");
 }
@@ -253,38 +269,49 @@ Installer::disablePlugins(const bp::ServiceVersion& version)
     bool isVistaOrLater = (osVersion.compare("6") >= 0);
     string versionStr = version.asString();
 
-    // Disable npapi plugin by zapping the registry
-    string key = "HKCU\\SOFTWARE\\MozillaPlugins\\@yahoo.com/BrowserPlus,version=" + versionStr;
-    recursiveDeleteKey(key);
+    // Disable npapi plugin by zapping the registry, not fatal if it fails
+    try {
+        string key = "HKCU\\SOFTWARE\\MozillaPlugins\\@yahoo.com/BrowserPlus,version="
+                     + versionStr;
+        recursiveDeleteKey(key);
+    } catch (const bp::error::Exception& e) {
+        BPLOG_WARN_STRM("unable to disable " << versionStr
+                        << " NPAPI plugin: " << e.what());
+    }
 
-    // Disable IE plugin by zapping the registry
-    bpf::Path path =  getProductDirectory(version.majorVer(),
-                                          version.minorVer(),
-                                          version.microVer()) 
-                       / "Plugins" / bpf::Path("YBPAddon__" + versionStr + ".dll");
-    if (bfs::is_regular(path)) { 
-        // unregister control
-        string version, typeLibGuid, activeXGuid;
-        vector<string> mtypes;
-        if (getControlInfo(path, version, typeLibGuid, activeXGuid, mtypes)) {
-            if (unRegisterControl(mtypes, typeLibGuid, 
-                                  path, activeXGuid,
-                                  "CBPCtl Object", "Yahoo.BPCtl",
-                                  "Yahoo.BPCtl." + version) != 0) {
-                BPLOG_WARN_STRM("unable to unregister " << path);
+    // Disable IE plugin by zapping the registry, not fatal if it fails
+    try {
+        bpf::Path path =  getProductDirectory(version.majorVer(),
+                                              version.minorVer(),
+                                              version.microVer()) 
+                          / "Plugins" / bpf::Path("YBPAddon__" + versionStr + ".dll");
+        if (bfs::is_regular(path)) { 
+            // unregister control
+            string version, typeLibGuid, activeXGuid;
+            vector<string> mtypes;
+            if (getControlInfo(path, version, typeLibGuid, activeXGuid, mtypes)) {
+                if (unRegisterControl(mtypes, typeLibGuid, 
+                                      path, activeXGuid,
+                                      "CBPCtl Object", "Yahoo.BPCtl",
+                                      "Yahoo.BPCtl." + version) != 0) {
+                    BPLOG_WARN_STRM("unable to unregister " << path);
+                }
             }
-        }
 
-        // Remove "supress activex nattergram" entry and vista daemon elevation gunk if
-        // this plugin has a different activex guid
-        if (activeXGuid.compare(utils::activeXGuid()) != 0) {
-            recursiveDeleteKey("HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Ext\\Stats\\"
-                               + activeXGuid);
-            if (isVistaOrLater) {
-                recursiveDeleteKey("HKCU\\SOFTWARE\\Microsoft\\Internet Explorer\\Low Rights\\ElevationPolicy\\"
+            // Remove "supress activex nattergram" entry and vista daemon elevation gunk if
+            // this plugin has a different activex guid
+            if (activeXGuid.compare(utils::activeXGuid()) != 0) {
+                recursiveDeleteKey("HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Ext\\Stats\\"
                                    + activeXGuid);
+                if (isVistaOrLater) {
+                    recursiveDeleteKey("HKCU\\SOFTWARE\\Microsoft\\Internet Explorer\\Low Rights\\ElevationPolicy\\"
+                                       + activeXGuid);
+                }
             }
         }
+    } catch (const bp::error::Exception& e) {
+        BPLOG_WARN_STRM("unable to disable " << versionStr
+                        << " IE plugin: " << e.what());
     }
 
     // Remove legacy ffx2 NPAPI plugin.

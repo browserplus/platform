@@ -116,9 +116,9 @@ void forkChild( const string& sChildName, const vector<string>& vsParentArgs )
 //        vwChildArgs.push_back( bp::strutil::utf8ToWide( *it ) );
 //  }                               
     
-    // Add path to parent exe so child can delete it.
+    // Add quoted path to parent exe so child can delete it.
     Path parentPath(wszParentPath);
-    vsChildArgs.push_back( parentPath.utf8() );
+    vsChildArgs.push_back( "\"" + parentPath.utf8() + "\"" );
 
     // Convert arg vec to wide string.
     stringstream ss;
@@ -173,13 +173,9 @@ void doWork( const vector<string>& vsArgs )
     if (nRtn == IDCANCEL)
         return;
 
-    // Give the parent process time to exit.
+    // Give the parent process time to exit.  We want this
+    // since "unins.run()" will try to remove the parent.
     Sleep( 200 );
-
-    // Delete parent exe.
-    Path parentPath = Path(vsArgs[1]);
-    BPLOG_INFO_STRM( "Deleting " << parentPath );
-    remove( parentPath );
 
     // Perform the actual uninstall.
     bp::install::Uninstaller unins;
