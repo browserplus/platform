@@ -31,7 +31,7 @@ for (k in corelets) {
 }
 
 // attempt to initialize browserplus, if not installed, handle upsell
-BPTool.Installer.show({}, initCB);
+BrowserPlus.init({}, initCB);
 
 function initCB(result) {
     if (!result.success) {
