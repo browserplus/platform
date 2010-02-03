@@ -854,6 +854,42 @@ public:
     boost::uint32_t m_fileIdLow;
 };
 
+
+// bfs::remove_all will throw as soon as it hits an error.
+// This version catches, whines, and keeps removing.
+static bool
+doRemoveAll(const Path& path)
+{
+    bool rval = true;
+    try {
+        // don't recurse into symlinks
+        if (!isSymlink(path) && bfs::is_directory(path)) {
+            tDirIter end;
+            for (tDirIter iter(path); iter != end; ++iter) {
+                Path dir(iter->path());
+                try {
+                    if (!doRemoveAll(dir)) {
+                        rval = false;
+                    }
+                } catch (const tFileSystemError& e) {
+                    BPLOG_WARN_STRM("doRemoveAll failed to remove "
+                                    << dir << ": " << e.what());
+                    rval = false;
+                }
+            }
+        }
+        if (!bfs::remove(path)) {
+            rval = false;
+        }
+    } catch (const tFileSystemError& e) {
+        BPLOG_WARN_STRM("doRemoveAll failed to remove "
+                        << path << ": " << e.what());
+        rval = false;
+    }
+    return rval;
+}
+
+
 // Test for circular links.  We look for p's deviceId/fileId on the
 // stack of dirs we're currently visiting.  If we find it,
 // we don't revisit.
@@ -1344,42 +1380,40 @@ remove(const Path& path)
         return true; 
     }
 
-    bool rval = false;
+    bool rval = true;
     try {
-        bfs::remove_all(path);
-        rval = true;
-    } catch(const tFileSystemError&) {
-        // bfs::remove_all can fail if anything is read-only.
-        // Thus, we'll recursively remove the attribute and try again.
-        BPLOG_DEBUG_STRM("bfs::remove_all(" << path
-                         << ") failed, removing read-only attributes "
-                         << "and trying again");
-        if (bfs::is_directory(path)) {
-            tRecursiveDirIter end;
-            for (tRecursiveDirIter it(path); it != end; ++it) {
-                Path p(it->path());
-                (void) unsetReadOnly(p);
+        rval = doRemoveAll(path);
+        if (!rval) {
+            // doRemoveAll can fail if anything is read-only.
+            // Thus, we'll recursively remove the attribute and try again.
+            BPLOG_DEBUG_STRM("doRemoveAll(" << path
+                             << ") failed, removing read-only attributes "
+                             << "and trying again");
+            if (bfs::is_directory(path)) {
+                tRecursiveDirIter end;
+                for (tRecursiveDirIter it(path); it != end; ++it) {
+                    Path p(it->path());
+                    (void) unsetReadOnly(p);
+                }
+            } else {
+                (void) unsetReadOnly(path);
             }
-        } else {
-            (void) unsetReadOnly(path);
+
+            // Ability to delete p depends upons permissions on 
+            // p's parent.  Try to give parent write permission,
+            // then restore old permission when done.
+            FileInfo parentInfo;
+            Path parent = path.parent_path();
+            bool setParentInfo = statFile(parent, parentInfo)
+                && unsetReadOnly(parent);
+            rval = doRemoveAll(path);
+            if (setParentInfo) {
+                setFileProperties(parent, parentInfo);
+            }
         }
-        // Ability to delete p depends upons permissions on 
-        // p's parent.  Try to give parent write permission,
-        // then restore old permission when done.
-        FileInfo parentInfo;
-        Path parent = path.parent_path();
-        bool setParentInfo = statFile(parent, parentInfo)
-                             && unsetReadOnly(parent);
-        try {
-            bfs::remove_all(path);
-            rval = true;
-        } catch(const tFileSystemError& e) {
-            BPLOG_WARN_STRM("bfs::remove_all(" << path
-                            << ") failed: " << e.what());
-        }
-        if (setParentInfo) {
-            setFileProperties(parent, parentInfo);
-        }
+    } catch(const tFileSystemError& e) {
+        BPLOG_WARN_STRM("remove(" << path << ") failed: " << e.what());
+        rval = false;
     }
     return rval;
 }

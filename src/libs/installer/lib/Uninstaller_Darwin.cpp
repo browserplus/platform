@@ -63,9 +63,9 @@ namespace bp {
                 if (p.filename().find("BrowserPlus_") == 0) {
                     try {
                         BPLOG_DEBUG_STRM("remove " << p);
-                        bfs::remove_all(p);
+                        remove(p);
                     } catch(const tFileSystemError&) {
-                        BPLOG_WARN_STRM("unable to remove_all " << p);
+                        BPLOG_WARN_STRM("unable to remove " << p);
                     }
                 }
             }
