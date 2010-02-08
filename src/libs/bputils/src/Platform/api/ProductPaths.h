@@ -322,10 +322,20 @@ namespace bp {
          */
         bp::file::Path getPreferencePanelUIPath(const std::string & locale);
         
-        // get paths to plugins
+        /**
+         *   Get paths to plugins
+         */
         std::vector<bp::file::Path> getPluginPaths(int major = -1,
                                                    int minor = -1,
                                                    int micro = -1);
+
+        /**
+         *   Make sure that all needed directories exist, creating
+         *   them if necessary.
+         */
+        void createDirectories(int major = -1,
+                               int minor = -1,
+                               int micro = -1);
     }
 }
 

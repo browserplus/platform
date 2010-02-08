@@ -76,7 +76,7 @@ bp::install::utils::readPlatformInfo(const bpf::Path& path)
                 bpf::Path installedPath = getBPInstalledPath(version.majorVer(),
                                                              version.minorVer(),
                                                              version.microVer());
-                if (boost::filesystem::exists(installedPath)) {
+                if (bpf::exists(installedPath)) {
                     s_installedVersions.push_back(version);
                 }
             }

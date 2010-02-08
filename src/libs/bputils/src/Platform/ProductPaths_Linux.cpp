@@ -51,11 +51,6 @@ bp::paths::getProductTopDirectory()
         BP_THROW_FATAL("unable to get $HOME");
     }
     prodDir /= Path("." + getCompanyName()) / getProductName();
-    try {
-        bfs::create_directories(prodDir);
-    } catch(const tFileSystemError&) {
-        BP_THROW_FATAL("unable to create " + prodDir.utf8());
-    }
     return prodDir;
 }
 

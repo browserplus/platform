@@ -101,7 +101,7 @@ Controller::run(const bpf::Path & pathToHarness,
     bpf::Path executable = pathToHarness;
     if (executable.empty()) executable = bp::paths::getRunnerPath();
 
-    if (!bfs::exists(executable)) {
+    if (!bpf::exists(executable)) {
         err.append("no such file: ");
         err.append(executable.externalUtf8());
         return false;

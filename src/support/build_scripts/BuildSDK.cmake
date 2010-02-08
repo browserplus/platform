@@ -1,4 +1,4 @@
- # ***** BEGIN LICENSE BLOCK *****
+# ***** BEGIN LICENSE BLOCK *****
 # The contents of this file are subject to the Mozilla Public License
 # Version 1.1 (the "License"); you may not use this file except in
 # compliance with the License. You may obtain a copy of the License at
@@ -27,24 +27,28 @@ SET (BP_EXTERNAL_DIR
      "${CMAKE_CURRENT_SOURCE_DIR}/../external/${CMAKE_SYSTEM_NAME}")
 
 SET (BUILD_SCRIPTS_DIR 
-     "${CMAKE_CURRENT_SOURCE_DIR}/support/build_scripts")
-
-MESSAGE("bpext: ${BP_EXTERNAL_DIR}")
+     "${CMAKE_CURRENT_BINARY_DIR}/support/build_scripts")
 
 SET (arch "i386") 	   	
 
 IF (WIN32)
   SET (platform "Win32")
-  SET (tarCmd "${BP_EXTERNAL_DIR}/bin/7z.exe") 	   	
+  SET (tarCmd "7z.exe") 	   	
   SET (tarArgs a -bd -r -y -tzip) 	   	
+  SET (tarTarArgs a -bd -r -y -ttar) 	   	
   SET (tarSuffix zip) 	   	
+  SET (elzmaCmd "${BP_EXTERNAL_DIR}/bin/elzma.exe") 	   	
 ELSEIF (APPLE)
   SET (platform "Darwin")
   SET (tarCmd tar) 	   	
   SET (tarArgs czvhf) 	   	
+  SET (tarTarArgs cvhf) 	   	
   SET (tarSuffix tgz) 	   	
+  SET (elzmaCmd "${BP_EXTERNAL_DIR}/bin/elzma")
 ENDIF () 	 
-SET (installerSdkFileName "installersdk_${VersionString}-${platform}-${arch}.${tarSuffix}")
+SET (pabSdkFileName "pab_${VersionString}-${platform}-${arch}.tar")
+SET (pabDir "pab_${VersionString}-${platform}")
+SET (pabWorkDir "${CMAKE_CURRENT_BINARY_DIR}/${pabDir}/work")
 SET (sdkFileName "bpsdk_${VersionString}-${platform}-${arch}.${tarSuffix}")
 SET (sdkIntFileName "bpsdk_internal_${VersionString}-${platform}-${arch}.${tarSuffix}")
 
@@ -78,7 +82,7 @@ FILE(TO_NATIVE_PATH "${BUILD_SCRIPTS_DIR}/makeInstaller.rb"
                     rubyMakeInstaller)
 ADD_CUSTOM_TARGET(MakeInstaller ALL
                   DEPENDS ${allShippingDepends}
-                  COMMAND ruby -s \"${rubyMakeInstaller}\" -intDir=${CMAKE_CFG_INTDIR}
+                  COMMAND ruby -s \"${rubyMakeInstaller}\" -intDir=${CMAKE_CFG_INTDIR} -buildDir=\"${CMAKE_CURRENT_BINARY_DIR}\"
                   COMMENT "Make BrowserPlus installer")
 ADD_DEPENDENCIES(MakeInstaller PackageSDK)
 
@@ -89,7 +93,7 @@ ADD_DEPENDENCIES(MakeInstaller PackageSDK)
 FILE(TO_NATIVE_PATH "${BUILD_SCRIPTS_DIR}/installLocally.rb" rubyInstaller)
 ADD_CUSTOM_TARGET(InstallLocally ALL
                   DEPENDS ${allShippingDepends}
-                  COMMAND ruby -s \"${rubyInstaller}\" 
+                  COMMAND ruby -s \"${rubyInstaller}\"
                   COMMENT "Install BrowserPlus on this machine")
 ADD_DEPENDENCIES(InstallLocally MakeInstaller)
 
@@ -111,6 +115,7 @@ ADD_CUSTOM_COMMAND(TARGET CompressSDK
                    COMMENT "Compressing the Internal BrowserPlus SDK")
 
 ADD_CUSTOM_COMMAND(TARGET CompressSDK
-                   COMMAND ${tarCmd} ${tarArgs} ${installerSdkFileName} installer
+                   COMMAND ${CMAKE_COMMAND} -E remove_directory ${pabWorkDir}
+                   COMMAND ${tarCmd} ${tarTarArgs} ${pabSdkFileName} ${pabDir}
+                   COMMAND ${elzmaCmd} --lzip -v -z ${pabSdkFileName}
                    COMMENT "Compressing the BrowserPlus Installer SDK")
-

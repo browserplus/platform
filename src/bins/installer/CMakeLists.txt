@@ -35,13 +35,18 @@ IF (WIN32)
     SET(BrowserPlusInstaller_SOURCES 
         ${installerXplatSources} 
         ${CMAKE_SYSTEM_NAME}/InstallerSkinGUI_Windows.cpp 
-        ${CMAKE_SYSTEM_NAME}/resource.h 
-        ${CMAKE_SYSTEM_NAME}/BrowserPlusInstaller.rc)
+		${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SYSTEM_NAME}/resource.h 
+        ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SYSTEM_NAME}/BrowserPlusInstaller.rc)
 
     SET(BrowserPlusUninstaller_SOURCES 
         BrowserPlusUninstaller_Windows.cpp
-        ${CMAKE_SYSTEM_NAME}/resource.h 
-        ${CMAKE_SYSTEM_NAME}/BrowserPlusUninstaller.rc)
+		${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SYSTEM_NAME}/resource.h 
+        ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SYSTEM_NAME}/BrowserPlusUninstaller.rc)
+
+    FILE(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Windows")		
+    CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/Windows/bpicon.ico"
+	               "${CMAKE_CURRENT_BINARY_DIR}/Windows/bpicon.ico"
+				   COPYONLY)
 ELSEIF (APPLE)
     SET(BrowserPlusInstaller_SOURCES 
         ${installerXplatSources} 

@@ -25,8 +25,7 @@ SET(BP_EXTERNAL "${CMAKE_CURRENT_SOURCE_DIR}/../../../../external/${CMAKE_SYSTEM
 
 LINK_DIRECTORIES("${BP_EXTERNAL}/lib")
 
-INCLUDE_DIRECTORIES("${BP_EXTERNAL}/include"
-                    "${CMAKE_CURRENT_SOURCE_DIR}/../../ServiceAPI/api")
+INCLUDE_DIRECTORIES("${BP_EXTERNAL}/include")
 
 # randomized definitions for global symbols exported into objc space
 BPRandDefn(MY_TIMER_FIRED_CLASS)

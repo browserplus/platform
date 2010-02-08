@@ -220,7 +220,10 @@ FileBrowsePluglet::execute(unsigned int tid,
             selection.push_back([[url path] UTF8String]);
         }
     }
-    
+    [panel setDelegate:nil];
+    [delegate release];
+    [panel release];
+
     bp::Object* obj = NULL;
     if (m_desc.majorVersion() == 1) {
         // version 1 api applies filtering, recursion, etc...

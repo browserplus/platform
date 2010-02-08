@@ -23,7 +23,4 @@ SET(${progName}_MAJOR_VERSION 0)
 SET(${progName}_MINOR_VERSION 1)
 SET(${progName}_LINK_STATIC BPUtils ConsoleLib ServiceRunnerLib)
 
-# bputils requires bptype header
-INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../../../ServiceAPI/api")
-
 YBT_BUILD(BINARY ${progName})

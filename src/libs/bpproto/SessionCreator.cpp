@@ -140,10 +140,10 @@ getNewestInstalledPlatform()
             bp::ServiceVersion version;
             std::string s = bp::file::utf8FromNative(it->path().filename());
             if (version.parse(s) && version.compare(newest) > 0 &&
-                boost::filesystem::exists(bp::paths::getBPInstalledPath(
-                                              version.majorVer(),
-                                              version.minorVer(),
-                                              version.microVer())))
+                bp::file::exists(bp::paths::getBPInstalledPath(
+                                     version.majorVer(),
+                                     version.minorVer(),
+                                     version.microVer())))
             {
                 newest = version;
             }
@@ -161,7 +161,7 @@ SessionCreator::tryConnect()
     // Make sure that bp is fully installed.  The installer's last
     // act is to create the file at BPInstalledPath.  This test
     // prevents us from trying to launch before our install is complete.
-    if (!boost::filesystem::exists(bp::paths::getBPInstalledPath())) {
+    if (!bp::file::exists(bp::paths::getBPInstalledPath())) {
         // not installed!  now either there's a newer version that
         // just got installed, or we were just uninstalled but still
         // loaded into browser memory.
@@ -178,7 +178,7 @@ SessionCreator::tryConnect()
         }
     }
     
-    if (boost::filesystem::exists(bp::paths::getBPDisabledPath())) {
+    if (bp::file::exists(bp::paths::getBPDisabledPath())) {
         BPLOG_ERROR("BrowserPlus disabled");
         reportError(BP_EC_PLATFORM_DISABLED,
                     "The BrowserPlus platform has been disabled");

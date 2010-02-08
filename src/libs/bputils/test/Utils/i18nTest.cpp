@@ -38,7 +38,7 @@ i18nTest::storeLoadFileToString()
     CPPUNIT_ASSERT(bp::strutil::storeToFile(path, fileText));
     CPPUNIT_ASSERT(bp::strutil::loadFromFile(path, fileTextRead));
     CPPUNIT_ASSERT(!fileText.compare(fileTextRead));    
-    CPPUNIT_ASSERT(boost::filesystem::exists(path));
+    CPPUNIT_ASSERT(bp::file::exists(path));
     CPPUNIT_ASSERT(bp::file::remove(path));
-    CPPUNIT_ASSERT(!boost::filesystem::exists(path));
+    CPPUNIT_ASSERT(!bp::file::exists(path));
 }

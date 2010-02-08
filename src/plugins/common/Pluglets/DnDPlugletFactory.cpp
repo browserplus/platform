@@ -25,13 +25,8 @@
 #include "PluginCommonLib/CommonErrors.h"
 
 
-// win32 file systems tend to be much slower than osx, on win32 we'll
-// have a limit of 1k files dropped (YIB-2077636)
-#ifdef WIN32
 #define DEFAULT_DROP_LIMIT 1000
-#else
-#define DEFAULT_DROP_LIMIT 10000
-#endif
+
 #define _MAKESTRING(x) #x
 #define MAKESTRING(x) _MAKESTRING(x)
 

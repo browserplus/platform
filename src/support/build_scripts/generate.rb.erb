@@ -123,7 +123,7 @@ subs = {
   f = File.join($workDir, f)
   puts "Updating #{f}"
   contents = File.open(f, "r") { |myf| myf.read }
-  subs.each { |pat, rep| contents.sub!(pat, rep) }
+  subs.each { |pat, rep| contents.gsub!(pat, rep) }
   File.open(f, "w+") { |myf| myf.write contents }  
 }
 
@@ -162,10 +162,10 @@ FileUtils.cp(bpkgPath, File.join($workDir, "install"))
 instCfgContents = ""
 instCfgPath = File.join($workDir, "install", "installer.config")
 File.open(instCfgPath, "r") { |f|
-  f.lines.each { |l|
+  while (l = f.gets)
     l = "  ,\"package\": \"#{bpkgName}\"" if l =~ /"package":/
     instCfgContents = instCfgContents + l
-  }
+  end
 }
 File.open(instCfgPath, "w+") { |f| f.write instCfgContents }
 

@@ -21,7 +21,5 @@ SET(CoreletManager_MAJOR_VERSION 0)
 SET(CoreletManager_MINOR_VERSION 1)
 SET(CoreletManager_LINK_STATIC BPUtils Permissions ServiceRunnerLib)
 
-INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../../../ServiceAPI/api")
-
 YBT_BUILD(LIBRARY_STATIC CoreletManager)
 ADD_DEPENDENCIES(CoreletManager_s BPUtils_s Permissions_s ServiceRunnerLib_s) 

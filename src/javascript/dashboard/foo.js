@@ -7,21 +7,12 @@ corelets["TextToSpeech"] = {require: {service: "TextToSpeech"},
                             content: "sayContent", 
                             loadedCB: sayLoaded, 
                             cbCalled: false}
-corelets["DesktopSearch"] = {require: {service: "DesktopSearch"}, 
-                             content: "searchContent", 
-                             loadedCB: searchLoaded, 
-                             cbCalled: false};
-corelets["YahooFinance"] = {require: {service: "YahooFinance",
-                                      minversion: "1.0.6"}, 
-                            content: "quoteContent", 
-                            loadedCB: quoteLoaded,
-                            cbCalled: false};
-corelets["DragAndDrop"] = {require: {service: "DragAndDrop"}, 
+corelets["DragAndDrop"] = {require: {service: "DragAndDrop", version: "1.0.1"}, 
                            content: "dropContent",
                            loadedCB: dropLoaded, 
                            cbCalled: false};
 corelets["Zipper"] = {require: {service: "Zipper",
-                                minversion: "2.0.0"},
+                                minversion: "1.0.0"},
                       content: "dropContent",
                       loadedCB: zipperLoaded, 
                       cbCalled: false};
@@ -31,7 +22,7 @@ for (k in corelets) {
 }
 
 // attempt to initialize browserplus, if not installed, handle upsell
-BPTool.Installer.show({}, initCB);
+BrowserPlus.init({}, initCB);
 
 function initCB(result) {
     if (!result.success) {

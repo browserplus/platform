@@ -77,6 +77,10 @@ Installer::Installer(const bpf::Path& dir,
         BP_THROW("Bad version: " + versionString);
     }
 
+    bp::paths::createDirectories(m_version.majorVer(),
+                                 m_version.minorVer(),
+                                 m_version.microVer());
+
     bpf::Path platInfo = m_dir / "platformInfo.json";
     utils::readPlatformInfo(platInfo);
 }
@@ -210,7 +214,7 @@ Installer::installPermissions()
     // Install new public keys if needed.  They are needed if
     // they are not found in the current keys.
     bpf::Path newCertPath = m_dir / "permissions" / "BrowserPlus.crt";
-    if (bfs::exists(newCertPath)) {
+    if (bpf::exists(newCertPath)) {
         bool needNewKeys = true;
         string newKeys;
         if (!bp::strutil::loadFromFile(newCertPath, newKeys)) {
@@ -220,7 +224,7 @@ Installer::installPermissions()
     
         string curKeys;
         bpf::Path certPath = getCertFilePath();
-        if (bfs::exists(certPath)) {
+        if (bpf::exists(certPath)) {
             (void) bp::strutil::loadFromFile(certPath, curKeys);
             needNewKeys = (curKeys.find(newKeys) == string::npos);
         }
@@ -244,7 +248,7 @@ Installer::installPermissions()
     for (unsigned int i = 0; i < files.size(); i++) {
         bpf::Path path = m_dir / "permissions" / files[i];
         string json;
-        if (!bfs::exists(path)) {
+        if (!bpf::exists(path)) {
             continue;
         }
         if (!bp::strutil::loadFromFile(path, json)) {
@@ -286,7 +290,7 @@ Installer::installPermissions()
     try {
         // Now for auto-update permissions
         bpf::Path path = m_dir / "permissions" / "configAutoUpdatePermissions";
-        if (bfs::exists(path)) {
+        if (bpf::exists(path)) {
             string json;
             if (!bp::strutil::loadFromFile(path, json)) {
                 BP_THROW(lastErrorString("unable to load permissions from "
@@ -483,7 +487,7 @@ Installer::doCopy(const bpf::Path& src,
 {
     BPLOG_DEBUG_STRM("doCopy: attempt to copy " << src
                      << " to " << dest);
-    if (!bfs::exists(src)) {
+    if (!bpf::exists(src)) {
         BP_THROW(lastErrorString(src.externalUtf8() + " does not exist"));
     }
     
@@ -516,7 +520,7 @@ Installer::doSingleFileCopy(const bpf::Path& src,
 {
     BPLOG_DEBUG_STRM("doSingleFileCopy(" << src << ", " << dest << ")");
 
-    if (!bfs::exists(src)) {
+    if (!bpf::exists(src)) {
         BP_THROW(lastErrorString(src.externalUtf8() + " does not exist"));
     }
     bpf::Path destParent(dest.parent_path());

@@ -327,6 +327,14 @@ namespace bp {
          */
         void delayDelete();
 
+        /** Whether the item specified by the path exists.
+         *  Uses boost::filesystem::exists().
+         *  Returns false if that method throws an exception. 
+         *  \param		path [IN] - source path
+         *  \returns	true if path item exists
+         */
+        bool exists(const Path& path);
+
         /** Does a path refer to a Unix or NTFS symlink?
          *  \param		path [IN] - source path
          *  \returns	true if path is a link

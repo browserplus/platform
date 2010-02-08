@@ -21,6 +21,7 @@ if CONFIG['arch'] =~ /mswin/
     $patchCmd = "ptch.exe"
     $libSuffix = "lib"
     $cmakeGenerator = "-G \"Visual Studio 9 2008\""
+    $cmakeArgs = ""
 
     rv = system("devenv /? > devenv.out 2>&1")
     FileUtils.rm_f("devenv.out")
@@ -84,6 +85,7 @@ elsif CONFIG['arch'] =~ /darwin/
     # xcode uses SDKROOT
     ENV['SDKROOT'] = "/Developer/SDKs/MacOSX10.4u.sdk"
     $cmakeGenerator = ""
+    $cmakeArgs = "-DCMAKE_OSX_DEPLOYMENT_TARGET=10.4"
 
     # make sure we're using gcc 4.0
     ENV['CC'] = 'gcc-4.0'
@@ -91,6 +93,7 @@ elsif CONFIG['arch'] =~ /darwin/
 elsif CONFIG['arch'] =~ /linux/
     $platform = "Linux"
     $cmakeGenerator = ""
+    $cmakeArgs = ""
 else
     puts "unsupported platform: #{CONFIG['arch']}"
     exit -1

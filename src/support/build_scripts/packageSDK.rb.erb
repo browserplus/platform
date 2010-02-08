@@ -44,7 +44,7 @@ end
 
 puts "Packaging BrowserPlus SDK"
 
-$topDir = File.dirname(File.dirname(File.dirname(File.expand_path(__FILE__))))
+$topDir = File.dirname(File.dirname(File.dirname(File.dirname(File.expand_path(__FILE__)))))
 
 # make a pass thru dir removing .svn and .git turds
 def flushTurds(dir) 
@@ -232,7 +232,14 @@ else
 end
 FileUtils.mkdir_p("#{sdkDir}/samples/NativeService")
 sampleCoreletFiles.each do |f|
-  FileUtils.install("#{$topDir}/sdk/sample_services/NativeService/#{f}", "#{sdkDir}/samples/NativeService", :verbose => $beVerbose)
+  # magicially handle the fact that .erb files are substituted into the
+  # build directory
+  [ "#{$topDir}/sdk/sample_services/NativeService/#{f}",
+    "#{$buildDir}/sdk/sample_services/NativeService/#{f}" ]. each { |pf|
+    f = pf if File.exist?(pf)
+  }
+  FileUtils.install(f, "#{sdkDir}/samples/NativeService",
+                    :verbose => $beVerbose)
 end
 
 # Put ruby sample service in SDK

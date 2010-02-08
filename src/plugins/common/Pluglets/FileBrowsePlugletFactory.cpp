@@ -59,7 +59,7 @@ BPArgumentDefinition s_browseArguments[] = {
     {
         "limit",
         "Maximum number of items which will be included. "
-        "Default is 10000",
+        "Default is 1000",
         BPTInteger,
         false
     }

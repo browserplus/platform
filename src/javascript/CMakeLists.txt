@@ -90,8 +90,10 @@ MACRO(INSTALL_RESOURCE file path)
   )
 ENDMACRO(INSTALL_RESOURCE file path)
 
-MINIFY(src/browserplus.js)
-INSTALL_RESOURCE(src/browserplus.js "${VersionString}")
-INSTALL_RESOURCE(src/browserplus-min.js "${VersionString}")
+MINIFY(${CMAKE_CURRENT_BINARY_DIR}/src/browserplus.js)
+INSTALL_RESOURCE(${CMAKE_CURRENT_BINARY_DIR}/src/browserplus.js
+                 "${VersionString}")
+INSTALL_RESOURCE(${CMAKE_CURRENT_BINARY_DIR}/src/browserplus-min.js
+                 "${VersionString}")
 
 ADD_DEPENDENCIES( JavaScript PerformSubstitution )

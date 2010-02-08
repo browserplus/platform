@@ -80,7 +80,8 @@ Uninstaller::run(bool fromRunonce)
             bpf::Path pluginsDir = topIter->path() / "Plugins";
             if (bfs::is_directory(pluginsDir)) {
                 bpf::tDirIter pluginEnd;
-                for (bpf::tDirIter pluginIter(pluginsDir); pluginIter != pluginEnd; ++pluginIter) {
+                for (bpf::tDirIter pluginIter(pluginsDir); pluginIter != pluginEnd;
+                     ++pluginIter) {
                     // IE
                     bpf::Path plugin(pluginIter->path());
                     if (plugin.utf8().find("YBPAddon_") != string::npos) {
@@ -95,14 +96,21 @@ Uninstaller::run(bool fromRunonce)
                                 BPLOG_WARN_STRM("unable to unregister " << plugin);
                                 m_error = true;
                             }
-                        }
 
-                        // Remove "supress activex nattergram" entry and vista daemon elevation gunk
-                        recursiveDeleteKey("HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Ext\\Stats\\"
-                                           + activeXGuid);
-                        if (isVistaOrLater) {
-                            recursiveDeleteKey("HKCU\\SOFTWARE\\Microsoft\\Internet Explorer\\Low Rights\\ElevationPolicy\\"
-                                               + activeXGuid);
+                            // Remove "supress activex nattergram" entry and vista
+                            // daemon elevation gunk, not fatal if it fails
+                            try {
+                                recursiveDeleteKey("HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Ext\\Stats\\"
+                                                   + activeXGuid);
+                                if (isVistaOrLater) {
+                                    recursiveDeleteKey("HKCU\\SOFTWARE\\Microsoft\\Internet Explorer\\Low Rights\\ElevationPolicy\\"
+                                                       + activeXGuid);
+                                }
+                            } catch (const Exception& e) {
+                                BPLOG_WARN_STRM("unable to remove nattergram/uac registry entries for "
+                                                << activeXGuid << ": " << e.what());
+                                m_error = true;
+                            }
                         }
                     }
                 }
@@ -113,30 +121,48 @@ Uninstaller::run(bool fromRunonce)
     // NPAPI may be in a non-standard place due to firefox and 
     // non-ascii usernames.  The registry knows all...
     string mozKey = "HKCU\\SOFTWARE\\MozillaPlugins";
-    if (keyExists(mozKey)) {
-        vector<Key> keys = subKeys(mozKey);
-        for (size_t i = 0; i < keys.size(); i++) {
-            if (keys[i].path().find("@yahoo.com/BrowserPlus,version=") != string.npos) {
-                bpf::Path path;
-                try {
-                    path = bpf::Path(keys[i].readString("Path"));
-                    BPLOG_DEBUG_STRM("remove " << path);
-                    if (!bpf::remove(path)) {
-                        BPLOG_DEBUG_STRM(lastErrorString("unable to delete " + path.externalUtf8()));
+    try {
+        if (keyExists(mozKey)) {
+            vector<Key> keys = subKeys(mozKey);
+            for (size_t i = 0; i < keys.size(); i++) {
+                if (keys[i].path().find("@yahoo.com/BrowserPlus,version=") != string.npos) {
+                    try {
+                        // find path to npapi and remove it.
+                        // make sure that path is in top dir or ugly dir
+                        bpf::Path path = bpf::Path(keys[i].readString("Path"));
+                        if (path.string().find(topDir.string()) != 0
+                            && path.string().find(kUglyNpapiDir.string()) != 0) {
+                            BPLOG_WARN_STRM("registry path to npapi was unexpected: "
+                                            << path);
+                            m_error = true;
+                            continue;
+                        }
+                        BPLOG_DEBUG_STRM("remove " << path);
+                        if (!bpf::remove(path)) {
+                            BPLOG_DEBUG_STRM(lastErrorString("unable to delete "
+                                                             + path.externalUtf8()));
+                            m_error = true;
+                        }
+                        // deal with ugly npapi dir if it exists
+                        if (bfs::is_directory(kUglyNpapiDir)) {
+                            removeDirIfEmpty(path.parent_path());
+                            removeDirIfEmpty(kUglyNpapiDir);
+                        }
+
+                        // remove keys
+                        recursiveDeleteKey(keys[i].fullPath());
+                    } catch(const Exception& e) {
+                        BPLOG_WARN_STRM("error removing " << keys[i].fullPath()
+                                        << ": " << e.what());
                         m_error = true;
                     }
-                    // deal with ugly npapi dir if it exists
-                    if (bfs::is_directory(kUglyNpapiDir)) {
-                        removeDirIfEmpty(path.parent_path());
-                        removeDirIfEmpty(kUglyNpapiDir);
-                    }
-                } catch(const Exception& e) {
-                    BPLOG_WARN_STRM("unable to read Path from " << keys[i].fullPath()
-                                    << ", " << e.what());
                 }
-                recursiveDeleteKey(keys[i].fullPath());
             }
         }
+    } catch (const Exception& e) {
+        BPLOG_WARN_STRM("failed to get registry entries for " << mozKey
+                        << ":  " << e.what());
+        m_error = true;
     }
 
     // Remove NPAPI plugin for those folks who have firefox2 (we used to
@@ -190,10 +216,12 @@ Uninstaller::run(bool fromRunonce)
 
 
     // remove add/remove programs entry
-    deleteKey("HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Yahoo! BrowserPlus");
-
-    // Runonce script from install/update
-    deleteKey("HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnce\\RemoveOldBrowserPlus");
+    try {
+        deleteKey("HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Yahoo! BrowserPlus");
+    } catch (const Exception& e) {
+        BPLOG_WARN_STRM("failed to get remove add/remove programs entry " << e.what());
+        m_error = true;
+    }
 
     // Remove platform, must be last.
     BPLOG_DEBUG_STRM("remove " << topDir);
@@ -245,6 +273,7 @@ Uninstaller::scheduleRunonce()
 {
 #ifdef NOTDEF
     // Schedule a runonce to try uninstall again.
+    // XXX: have installer remove this entry!!
     bpf::Path exePath = getUninstallerPath();
     bpf::Path runoncePath = getTempDirectory() / exePath.filename();
     (void) bpf::remove(runoncePath);

@@ -24,9 +24,6 @@ SET(ConsoleLib_MINOR_VERSION 1)
 
 SET(ConsoleLib_LINK_STATIC BPUtils)
 
-INCLUDE_DIRECTORIES("${BP_EXTERNAL}/include"
-                    "${CMAKE_CURRENT_SOURCE_DIR}/../../ServiceAPI/api")
-
 YBT_BUILD(LIBRARY_STATIC ConsoleLib)
 IF (NOT WIN32) 
    SET(OSLIBS)

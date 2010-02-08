@@ -41,7 +41,7 @@
 # The major/minor/micro of this version
 #
 SET(BrowserPlusPlatform_MAJOR_VERSION 2)
-SET(BrowserPlusPlatform_MINOR_VERSION 5)
+SET(BrowserPlusPlatform_MINOR_VERSION 6)
 SET(BrowserPlusPlatform_MICRO_VERSION 0)
 
 # Previous mimetypes which we also support as a CMAKE list
@@ -53,7 +53,7 @@ SET(BackwardCompatibleMimeTypes)
 
 # activeX control's clsid and typelib guid
 # clsid (ActiveXGuid) should be changed EVERY TIME YOU BUMP PLATFORM VERSION
-SET(ActiveXGuid "A5CF18EA-FB37-477E-804F-065DE5A92BC3")
+SET(ActiveXGuid "974C34A4-7FB0-4F2F-AA02-655E0CCCA662")
 SET(TypeLibGuid "399F26B4-E0C6-4345-8AD6-7AC1D86DAAA5") 
 
 ########################################################################
@@ -70,7 +70,7 @@ ADD_DEFINITIONS(-DBP_VERSION_MAJOR=${BrowserPlusPlatform_MAJOR_VERSION}
                 
 SET(VersionString
     "${BrowserPlusPlatform_MAJOR_VERSION}.${BrowserPlusPlatform_MINOR_VERSION}.${BrowserPlusPlatform_MICRO_VERSION}")    
-    
+
 SET(WindowsVersionInfo 
     "${BrowserPlusPlatform_MAJOR_VERSION},${BrowserPlusPlatform_MINOR_VERSION},${BrowserPlusPlatform_MICRO_VERSION},0")
 
@@ -78,6 +78,10 @@ SET(WindowsVersionInfo
 #
 SET(MimeType application/x-yahoo-browserplus_${BrowserPlusPlatform_MAJOR_VERSION})
 SET(FullMimeType application/x-yahoo-browserplus_${BrowserPlusPlatform_MAJOR_VERSION}.${BrowserPlusPlatform_MINOR_VERSION}.${BrowserPlusPlatform_MICRO_VERSION})
+
+# Plugin name and description 
+SET(PluginName "BrowserPlus (from Yahoo!) v${VersionString}")
+SET(PluginDescription "BrowserPlus -- Improve your browser! -- http://browserplus.yahoo.com/")
 
 # Build list/array for supported previous mimetypes.  
 #

@@ -260,7 +260,7 @@ private:
 //
 const std::string Transaction::Impl::ksDefaultUserAgent = "Yahoo! BrowserPlus (win32)";
 const double Transaction::Impl::kfDefaultTimeoutSecs = 30.0;
-const DWORD Transaction::Impl::kBufferSize = 64*1024;
+const DWORD Transaction::Impl::kBufferSize = 16*1024;
 
 bp::sync::Mutex Transaction::Impl::s_lock;
 DWORD Transaction::Impl::s_id = 1000;
@@ -329,13 +329,13 @@ Transaction::Impl::Impl(RequestPtr ptrRequest) :
 
     m_id = s_id++;
     addToImplMap();
-    BPLOG_INFO_STRM(m_id << ": create Transaction::Impl");
+    BPLOG_DEBUG_STRM(m_id << ": create Transaction::Impl");
 }
 
 
 Transaction::Impl::~Impl()
 {
-    BPLOG_INFO_STRM(m_id << ": destroy Transaction::Impl");
+    BPLOG_DEBUG_STRM(m_id << ": destroy Transaction::Impl");
     removeFromImplMap();
 
     closeConnection();
@@ -859,7 +859,7 @@ Transaction::Impl::getDataToPost()
 DWORD
 Transaction::Impl::postData(bool& done)
 {
-    BPLOG_INFO_STRM(m_id << ": postData " << m_bytesToPost << " bytes");
+    BPLOG_DEBUG_STRM(m_id << ": postData " << m_bytesToPost << " bytes");
     if (m_bytesToPost == 0) {
         done = true;
         return ERROR_SUCCESS;
@@ -1027,7 +1027,7 @@ Transaction::Impl::receiveResponseData()
                             (DWORD_PTR) m_id)) {
         clearTimer();
         m_bytesInReceiveBuffer = ibuf.dwBufferLength;
-        BPLOG_INFO_STRM(m_id << ": InternetReadFileEx got " 
+        BPLOG_DEBUG_STRM(m_id << ": InternetReadFileEx got " 
                          << m_bytesInReceiveBuffer << " bytes");
     } else {
 		m_bytesInReceiveBuffer = 0;
@@ -1163,7 +1163,7 @@ Transaction::Impl::onWininetCallback(HINTERNET /* hInternet */,
         break;
             
     case INTERNET_STATUS_RESPONSE_RECEIVED:
-        BPLOG_DEBUG_STRM(m_id << ": Status: Response Received " 
+        BPLOG_INFO_STRM(m_id << ": Status: Response Received " 
                          << *((LPDWORD)pStatusInfo) << " bytes");
         break;
             
@@ -1181,7 +1181,7 @@ Transaction::Impl::onWininetCallback(HINTERNET /* hInternet */,
         break;
             
     case INTERNET_STATUS_REQUEST_SENT:
-        BPLOG_INFO_STRM(m_id << ": Status: Request sent " 
+        BPLOG_DEBUG_STRM(m_id << ": Status: Request sent " 
                         << *((LPDWORD)pStatusInfo) << " bytes");
         break;
             

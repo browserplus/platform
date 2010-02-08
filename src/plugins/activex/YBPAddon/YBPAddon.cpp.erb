@@ -30,6 +30,7 @@
 #include "BPProtocol/BPProtocol.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bpfile.h"
+#include "BPUtils/ProductPaths.h"
 #include "PluginCommonLib/PluginCommonLib.h"
 
 
@@ -63,6 +64,9 @@ BOOL WINAPI CYBPAddonModule::DllMain(DWORD dwReason, LPVOID lpReserved)
                               _CRTDBG_MODE_WNDW);
 
             
+            // create needed directories
+		    bp::paths::createDirectories();
+
             bp::plugin::setupLogging( bp::file::Path( L"bpactivex.log" ) );
             
             BPInitialize();

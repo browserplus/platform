@@ -31,6 +31,7 @@
 #include "BPUtils/bpdebug.h"
 #include "BPUtils/bpthread.h"
 #include "BPUtils/bpfile.h"
+#include "BPUtils/ProductPaths.h"
 
 
 // Windows cruft...
@@ -141,6 +142,9 @@ NP_Initialize(NPNetscapeFuncs* browserFuncs,
               NPPluginFuncs*)
 #endif
 {
+    // create needed directories
+    bp::paths::createDirectories();
+
     bp::plugin::setupLogging( bp::file::Path("bpnpapi.log") );
     BPInitialize();
     gBrowserFuncs = *browserFuncs;

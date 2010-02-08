@@ -28,10 +28,10 @@ SET (TARGET "YBPAddon")
 PROJECT(${TARGET})
 
 
-# Gather Source Files
-FILE (GLOB HDRS *.h)
-FILE (GLOB SRCS *.cpp)
-FILE (GLOB RESRCS *.rc)
+# Gather Source Files (from binary dir too for .erb subst' files)
+FILE (GLOB HDRS *.h ${CMAKE_CURRENT_BINARY_DIR}/*.h)
+FILE (GLOB SRCS *.cpp ${CMAKE_CURRENT_BINARY_DIR}/*.cpp)
+FILE (GLOB RESRCS *.rc ${CMAKE_CURRENT_BINARY_DIR}/*.rc)
 
 
 # File groupings for IDEs
@@ -53,6 +53,9 @@ SET(CMAKE_ATL_FLAG "1" CACHE STRING "ATL" FORCE)
 # Compiler options
 ADD_DEFINITIONS(-D_ATL_ATTRIBUTES -D_USRDLL)
 INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/../../../dist/include")
+# substituted files in binary dir must find headers here and vice versa
+INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}")
 LINK_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/../../../dist/include")
 
 # Linker options

@@ -12,7 +12,7 @@ you to control how that installed version is configured:
 
 Building on OSX:
   Setting up your environment:
-    1. install the latest version of XCode (at time of writting 2.5 or 3.0 for tiger/leopard)
+    1. install the latest version of XCode (at time of writing 2.5 or 3.0 for tiger/leopard)
     2. install cmake version 2.6.2 or greater from http://www.cmake.org/cmake/resources/software.html
     3. install ruby from http://www.ruby-lang.org
  

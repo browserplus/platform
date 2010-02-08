@@ -207,12 +207,14 @@ namespace bp {
             LONG lRtn = RegCreateKeyExW( m_hRootKey, m_wsPath.c_str(), 0, NULL, 0,
                                          KEY_SET_VALUE, NULL, &hKey, NULL );
             if (lRtn != ERROR_SUCCESS) {
-                BP_THROW( "RegCreateKeyExW returned: " + bp::conv::toString( lRtn ) );
+                BP_THROW( "RegCreateKeyExW(" + wideToUtf8(m_wsPath)
+                          + ") returned: " + bp::conv::toString( lRtn ) );
             }
 
             lRtn = RegCloseKey( hKey );
             if (lRtn != ERROR_SUCCESS) {
-                BP_THROW( "RegCloseKey returned: " + bp::conv::toString( lRtn ) );
+                BP_THROW( "RegCloseKey(" + wideToUtf8(m_wsPath)
+                          + ") returned: " + bp::conv::toString( lRtn ) );
             }
         }
 
@@ -228,7 +230,8 @@ namespace bp {
     
             lRtn = RegCloseKey( hKey );
             if (lRtn != ERROR_SUCCESS) {
-                BP_THROW( "RegCloseKey returned: " + bp::conv::toString( lRtn ) );
+                BP_THROW( "RegCloseKey(" + wideToUtf8(m_wsPath)
+                          + ") returned: " + bp::conv::toString( lRtn ) );
             }
 
             return true;
@@ -241,7 +244,8 @@ namespace bp {
             LONG lRtn = RegOpenKeyExW( m_hRootKey, m_wsPath.c_str(),
                                        0, KEY_QUERY_VALUE, &hKey );
             if (lRtn != ERROR_SUCCESS) {
-                BP_THROW( "RegOpenKeyExW returned: " + bp::conv::toString( lRtn ) );
+                BP_THROW( "RegOpenKeyExW(" + wideToUtf8(m_wsPath)
+                          + ") returned: " + bp::conv::toString( lRtn ) );
             }
 
             DWORD dwNumSubKeys;
@@ -249,7 +253,8 @@ namespace bp {
                                      &dwNumSubKeys,
                                      NULL, NULL, NULL, NULL, NULL, NULL, NULL );
             if (lRtn != ERROR_SUCCESS) {
-                BP_THROW( "RegQueryInfoKeyW returned: " + bp::conv::toString( lRtn ) );
+                BP_THROW( "RegQueryInfoKeyW(" + wideToUtf8(m_wsPath)
+                          + ") returned: " + bp::conv::toString( lRtn ) );
             }
 
             return static_cast<int>( dwNumSubKeys );
@@ -262,7 +267,8 @@ namespace bp {
             LONG lRtn = RegOpenKeyExW( m_hRootKey, m_wsPath.c_str(),
                                        0, KEY_QUERY_VALUE, &hKey );
             if (lRtn != ERROR_SUCCESS) {
-                BP_THROW( "RegOpenKeyExW returned: " + bp::conv::toString( lRtn ) );
+                BP_THROW( "RegOpenKeyExW(" + wideToUtf8(m_wsPath)
+                          + ") returned: " + bp::conv::toString( lRtn ) );
             }
 
             DWORD dwNumValues;
@@ -270,7 +276,8 @@ namespace bp {
                                      &dwNumValues,
                                      NULL, NULL, NULL, NULL );
             if (lRtn != ERROR_SUCCESS) {
-                BP_THROW( "RegQueryInfoKeyW returned: " + bp::conv::toString( lRtn ) );
+                BP_THROW( "RegQueryInfoKeyW(" + wideToUtf8(m_wsPath)
+                          + ") returned: " + bp::conv::toString( lRtn ) );
             }
 
             return static_cast<int>( dwNumValues );
@@ -302,7 +309,8 @@ namespace bp {
             LONG lRtn = RegOpenKeyExW( m_hRootKey, m_wsPath.c_str(),
                                        0, KEY_READ, &hKey );
             if (lRtn != ERROR_SUCCESS) {
-                BP_THROW( "RegOpenKeyExW returned: " + bp::conv::toString( lRtn ) );
+                BP_THROW( "RegOpenKeyExW(" + wideToUtf8(m_wsPath)
+                          + ") returned: " + bp::conv::toString( lRtn ) );
             }
 
             // TODO: could use RegQueryInfo to get required buf size.
@@ -313,12 +321,15 @@ namespace bp {
             lRtn = RegQueryValueExW( hKey, wValueName.c_str(),
                                      NULL, NULL, buf, &dwBufSize );
             if (lRtn != ERROR_SUCCESS) {
-                BP_THROW( "RegQueryValueExW returned: " + bp::conv::toString( lRtn ) );
+                BP_THROW( "RegQueryValueExW(" + wideToUtf8(m_wsPath)
+                          + ", " + sValueName
+                          + ") returned: " + bp::conv::toString( lRtn ) );
             }
 
             lRtn = RegCloseKey( hKey );
             if (lRtn != ERROR_SUCCESS) {
-                BP_THROW( "RegCloseKey returned: " + bp::conv::toString( lRtn ) );
+                BP_THROW( "RegCloseKey(" + wideToUtf8(m_wsPath)
+                          + ") returned: " + bp::conv::toString( lRtn ) );
             }
 
             int* pnVal = reinterpret_cast<int*>( buf );
@@ -339,7 +350,8 @@ namespace bp {
             LONG lRtn = RegOpenKeyExW( m_hRootKey, m_wsPath.c_str(),
                                        0, KEY_READ, &hKey );
             if (lRtn != ERROR_SUCCESS) {
-                BP_THROW( "RegOpenKeyExW returned: " + bp::conv::toString( lRtn ) );
+                BP_THROW( "RegOpenKeyExW(" + wideToUtf8(m_wsPath)
+                          + ") returned: " + bp::conv::toString( lRtn ) );
             }
 
             // TODO: could use RegQueryInfo to get required buf size.
@@ -350,12 +362,15 @@ namespace bp {
             lRtn = RegQueryValueExW( hKey, wValueName.c_str(),
                                      NULL, NULL, szBuf, &dwBufSize );
             if (lRtn != ERROR_SUCCESS) {
-                BP_THROW( "RegQueryValueExW returned: " + bp::conv::toString( lRtn ) );
+                BP_THROW( "RegQueryValueExW(" + wideToUtf8(m_wsPath)
+                          + ", " + sValueName
+                          + ") returned: " + bp::conv::toString( lRtn ) );
             }
 
             lRtn = RegCloseKey( hKey );
             if (lRtn != ERROR_SUCCESS) {
-                BP_THROW( "RegCloseKey returned: " + bp::conv::toString( lRtn ) );
+                BP_THROW( "RegCloseKey(" + wideToUtf8(m_wsPath)
+                          + ") returned: " + bp::conv::toString( lRtn ) );
             }
             std::wstring wval(reinterpret_cast<wchar_t*>( szBuf ) );
             std::string rval = wideToUtf8( wval );
@@ -367,7 +382,8 @@ namespace bp {
         {
             LONG lRtn = RegDeleteKeyW( m_hRootKey, m_wsPath.c_str() );
             if (lRtn != ERROR_SUCCESS) {
-                BP_THROW( "RegDeleteKeyW returned: " + bp::conv::toString( lRtn ) );
+                BP_THROW( "RegDeleteKeyW(" + wideToUtf8(m_wsPath)
+                          + ") returned: " + bp::conv::toString( lRtn ) );
             }
         }
 
@@ -389,7 +405,8 @@ namespace bp {
             LONG lRtn = RegOpenKeyExW( m_hRootKey, m_wsPath.c_str(),
                                        0, KEY_READ, &hKey );
             if (lRtn != ERROR_SUCCESS) {
-                BP_THROW( "RegOpenKeyExW returned: " + bp::conv::toString( lRtn ) );
+                BP_THROW( "RegOpenKeyExW(" + wideToUtf8(m_wsPath)
+                          + ") returned: " + bp::conv::toString( lRtn ) );
             }
 
             // TODO: could use RegQueryInfo to get required buf size.
@@ -399,7 +416,8 @@ namespace bp {
             lRtn = RegEnumKeyExW( hKey, nIdx, szSubKeyName, &dwBufSize,
                                   NULL, NULL, NULL, NULL );
             if (lRtn != ERROR_SUCCESS) {
-                BP_THROW( "RegEnumKeyEx returned: " + bp::conv::toString( lRtn ) );
+                BP_THROW( "RegEnumKeyEx(" + wideToUtf8(m_wsPath)
+                          + ") returned: " + bp::conv::toString( lRtn ) );
             }
 
             string sSubKeyFullPath = fullPath() + "\\" + wideToUtf8( szSubKeyName );
@@ -414,7 +432,8 @@ namespace bp {
             LONG lRtn = RegOpenKeyExW( m_hRootKey, m_wsPath.c_str(),
                                        0, KEY_READ, &hKey );
             if (lRtn != ERROR_SUCCESS) {
-                BP_THROW( "RegOpenKeyExW returned: " + bp::conv::toString( lRtn ) );
+                BP_THROW( "RegOpenKeyExW(" + wideToUtf8(m_wsPath)
+                          + ") returned: " + bp::conv::toString( lRtn ) );
             }
 
             // TODO: could use RegQueryInfo to get required buf size.
@@ -425,7 +444,9 @@ namespace bp {
             lRtn = RegEnumValueW( hKey, nIdx, szValName, &dwBufSize,
                                   NULL, &dwType, NULL, NULL );
             if (lRtn != ERROR_SUCCESS) {
-                BP_THROW( "RegEnumValueW returned: " + bp::conv::toString( lRtn ) );
+                BP_THROW( "RegEnumValueW(" + wideToUtf8(m_wsPath) + ", "
+                          + bp::conv::toString( nIdx )
+                          + ") returned: " + bp::conv::toString( lRtn ) );
             }
 
             return Value( wideToUtf8( szValName ), this, dwType );
@@ -446,19 +467,24 @@ namespace bp {
             LONG lRtn = RegCreateKeyExW( m_hRootKey, m_wsPath.c_str(), 0, NULL, 0,
                                          KEY_SET_VALUE, NULL, &hKey, NULL );
             if (lRtn != ERROR_SUCCESS) {
-                BP_THROW( "RegCreateKeyExW returned: " + bp::conv::toString( lRtn ) );
+                BP_THROW( "RegCreateKeyExW(" + wideToUtf8(m_wsPath)
+                          + ") returned: " + bp::conv::toString( lRtn ) );
             }
 
             std::wstring wValueName = utf8ToWide( sValueName );
             lRtn = RegSetValueExW( hKey, wValueName.c_str(), 0, REG_DWORD, 
                                    reinterpret_cast<BYTE*>(&nData), sizeof(nData) );
             if (lRtn != ERROR_SUCCESS) {
-                BP_THROW( "RegSetValueExW returned: " + bp::conv::toString( lRtn ) );
+                BP_THROW( "RegSetValueExW(" + wideToUtf8(m_wsPath)
+                          + ", " + sValueName + ", " 
+                          + bp::conv::toString( nData )
+                          + ") returned: " + bp::conv::toString( lRtn ) );
             }
 
             lRtn = RegCloseKey( hKey );
             if (lRtn != ERROR_SUCCESS) {
-                BP_THROW( "RegCloseKey returned: " + bp::conv::toString( lRtn ) );
+                BP_THROW( "RegCloseKey(" + wideToUtf8(m_wsPath)
+                          + ") returned: " + bp::conv::toString( lRtn ) );
             }
         }
 
@@ -477,7 +503,8 @@ namespace bp {
             LONG lRtn = RegCreateKeyExW( m_hRootKey, m_wsPath.c_str(), 0, NULL, 0,
                                          KEY_SET_VALUE, NULL, &hKey, NULL );
             if (lRtn != ERROR_SUCCESS) {
-                BP_THROW( "RegCreateKeyExW returned: " + bp::conv::toString( lRtn ) );
+                BP_THROW( "RegCreateKeyExW(" + wideToUtf8(m_wsPath)
+                          + ") returned: " + bp::conv::toString( lRtn ) );
             }
 
             std::wstring wData = utf8ToWide( sData );
@@ -486,12 +513,15 @@ namespace bp {
                                    reinterpret_cast<const BYTE*>(wData.c_str()),
                                    static_cast<DWORD>(wData.length() * sizeof(wchar_t)) );
             if (lRtn != ERROR_SUCCESS) {
-                BP_THROW( "RegSetValueExW returned: " + bp::conv::toString( lRtn ) );
+                BP_THROW( "RegSetValueExW(" + wideToUtf8(m_wsPath)
+                          + ", " + sValueName + ", " + sData
+                          + ") returned: " + bp::conv::toString( lRtn ) );
             }
 
             lRtn = RegCloseKey( hKey );
             if (lRtn != ERROR_SUCCESS) {
-                BP_THROW( "RegCloseKey returned: " + bp::conv::toString( lRtn ) );
+                BP_THROW( "RegCloseKey(" + wideToUtf8(m_wsPath)
+                          + ") returned: " + bp::conv::toString( lRtn ) );
             }
         }
 

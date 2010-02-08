@@ -16,15 +16,6 @@
     </div>
   </div>
   
-  <div class="contentModule" id="blackListDisplay">
-    <div class="moduleTitle">Blacklisted EvilCorelet test</div>
-    <div class="moduleContent">
-	  <center id="evilStatus">
-		Trying to load...
-	  </center>
-    </div>
-  </div>
-  
   <div class="contentModule">
     <div class="moduleTitle">Speak to Me</div>
     <div class="moduleContent"><div id="sayContent">
@@ -37,32 +28,6 @@
     </div></div>
   </div>
 
-  <div class="contentModule">
-    <div class="moduleTitle">Stock Quotes</div>
-    <div class="moduleContent" id="quoteContent">
-	  <!-- &nbsp; gives us a child to the div node that we can replace with
-		   current stock quote prices --> 
-      <div class="quoteimagedisplay" id="quoteimagetarget"></div>
-	  <form name="quoteform" id="quoteForm" action="#">
-		<input id="symbol" type="text" value="YHOO"/><br></br>
-		<input name="button" value="gimme quote!" type="button"/>
-	  </form>
-	  <p></p>
-      <div class="quotedisplay" id="quotetarget">&nbsp;</div> 
-    </div>
-  </div>
-
-  <div class="contentModule">
-    <div class="moduleTitle">Search your desktop</div>
-	<div class="moduleContent"><div id="searchContent"> 
-      <form name="searchform" action="#">
-        <input id="query" type="text" value="vodka"/>
-        <input name="button" value="search my desktop!" type="button"/>
-      </form>
-      <div id="searchtarget">&nbsp;</div> 
-    </div></div>
-  </div>
-  
   <div class="contentModule">
     <div class="moduleTitle">Drop files here</div>
 	<div class="moduleContent" id="dropContent">
@@ -85,8 +50,7 @@
 </center>
            
 <!-- and the script that the webpage author will write -->
-<script language="javascript" type="text/javascript" src="../../src/browserplus-min.js"></script>
-<script language="javascript" type="text/javascript" src="../../tools/installer/install.js"></script>
+<script language="javascript" type="text/javascript" src="../../build/javascript/src/browserplus.js"></script>
 <script language="javascript" type="text/javascript" src="json.js"></script>
 <script language="javascript" type="text/javascript" src="foo.js"></script>
 </body>

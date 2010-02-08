@@ -221,17 +221,7 @@ BPSession::describeService(const plugin::Variant* args,
     // hit the server to get a description
     if (ctx->serviceDescription || ctx->ec != BP_EC_OK) {
         // let our function return before we invoke callback
-
-        // TODO: We should use thread hopper to efficiently gaurantee
-        //  that callbacks are never invoked before functions return.
-        //  however old style browserplus.js relies on this
-        //  behavior.  When we ship 2.1.y we can safely fix this
-        //  behavior as the post 2.0.6 browserplus.js does not require
-        //  the strange describe semantics
-
-        // m_threadHopper.invokeOnThread(describeReturn, (void *) ctx);
-        describeReturn((void *) ctx);
-        
+        m_threadHopper.invokeOnThread(describeReturn, (void *) ctx);
     } else {
         ec = BPDescribe(m_protoHand,
                         service.c_str(),

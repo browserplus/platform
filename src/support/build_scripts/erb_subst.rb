@@ -1,5 +1,6 @@
 # ruby -s ./erb_subst.rb
 
+require 'fileutils'
 require 'rbconfig'
 include Config
 require 'pp'
@@ -24,12 +25,19 @@ end
 $cmake = eval(File.read($context))
 $l10n = JSON.parse(File.read($l10n))
 
+lastCMakeRun = File.mtime(File.join($output_dir, "time.stamp"))
+
 Dir.glob(File.join("**", "*.erb")).each { |from|
   to = from.sub(/\.erb/, '')
+  # substitute into the the build/ directory, rather than inside
+  # source directory.
+  to = File.join($output_dir, to)
   if !File.exist?(to) ||
       File.mtime(to) < File.mtime(from) ||
+      File.mtime(to) < lastCMakeRun ||
       File.size(to) == 0
     puts "Generating: #{to}"
+    FileUtils.mkdir_p(File.dirname(to))
     File.open(to, "w") { |o|
       t = ERB.new(File.read(from))
       o.write t.result()

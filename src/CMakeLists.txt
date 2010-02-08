@@ -59,6 +59,8 @@ INCLUDE(support/build_scripts/BPRandDefn.cmake)
 # everyone under here will build with access to the ServiceAPI headers
 INCLUDE_DIRECTORIES(sdk/service_api/api)
 
+ADD_DEFINITIONS(-DBPVERSION=\"${VersionString}\")
+
 # If you add an entry here, you probably also need to add it to 
 # "allShippingDepends" in BuildSDK.cmake
 ADD_SUBDIRECTORY(libs)
@@ -73,3 +75,7 @@ ADD_SUBDIRECTORY(javascript)
 ADD_DEPENDENCIES( BPUtils_s PerformSubstitution )
 
 INCLUDE(support/build_scripts/BuildSDK.cmake)
+
+# and drop a time stamp file that can be used by various parts of the
+# build system (for instance, erb substitution)
+FILE(WRITE "${CMAKE_CURRENT_BINARY_DIR}/time.stamp" "")

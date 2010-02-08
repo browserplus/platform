@@ -93,11 +93,6 @@ bp::paths::getProductTopDirectory()
     // append Yahoo!/BrowserPlus
     productDir /= getCompanyName();
     productDir /= getProductName();
-    try {
-        bfs::create_directories(productDir);
-    } catch(const tFileSystemError&) {
-        BP_THROW_FATAL("Unable to create " + productDir.utf8());
-    }
     return productDir;
 }
 

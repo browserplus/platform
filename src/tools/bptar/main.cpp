@@ -76,7 +76,7 @@ main(int argc, char ** argv)
         for (int i = 3; i < argc; i++) {
             bp::file::Path path(argv[i]);
             std::vector<bp::file::Path> subPaths;
-            if (!boost::filesystem::exists(path)) {
+            if (!bp::file::exists(path)) {
                 std::cerr << "no such file (skipping): " << path << std::endl;
                 continue;
             }

@@ -35,6 +35,7 @@
 #include "BPUtils/HttpRequest.h"
 #include "BPUtils/HttpSyncTransaction.h"
 #include "BPUtils/ProductPaths.h"
+#include "BPUtils/ProcessLock.h"
 
 
 #ifdef MACOSX
@@ -342,9 +343,27 @@ ScriptableConfigObject::invoke(const string & functionName,
         string daemon = utf8FromNative(bp::paths::getDaemonPath().filename());
         bp::process::kill(daemon, true);
 
+        bp::ProcessLock lock =  NULL;
+#ifdef WIN32
+        // wait for daemon to die
+        string lockName = bp::paths::getIPCLockName();
+        int count = 0;
+        while (!lock && count < 10) {
+            bp::acquireProcessLock(false, lockName);
+            if (!lock) {
+                Sleep(500);
+                count++;
+            }
+        }
+#endif
+
         // now run uninstaller
         bp::process::spawnStatus status;
         bp::process::spawn(uninstaller, std::string(), Path(), args, &status);
+
+        if (lock) {
+            bp::releaseProcessLock(lock);
+        }
 
 #ifdef WIN32
         // uninstaller will leave cruft since windows can't 
@@ -521,12 +540,12 @@ ScriptableConfigObject::invoke(const string & functionName,
 bool
 ScriptableConfigObject::isInstalled()
 {
-    return boost::filesystem::exists(bp::paths::getBPInstalledPath());
+    return exists(bp::paths::getBPInstalledPath());
 }
 
 
 bool
 ScriptableConfigObject::isEnabled()
 {
-    return isInstalled() && !boost::filesystem::exists(bp::paths::getBPDisabledPath());
+    return isInstalled() && !exists(bp::paths::getBPDisabledPath());
 }

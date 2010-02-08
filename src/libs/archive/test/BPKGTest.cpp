@@ -221,7 +221,7 @@ bool verifyDirectoryTestData(const bpf::Path & dirPath)
     {
         bpf::Path nestedFilePath = dirPath/"levelone"/"leveltwo"/"levelthree"/"thefile.txt";
 
-        if (!bfs::exists(nestedFilePath)) {
+        if (!bpf::exists(nestedFilePath)) {
             return false;
         }
     }

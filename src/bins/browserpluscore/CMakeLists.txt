@@ -35,8 +35,6 @@ SET(BrowserPlusCore_LINK_STATIC
     DistributionClient CoreletManager Permissions
     ServiceRunnerLib BPUtils I18n)
 
-INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../../ServiceAPI/api")
-
 YBT_BUILD(BINARY BrowserPlusCore)
 TARGET_LINK_LIBRARIES(BrowserPlusCore ${OS_LIBS})
 IF (APPLE)

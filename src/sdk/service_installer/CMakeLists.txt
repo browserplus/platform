@@ -23,9 +23,6 @@ SET(${progName}_MAJOR_VERSION 0)
 SET(${progName}_MINOR_VERSION 1)
 SET(${progName}_LINK_STATIC ServiceRunnerLib BPUtils)
 
-# for bptypes header required by BPUtils
-INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../../ServiceAPI/api")
-
 YBT_BUILD(BINARY ${progName})
 
 IF (WIN32)

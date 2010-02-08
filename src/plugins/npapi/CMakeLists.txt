@@ -69,6 +69,7 @@ ELSEIF(WIN32)
 # SET(OS_LIBS Ws2_32 mswsock psapi ssleay32 libeay32 DbgHelp)
   SET(OS_LIBS ${ATL_LIBS} Ws2_32 mswsock psapi ssleay32_s libeay32_s DbgHelp)
 
+  INCLUDE_DIRECTORIES(packaging/windows)
 ELSE()
   SET(OS_LIBS "")
 ENDIF()
@@ -82,17 +83,18 @@ SET(BPHDRS src/common.h src/BPScriptableObject.h
     src/ScriptablePluginObjectBase.h src/GenericJSObject.h
     src/nputils.h src/NPAPIObject.h src/NPAPIVariant.h src/NPAPIPlugin.h)
 SET(BPSRCS
-    src/main.cpp
+    # these files are substituted using .erb
+    ${CMAKE_CURRENT_BINARY_DIR}/src/main.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/BPScriptableObject.cpp
+    # these files are not
     src/NPAPIPlugin.cpp
     src/ScriptablePluginObjectBase.cpp
-    src/BPScriptableObject.cpp
     src/GenericJSObject.cpp src/nputils.cpp
     src/DragAndDrop/DnDPlugletFactoryNPAPI.cpp
     src/DragAndDrop/DnDPlugletNPAPI.cpp
     src/DragAndDrop/DropManagerFactory.cpp
     src/DragAndDrop/InterceptDropManager.cpp
     src/DragAndDrop/Html5DropManager.cpp)
-    
 
 SET(BPRSRCS "")
 
@@ -100,13 +102,13 @@ IF(APPLE)
   SET(BPSRCS ${BPSRCS} src/DragAndDrop/InterceptDropManager_Darwin.cpp)
   # MacOSX specific packaging resources
   SET(BPRSRCS ${BPRSRCS} 
-      packaging/mac/Localized.r)
+      ${CMAKE_CURRENT_BINARY_DIR}/packaging/mac/Localized.r)
 ELSEIF(WIN32)
   SET(BPSRCS ${BPSRCS} src/DragAndDrop/InterceptDropManager_Windows.cpp)
   # Windows specific packaging gunk
   SET(BPHDRS ${BPHDRS} packaging/windows/resource.h)
   SET(BPSRCS ${BPSRCS} packaging/windows/npybp.def)
-  SET(BPRSRCS ${BPRSRCS} packaging/windows/npybp.rc)
+  SET(BPRSRCS ${BPRSRCS} ${CMAKE_CURRENT_BINARY_DIR}/packaging/windows/npybp.rc)
 ENDIF()
 
 # Nice groupings for IDEs
@@ -138,7 +140,7 @@ IF (APPLE)
   ADD_CUSTOM_COMMAND(TARGET ${BPLIB} POST_BUILD
       COMMAND /Developer/Tools/Rez  -d SystemSevenOrLater=1 -useDF
               -script Roman -arch i386
-              \"${CMAKE_CURRENT_SOURCE_DIR}/packaging/mac/Localized.r\"
+              \"${CMAKE_CURRENT_BINARY_DIR}/packaging/mac/Localized.r\"
               -o \"${CMAKE_CURRENT_BINARY_DIR}/Localized.rsrc\"
   )
 
@@ -151,7 +153,7 @@ IF (APPLE)
       COMMAND mkdir -p \"${pluginDir}/Contents/Resources/English.lproj\"
       COMMAND ln -sf \"${BP_LOCATION}\" 
                      \"${pluginDir}/Contents/MacOS/BrowserPlus\"
-      COMMAND ln -sf \"${CMAKE_CURRENT_SOURCE_DIR}/packaging/mac/Info.plist\" 
+      COMMAND ln -sf \"${CMAKE_CURRENT_BINARY_DIR}/packaging/mac/Info.plist\" 
                      \"${pluginDir}/Contents/Info.plist\"
       COMMAND ln -sf \"${CMAKE_CURRENT_BINARY_DIR}/Localized.rsrc\"
             \"${pluginDir}/Contents/Resources/English.lproj/Localized.rsrc\"

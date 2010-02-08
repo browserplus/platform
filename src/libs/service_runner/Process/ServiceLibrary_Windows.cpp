@@ -41,8 +41,19 @@ ServiceLibrary::dlopenNP(const bp::file::Path & path)
     // LOAD_WITH_ALTERED_SEARCH_PATH argument
   
     // determine the target directory
-	void * libptr = (void *) LoadLibraryExW(
-		path.external_file_string().c_str(), (HANDLE) NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+    std::wstring nativePath = path.external_file_string();
+
+    // TODO: maybe call bp::file::canonicalPath
+    
+    void * libptr = (void *) LoadLibraryExW(nativePath.c_str(),
+                                            (HANDLE) NULL,
+                                            LOAD_WITH_ALTERED_SEARCH_PATH);
+    if (libptr == NULL) {
+        BPLOG_ERROR_STRM("LoadLibraryExW(" <<
+                         bp::strutil::wideToUtf8(nativePath) <<
+                         ") failed: " <<
+                         bp::error::lastErrorString());
+    }
     
     return libptr;
 }

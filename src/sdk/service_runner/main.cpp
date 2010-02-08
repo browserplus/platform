@@ -48,6 +48,10 @@ static APTArgDefinition g_args[] = {
       "Enable file logging, argument is a path, when combined with '-log' "
       "logging will occur to a file at the level specified."
     },
+    { "version", APT::NO_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
+      APT::NOT_INTEGER, APT::MAY_NOT_RECUR,
+      "get the BrowserPlus platform version with this tool was built."
+    },
     { "providerPath", APT::TAKES_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
       APT::NOT_INTEGER, APT::MAY_RECUR,
       "When running a dependent service, you may explicitly specify "
@@ -189,6 +193,9 @@ main(int argc, const char ** argv)
     if (x < 0) {
         std::cerr << argParser.error() << std::endl;
         exit(1);
+    } else if (argParser.argumentPresent("version")) {
+        std::cout << BPVERSION << std::endl;
+        exit(0);
     } else if (x != argc - 2 && x != argc - 1) {
         std::cerr << "missing service & version or path argument\n"
                   << std::endl;

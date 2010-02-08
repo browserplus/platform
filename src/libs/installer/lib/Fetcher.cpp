@@ -171,7 +171,7 @@ namespace bp {
             CoreletList::const_iterator it;
             for (it = clist.begin(); it != clist.end(); ++it) {
                 bpf::Path path = coreletDir / it->first / it->second / "manifest.json";
-                if (!boost::filesystem::exists(path)) {
+                if (!bpf::exists(path)) {
                     m_neededServices.push_back(*it);
                 }
             }

@@ -51,13 +51,6 @@ doGetTopDir(const string& s)
 {
     Path rval(bp::paths::getProductTopDirectory());
     rval /= s;
-    try {
-        bfs::create_directories(rval);
-    } catch(const tFileSystemError& e) {
-        BP_THROW_FATAL("unable to create " 
-            + rval.externalUtf8() 
-            + ": " + e.what());
-    }
     return rval;
 }
 
@@ -173,13 +166,6 @@ bp::paths::getCoreletDataDirectory(string name,
     stringstream ss;
     ss << major_ver;
     coreletDataDir /= Path("CoreletData")/name/ss.str();
-    try {
-        bfs::create_directories(coreletDataDir);
-    } catch(const tFileSystemError& e) {
-        BP_THROW_FATAL("unable to get "
-            + coreletDataDir.externalUtf8()
-            + ": " + e.what());
-    } 
     return coreletDataDir;
 }
 
@@ -195,13 +181,6 @@ bp::paths::getObfuscatedWritableDirectory(int major,
         return dir;
     }
     dir /= sInstallId;
-    try {
-        bfs::create_directories(dir);
-    } catch(const tFileSystemError& e) {
-        BP_THROW_FATAL("unable to get " 
-            + dir.externalUtf8()
-            + ": " + e.what());
-    } 
     return dir;
 }
 
@@ -336,7 +315,7 @@ bp::paths::getComponentInstallDialogPath(const string & locale)
     
     for (unsigned int i = 0; i < locales.size(); i++) {
         Path path = getProductDirectory()/"ui"/"install_dialog"/locales[i]/"index.html";
-        if (bfs::exists(path)) {
+        if (exists(path)) {
             rval = path;
             break;
         }
@@ -354,7 +333,7 @@ bp::paths::getPreferencePanelUIPath(const string & locale)
     
     for (unsigned int i = 0; i < locales.size(); i++) {
         Path path = getProductDirectory()/"ui"/"preference_panel"/locales[i]/"index.html";
-        if (bfs::exists(path)) {
+        if (exists(path)) {
             rval = path;
             break;
         }
@@ -363,3 +342,24 @@ bp::paths::getPreferencePanelUIPath(const string & locale)
 }
 
 
+void
+bp::paths::createDirectories(int major,
+                             int minor,
+                             int micro) 
+{
+    try {
+        bfs::create_directories(getProductTopDirectory());
+        bfs::create_directories(getProductDirectory(major, minor, micro));
+        bfs::create_directories(getPermissionsDirectory());
+        bfs::create_directories(getCoreletDirectory());
+        bfs::create_directories(getCoreletCacheDirectory());
+        bfs::create_directories(getProductTopDirectory() / "CoreletData");
+        bfs::create_directories(getPluginWritableDirectory(major, minor, micro));
+        bfs::create_directories(getObfuscatedWritableDirectory(major, minor, micro));
+        bfs::create_directories(getPlatformCacheDirectory());
+    } catch (const tFileSystemError& e) {
+        string msg = "unable to create " + Path(e.path1()).utf8()
+                     + ": " + e.what();
+        BP_THROW_FATAL(msg);
+    }
+}

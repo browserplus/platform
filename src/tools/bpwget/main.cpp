@@ -238,7 +238,7 @@ main(int argc, const char ** argv)
     // check for post body
     if (ap.argumentPresent("post")) {
         bp::file::Path path(ap.argument("post"));
-        if (!boost::filesystem::exists(path)) {
+        if (!bp::file::exists(path)) {
             std::cerr << "no such file: " << path << std::endl;
             return 1;
         }
