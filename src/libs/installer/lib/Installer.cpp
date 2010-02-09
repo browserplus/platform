@@ -163,6 +163,7 @@ Installer::run()
     }
     (void) remove(installingPath);
     sendProgress(100);
+    sendDone();
 }
 
 
@@ -467,6 +468,17 @@ Installer::sendError(const string& s)
     shared_ptr<IInstallerListener> l = m_listener.lock();
     if (l) {
         l->onError(s);
+    }
+}
+
+
+void
+Installer::sendDone()
+{
+    BPLOG_DEBUG_STRM("sendDone")
+    shared_ptr<IInstallerListener> l = m_listener.lock();
+    if (l) {
+        l->onDone();
     }
 }
 

@@ -81,6 +81,13 @@ public:
         m.setPayload(payload);
         sendMessage(m);
     }
+    virtual void onDone() {
+        bp::ipc::Message m;
+        m.setCommand("done");
+        bp::Map* payload = new bp::Map;
+        m.setPayload(payload);
+        sendMessage(m);
+    }
     
 private:
     void sendMessage(const bp::ipc::Message& m) {
@@ -102,8 +109,9 @@ private:
 void
 usage()
 {
-    BPLOG_ERROR("usage: BrowserPlusUpdater [-ipcName=<ipcName>] dir [lockfile]");
-    cout << "usage: BrowserPlusUpdater [-ipcName=<ipcName>] dir [lockfile]" << endl;
+    string s = "usage: BrowserPlusUpdater [-ipcName=<ipcName>] [-logPath=<logPath>] [-logLevel=<level> dir [lockfile]";
+    BPLOG_ERROR(s);
+    cout << s << endl;
     exit(-1);
 }
 
@@ -120,15 +128,13 @@ main(int argc, const char** argv)
     Path stringsPath = canonicalPath(Path(argv[0])).parent_path() / "strings.json";
     Installer::setLocalizedStringsPath(stringsPath, locale);
 
-    // setup logging
+    // setup logging, may be overridden by -logPath=<path> and/or -logLevel=<level>
     Path logFile = getTempDirectory() / "BrowserPlusUpdater.log";
-    (void) remove(logFile);
-    bp::log::setupLogToFile(logFile,
-                            bp::log::levelToString(bp::log::LEVEL_ALL),
-                            true);        
+    string logLevel = bp::log::levelToString(bp::log::LEVEL_ALL);
 
     // crack argv
-    // usage is: BrowserPlusUpdater [-ipcName=<ipcName> dir [lockfile]
+    // usage is: BrowserPlusUpdater [-ipcName=<ipcName>] [-logPath=<logPath>] 
+    //                              [-logLevel=<level> dir [lockfile]
     // we no longer need lockfile arg
     IPCProxy* proxy = NULL;
     if (argc < 2) {
@@ -137,12 +143,34 @@ main(int argc, const char** argv)
     int argIndex = 1;
     string ipcName;
     string curArg(argv[argIndex]);
+    bool loggingChanged = false;
     if (curArg.find("-ipcName=") == 0) {
         ipcName = curArg.substr(strlen("-ipcName="));
         proxy = new IPCProxy(ipcName);
-        argIndex++;
+        curArg = argv[++argIndex];
+    }
+    if (curArg.find("-logPath=") == 0) {
+        logFile = curArg.substr(strlen("-logPath="));
+        curArg = argv[++argIndex];
+        loggingChanged = true;
+    }
+    if (curArg.find("-logLevel=") == 0) {
+        logLevel = curArg.substr(strlen("-logLevel="));
+        curArg = argv[++argIndex];
+        loggingChanged = true;
     }
     Path dir(argv[argIndex++]);
+
+    if (loggingChanged) {
+        if (!logFile.empty()) {
+            bp::log::setupLogToFile(logFile, logLevel, false);
+        } else {
+            bp::log::setupLogToConsole(logLevel);
+        }
+    } else {
+        (void) remove(logFile);
+        bp::log::setupLogToFile(logFile, logLevel, true);
+    }
     
     int rval = 0;
     try {

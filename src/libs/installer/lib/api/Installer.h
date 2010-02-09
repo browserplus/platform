@@ -71,11 +71,17 @@ namespace install {
 class IInstallerListener
 {
  public:
+    // Listeners will get a stream on status/error/progress
+    // callbacks.  Prior to version 2.6, a progress of 100%
+    // indicates that the install is done.  In 2.6 and later,
+    // onDone() will be called when the installer is finished, 
+    // both successfully and with errors.
     virtual ~IInstallerListener() {};
     virtual void onStatus(const std::string& msg) = 0;
     virtual void onError(const std::string& msg) = 0;
     // progress callbacks are invoked during run()
     virtual void onProgress(unsigned int pct) = 0;
+    virtual void onDone() = 0;
 };
 
 class Installer 
@@ -132,6 +138,7 @@ class Installer
     void sendProgress(unsigned int pct);
     void sendStatus(const std::string& s);
     void sendError(const std::string&s);
+    void sendDone();
     void doCopy(const bp::file::Path& src,
                 const bp::file::Path& dest);  // throws
     void doSingleFileCopy(const bp::file::Path& src,

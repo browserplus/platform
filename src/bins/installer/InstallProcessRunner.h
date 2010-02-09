@@ -32,24 +32,30 @@
 #include "BPUtils/bpfile.h"
 #include "BPUtils/IPCChannelServer.h"
 #include "BPInstaller/BPInstaller.h"
+#include "BPUtils/bptimer.h"
 
 
-class InstallProcessRunner : public bp::ipc::IChannelServerListener,
+class InstallProcessRunner : public bp::time::ITimerListener,
+                             public bp::ipc::IChannelServerListener,
                              public bp::ipc::IChannelListener,
                              public std::tr1::enable_shared_from_this<InstallProcessRunner>
 
 {
   public:
-    InstallProcessRunner();
+    InstallProcessRunner(const bp::file::Path& logPath,
+                         const std::string& logLevel);
     virtual ~InstallProcessRunner();
 
-    void setListener(bp::install::IInstallerListener* listener);
+    void setListener(std::tr1::weak_ptr<bp::install::IInstallerListener> listener);
                 
     // spawn BrowserPlusUpdater
     void start(const bp::file::Path& dir,
                bool deleteWhenDone = false);
 
   private:
+    // implementation of ITimerListener interface
+    void timesUp(bp::time::Timer* t);
+
     // implementation of IChannelServerListener interface
     void gotChannel(bp::ipc::Channel* c);
     void serverEnded(bp::ipc::IServerListener::TerminationReason,
@@ -67,11 +73,15 @@ class InstallProcessRunner : public bp::ipc::IChannelServerListener,
     void onResponse(bp::ipc::Channel* c,
                     const bp::ipc::Response& response);
 
-    bp::install::IInstallerListener* m_listener;
+    bp::file::Path m_logPath;
+    std::string m_logLevel;
+    std::tr1::weak_ptr<bp::install::IInstallerListener> m_listener;
     std::string m_ipcName;
     mutable std::tr1::shared_ptr<bp::ipc::ChannelServer> m_server;
     bp::process::spawnStatus m_procStatus;
-    bool m_got100;
+    bp::time::Timer m_timer;
+    unsigned int m_timerFires;
+    bool m_connectedToUpdater;
 };
 
 #endif

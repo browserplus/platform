@@ -28,7 +28,7 @@
 #include "InstallerRunner.h"
 
 InstallerRunner::InstallerRunner()
-    : m_listener(NULL)
+    : m_listener()
 {
 }
     
@@ -38,7 +38,7 @@ InstallerRunner::~InstallerRunner()
 }
 
 void
-InstallerRunner::setListener(bp::install::IInstallerListener * listener)
+InstallerRunner::setListener(std::tr1::weak_ptr<bp::install::IInstallerListener> listener)
 {
     m_listener = listener;
 }
@@ -67,7 +67,7 @@ InstallerRunner::start(const bp::file::Path& dir,
 
 struct IRMessage
 {
-    typedef enum { E_Status, E_Error, E_Progress } Type;
+    typedef enum { E_Status, E_Error, E_Progress, E_Done } Type;
 
     IRMessage(Type t, std::string m, unsigned int p)
        : type(t), msg(m), pct(p) 
@@ -97,19 +97,28 @@ InstallerRunner::onProgress(unsigned int pct)
 }
 
 void
+InstallerRunner::onDone()
+{
+    hop((void *) new IRMessage(IRMessage::E_Done, std::string(), 0));
+}
+
+void
 InstallerRunner::onHop(void * context)
 {
     IRMessage * irm = (IRMessage *) context;
-    if (m_listener) {
+    std::tr1::shared_ptr<IInstallerListener> l = m_listener.lock();
+    if (l) {
         switch (irm->type) {
             case IRMessage::E_Status:
-                m_listener->onStatus(irm->msg);
+                l->onStatus(irm->msg);
                 break;
             case IRMessage::E_Error:
-                m_listener->onError(irm->msg);
+                l->onError(irm->msg);
                 break;
             case IRMessage::E_Progress:
-                m_listener->onProgress(irm->pct);
+                l->onProgress(irm->pct);
+            case IRMessage::E_Done:
+                l->onDone();
         }
     }
     delete irm;
