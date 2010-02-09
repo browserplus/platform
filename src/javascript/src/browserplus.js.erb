@@ -44,7 +44,10 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
             setTimeout(function() {
                 try { navigator.plugins.refresh(false); } catch(e) { }
                 BrowserPlus.init(initArgs, function(r) {
-                    if (r.success) {
+                    // return to client if initialization is successfull OR
+                    // if an error code other than notInstalled is encountered:
+                    // http://browserplus.lighthouseapp.com/projects/43039-platform/tickets/14
+                    if (r.success || r.error !== 'bp.notInstalled') {
                         callback(r);
                     } else {
                         BrowserPlus.initWhenAvailable(initArgs, callback);
