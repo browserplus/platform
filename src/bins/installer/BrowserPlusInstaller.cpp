@@ -34,6 +34,7 @@
 #include "InstallerSkinVerbose.h"
 #include "InstallerSkinGUI.h"
 #include "InstallerRunner.h"
+#include "InstallProcessRunner.h"
 
 using namespace std;
 using namespace std::tr1;
@@ -267,6 +268,7 @@ private:
     shared_ptr<InstallerSkin> m_skin;
     bp::runloop::RunLoop * m_rl;
     shared_ptr<InstallerRunner> m_runner;
+    shared_ptr<InstallProcessRunner> m_processRunner;
     unsigned int m_width, m_height;
     std::string m_title;
     
@@ -420,10 +422,28 @@ private:
         if (m_skin) m_skin->progress(69);
 
         // platformDir is all set up, install from it.
-        //
-        m_runner.reset(new InstallerRunner);
-        m_runner->setListener(this);
-        m_runner->start(platformDir, false);
+        // Starting with version 2.6.0, we install by invoking 
+        // dir/BrowserPlusUpdater.  Prior to that, we use our
+        // own compiled in Installer.  When everyone is updated
+        // to 2.6 or greater, m_runner can go away.
+        string s = bp::file::utf8FromNative(platformDir.filename());
+        bp::ServiceVersion version;
+        bool useUpdater = version.parse(s)
+            && version.majorVer() >= 2
+            && version.minorVer() >= 6;
+        if (useUpdater) {
+            BPLOG_DEBUG_STRM("install version " << version.asString() 
+                             << " using BrowserPlusUpdater");
+            m_processRunner.reset(new InstallProcessRunner);
+            m_processRunner->setListener(this);
+            m_processRunner->start(platformDir, false);
+        } else {
+            BPLOG_DEBUG_STRM("install version " << version.asString() 
+                             << " using Installer instance");
+            m_runner.reset(new InstallerRunner);
+            m_runner->setListener(this);
+            m_runner->start(platformDir, false);
+        }
     }
     
     void shutdown()

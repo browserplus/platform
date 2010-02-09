@@ -29,7 +29,8 @@ SET(installerXplatSources
     InstallerSkinGUI.h
     ScriptableInstallerObject.h ScriptableInstallerObject.cpp
     InstallerSkinVerbose.h InstallerSkinVerbose.cpp
-    InstallerRunner.h InstallerRunner.cpp)
+    InstallerRunner.h InstallerRunner.cpp
+    InstallProcessRunner.h InstallProcessRunner.cpp)
 
 IF (WIN32)
     SET(BrowserPlusInstaller_SOURCES 

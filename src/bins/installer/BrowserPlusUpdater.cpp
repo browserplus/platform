@@ -22,11 +22,6 @@
 
 /**
  * BrowserPlusUpdater - a simple binary to manage the update process.
- *                      Takes two args
- *                          - a pathname to the directory containing 
- *                            the update "stuff".
- *                          - [optional] a pathname to the daemon lock 
- *                            file for the daemon which invoked us.
  */
 
 #include <string>
@@ -34,11 +29,84 @@
 #include "BPUtils/bplocalization.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/ARGVConverter.h"
+#include "BPUtils/IPCChannel.h"
 #include "BPInstaller/BPInstaller.h"
 
 using namespace std;
+using namespace std::tr1;
 using namespace bp::file;
 using namespace bp::install;
+
+// For platform 2.6 and later, standalone install invokes BrowserPlusUpdater
+// and status/progress/error is sent back to installer via IPC.  This listener
+// is the proxy.
+class IPCProxy : virtual public bp::install::IInstallerListener
+{
+public:
+    IPCProxy(const std::string& ipcName) : m_channel(), m_channelOk(true) {
+        bool ok = m_channel.connect(ipcName);
+        BPLOG_DEBUG_STRM("connect to " << ipcName << " returns " << ok);
+        if (!ok) {
+            BPLOG_WARN_STRM("BrowserPlusUpdater unable to connect to "
+                            << ipcName);
+            m_channelOk = false;
+        }
+    }
+    virtual ~IPCProxy() {
+        if (m_channelOk) {
+            m_channel.disconnect();
+        }
+    }
+    virtual void onStatus(const std::string& msg) {
+        bp::ipc::Message m;
+        m.setCommand("status");
+        bp::Map* payload = new bp::Map;
+        payload->add("message", new bp::String(msg));
+        m.setPayload(payload);
+        sendMessage(m);
+    }
+    virtual void onError(const std::string& msg) {
+        bp::ipc::Message m;
+        m.setCommand("error");
+        bp::Map* payload = new bp::Map;
+        payload->add("message", new bp::String(msg));
+        m.setPayload(payload);
+        sendMessage(m);
+    }
+    virtual void onProgress(unsigned int pct) {
+        bp::ipc::Message m;
+        m.setCommand("progress");
+        bp::Map* payload = new bp::Map;
+        payload->add("percent", new bp::Integer(pct));
+        m.setPayload(payload);
+        sendMessage(m);
+    }
+    
+private:
+    void sendMessage(const bp::ipc::Message& m) {
+        BPLOG_DEBUG_STRM("IPCProxy sends " << m.serialize());
+        if (!m_channelOk) {
+            BPLOG_ERROR_STRM("bad channel, unable to send" << m.serialize());
+            return;
+        }
+        if (!m_channel.sendMessage(m)) {
+            BPLOG_ERROR_STRM("unable to send" << m.serialize());
+        }
+    }
+
+    bp::ipc::Channel m_channel;
+    bool m_channelOk;
+};
+
+
+void
+usage()
+{
+    BPLOG_ERROR("usage: BrowserPlusUpdater [-ipcName=<ipcName>] dir [lockfile]");
+    cout << "usage: BrowserPlusUpdater [-ipcName=<ipcName>] dir [lockfile]" << endl;
+    exit(-1);
+}
+
 
 int
 main(int argc, const char** argv)
@@ -59,26 +127,32 @@ main(int argc, const char** argv)
                             bp::log::levelToString(bp::log::LEVEL_ALL),
                             true);        
 
-    Path dir;
-    switch(argc) {
-    case 3:
-        // we no longer need lockfile arg
-        // fall thru
-        BPLOG_DEBUG_STRM("ignoring lockfile = " << argv[2]);
-    case 2:
-        dir = Path(argv[1]);
-        BPLOG_DEBUG_STRM("dir = " << argv[1]);
-        break;
-    default:
-		BPLOG_ERROR("usage: BrowserPlusUpdater dir [lockfile]");
-		cout << "usage: BrowserPlusUpdater dir [lockfile]" << endl; 
-        return -1;
+    // crack argv
+    // usage is: BrowserPlusUpdater [-ipcName=<ipcName> dir [lockfile]
+    // we no longer need lockfile arg
+    IPCProxy* proxy = NULL;
+    if (argc < 2) {
+        usage();
     }
-
+    int argIndex = 1;
+    string ipcName;
+    string curArg(argv[argIndex]);
+    if (curArg.find("-ipcName=") == 0) {
+        ipcName = curArg.substr(strlen("-ipcName="));
+        proxy = new IPCProxy(ipcName);
+        argIndex++;
+    }
+    Path dir(argv[argIndex++]);
+    
     int rval = 0;
     try {
         // install out of dir
+        shared_ptr<IInstallerListener> p;
         Installer inst(dir, true);
+        if (proxy) {
+            p.reset(proxy);
+            inst.setListener(weak_ptr<IInstallerListener>(p));
+        }
         inst.run();
     } catch (const bp::error::Exception& e) {
         BPLOG_ERROR(e.what());
