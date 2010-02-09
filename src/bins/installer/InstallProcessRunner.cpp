@@ -30,7 +30,8 @@
 #include "BPUtils/ProductPaths.h"
 
 InstallProcessRunner::InstallProcessRunner()
-    : m_listener(NULL), m_ipcName(), m_server(), m_procStatus()
+    : m_listener(NULL), m_ipcName(), m_server(),
+      m_procStatus(), m_got100(false)
 {
 }
     
@@ -113,14 +114,17 @@ InstallProcessRunner::channelEnded(bp::ipc::Channel* c,
                                    bp::ipc::IConnectionListener::TerminationReason why,
                                    const char* errorString)
 {
-    // XXX?  hmm, never get this callback
-#ifdef NOTDEF
     int exitCode = 0;
     (void) bp::process::wait(m_procStatus, true, exitCode);
     BPLOG_DEBUG_STRM("updater exits with status " << exitCode);
-#endif
-	BPLOG_ERROR_STRM("Installer IPC channel ended, err = "
-                     << errorString);
+
+    if (m_got100) {
+        m_listener->onProgress(100);        
+    } else {
+        std::string msg("installation process terminated abnormnally");
+        m_listener->onError(msg);
+    }
+
     m_server.reset();
 }
 
@@ -153,7 +157,14 @@ InstallProcessRunner::onMessage(bp::ipc::Channel* c,
             BPLOG_WARN_STRM("malformed 'progress' message, no 'percent'");
         } else {
             unsigned int percent = (unsigned int)(long long) *(payload->get("percent"));
-            m_listener->onProgress(percent);
+            // 100% has a special meaning, it tells the InstallManager that installation
+            // is complete.  we'll simply surpress it here for now and send it when
+            // the child process shuts down (breaking the IPC channel)
+            if (percent == 100) {
+                m_got100 = true;
+            } else {
+                m_listener->onProgress(percent);
+            }
         }
     } else if (!m.command().compare("error")) {
         if (!payload->has("message")) {

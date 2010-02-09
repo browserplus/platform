@@ -71,6 +71,7 @@ class InstallProcessRunner : public bp::ipc::IChannelServerListener,
     std::string m_ipcName;
     mutable std::tr1::shared_ptr<bp::ipc::ChannelServer> m_server;
     bp::process::spawnStatus m_procStatus;
+    bool m_got100;
 };
 
 #endif
