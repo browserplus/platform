@@ -117,8 +117,10 @@ InstallerRunner::onHop(void * context)
                 break;
             case IRMessage::E_Progress:
                 l->onProgress(irm->pct);
+                break;
             case IRMessage::E_Done:
                 l->onDone();
+                break;
         }
     }
     delete irm;

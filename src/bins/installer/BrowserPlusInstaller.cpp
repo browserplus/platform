@@ -227,8 +227,9 @@ public:
           m_autoUpdatePermissions(autoUpdatePermissions), m_skin(skin), m_rl(rl), 
           m_width(width), m_height(height), m_title(title),
           m_installerLock(NULL), m_state(ST_Started),
-          m_downloadingServices(false), m_logPath(logPath), m_logLevel(logLevel),
-          m_26orLater(false)
+          m_downloadingServices(false), m_26orLater(false), m_logPath(logPath),
+          m_logLevel(logLevel)
+          
     {
         if (m_skin != NULL) m_skin->setListener(this);
     }
@@ -443,8 +444,13 @@ private:
         string s = bp::file::utf8FromNative(platformDir.filename());
         bp::ServiceVersion version;
         weak_ptr<IInstallerListener> wp(shared_from_this());
-        m_26orLater = version.parse(s)
-                      && version.majorVer() >= 2
+        if (!version.parse(s)) {
+            BP_THROW("bad version: " + s);
+        }
+        bp::paths::createDirectories(version.majorVer(),
+                                     version.minorVer(),
+                                     version.microVer());
+        m_26orLater = version.majorVer() >= 2
                       && version.minorVer() >= 6;
         if (m_26orLater) {
             BPLOG_DEBUG_STRM("install version " << version.asString() 
