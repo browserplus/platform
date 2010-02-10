@@ -41,17 +41,20 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
 
     return {
         initWhenAvailable: function(initArgs, callback) {
-          setTimeout(function() {
-		      try { navigator.plugins.refresh(false); } catch(e) { }
-			  BrowserPlus.init(initArgs, function(r) {
-				if (r.success) {
-				  callback(r);
-				} else {
-				  BrowserPlus.initWhenAvailable(initArgs, callback);
-				}
-			  });
-			}, 1000);
-        },		  
+            setTimeout(function() {
+                try { navigator.plugins.refresh(false); } catch(e) { }
+                BrowserPlus.init(initArgs, function(r) {
+                    // return to client if initialization is successfull OR
+                    // if an error code other than notInstalled is encountered:
+                    // http://browserplus.lighthouseapp.com/projects/43039-platform/tickets/14
+                    if (r.success || r.error !== 'bp.notInstalled') {
+                        callback(r);
+                    } else {
+                        BrowserPlus.initWhenAvailable(initArgs, callback);
+                    }
+                });
+            }, 1000);
+        },        
 
         clientSystemInfo: function() {
             return _detectBrowser();
@@ -120,14 +123,14 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
 
             var proxyCallback = function(details) {
                 // return the error code if there is one,
-			    // otherwise dynamically build callable interfaces for the
-			    // required services
+                // otherwise dynamically build callable interfaces for the
+                // required services
                 if (details.success) {
-         			var rv = [];
+                    var rv = [];
                     for (var k = 0; k < details.value.length; k++) {
                         _createAPI({value: details.value[k].fullDesc});
                         rv.push({service: details.value[k].service,
-                                version: details.value[k].version});
+                                 version: details.value[k].version});
                     }
                     details.value = rv;
                 }   
@@ -248,7 +251,7 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
                                             if (pi) document.documentElement.removeChild(pi.parentNode);
                                             navigator.plugins.refresh(false);
                                         } catch(ignoreErr) { }
-                                      
+                                        
                                         if (_setupPlugin() && _corePlugin() !== null)
                                         {
                                             setTimeout(function() { _corePlugin().Initialize(_args, proxyInitCallback); }, 10);
@@ -265,12 +268,12 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
                             if (!res.success && res.error === 'bp.switchVersion')
                             {
                                 res = {
-                                  success: false,
-                                  error: 'bp.notInstalled',
-                                  verboseError: 'BrowserPlus isn\'t installed, or couldn\'t be loaded'
+                                    success: false,
+                                    error: 'bp.notInstalled',
+                                    verboseError: 'BrowserPlus isn\'t installed, or couldn\'t be loaded'
                                 };
                             }
-                          
+                            
                             _initState = res.success ? 'succeeded' : 'uninitialized';
                             // clear callbacks
                             var cbs = _initCallbacks;
@@ -303,7 +306,7 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
                         }
                     };
                 })();
-              
+                
                 // give control back to browser
                 setTimeout(_doInit, 0);
             }
@@ -331,11 +334,11 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
         // an innerHTML property in a div.  This causes the plugin to
         // load synchronously.
 
-	var mt = navigator.mimeTypes[_mimeType];
-	if (typeof(mt) !== "object" || typeof(mt.enabledPlugin) !== "object")
+        var mt = navigator.mimeTypes[_mimeType];
+        if (typeof(mt) !== "object" || typeof(mt.enabledPlugin) !== "object")
         {
-	    return false;
-	}
+            return false;
+        }
 
         var div = document.createElement("div");
         div.style.visibility = "hidden";
@@ -347,9 +350,9 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
         div.style.top = 0;
         div.style.left = 0;
         div.innerHTML = '<object type="' + _mimeType + '" ' +
-                        'id="' + _bpPluginID + '" ' +
-                        'name="' + _bpPluginID + '">' +
-                        '</object>';
+            'id="' + _bpPluginID + '" ' +
+            'name="' + _bpPluginID + '">' +
+            '</object>';
         document.documentElement.appendChild(div);
         
         _pluginLoaded = true;
@@ -363,36 +366,36 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
             return true;
         }
 
-	try {
-	    // Create control.
-	    var elem = document.createElement("object");
-	    elem.id = _bpPluginID;
-	    elem.type = _mimeType;
+        try {
+            // Create control.
+            var elem = document.createElement("object");
+            elem.id = _bpPluginID;
+            elem.type = _mimeType;
 
-	    // If this addon disabled by the user, this statement throws.
-	    elem.style.display = 'none';
+            // If this addon disabled by the user, this statement throws.
+            elem.style.display = 'none';
 
-	    // add the 'object' tag to the document
-	    document.body.appendChild(elem);
+            // add the 'object' tag to the document
+            document.body.appendChild(elem);
 
-	    // Verify that the activex control is really working:
-	    // If the control is uncreatable this will throw.
-	    document.getElementById( _bpPluginID ).Ping();        
-	    _pluginLoaded = true;
-	    return true;
-	}
-	catch(e) {
-	    // Protect the next operation - we have had issues with
-	    // this intermittently throwing InvalidParameter.
-	    try {
-		// Remove the dom element, it is just a shell not
-		// connected to the plugin.  Keeping this element
-		// around has interfered with some retry scenarios.
-		document.body.removeChild(elem);
-	    }
-	    catch(e2) {
-	    }
-	}
+            // Verify that the activex control is really working:
+            // If the control is uncreatable this will throw.
+            document.getElementById( _bpPluginID ).Ping();        
+            _pluginLoaded = true;
+            return true;
+        }
+        catch(e) {
+            // Protect the next operation - we have had issues with
+            // this intermittently throwing InvalidParameter.
+            try {
+                // Remove the dom element, it is just a shell not
+                // connected to the plugin.  Keeping this element
+                // around has interfered with some retry scenarios.
+                document.body.removeChild(elem);
+            }
+            catch(e2) {
+            }
+        }
 
         return false;
     };
@@ -401,7 +404,7 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
         if (_pluginLoaded) {
             return document.getElementById( _bpPluginID );
         } 
-	return null;
+        return null;
     };
 
     function _isPluginActiveX() {
@@ -523,9 +526,9 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
             },
             Windows: {
                 Explorer: {
-                  "8": "supported",
-                  "7": "supported",
-                  "6": "experimental"
+                    "8": "supported",
+                    "7": "supported",
+                    "6": "experimental"
                 },
                 Safari: "supported",
                 Firefox: "supported",
@@ -563,11 +566,11 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
             if (supportMatrix[_OS] && supportMatrix[_OS][_browser]) {
                 var e = supportMatrix[_OS][_browser];
                 if (typeof e === 'string') {
-                  return e;
+                    return e;
                 } else if (e[_version]) {
-                  return e[_version];
+                    return e[_version];
                 } else {
-                  return "unsupported";
+                    return "unsupported";
                 }
             } else {
                 return "unsupported";
@@ -592,7 +595,7 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
                 _supportLevel = supportLevel();
             }
             _locale = navigator.language || navigator.browserLanguage || 
-                      navigator.userLanguage || navigator.systemLanguage;
+                navigator.userLanguage || navigator.systemLanguage;
         }
 
         return {

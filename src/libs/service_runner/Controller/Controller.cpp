@@ -177,7 +177,7 @@ Controller::timesUp(bp::time::Timer *)
     // got a connection yet, has the process exited?
     int exitCode = 0;
     if (bp::process::wait(m_spawnStatus, false, exitCode)) {
-        BPLOG_DEBUG_STRM("Spawned service process exited with code: "
+        BPLOG_ERROR_STRM("Spawned service process exited with code: "
                          << exitCode);
         m_spawnCheckTimer.cancel();
         // this callback may delete us

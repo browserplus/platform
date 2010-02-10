@@ -117,6 +117,7 @@ bool DropChannel::connect( const std::string& sElementId,
     m_mimetypes = mimeTypes;
     m_includeGestureInfo = includeGestureInfo;
     m_limit = limit;
+    m_version = "1.0.0";
     
     return true;
 }

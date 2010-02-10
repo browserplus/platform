@@ -550,8 +550,7 @@ FileBrowsePluglet::execute(unsigned int tid,
         DWORD flags = 0;
         pDlg->GetOptions(&flags);
         flags |= FOS_ALLOWMULTISELECT | FOS_FORCEFILESYSTEM | FOS_PATHMUSTEXIST
-                 | FOS_FILEMUSTEXIST | FOS_DONTADDTORECENT 
-                 | FOS_FORCESHOWHIDDEN;
+                 | FOS_FILEMUSTEXIST | FOS_DONTADDTORECENT;
         if (m_desc.majorVersion() > 1) {
             flags |= FOS_NODEREFERENCELINKS;
         }
