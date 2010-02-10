@@ -34,6 +34,7 @@
 #include "InstallerSkinVerbose.h"
 #include "InstallerSkinGUI.h"
 #include "InstallerRunner.h"
+#include "InstallProcessRunner.h"
 
 using namespace std;
 using namespace std::tr1;
@@ -217,14 +218,18 @@ public:
                    bp::runloop::RunLoop * rl,
                    unsigned int width,
                    unsigned int height,
-                   std::string title)
+                   const string& title,
+                   const Path& logPath,
+                   const string& logLevel)
         : m_exeDir(exeDir), m_destDir(destDir), m_updatePkg(updatePkg),
           m_keyPath(keyPath), m_servers(servers), m_platformVersion(version),
           m_platformSize(0), m_services(services), m_permissions(permissions),
           m_autoUpdatePermissions(autoUpdatePermissions), m_skin(skin), m_rl(rl), 
           m_width(width), m_height(height), m_title(title),
           m_installerLock(NULL), m_state(ST_Started),
-          m_downloadingServices(false)
+          m_downloadingServices(false), m_26orLater(false), m_logPath(logPath),
+          m_logLevel(logLevel)
+          
     {
         if (m_skin != NULL) m_skin->setListener(this);
     }
@@ -241,7 +246,7 @@ public:
     {
         // verify another instance of the installer is not running
         m_installerLock =
-            bp::acquireProcessLock(false, std::string("BrowserPlusInstaller"));
+            bp::acquireProcessLock(false, string("BrowserPlusInstaller"));
         if (m_installerLock == NULL) {
             m_skin->errorMessage(Installer::getString(Installer::kInstallerAlreadyRunning));
         }
@@ -267,8 +272,9 @@ private:
     shared_ptr<InstallerSkin> m_skin;
     bp::runloop::RunLoop * m_rl;
     shared_ptr<InstallerRunner> m_runner;
+    shared_ptr<InstallProcessRunner> m_processRunner;
     unsigned int m_width, m_height;
-    std::string m_title;
+    string m_title;
     
     // a lock to protect against multiple instances
     bp::ProcessLock m_installerLock;
@@ -289,6 +295,17 @@ private:
         ST_Canceled 
     } m_state;
     bool m_downloadingServices;
+
+    // XXX: note about m_26orLater
+    // XXX: 100% progress has a special meaning prior to 2.6, it tells the InstallManager 
+    // XXX: that installation is complete.  2.6 and later use IInstallerListener::onDone().
+    // XXX: To remain compatible with 2.5 and earlier, we must know whether or not
+    // XXX: to expect onDone() to be invoked.  When 2.5 and prior are history,
+    // XXX: this m_26orLater hack can be removed
+    bool m_26orLater;
+    
+    Path m_logPath;
+    string m_logLevel;
 
     // do the body of the installation.  This should be broken up into
     // asynchronous steps
@@ -420,10 +437,34 @@ private:
         if (m_skin) m_skin->progress(69);
 
         // platformDir is all set up, install from it.
-        //
-        m_runner.reset(new InstallerRunner);
-        m_runner->setListener(this);
-        m_runner->start(platformDir, false);
+        // Starting with version 2.6.0, we install by invoking 
+        // dir/BrowserPlusUpdater.  Prior to that, we use our
+        // own compiled in Installer.  When everyone is updated
+        // to 2.6 or greater, m_runner can go away.
+        string s = bp::file::utf8FromNative(platformDir.filename());
+        bp::ServiceVersion version;
+        weak_ptr<IInstallerListener> wp(shared_from_this());
+        if (!version.parse(s)) {
+            BP_THROW("bad version: " + s);
+        }
+        bp::paths::createDirectories(version.majorVer(),
+                                     version.minorVer(),
+                                     version.microVer());
+        m_26orLater = version.majorVer() >= 2
+                      && version.minorVer() >= 6;
+        if (m_26orLater) {
+            BPLOG_DEBUG_STRM("install version " << version.asString() 
+                             << " using BrowserPlusUpdater");
+            m_processRunner.reset(new InstallProcessRunner(m_logPath, m_logLevel));
+            m_processRunner->setListener(wp);
+            m_processRunner->start(platformDir, false);
+        } else {
+            BPLOG_DEBUG_STRM("install version " << version.asString() 
+                             << " using Installer instance");
+            m_runner.reset(new InstallerRunner);
+            m_runner->setListener(wp);
+            m_runner->start(platformDir, false);
+        }
     }
     
     void shutdown()
@@ -536,13 +577,22 @@ private:
             m_skin->progress(pct);
         }
 
-        if (pct == 100) {
-            m_state = ST_WaitingToEnd;
-            if (m_skin) m_skin->allDone();
-            else shutdown();
+        // XXX: see note above about m_26orLater
+        if (!m_26orLater && pct == 100) {
+            BPLOG_DEBUG_STRM("got 100% progress, assuming done");
+            onDone();
         }
 	}
 
+    virtual void onDone()
+	{
+        m_state = ST_WaitingToEnd;
+        if (m_skin) {
+            m_skin->allDone();
+        } else {
+            shutdown();
+        }
+	}
 };
 
 
@@ -661,7 +711,7 @@ readConfig(const Path& configPath,
             height = (unsigned int) ((long long) *(m->get("height")));
         }
         if (m->has("title", BPTString)) {
-            title = (std::string) *(m->get("title"));
+            title = (string) *(m->get("title"));
         }
     }
 }
@@ -724,7 +774,7 @@ main(int argc, const char** argv)
     // as executable since a mounted mac .dmg is read-only
     Path logFile = getTempDirectory() / "BrowserPlusInstaller.log";
     (void) remove(logFile);
-    string logLevel = "debug";
+    string logLevel = bp::log::levelToString(bp::log::LEVEL_ALL);
 
     // we must get current user's locale, this may be overridded with the
     // -locale flag.
@@ -823,9 +873,8 @@ main(int argc, const char** argv)
         string permissions;
         // default width and height
         unsigned int width = 400, height = 440;
-        std::string installerTitle =
-            bp::install::Installer::getString(
-                bp::install::Installer::kInstallerTitle);
+        string installerTitle = bp::install::Installer::getString(
+                                    bp::install::Installer::kInstallerTitle);
         
         // Dig stuff out of config file.  Command line args for 
         // updatePackage and version take precedence
@@ -856,7 +905,7 @@ main(int argc, const char** argv)
             new InstallManager(exeDir, destDir, updatePkg, keyPath,
                                servers, version, services, permissions,
                                autoUpdatePermissions, skin, &rl, width,
-                               height, installerTitle));
+                               height, installerTitle, logFile, logLevel));
         
         // now we're ready to start the main runloop
         rl.setCallBacks(runLoopCallBack, NULL);

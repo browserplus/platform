@@ -43,7 +43,7 @@ class InstallerRunner : public bp::install::IInstallerListener,
     InstallerRunner();
     virtual ~InstallerRunner();
     // this proxy class re-uses the listener from bp::install
-    void setListener(bp::install::IInstallerListener * listener);
+    void setListener(std::tr1::weak_ptr<bp::install::IInstallerListener> listener);
                 
     // allocate the underlying installer and get it running
     void start(const bp::file::Path& dir, bool deleteWhenDone = false);
@@ -56,13 +56,14 @@ class InstallerRunner : public bp::install::IInstallerListener,
     virtual void onStatus(const std::string& msg);
     virtual void onError(const std::string& msg);
     virtual void onProgress(unsigned int pct);
+    virtual void onDone();
 
     // entry point for messages from the installer thread.
     // this function is invoked on the client's thread
     virtual void onHop(void * context);
 
     bp::thread::Thread m_installerThread;
-    bp::install::IInstallerListener * m_listener;
+    std::tr1::weak_ptr<bp::install::IInstallerListener> m_listener;
 };
 
 #endif
