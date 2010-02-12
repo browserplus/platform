@@ -1,0 +1,41 @@
+DaemonInvoke.txt
+
+[See DaemonInvoke.png for diagram to accompany this document]
+
+
+Service Invoke Flow (non-built in service, service not running):
+    ActiveSession::onQuery
+    ActiveSession::doInvoke
+    CoreletRegistry::instantiate
+    DynamicServiceManager::instantiate
+    Controller::run
+    DynamicServiceState::addPendingAllocation
+    DynamicServiceManager::onAllocated
+    DynamicServiceState::allocationComplete
+    ActiveSession::gotInstance
+    ActiveSession::doExecution
+    DynamicServiceInstance::execute
+    DynamicServiceManager::onInstanceExecute
+    Controller::invoke
+    Channel::sendQuery
+    Controller::onResponse
+    DynamicServiceManager::onInvokeResults
+    CoreletInstance::sendComplete
+    ActiveSession::executionComplete
+    Channel::sendResponse
+
+
+Service Invoke Flow (non-built in service, service already running):
+    ActiveSession::onQuery
+    ActiveSession::doInvoke
+    ActiveSession::doExecution
+    DynamicServiceInstance::execute
+    DynamicServiceManager::onInstanceExecute
+    Controller::invoke
+    Channel::sendQuery
+    Controller::onResponse
+    DynamicServiceManager::onInvokeResults
+    CoreletInstance::sendComplete
+    ActiveSession::executionComplete
+    Channel::sendResponse
+
