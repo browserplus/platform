@@ -1,4 +1,5 @@
 02/XX/2010 - Changes from 2.5.1 to 2.6.0
+  * bugfix [#17] - Fix scroll on FFX 3.6 on pages using DnD service.
   * bugfix - win32 plugin crash upon drop of "Public Document" folder
   * bugfix [#33] - further decouple installer - this refines the protocol
     between the two parts of the installer - the "top half" that presents a
