@@ -17,7 +17,7 @@
     encountered.
   * bugfix #56 - .describe() in JSAPI now returns control to client before invoking
     completion callback
-  * #22 - improved logging upon registry panipulation errors to help diagnose specific
+  * #22 - improved logging upon registry manipulation errors to help diagnose specific
     cause of failures in the field.
   * bug #51 - -version flag added to servicerunner    
   * on win32 config panel we now wait for daemon to shut down before invoking uninstaller.
