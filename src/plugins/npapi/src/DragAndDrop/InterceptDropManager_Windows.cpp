@@ -53,6 +53,26 @@ using namespace std;
 // (second warning from NPVariant macros)
 #pragma warning (disable : 4100 4127)
 
+// a hardcoded test that determines if a useragent string represents a
+// Firefox browser < 3.6
+static bool isOldFirefoxBrowser(std::string uagent)
+{
+    size_t loc = uagent.find("Firefox/");
+    if (loc == std::string::npos) return false;
+    loc += 8;
+    
+    const char * verptr = uagent.c_str() + loc;
+	char * endptr = NULL;
+
+    if (::strtoul(verptr, &endptr, 10) > 3) return false;
+    if (!endptr || !(*endptr)) return true;
+	endptr++;
+    if (::strtoul(endptr, NULL, 10) >= 6) return false;    
+
+    return true;
+}
+
+
 
 class WindowsDropManager : public virtual InterceptDropManager,
                            public virtual IDropTarget
@@ -121,10 +141,11 @@ private:
     HWND m_hWnd;
     HWND m_pluginHWnd;
 
-    // each drop target has a transparent overlay which we 
-    // force to the top of the z-order.  events are
-    // forwarded to parent window.
-    bool m_isSafari;
+    // older firefox browsers require extra hacks to re-arrange the
+    // stacking order: each drop target has a transparent overlay which we 
+    // force to the top of the z-order.  events are forwarded to parent window.
+    // this technique is not used on other browsers.
+    bool m_isOldFirefoxBrowser;
     std::string m_className;
     ATOM m_atom;
     HWND m_dndHWnd;
@@ -159,25 +180,27 @@ WindowsDropManager::WindowsDropManager(NPP instance,
       m_pDataObject(NULL), m_refCount(0), m_atom(0)
 {
     std::string uagent(gBrowserFuncs.uagent(m_instance));
-    m_isSafari = (uagent.find("Safari") != std::string::npos);
+    m_isOldFirefoxBrowser = isOldFirefoxBrowser(uagent);
     m_pluginHWnd = (HWND)(window->window);
     m_hWnd = GetParent(m_pluginHWnd);
     OleInitialize(0);
     BPLOG_INFO_STRM("allocated new windows drop manager: " <<  m_hWnd);
+	BPLOG_INFO_STRM("intercept behavior: " <<  
+		(m_isOldFirefoxBrowser ? "ffx < 3.6" : "new or non-firefox"));
 }
 
 
 WindowsDropManager::~WindowsDropManager()
 {
     if (!m_targets.empty()) {
-        if (m_isSafari) {
-            ::RevokeDragDrop(m_hWnd);
-        } else {
+        if (m_isOldFirefoxBrowser) {
             if (m_dndHWnd) {
                 ::RevokeDragDrop(m_dndHWnd);
                 ::DestroyWindow(m_dndHWnd);
                 m_dndHWnd = NULL;
             }
+        } else {
+            ::RevokeDragDrop(m_hWnd);
         }
     } 
     if (!m_className.empty()) {
@@ -195,13 +218,7 @@ WindowsDropManager::createOverlay(const std::string& name)
     HWND hwnd = NULL;
     try {
         if (m_targets.size() == 1) {
-            if (m_isSafari) {
-                ::RevokeDragDrop(m_hWnd);
-                HRESULT res = ::RegisterDragDrop(m_hWnd, this);
-                if (res != S_OK) {
-                    throw std::string("::RegisterDragDrop failed");
-                }
-            } else {
+            if (m_isOldFirefoxBrowser) {
                 if (m_atom == 0) {
                     // window class name must be scoped to this instance of 
                     // dropmanager.  trying to share a classname results in
@@ -273,6 +290,12 @@ WindowsDropManager::createOverlay(const std::string& name)
                 }
                 BPLOG_INFO_STRM("added drop target window: " <<
                                 BP_HEX_MANIP << long(m_dndHWnd));
+            } else {
+                ::RevokeDragDrop(m_hWnd);
+                HRESULT res = ::RegisterDragDrop(m_hWnd, this);
+                if (res != S_OK) {
+                    throw std::string("::RegisterDragDrop failed");
+                }
             }
         }
     } catch (const std::string& msg) {
@@ -330,12 +353,12 @@ WindowsDropManager::removeTarget(const std::string& name)
     bool rval = InterceptDropManager::removeTarget(name);
     if (rval) {
         if (m_targets.empty()) {
-            if (m_isSafari) {
-                ::RevokeDragDrop(m_hWnd);
-            } else {
+            if (m_isOldFirefoxBrowser) {
                 ::RevokeDragDrop(m_dndHWnd);
                 ::DestroyWindow(m_dndHWnd);
                 m_dndHWnd = NULL;
+            } else {
+                ::RevokeDragDrop(m_hWnd);
             }
         }
     }
@@ -494,8 +517,8 @@ WindowsDropManager::dropWindowCallback(HWND hwnd,
         if (next != NULL) {
            ::PostMessage(next, msg, wParam, lParam);
         }
-    }
-    return rval;
+	} 
+	return rval;
 }
 
 
