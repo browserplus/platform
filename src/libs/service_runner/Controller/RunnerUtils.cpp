@@ -43,23 +43,28 @@ ServiceRunner::determineProviderPath(const bp::service::Summary & s,
 
     // list all subdirectories
     bp::ServiceVersion winner;
-    bp::file::tDirIter end;
-    for (bp::file::tDirIter it(d); it != end; ++it) 
-    {
-        bp::file::Path p(it->path().filename());
-        bp::ServiceVersion current;        
-        if (!current.parse(p.utf8()))
+    try {
+        bp::file::tDirIter end;
+        for (bp::file::tDirIter it(d); it != end; ++it) 
         {
-            std::cerr << "skipping bogus version dir: " << p.utf8()
-                      << std::endl;
-            continue;
+            bp::file::Path p(it->path().filename());
+            bp::ServiceVersion current;        
+            if (!current.parse(p.utf8()))
+            {
+                std::cerr << "skipping bogus version dir: " << p.utf8()
+                << std::endl;
+                continue;
+            }
+            
+            if (bp::ServiceVersion::isNewerMatch(current, winner,
+                                                 version, minversion))
+            {
+                winner = current;
+            }
         }
-
-        if (bp::ServiceVersion::isNewerMatch(current, winner,
-                                             version, minversion))
-        {
-            winner = current;
-        }
+    } catch (bp::file::tFileSystemError& e) {
+        std::cerr << "unable to iterate thru " 
+            << d.externalUtf8() << ": " << e.what();
     }
     if (winner.majorVer() >= 0) {
         d /= winner.asString();

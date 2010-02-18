@@ -69,18 +69,24 @@ bp::install::utils::readPlatformInfo(const bpf::Path& path)
     bpf::Path dir = getProductTopDirectory();
     if (boost::filesystem::is_directory(dir)) {
         bpf::tDirIter end;
-        for (bpf::tDirIter it(dir); it != end; ++it) {
-            string s = bpf::utf8FromNative(it->filename());
-            bp::ServiceVersion version;
-            if (version.parse(s)) {
-                bpf::Path installedPath = getBPInstalledPath(version.majorVer(),
-                                                             version.minorVer(),
-                                                             version.microVer());
-                if (bpf::exists(installedPath)) {
-                    s_installedVersions.push_back(version);
+        try {
+            for (bpf::tDirIter it(dir); it != end; ++it) {
+                string s = bpf::utf8FromNative(it->filename());
+                bp::ServiceVersion version;
+                if (version.parse(s)) {
+                    bpf::Path installedPath = getBPInstalledPath(version.majorVer(),
+                                                                 version.minorVer(),
+                                                                 version.microVer());
+                    if (bpf::exists(installedPath)) {
+                        s_installedVersions.push_back(version);
+                    }
                 }
             }
+        } catch (const bp::file::tFileSystemError& e) {
+            BPLOG_WARN_STRM("unable to iterate thru " << dir
+                            << ": " << e.what());
         }
+        
     }
 }
 

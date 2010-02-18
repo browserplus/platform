@@ -89,10 +89,17 @@ main(int argc, char ** argv)
                     exit(1);
                 }
                 
-                bp::file::tRecursiveDirIter end;
-                for (bp::file::tRecursiveDirIter it(path); it != end; ++it) {
-                    subPaths.push_back(bp::file::Path(it->path()));
+                try {
+                    bp::file::tRecursiveDirIter end;
+                    for (bp::file::tRecursiveDirIter it(path); it != end; ++it) {
+                        subPaths.push_back(bp::file::Path(it->path()));
+                    }
+                } catch (const bp::file::tFileSystemError& e) {
+                    std::cerr << "unable to iterate thru " << path.externalUtf8()
+                              << ": " << e.what();
+                    exit(1);
                 }
+            
             } else {
                 subPaths.push_back(path);
             }

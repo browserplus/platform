@@ -390,111 +390,116 @@ DiskScanner::scanDiskForServices(
             unsigned int loadedCorelets = 0;
             unsigned int subDirectories = 0;
 
-            bp::file::tDirIter end;
-            for (bp::file::tDirIter it(path); it != end; ++it) {
-                bp::file::Path subpath(it->path());
-                // silently skip dot directories
-                if (subpath.string().compare(0, 1, bp::file::nativeFromUtf8(".")) == 0) 
-                    continue;
+            try {
+                bp::file::tDirIter end;
+                for (bp::file::tDirIter it(path); it != end; ++it) {
+                    bp::file::Path subpath(it->path());
+                    // silently skip dot directories
+                    if (subpath.string().compare(0, 1, bp::file::nativeFromUtf8(".")) == 0) 
+                        continue;
 
-                // verify it's a directory
-                if (!boost::filesystem::is_directory(subpath))  
-                    continue;
-                
-                // check to see if this is a valid corelet
-                std::string error;
-                bp::service::Summary summary;
+                    // verify it's a directory
+                    if (!boost::filesystem::is_directory(subpath))  
+                        continue;
                     
-                if (!summary.detectCorelet(subpath, error)) {
-                    dirStack.push(subpath);
-                    subDirectories++;
-                    continue;
-                }
-                
-                // if this corelet is blacklisted, nuke it
-
-                std::string version = bp::file::utf8FromNative(subpath.filename());
-                std::string name = bp::file::utf8FromNative(subpath.parent_path().filename());
-                if (!pmgr->serviceMayRun(name, version))
-                {
-                    bp::file::remove(subpath);
-                    BPLOG_WARN_STRM("blacklisted corelet " 
-                                    << name << "/" << version << " removed");
-                    std::ofstream ofs;
-                    if (bp::file::openWritableStream(
-                            ofs, bp::paths::getCoreletLogPath(),
-							std::ios_base::app | std::ios::binary))
-                    {
+                    // check to see if this is a valid corelet
+                    std::string error;
+                    bp::service::Summary summary;
                         
-                        BPTime now;
-                        ofs << now.asString()
-                            << ": Removed blacklisted corelet " 
-                            << name << ", version " << version << std::endl;
+                    if (!summary.detectCorelet(subpath, error)) {
+                        dirStack.push(subpath);
+                        subDirectories++;
+                        continue;
                     }
-                } 
-                else
-                {
-                    // increment the counter that signifies that this is a
-                    // directory containing something useful, not to be
-                    // cleaned up
-                    loadedCorelets++;
+                    
+                    // if this corelet is blacklisted, nuke it
 
-                    // we've now got a valid summary.  if we have already
-                    // loaded it and it is not out of date, then we can
-                    // transition it straight to the output map
-                    std::map<bp::service::Summary, bp::service::Description>
-                        ::iterator loadedIt;
-                    loadedIt = lastScan.find(summary);
-
-                    // can we skip the loading of this service because it's
-                    // already been scanned and is up to date
-                    if (loadedIt != lastScan.end())
+                    std::string version = bp::file::utf8FromNative(subpath.filename());
+                    std::string name = bp::file::utf8FromNative(subpath.parent_path().filename());
+                    if (!pmgr->serviceMayRun(name, version))
                     {
-                        if (!loadedIt->first.outOfDate() ||
-                            running.find(summary) != running.end())
+                        bp::file::remove(subpath);
+                        BPLOG_WARN_STRM("blacklisted corelet " 
+                                        << name << "/" << version << " removed");
+                        std::ofstream ofs;
+                        if (bp::file::openWritableStream(
+                                ofs, bp::paths::getCoreletLogPath(),
+                                std::ios_base::app | std::ios::binary))
                         {
-                            // update the correct count given the reason
-                            // why we can skip loading this service
-                            // (currently running or up to date)
-                            if (loadedIt->first.outOfDate()) {
-                                postponedServices++;
-                            } else {
-                                alreadyLoadedServices++;
-                            }
-
-                            thisScan[loadedIt->first] = loadedIt->second;
-
-                            if (summary.type() ==
-                                bp::service::Summary::Provider)
-                            {
-                                providerSummaries.insert(summary);
-                            }
-                            continue;
+                            
+                            BPTime now;
+                            ofs << now.asString()
+                                << ": Removed blacklisted corelet " 
+                                << name << ", version " << version << std::endl;
                         }
-                        
-                        // we have already loaded this service, but it
-                        // needs to be refreshed!
-                        refreshedServices++;
-
-                        // let's remove the interface from the disk cache
-                        bp::serviceInterfaceCache::purge(name, version);
-                    }
-
-                    if (summary.type() == bp::service::Summary::Provider)
-                    {
-                        neededProviderSummaries.insert(summary);
-                    }
+                    } 
                     else
                     {
-                        neededSummaries.insert(summary);
+                        // increment the counter that signifies that this is a
+                        // directory containing something useful, not to be
+                        // cleaned up
+                        loadedCorelets++;
+
+                        // we've now got a valid summary.  if we have already
+                        // loaded it and it is not out of date, then we can
+                        // transition it straight to the output map
+                        std::map<bp::service::Summary, bp::service::Description>
+                            ::iterator loadedIt;
+                        loadedIt = lastScan.find(summary);
+
+                        // can we skip the loading of this service because it's
+                        // already been scanned and is up to date
+                        if (loadedIt != lastScan.end())
+                        {
+                            if (!loadedIt->first.outOfDate() ||
+                                running.find(summary) != running.end())
+                            {
+                                // update the correct count given the reason
+                                // why we can skip loading this service
+                                // (currently running or up to date)
+                                if (loadedIt->first.outOfDate()) {
+                                    postponedServices++;
+                                } else {
+                                    alreadyLoadedServices++;
+                                }
+
+                                thisScan[loadedIt->first] = loadedIt->second;
+
+                                if (summary.type() ==
+                                    bp::service::Summary::Provider)
+                                {
+                                    providerSummaries.insert(summary);
+                                }
+                                continue;
+                            }
+                            
+                            // we have already loaded this service, but it
+                            // needs to be refreshed!
+                            refreshedServices++;
+
+                            // let's remove the interface from the disk cache
+                            bp::serviceInterfaceCache::purge(name, version);
+                        }
+
+                        if (summary.type() == bp::service::Summary::Provider)
+                        {
+                            neededProviderSummaries.insert(summary);
+                        }
+                        else
+                        {
+                            neededSummaries.insert(summary);
+                        }
                     }
                 }
-            }
-            if (!loadedCorelets && !subDirectories) {
-                bp::file::Path fullPath(bp::file::canonicalPath(path));
+                if (!loadedCorelets && !subDirectories) {
+                    bp::file::Path fullPath(bp::file::canonicalPath(path));
 
-                BPLOG_WARN_STRM("removing empty directory: " << fullPath);
-                bp::file::remove(fullPath);
+                    BPLOG_WARN_STRM("removing empty directory: " << fullPath);
+                    bp::file::remove(fullPath);
+                }
+            } catch (const bp::file::tFileSystemError& e) {
+                BPLOG_WARN_STRM("unable to iterate thru " << path
+                                << ": " << e.what());
             }
         }
     }

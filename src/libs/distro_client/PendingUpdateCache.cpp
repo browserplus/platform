@@ -45,32 +45,34 @@ PendingUpdateCache::cached()
         bp::file::Path path(dirStack.top());
         dirStack.pop();
 
-        if (boost::filesystem::is_directory(path))
-        {
-            bp::file::tDirIter end;
-            for (bp::file::tDirIter it(path); it != end; ++it)
-            {            
-                bp::file::Path p(it->path());
-
-                // silently skip dot directories
-                bp::file::tString dot = bp::file::nativeFromUtf8(".");
-                if (p.filename().compare(0, 1, dot) == 0) continue;
-
-                if (!boost::filesystem::is_directory(p)) continue;
-                
-                // check to see if this is a valid corelet
-                std::string error;
-                bp::service::Summary summary;
-
-                if (!summary.detectCorelet(p, error))
-                {
-                    dirStack.push(p);
-                    continue;
+        if (boost::filesystem::is_directory(path)) {
+            try {
+                bp::file::tDirIter end;
+                for (bp::file::tDirIter it(path); it != end; ++it) {            
+                    bp::file::Path p(it->path());
+                    
+                    // silently skip dot directories
+                    bp::file::tString dot = bp::file::nativeFromUtf8(".");
+                    if (p.filename().compare(0, 1, dot) == 0) continue;
+                    
+                    if (!boost::filesystem::is_directory(p)) continue;
+                    
+                    // check to see if this is a valid corelet
+                    std::string error;
+                    bp::service::Summary summary;
+                    
+                    if (!summary.detectCorelet(p, error)) {
+                        dirStack.push(p);
+                        continue;
+                    }
+                    
+                    // cool, got a summary, add it to the set of currently
+                    // available corelets.
+                    currentCorelets.push_back(summary);
                 }
-                
-                // cool, got a summary, add it to the set of currently
-                // available corelets.
-                currentCorelets.push_back(summary);
+            } catch (bp::file::tFileSystemError& e) {
+                BPLOG_WARN_STRM("unable to iterate thru " << path
+                                << ": " << e.what());
             }
         }
     }

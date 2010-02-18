@@ -432,8 +432,13 @@ RequireRequest::checkPlatformUpdates()
     tDirIter end;
     Path platCache = bp::paths::getPlatformCacheDirectory();
     if (boost::filesystem::is_directory(platCache)) {
-        for (tDirIter iter(platCache); iter != end; ++iter) {
-            updates.push_back(utf8FromNative(iter->path().filename()));;
+        try {
+            for (tDirIter iter(platCache); iter != end; ++iter) {
+                updates.push_back(utf8FromNative(iter->path().filename()));;
+            }
+        } catch (const tFileSystemError& e) {
+            BPLOG_WARN_STRM("unable to iterate thru " << platCache
+                            << ": " << e.what());
         }
     }
     vector<string>::iterator it = updates.begin();

@@ -347,16 +347,21 @@ int main(int argc, const char ** argv)
         }
         
         if (boost::filesystem::is_directory(source)) {
-            bp::file::tDirIter end;
-            for (bp::file::tDirIter it(source); it != end; ++it) {
-                bp::file::Path p(it->path());
-                bp::file::Path relPath = p.relativeTo(source);
-                bp::file::Path fromPath = it->path();
-                bp::file::Path toPath = destination / relPath;
-                if (!bp::file::copy(fromPath, toPath)) {
-                    std::cerr << "error copying " << fromPath << std::endl;
-                    exit(1);
+            try {
+                bp::file::tDirIter end;
+                for (bp::file::tDirIter it(source); it != end; ++it) {
+                    bp::file::Path p(it->path());
+                    bp::file::Path relPath = p.relativeTo(source);
+                    bp::file::Path fromPath = it->path();
+                    bp::file::Path toPath = destination / relPath;
+                    if (!bp::file::copy(fromPath, toPath)) {
+                        std::cerr << "error copying " << fromPath << std::endl;
+                        exit(1);
+                    }
                 }
+            } catch (const bp::file::tFileSystemError& e) {
+                std::cerr << "unable to iterate thru " << source.externalUtf8()
+                        << ": " << e.what();
             }
         }
 

@@ -134,19 +134,24 @@ getNewestInstalledPlatform()
     bp::ServiceVersion newest;
     bp::file::Path dir = bp::paths::getProductTopDirectory();
     if (boost::filesystem::is_directory(dir)) {
-        bp::file::tDirIter end;
-        for (bp::file::tDirIter it(dir); it != end; ++it)
-        {
-            bp::ServiceVersion version;
-            std::string s = bp::file::utf8FromNative(it->path().filename());
-            if (version.parse(s) && version.compare(newest) > 0 &&
-                bp::file::exists(bp::paths::getBPInstalledPath(
-                                     version.majorVer(),
-                                     version.minorVer(),
-                                     version.microVer())))
+        try {
+            bp::file::tDirIter end;
+            for (bp::file::tDirIter it(dir); it != end; ++it)
             {
-                newest = version;
+                bp::ServiceVersion version;
+                std::string s = bp::file::utf8FromNative(it->path().filename());
+                if (version.parse(s) && version.compare(newest) > 0 &&
+                    bp::file::exists(bp::paths::getBPInstalledPath(
+                                         version.majorVer(),
+                                         version.minorVer(),
+                                         version.microVer())))
+                {
+                    newest = version;
+                }
             }
+        } catch (const bp::file::tFileSystemError& e) {
+            BPLOG_WARN_STRM("unable to iterate thru " << dir
+                            << ": " << e.what());
         }
     }
 

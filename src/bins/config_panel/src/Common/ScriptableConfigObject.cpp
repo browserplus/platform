@@ -272,18 +272,24 @@ ScriptableConfigObject::invoke(const string & functionName,
             unsigned long totalSize = 0;
             Path dir = bp::paths::getObfuscatedWritableDirectory();
             if (boost::filesystem::is_directory(dir)) {
-                tDirIter end;
-                tString logExt = nativeFromUtf8(".log");
-                for (tDirIter iter(dir); iter != end; ++iter) {
-                    if (boost::filesystem::is_regular_file(*iter)) {
-                        if (boost::filesystem::extension(*iter).compare(logExt) == 0) {
-                            long sz = (long) boost::filesystem::file_size(iter->path());
-                            if (sz > 0) {
-                                totalSize += sz;
+                try {
+                    tDirIter end;
+                    tString logExt = nativeFromUtf8(".log");
+                    for (tDirIter iter(dir); iter != end; ++iter) {
+                        if (boost::filesystem::is_regular_file(*iter)) {
+                            if (boost::filesystem::extension(*iter).compare(logExt) == 0) {
+                                long sz = (long) boost::filesystem::file_size(iter->path());
+                                if (sz > 0) {
+                                    totalSize += sz;
+                                }
                             }
                         }
                     }
+                } catch (tFileSystemError& e) {
+                    BPLOG_WARN_STRM("unable to iterate thru " << dir
+                                    << ": " << e.what());
                 }
+               
             }
             rv = new bp::Integer(totalSize);
         } else {
@@ -433,15 +439,20 @@ ScriptableConfigObject::invoke(const string & functionName,
                 tString logExt = nativeFromUtf8(".log");
                 Path dir = bp::paths::getObfuscatedWritableDirectory();
                 if (boost::filesystem::is_directory(dir)) {
-                    tDirIter end;
-                    for (tDirIter iter(dir); iter != end; ++iter) {
-                        if (boost::filesystem::extension(*iter).compare(logExt) == 0) {
-                            Path log(iter->path());
-                            Path relPath = log.relativeTo(dir);
-                            if (!tar.addFile(log, relPath)) {
-                                throw string("unable to add " + log.externalUtf8());
+                    try {
+                        tDirIter end;
+                        for (tDirIter iter(dir); iter != end; ++iter) {
+                            if (boost::filesystem::extension(*iter).compare(logExt) == 0) {
+                                Path log(iter->path());
+                                Path relPath = log.relativeTo(dir);
+                                if (!tar.addFile(log, relPath)) {
+                                    throw string("unable to add " + log.externalUtf8());
+                                }
                             }
                         }
+                    } catch (const tFileSystemError& e) {
+                        BPLOG_WARN_STRM("unable to iterate thru " << dir
+                                        << ": " << e.what());
                     }
                 }
             }

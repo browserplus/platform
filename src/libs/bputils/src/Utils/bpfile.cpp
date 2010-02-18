@@ -864,19 +864,25 @@ doRemoveAll(const Path& path)
     try {
         // don't recurse into symlinks
         if (!isSymlink(path) && bfs::is_directory(path)) {
-            tDirIter end;
-            for (tDirIter iter(path); iter != end; ++iter) {
-                Path dir(iter->path());
-                try {
-                    if (!doRemoveAll(dir)) {
+            try {
+                tDirIter end;
+                for (tDirIter iter(path); iter != end; ++iter) {
+                    Path dir(iter->path());
+                    try {
+                        if (!doRemoveAll(dir)) {
+                            rval = false;
+                        }
+                    } catch (const tFileSystemError& e) {
+                        BPLOG_WARN_STRM("doRemoveAll failed to remove "
+                                        << dir << ": " << e.what());
                         rval = false;
                     }
-                } catch (const tFileSystemError& e) {
-                    BPLOG_WARN_STRM("doRemoveAll failed to remove "
-                                    << dir << ": " << e.what());
-                    rval = false;
                 }
+            } catch (const tFileSystemError& e) {
+                BPLOG_WARN_STRM("unable to iterate thru " << path
+                                << ": " << e.what());
             }
+            
         }
         if (!bfs::remove(path)) {
             rval = false;
@@ -1325,10 +1331,15 @@ remove(const Path& path)
                              << ") failed, removing read-only attributes "
                              << "and trying again");
             if (bfs::is_directory(path)) {
-                tRecursiveDirIter end;
-                for (tRecursiveDirIter it(path); it != end; ++it) {
-                    Path p(it->path());
-                    (void) unsetReadOnly(p);
+                try {
+                    tRecursiveDirIter end;
+                    for (tRecursiveDirIter it(path); it != end; ++it) {
+                        Path p(it->path());
+                        (void) unsetReadOnly(p);
+                    }
+                } catch (const tFileSystemError& e) {
+                    BPLOG_WARN_STRM("unable to iterate thru " << path
+                                    << ": " << e.what());
                 }
             } else {
                 (void) unsetReadOnly(path);

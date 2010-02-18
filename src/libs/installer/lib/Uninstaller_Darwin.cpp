@@ -57,17 +57,22 @@ namespace bp {
 
             // Remove all BrowserPlus plugins
             Path dir = utils::getFolderPath(kInternetPlugInFolderType);
-            tDirIter end;
-            for (tDirIter iter(dir); iter != end; ++iter) {
-                Path p(iter->path());
-                if (p.filename().find("BrowserPlus_") == 0) {
-                    try {
-                        BPLOG_DEBUG_STRM("remove " << p);
-                        remove(p);
-                    } catch(const tFileSystemError&) {
-                        BPLOG_WARN_STRM("unable to remove " << p);
+            try {
+                tDirIter end;
+                for (tDirIter iter(dir); iter != end; ++iter) {
+                    Path p(iter->path());
+                    if (p.filename().find("BrowserPlus_") == 0) {
+                        try {
+                            BPLOG_DEBUG_STRM("remove " << p);
+                            remove(p);
+                        } catch(const tFileSystemError&) {
+                            BPLOG_WARN_STRM("unable to remove " << p);
+                        }
                     }
                 }
+            } catch (const tFileSystemError& e) {
+                BPLOG_WARN_STRM("unable to iterate thru " << dir
+                                << ": " << e.what());
             }
 
             // Remove preference panel

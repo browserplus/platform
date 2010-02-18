@@ -362,30 +362,42 @@ Installer::installServices()
         BPLOG_DEBUG_STRM(servicesDir << " does not exist, no services installed");
         return;
     }
-    bpf::tDirIter sit_end;
-    for (bpf::tDirIter sit(servicesDir); sit != sit_end; ++sit) {
-        bpf::Path service = sit->path().filename();
-        bpf::tDirIter vit_end;
-        for (bpf::tDirIter vit(sit->path()); vit != vit_end; ++vit) {
-            bpf::Path version = vit->path().filename();
-            bpf::Path source = sit->path();
-            bpf::Path dest = getCoreletDirectory() / service / version;
+    try {
+        bpf::tDirIter sit_end;
+        for (bpf::tDirIter sit(servicesDir); sit != sit_end; ++sit) {
+            bpf::Path service = sit->path().filename();
             try {
-                bfs::create_directories(dest.parent_path());
-            } catch(const bpf::tFileSystemError& e) {
-                BPLOG_WARN_STRM("unable to create " << dest
-                    << ": " << e.what());
-                continue;
+                bpf::tDirIter vit_end;
+                for (bpf::tDirIter vit(sit->path()); vit != vit_end; ++vit) {
+                    bpf::Path version = vit->path().filename();
+                    bpf::Path source = sit->path();
+                    bpf::Path dest = getCoreletDirectory() / service / version;
+                    try {
+                        bfs::create_directories(dest.parent_path());
+                    } catch(const bpf::tFileSystemError& e) {
+                        BPLOG_WARN_STRM("unable to create " << dest
+                                        << ": " << e.what());
+                        continue;
+                    }
+                    (void) remove(dest);
+                    try {
+                        doCopy(source, dest.parent_path());
+                    } catch (const bp::error::Exception& e) {
+                        BPLOG_WARN(e.what());
+                        continue;
+                    }
+                }
             }
-            (void) remove(dest);
-            try {
-                doCopy(source, dest.parent_path());
-            } catch (const bp::error::Exception& e) {
-                BPLOG_WARN(e.what());
-                continue;
+            catch (const bpf::tFileSystemError& e) {
+                BPLOG_WARN_STRM("unable to iterate thru " << sit->path()   
+                                << ": " << e.what());
             }
         }
+    } catch (const bpf::tFileSystemError& e) {
+        BPLOG_WARN_STRM("unable to iterate thru " << servicesDir   
+                        << ": " << e.what());
     }
+    
     BPLOG_DEBUG("complete Installer::installServices");
 }
 
@@ -509,14 +521,19 @@ Installer::doCopy(const bpf::Path& src,
         } catch(const bpf::tFileSystemError&) {
             BP_THROW(lastErrorString("unable to create " + dest.externalUtf8()));
         }
-        bpf::tRecursiveDirIter end;
-        for (bpf::tRecursiveDirIter it(src); it != end; ++it) {
-            bpf::Path srcPath = bpf::Path(it->path());
-            bpf::Path relPath = srcPath.relativeTo(src);
-            bpf::Path destPath = dest / relPath;
-            if (bfs::is_regular(srcPath)) {
-                doSingleFileCopy(srcPath, destPath);
+        try {
+            bpf::tRecursiveDirIter end;
+            for (bpf::tRecursiveDirIter it(src); it != end; ++it) {
+                bpf::Path srcPath = bpf::Path(it->path());
+                bpf::Path relPath = srcPath.relativeTo(src);
+                bpf::Path destPath = dest / relPath;
+                if (bfs::is_regular(srcPath)) {
+                    doSingleFileCopy(srcPath, destPath);
+                }
             }
+        } catch (const bpf::tFileSystemError& e) {
+            BP_THROW("unable to iterate thru " + src.externalUtf8()
+                     + ": " + e.what());
         }
     } else {
         doSingleFileCopy(src, dest);

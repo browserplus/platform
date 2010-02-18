@@ -68,50 +68,56 @@ public:
             response.body.append("Contents of " + path.utf8());
             response.body.append("</title></head><body>");
             response.body.append("<h2>Index of " + path.utf8() + "</h2>");        
-            response.body.append("<hr><pre>\n");        
-            tRecursiveDirIter end;
-            for (tRecursiveDirIter it(path); it != end; ++it) {
-                Path pathToKid(it->path());
-                Path relPath = pathToKid.relativeTo(path);
-                std::string relStr = relPath.utf8();
-                std::string urlToKid = request.url.path() + relPath.utf8();
-
-                unsigned int j;
-                
-                response.body.append("<a href=\"");
-                response.body.append(urlToKid);                
-                response.body.append("\">");
-                response.body.append(relStr);
-                response.body.append("</a>");
-
-                for (j = relStr.length(); j < 30; j++) {
-                    response.body.append(" ");
-                }
-                // files size
-                {
-                    size_t size = boost::filesystem::is_regular_file(pathToKid) ?
-                                  (size_t) boost::filesystem::file_size(pathToKid) : 0;
-                    std::stringstream ss;
-                    ss << size;
-                    response.body.append(ss.str());
-                    for (j = ss.str().length(); j < 20; j++) {
+            response.body.append("<hr><pre>\n"); 
+            try {
+                tRecursiveDirIter end;
+                for (tRecursiveDirIter it(path); it != end; ++it) {
+                    Path pathToKid(it->path());
+                    Path relPath = pathToKid.relativeTo(path);
+                    std::string relStr = relPath.utf8();
+                    std::string urlToKid = request.url.path() + relPath.utf8();
+                    
+                    unsigned int j;
+                    
+                    response.body.append("<a href=\"");
+                    response.body.append(urlToKid);                
+                    response.body.append("\">");
+                    response.body.append(relStr);
+                    response.body.append("</a>");
+                    
+                    for (j = relStr.length(); j < 30; j++) {
                         response.body.append(" ");
                     }
+                    // files size
+                    {
+                        size_t size = boost::filesystem::is_regular_file(pathToKid) ?
+                        (size_t) boost::filesystem::file_size(pathToKid) : 0;
+                        std::stringstream ss;
+                        ss << size;
+                        response.body.append(ss.str());
+                        for (j = ss.str().length(); j < 20; j++) {
+                            response.body.append(" ");
+                        }
+                    }
+                    
+                    // modtime
+                    BPTime t;
+                    try {
+                        t.set(boost::filesystem::last_write_time(pathToKid));
+                    } catch (const bp::file::tFileSystemError&) {
+                        // empty
+                    }
+                    response.body.append(t.asString());
+                    
+                    // next line
+                    response.body.append("\n");
                 }
-
-                // modtime
-                BPTime t;
-                try {
-                    t.set(boost::filesystem::last_write_time(pathToKid));
-                } catch (const bp::file::tFileSystemError&) {
-                    // empty
-                }
-                response.body.append(t.asString());
-
-                // next line
-                response.body.append("\n");
+                
+                
+            } catch (const bp::file::tFileSystemError& ) {
+                // empty
             }
-
+            
             response.body.append("</pre><hr></body></html>");        
         } else {
             response.status.setCode(Status::NOT_FOUND);

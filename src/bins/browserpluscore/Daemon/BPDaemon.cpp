@@ -320,14 +320,19 @@ BPDaemon::run()
     BPLOG_INFO("removing uninstalled platforms...");
     bp::file::Path dir = getProductTopDirectory();
     if (boost::filesystem::is_directory(dir)) {
-        bp::file::tDirIter end;
-        for (bp::file::tDirIter iter(dir); iter != end; ++iter) {
-            string s = bp::file::utf8FromNative(iter->path().filename());
-            bp::ServiceVersion version;
-            if (version.parse(s)) {
-                BPLOG_DEBUG_STRM("examine " << version.asString());
-                bp::platformutil::removePlatform(version, false);
+        try {
+            bp::file::tDirIter end;
+            for (bp::file::tDirIter iter(dir); iter != end; ++iter) {
+                string s = bp::file::utf8FromNative(iter->path().filename());
+                bp::ServiceVersion version;
+                if (version.parse(s)) {
+                    BPLOG_DEBUG_STRM("examine " << version.asString());
+                    bp::platformutil::removePlatform(version, false);
+                }
             }
+        } catch (const bp::file::tFileSystemError& e) {
+            BPLOG_WARN_STRM("unable to iterate thru " << dir
+                            << ": " << e.what());
         }
     }
 
