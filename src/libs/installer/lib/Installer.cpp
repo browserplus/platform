@@ -387,9 +387,9 @@ Installer::installServices()
                         continue;
                     }
                 }
-            }
-            catch (const bpf::tFileSystemError& e) {
-                BPLOG_WARN_STRM("unable to iterate thru " << sit->path()   
+            } catch (const bpf::tFileSystemError& e) {
+                bpf::Path p(sit->path());
+                BPLOG_WARN_STRM("unable to iterate thru " << p
                                 << ": " << e.what());
             }
         }
