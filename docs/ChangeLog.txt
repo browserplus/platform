@@ -1,4 +1,4 @@
-02/XX/2010 - Changes from 2.5.1 to 2.6.0
+02/18/2010 - Changes from 2.5.1 to 2.6.0
   * bugfix [#17] - Fix scroll on FFX 3.6 on pages using DnD service.
   * bugfix - win32 plugin crash upon drop of "Public Document" folder
   * bugfix [#33] - further decouple installer - this refines the protocol
@@ -29,6 +29,8 @@
   * FileBrowse 2.0 no longer automatically dereferences links on win32
   * fix crash related to selection of non-ready DVD drive on win32 and proactive changes to
     reduce future risk of uncaught BFS exceptions.
+  * fixes to properly handle exceptions from boost directory iterators (may resolve crashes
+    when user provides unexpected paths via browse or dnd).
 
 01/26/2010 - Changes from 2.5.0 to 2.5.1
   * Drop file browse recursion limit to 1000 to prevent seeming
