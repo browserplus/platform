@@ -931,15 +931,13 @@ isCircular(const bp::file::Path& p,
 // relative pseudo-path for each visited node.
 //
 static bool
-doVisit(const bp::file::Path& p,          // node to visit
-        bp::file::IVisitor& v,            // visitor to apply
-        vector<DirEntry>& pathStack,      // stack of dirs currently being visited
-        bp::file::Path& relativeDir,      // current relative pseudo directory name
-        bool followLinks,                 // follow links?
-        bool recursive)                   // recurse into children?
+doVisit(const bp::file::Path& p,
+        bp::file::IVisitor& v,  
+        vector<DirEntry>& pathStack,
+        const bp::file::Path& relativeDir,
+        bool followLinks,
+        bool recursive)
 {
-    bool rval = true;
-
     // Find real target if we're chasing links.
     bool islink = isLink(p);
     Path target = p;
@@ -955,9 +953,13 @@ doVisit(const bp::file::Path& p,          // node to visit
         return true;
     }
 
-    // don't visit top directory of a non-recursive visit
+    // visit this node, but don't visit top directory of a non-recursive
     if (recursive || !relativeDir.empty() || !bfs::is_directory(target)) {
-        if (v.visitNode(target, relativeDir/p.filename()) == IVisitor::eStop) {
+        bp::file::Path rp = relativeDir;
+        if (!bfs::is_directory(target)) {
+            rp /= p.filename();
+        }
+        if (v.visitNode(target, rp) == IVisitor::eStop) {
             return false;
         }
     }
@@ -967,140 +969,56 @@ doVisit(const bp::file::Path& p,          // node to visit
         return true;
     }
 
-    // visit a directory's children
     if (bfs::is_directory(target)) {
-        if (recursive) {
-            // remember ourselves for cycle detection
-            pathStack.push_back(DirEntry::fromPath(target));
+        // remember ourselves for cycle detection
+        pathStack.push_back(DirEntry::fromPath(target));
 
-            try {
-                // visit all children
-                int lastLevel = -1;
-                tRecursiveDirIter end;
-                for (tRecursiveDirIter iter(target); iter != end; ++iter) {
-                    // resolve link if chasing
-                    Path node(iter->path());
-                    Path nodeTarget = node;
-                    if (followLinks && isLink(node)) {
-                        if (!resolveLink(node, nodeTarget)) {
-                            // broken links will visit link itself
-                            nodeTarget = node;
-                        }
-                    }
-
-                    // check for cycles
-                    if (bfs::is_directory(nodeTarget)) {
-                        if (isCircular(nodeTarget, pathStack)) {
-                            iter.no_push();
-                            continue;
-                        }
-                    }
-
-                    // Maintain pathStack and relativeDir.  Iterator 
-                    // descent happens one level at a time, ascent can be 
-                    // multiple levels
-                    int thisLevel = iter.level();
-                    if (thisLevel > lastLevel) {
-                        if (thisLevel - lastLevel > 1) {
-                            // this was unexpected!
-                            stringstream ss;
-                            ss << "Unexpected level change, " << lastLevel 
-                               << " -> " << thisLevel << ", node = " << node
-                               << ", relativeDir = " << relativeDir;
-                            throw ss.str();
-                        }
-                        pathStack.push_back(DirEntry::fromPath(nodeTarget));
-                        relativeDir /= node.parent_path().filename();
-                    } else if (thisLevel < lastLevel) {
-                        for (int i = 0; i < lastLevel - thisLevel; i++) {
-                            pathStack.pop_back();
-                            relativeDir = relativeDir.parent_path();
-                        }
-                    }
-                    lastLevel = thisLevel;
-
-                    // visit child node
-                    if (v.visitNode(nodeTarget, relativeDir/node.filename())
-                        == IVisitor::eStop) {
-                        return false;
-                    }
-
-                    // Links to dirs take special consideration.  If we're not chasing
-                    // links, we don't dive into the directory.  If we're chasing
-                    // links and this is a non-symlink link (shortcut or alias), 
-                    // we must manually recurse into it since the bfs iterator won't.
-                    // Symlinks to dirs are handled by bfs iterator.
-                    if (isLink(node) && bfs::is_directory(nodeTarget)) {
-                        if (!followLinks) {
-                            if (isSymlink(node)) {
-                                iter.no_push();
-                            }
-                        } else {
-                            if (!isSymlink(node)) {
-                                class DelegatingVisitor : virtual public IVisitor {
-                                public:
-                                    DelegatingVisitor(IVisitor& v) : m_delegate(v) {}
-                                    virtual ~DelegatingVisitor() {}
-                                    tResult visitNode(const Path& p, 
-                                                      const Path& r) {
-                                        return m_delegate.visitNode(p, r);
-                                    }
-                                    IVisitor& m_delegate;
-                                };
-                                pathStack.push_back(DirEntry::fromPath(nodeTarget));
-                                relativeDir /= node.filename();
-                                DelegatingVisitor dv(v);
-                                tRecursiveDirIter end2;
-                                for (tRecursiveDirIter iter2(nodeTarget);
-                                     iter2 != end2; ++iter2) {
-                                    Path kid(iter2->path());
-                                    if (!doVisit(kid, dv, pathStack, relativeDir,
-                                                 followLinks, true)) {
-                                        return false;
-                                    }
-                                }
-                                pathStack.pop_back();
-                                relativeDir = relativeDir.parent_path();
-                            }
-                        }
+        // visit immediate children
+        try {
+            tDirIter end;
+            for (tDirIter iter(target); iter != end; ++iter) {
+                // resolve link if chasing
+                Path node(iter->path());
+                Path nodeTarget = node;
+                if (followLinks && isLink(node)) {
+                    if (!resolveLink(node, nodeTarget)) {
+                        // broken links will visit link itself
+                        nodeTarget = node;
                     }
                 }
-            } catch (const tFileSystemError& e) {
-                BPLOG_WARN_STRM("recursive visit of " << target
-                                << " failed: " << e.what());
-                rval = false;
-            }
-            pathStack.pop_back();
-            relativeDir = relativeDir.parent_path();
-        } else {
-            relativeDir /= p.parent_path().filename();
-            try {
-                tDirIter end;
-                for (tDirIter iter(target); iter != end; ++iter) {
-                    Path node(iter->path());
-                    Path nodeTarget = node;
-                    // resolve link if chasing
-                    if (followLinks && isLink(node)) {
-                        if (!resolveLink(node, nodeTarget)) {
-                            // broken links will visit link itself
-                            nodeTarget = node;
-                        }
+
+                // check for cycles
+                if (bfs::is_directory(nodeTarget)
+                    && isCircular(nodeTarget, pathStack)) {
+                    continue;
+                }
+
+                // visit child
+                bool diveIn = false;
+                if (recursive && bfs::is_directory(nodeTarget)) {
+                    diveIn = !isLink(node) || followLinks;
+                }
+                if (diveIn) {
+                    if (!doVisit(nodeTarget, v, pathStack,
+                                 relativeDir/node.filename(),
+                                 followLinks, recursive)) {
+                        return false;
                     }
-                    // visit the child
+                } else {
                     if (v.visitNode(nodeTarget, relativeDir/node.filename())
                         == IVisitor::eStop) {
                         return false;
                     }
                 }
-            } catch (const tFileSystemError& e) {
-                BPLOG_WARN_STRM("visit of " << target
-                                << " failed: " << e.what());
-                rval = false;
             }
-            relativeDir = relativeDir.parent_path();
+        } catch (const bp::file::tFileSystemError& e) {
+            BPLOG_WARN_STRM("visiting children of " << target
+                            << " failed, continuing: " << e.what());
         }
+
+        pathStack.pop_back();
     }
-    return rval;
+    return true;
 }
 
 
@@ -1300,7 +1218,7 @@ recursiveVisit(const Path& p,
                bool followLinks)
 {
     vector<DirEntry> stack;
-    Path rp;
+    Path rp = p.filename();
     return doVisit(p, v, stack, rp, followLinks, true);
 }
 
