@@ -156,8 +156,6 @@ Controller::run(const bpf::Path & pathToHarness,
         // process until we get an ipc connection established
         m_spawnCheckTimer.setListener(this);
         m_spawnCheckTimer.setMsec(200);
-
-        
     }
     else
     {
@@ -421,7 +419,7 @@ Controller::onResponse(bp::ipc::Channel *,
     }
     else if (!response.command().compare("invoke"))
     {
-        // first let's pars e the payload.  we expect a 'success' member
+        // first let's parse the payload.  we expect a 'success' member
         // which is a boolean.
         if (!response.payload() ||
             !response.payload()->has("success", BPTBoolean) ||
