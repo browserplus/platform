@@ -70,6 +70,7 @@ bp::platformutil::removePlatform(const bp::ServiceVersion& version,
     // nuke away
     BPLOG_DEBUG_STRM(version.asString() << " being nuked");
     (void) remove(getProductDirectory(major, minor, micro));
+    (void) remove(getPluginWritableDirectory(major, minor, micro));
     vector<Path> plugins = getPluginPaths(major, minor, micro);
     for (size_t i = 0; i < plugins.size(); i++) {
         (void) remove(plugins[i]);
