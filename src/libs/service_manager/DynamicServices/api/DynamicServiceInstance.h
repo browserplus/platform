@@ -27,7 +27,7 @@
 #include "CoreletManager/CoreletInstance.h"
 #include "CoreletManager/CoreletRegistry.h"
 
-// a dumb shim class that represent's a client's handle on a service
+// a dumb shim class that represents a client's handle on a service
 class DynamicServiceInstance : public CoreletInstance
 {
   public:
