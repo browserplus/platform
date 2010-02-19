@@ -346,7 +346,7 @@ DynamicServiceManager::initialized(ServiceRunner::Controller * c,
     bp::service::Summary summary;
     bp::service::Description desc;
     if (!internalFind(service, version, std::string(), summary, desc)) {
-        BPLOG_ERROR_STRM("INTERNAL ERROR: Initalized service with unknown "
+        BPLOG_ERROR_STRM("INTERNAL ERROR: Initialized service with unknown "
                          "service/version: " << service << " - " << version);
         // TODO: perhaps in this case we should throw fatal?
         return;
@@ -364,7 +364,7 @@ DynamicServiceManager::initialized(ServiceRunner::Controller * c,
         }
     } else {
         // yikes, this is possibly internal corruption!
-        BPLOG_ERROR_STRM("Initalized service with no "
+        BPLOG_ERROR_STRM("Initialized service with no "
                          "pending allocations: " << service << " - "
                          << version);
     }
@@ -448,7 +448,7 @@ DynamicServiceManager::onAllocated(ServiceRunner::Controller * c,
 
     if (regListener == NULL) {
         BPLOG_ERROR("service allocation completed, but listener has "
-                    "dissapeared.  deleting newly allocated instance.");
+                    "disappeared.  deleting newly allocated instance.");
         // returning will destruct the instance which will call back
         // into us.
         return;
@@ -464,20 +464,19 @@ DynamicServiceManager::onInvokeResults(ServiceRunner::Controller * c,
                                        unsigned int tid,
                                        const bp::Object * results)
 {
-    shared_ptr<DynamicServiceInstance> sptr =
-        m_state.findInstance(c, instance);
+    shared_ptr<DynamicServiceInstance> dsi = m_state.findInstance(c, instance);
 
-    if (sptr != NULL) {
+    if (dsi != NULL) {
         unsigned int origTid = tid;
 
         // we must map the transaction id
-        if (sptr->mapToClientTid(tid)) {
+        if (dsi->mapToClientTid(tid)) {
             bp::Null n;
             if (results == NULL) results = &n;
-            sptr->sendComplete(tid, *results);
-            sptr->removeTid(origTid);
+            dsi->sendComplete(tid, *results);
+            dsi->removeTid(origTid);
         } else {
-            BPLOG_WARN_STRM("received invocation results for a transactions "
+            BPLOG_WARN_STRM("received invocation results for a transaction "
                             "that longer exists: " << tid);
         }
     } else {
@@ -493,19 +492,18 @@ DynamicServiceManager::onInvokeError(ServiceRunner::Controller * c,
                                      const std::string & error,
                                      const std::string & verboseError)
 {
-    shared_ptr<DynamicServiceInstance> sptr =
-        m_state.findInstance(c, instance);
+    shared_ptr<DynamicServiceInstance> dsi = m_state.findInstance(c, instance);
 
-    if (sptr != NULL) {
+    if (dsi != NULL) {
         unsigned int origTid = tid;
         
         // we must map the transaction id
-        if (sptr->mapToClientTid(tid)) {
-            sptr->sendFailure(tid, error, verboseError);
-            sptr->removeTid(origTid);
+        if (dsi->mapToClientTid(tid)) {
+            dsi->sendFailure(tid, error, verboseError);
+            dsi->removeTid(origTid);
         } else {
-            BPLOG_WARN_STRM("received invocation results for a transactions "
-                            "that longer exists: " << tid);
+            BPLOG_WARN_STRM("received invocation results for a transaction "
+                            "that no longer exists: " << tid);
         }
     } else {
         BPLOG_WARN_STRM("received invocation results for an instance that "
@@ -520,17 +518,16 @@ DynamicServiceManager::onCallback(ServiceRunner::Controller * c,
                                   long long int callback,
                                   const bp::Object * value)
 {
-    shared_ptr<DynamicServiceInstance> sptr =
-        m_state.findInstance(c, instance);
+    shared_ptr<DynamicServiceInstance> dsi = m_state.findInstance(c, instance);
 
-    if (sptr != NULL) {
+    if (dsi != NULL) {
         // we must map the transaction id
-        if (sptr->mapToClientTid(tid)) {
+        if (dsi->mapToClientTid(tid)) {
             // map in results
             bp::Map m;
             m.add("callback", new bp::Integer(callback));
             if (value != NULL) m.add("parameters", value->clone());
-            sptr->invokeCallback(tid, m);
+            dsi->invokeCallback(tid, m);
         } else {
             BPLOG_WARN_STRM("received callback invocation for a transactions "
                             "that longer exists: " << tid);
@@ -548,18 +545,17 @@ DynamicServiceManager::onPrompt(ServiceRunner::Controller * c,
                                 const bp::file::Path & pathToDialog,
                                 const bp::Object * arguments)
 {
-    shared_ptr<DynamicServiceInstance> sptr =
+    shared_ptr<DynamicServiceInstance> dsi =
         m_state.findInstance(c, instance);
 
-    if (sptr != NULL) {
-        shared_ptr<CoreletExecutionContext> context =
-            sptr->m_context.lock();
+    if (dsi != NULL) {
+        shared_ptr<CoreletExecutionContext> context = dsi->m_context.lock();
 
         if (context == NULL) {
             BPLOG_WARN_STRM("received prompt request, however execution "
                             "context (client), has gone away, dropping.");
         } else {
-            context->promptUser(sptr, promptId, pathToDialog, arguments);
+            context->promptUser(dsi, promptId, pathToDialog, arguments);
         }
     } else {
         BPLOG_WARN_STRM("received prompt request for an instance that "
@@ -598,7 +594,7 @@ DynamicServiceManager::onInstanceExecute(DynamicServiceInstance * instance,
     if (controller != NULL) {
         unsigned int tid;
         
-        // inform the controller of the destruction of the instance
+        // request the controller to invoke the function
         tid = controller->invoke(instance->m_instanceId,
                                  function, &args);
 
