@@ -1,6 +1,9 @@
 *.tar.gz
 *.tar.bz2
 *.tgz
+*.zip
+easylzma/pax_global_header
+yajl/pax_global_header
 boost/boost_1_41_0/
 cppunit/cppunit-1.12.1/
 easylzma/easylzma-0.0.7/
