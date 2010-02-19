@@ -1,6 +1,11 @@
 *.tar.gz
 *.tar.bz2
 *.tgz
+boost/boost_1_41_0/
+cppunit/cppunit-1.12.1/
+easylzma/easylzma-0.0.7/
+icu/icu/
+libarchive/libarchive-2.6.2/
 /Darwin
 /Windows
 /Linux
