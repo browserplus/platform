@@ -73,7 +73,7 @@ Connector::setListener(weak_ptr<Controller> controller)
 void
 Connector::gotChannel(bp::ipc::Channel * c)
 {
-    BPLOG_DEBUG("recieived service connection, waiting for 'loaded' mesage");
+    BPLOG_DEBUG("received service connection, waiting for 'loaded' mesage");
     c->setListener(this);
     m_establishedChannel = c;
     // stop the server immediately, we're a one shot chicken
