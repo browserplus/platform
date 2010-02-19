@@ -87,7 +87,6 @@ namespace bp { namespace ipc
         void disconnect();    
 
         bool sendMessage(const Message & m);
-        // are these useful?
         bool sendQuery(const Query & q);        
         bool sendResponse(const Response & r);
 
