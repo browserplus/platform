@@ -48,7 +48,7 @@ class DynamicServiceInstance : public CoreletInstance
 
     // an id returned from DynamicServiceManager::allocate that allows
     // clients to correctly associate allocations.
-    // after passing ownership of the serivice back to the registry
+    // after passing ownership of the service back to the registry
     // listener, the instantiate id and listener are not used
     unsigned int m_instantiateId;
     std::tr1::weak_ptr<ICoreletRegistryListener> m_registryListener;
