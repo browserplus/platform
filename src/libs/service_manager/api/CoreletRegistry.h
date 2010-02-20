@@ -39,11 +39,17 @@
 
 class ICoreletRegistryListener  
 {
-  public:
+public:
     virtual ~ICoreletRegistryListener() { }
-    virtual void gotInstance(unsigned int allocationId,
-                             std::tr1::shared_ptr<CoreletInstance> instance) = 0;
+    
+    virtual void
+    onAllocationSuccess(unsigned int allocationId,
+                        std::tr1::shared_ptr<CoreletInstance> instance) = 0;
+    
+    virtual void
+    onAllocationFailure(unsigned int allocationId) = 0;
 };
+
 
 class CoreletRegistry : public bp::thread::HoppingClass
 {

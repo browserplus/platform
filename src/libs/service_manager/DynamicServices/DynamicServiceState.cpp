@@ -95,7 +95,7 @@ DynamicServiceState::addPendingAllocation(
 
 shared_ptr<DynamicServiceInstance>
 DynamicServiceState::createInstance(
-    class DynamicServiceManager * manager,
+    DynamicServiceManager * manager,
     weak_ptr<CoreletExecutionContext> contextWeak,
     weak_ptr<ICoreletRegistryListener> listener,
     unsigned int instantiateId,
@@ -190,6 +190,21 @@ DynamicServiceState::popPendingAllocations(
         oController = i->second.first;
         oPending = i->second.second;
         m_pendingAllocations.erase(i);
+    }
+}
+
+void
+DynamicServiceState::popPendingAllocations(
+    const ServiceRunner::Controller * c,
+    set<shared_ptr<DynamicServiceInstance> > & oPending )
+{
+    for (PendControllerMap::iterator i = m_pendingAllocations.begin();
+         i != m_pendingAllocations.end(); ++i) {
+        if (i->second.first.get() == c) {
+            oPending = i->second.second;
+            m_pendingAllocations.erase(i);
+            return;
+        }
     }
 }
 

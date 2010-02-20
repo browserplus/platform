@@ -452,10 +452,8 @@ ActiveSession::doInvoke(MessageContext* ctx)
 
         // allocation succeeds!  let's add a pending execution table entry
         // folding case 2 into case 1.
-        m_pendingExecutions[
-            std::pair<std::string, std::string>(service, version)
-            ] = std::pair<unsigned int, std::vector<PendingExecution> >(
-                allocationId, std::vector<PendingExecution>());
+        m_pendingExecutions[make_pair(service, version)] =
+            make_pair(allocationId, vector<PendingExecution>());
         i = m_pendingExecutions.find(serviceVersionPair);
         assert(i != m_pendingExecutions.end());
     } 
@@ -473,8 +471,8 @@ ActiveSession::doInvoke(MessageContext* ctx)
 }
 
 void
-ActiveSession::gotInstance(unsigned int allocationId,
-                           shared_ptr<CoreletInstance> instance)
+ActiveSession::onAllocationSuccess(unsigned int allocationId,
+                                   shared_ptr<CoreletInstance> instance)
 {
     // first we'll iterate to find this allocation by id
     std::map<std::pair<std::string, std::string>,
@@ -522,6 +520,37 @@ ActiveSession::doExecution(shared_ptr<CoreletInstance> instance,
     if (args == NULL) args = &n;
     instance->execute(tid, function, *args);
 }
+
+void
+ActiveSession::onAllocationFailure(unsigned int allocationId)
+{
+    // first we'll iterate to find this allocation by id
+    PendingExecutionMap::iterator i;
+    for (i = m_pendingExecutions.begin(); i != m_pendingExecutions.end(); ++i)
+    {
+        if (i->second.first == allocationId)
+            break;
+    }
+
+    if (i == m_pendingExecutions.end()) {
+        BPLOG_ERROR_STRM("Service allocation failed, however "
+                         "no pending function executions are registered, "
+                         "ignoring");
+        return;
+    }
+
+    // fail all of the pending executions
+    for (unsigned int j = 0; j < i->second.second.size(); j++) 
+    {
+        executionFailure(i->second.second[j].tid,
+                         "bp.instanceError",
+                         "couldn't execute function, "
+                         "service allocation failed.");
+    }
+
+    // now remove the entry from pending map
+    m_pendingExecutions.erase(i);
+}    
 
 bool
 ActiveSession::doRequire(MessageContext* ctx)

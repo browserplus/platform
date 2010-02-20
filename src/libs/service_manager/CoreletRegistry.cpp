@@ -199,7 +199,7 @@ CoreletRegistry::onHop(void * x)
                     "dissapeared.  deleting newly allocated instance.");
     } else {
         // this call will transfer ownership of the instance to the listener
-        regListener->gotInstance(ctx->instantiateId, ctx->inst);
+        regListener->onAllocationSuccess(ctx->instantiateId, ctx->inst);
     }
 
     delete ctx;
@@ -212,6 +212,9 @@ CoreletRegistry::instantiate(
     weak_ptr<CoreletExecutionContext> context,
     weak_ptr<ICoreletRegistryListener> listener)
 {
+    // DOC TODO: lloyd, is this area of code only applicable to
+    // built-in services, namely InactiveServiceCorelet?
+    // A comment to that effect might be nice if so.
     shared_ptr<CoreletFactory> fact =
         getReg(name, version, std::string()).second;
 

@@ -409,10 +409,28 @@ DynamicServiceManager::startAllocation(
 void
 DynamicServiceManager::onEnded(ServiceRunner::Controller * c)
 {
+    // TODO: serviceName and serviceVersion are currently not
+    // initialized until a connection is made, meaning they'll be empty
+    // if we're called as a result of a connection failure.
     BPLOG_ERROR_STRM(c->serviceName() << " (" << c->serviceVersion() << ") " <<
                      "ended unexpectedly.");
 
-    // TODO: is there more handling that should be done?
+    // Pull all the pending allocations for this controller out of our
+    // map.  We'll assume ownership here and they'll die when we go out
+    // of scope.
+    typedef set<shared_ptr<DynamicServiceInstance> > tInstSet;
+    tInstSet pendingAllocs;
+    m_state.popPendingAllocations(c, pendingAllocs);
+
+    // Notify each pending allocation's listener that it ain't gonna happen.
+    for (tInstSet::iterator it = pendingAllocs.begin();
+         it != pendingAllocs.end(); ++it) {
+        shared_ptr<ICoreletRegistryListener> listener;
+        listener = (*it)->m_registryListener.lock();
+        if (listener != NULL) {
+            listener->onAllocationFailure((*it)->m_instantiateId);
+        }
+    }
 }
 
 void
@@ -455,7 +473,7 @@ DynamicServiceManager::onAllocated(ServiceRunner::Controller * c,
     }
 
     // this call will transfer ownership of the instance to the listener
-    regListener->gotInstance(instance->m_instantiateId, instance);
+    regListener->onAllocationSuccess(instance->m_instantiateId, instance);
 }
 
 void

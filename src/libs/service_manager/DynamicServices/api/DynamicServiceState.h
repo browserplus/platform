@@ -70,23 +70,31 @@ class DynamicServiceState : public bp::time::ITimerListener
         unsigned int allocationId,
         std::tr1::shared_ptr<DynamicServiceInstance> instance);
 
-    // pull all entries off the pendingAllocation list for a given
-    // service.  turn them all into instances.
+    // Pull all entries for the specified service off the
+    // pendingAllocation map.
+    // The instances are all in a "half-birthed" state ready for allocation.
     void popPendingAllocations(
         const bp::service::Summary & summary,
         std::set<std::tr1::shared_ptr<DynamicServiceInstance> > & oPending,
         std::tr1::shared_ptr<ServiceRunner::Controller> & oController);
 
+    // Pull all entries for the specified controller off the
+    // pendingAllocation map.
+    // The instances are all in a "half-birthed" state ready for allocation.
+    void popPendingAllocations(
+        const ServiceRunner::Controller * c,
+        std::set<std::tr1::shared_ptr<DynamicServiceInstance> > & oPending );
+    
     // create a DynamicServiceInstance and initialize data members
     std::tr1::shared_ptr<DynamicServiceInstance>
-        createInstance(class DynamicServiceManager * manager,
+        createInstance(DynamicServiceManager * manager,
                        std::tr1::weak_ptr<CoreletExecutionContext> contextWeak,
                        std::tr1::weak_ptr<ICoreletRegistryListener> listener,
                        unsigned int instantiateId,
                        const bp::service::Summary & summary);
 
     // pull an instance off the "running" list, returning a shared_ptr
-    // to it.  this essentially promotes a instance in process of
+    // to it.  this essentially promotes an instance in process of
     // allocation to a full blown allocation
     std::tr1::shared_ptr<DynamicServiceInstance>
         allocationComplete(ServiceRunner::Controller * c,
@@ -124,7 +132,7 @@ class DynamicServiceState : public bp::time::ITimerListener
     // set the idle check to the soonest required time, or not at all
     void rescheduleIdleCheck();
 
-    // a map containing half birthed instances, which are waiting for
+    // a map containing half-birthed instances, which are waiting for
     // a controller to be initialized.  We own these instances.
     typedef std::pair<std::tr1::shared_ptr<ServiceRunner::Controller>,
                       std::set<std::tr1::shared_ptr<DynamicServiceInstance> > >
@@ -160,7 +168,7 @@ class DynamicServiceState : public bp::time::ITimerListener
         m_runningAllocations;
 
     // a map allowing us to get from instance id to service instance.
-    // The client managers lifetime of instances and we have a hook upon
+    // The client manages lifetime of instances and we have a hook upon
     // their destruction.  
     typedef std::map<unsigned int, std::tr1::weak_ptr<DynamicServiceInstance> > 
         IdToInstanceMap;

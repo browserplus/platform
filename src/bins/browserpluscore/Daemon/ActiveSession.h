@@ -136,7 +136,19 @@ class ActiveSession : public virtual RequireLock::ILockListener,
     void setListener(IActiveSessionListener * listener) {
         m_listener = listener;
     }
- 
+
+    ///
+    // ICoreletRegistryListener impl
+    
+    // invoked by CoreletRegistry/DynamicServiceManager upon successful
+    // service instance allocation
+    void onAllocationSuccess(unsigned int allocationId,
+                             std::tr1::shared_ptr<CoreletInstance> instance);
+
+    // invoked by CoreletRegistry/DynamicServiceManager upon failed
+    // service instance allocation
+    void onAllocationFailure(unsigned int allocationId);
+    
   private:
     // Messages may require domain permission validation.
     // A MessageContext keeps track of the request, and the
@@ -263,14 +275,11 @@ class ActiveSession : public virtual RequireLock::ILockListener,
         PendingExecution() : tid(0), args(NULL) { }
     };
 
-    std::map<std::pair<std::string, std::string>,
-        std::pair<unsigned int, std::vector<PendingExecution> > > 
-        m_pendingExecutions;
-
-    // invoked by CoreletRegistry upon successful service instance
-    // allocation
-    void gotInstance(unsigned int allocationId,
-                     std::tr1::shared_ptr<CoreletInstance> instance);
+    typedef std::map<std::pair<std::string, std::string>,
+                     std::pair<unsigned int, std::vector<PendingExecution> > >
+        PendingExecutionMap;
+    
+    PendingExecutionMap m_pendingExecutions;
 
     void doExecution(std::tr1::shared_ptr<CoreletInstance> instance,
                      unsigned int tid,

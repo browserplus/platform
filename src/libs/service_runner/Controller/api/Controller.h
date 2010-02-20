@@ -65,10 +65,11 @@ namespace ServiceRunner
                                  const std::string & service,
                                  const std::string & version,
                                  unsigned int apiVersion) = 0;
-        // a callback invoked when a spawned service exits after
-        // an IPC channel was successfully established.  This can
-        // occur instead of or after 'initialized' is invoked.
-        // TODO: return information about what happened!
+
+        // Callback invoked when controller's service is determined to be gone.
+        // - called if service process dies while waiting for IPC
+        //   connection to be established.
+        // - called if IPC connection goes down.
         virtual void onEnded(class Controller * c) = 0;
 
         virtual void onDescribe(class Controller * c,

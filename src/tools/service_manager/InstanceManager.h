@@ -39,8 +39,10 @@ class InstanceManager : public CoreletExecutionContext,
     std::tr1::shared_ptr<CoreletInstance> findInstance(unsigned int id);
 
   private:
-    void gotInstance(unsigned int allocationId,
-                     std::tr1::shared_ptr<CoreletInstance> instance);
+    void onAllocationSuccess(unsigned int allocationId,
+                             std::tr1::shared_ptr<CoreletInstance> instance);
+    
+    void onAllocationFailure(unsigned int allocationId);
 
     void executionComplete(unsigned int tid, const bp::Object & results);
 

@@ -38,13 +38,19 @@ InstanceManager::~InstanceManager()
 }
 
 void
-InstanceManager::gotInstance(unsigned int allocationId,
-                             shared_ptr<CoreletInstance> instance)
+InstanceManager::onAllocationSuccess(unsigned int allocationId,
+                                     shared_ptr<CoreletInstance> instance)
 {
     std::cout << "instance allocated: " << allocationId << std::endl;
     instance->setListener(shared_from_this());
     m_instances[allocationId] = instance;
     m_cmdExec->onSuccess();
+}
+
+void
+InstanceManager::onAllocationFailure(unsigned int allocationId)
+{
+    // TODO: handle
 }
 
 shared_ptr<CoreletInstance>

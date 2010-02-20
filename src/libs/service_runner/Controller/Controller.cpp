@@ -178,8 +178,11 @@ Controller::timesUp(bp::time::Timer *)
         BPLOG_ERROR_STRM("Spawned service process exited with code: "
                          << exitCode);
         m_spawnCheckTimer.cancel();
+        
         // this callback may delete us
-        if (m_listener) m_listener->onEnded(this);
+        if (m_listener) {
+            m_listener->onEnded(this);
+        }
     } else {
         // perform another check in 200ms.
         m_spawnCheckTimer.setMsec(200);        
