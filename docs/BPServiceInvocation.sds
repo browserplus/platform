@@ -584,8 +584,7 @@
         <ShowTitle>true</ShowTitle>
         <Description>Scenario:
 * Service not loaded at time of invoke.
-* Allocation succeeds.
-* Invocation succeeds.</Description>
+* Service spawned successfully, but IPC connection never established.</Description>
         <ShowDescription>true</ShowDescription>
         <ElementDocumentationDisplay>Default</ElementDocumentationDisplay>
         <FlowNoteDisplayLevel>Default</FlowNoteDisplayLevel>
@@ -933,7 +932,28 @@
         <FooterTextLeft />
         <FooterTextCenter />
         <FooterTextRight />
-        <ModificationTimeTicks>634024351552656250</ModificationTimeTicks>
+        <ModificationTimeTicks>634024359591875000</ModificationTimeTicks>
+        <PageSettings>
+          <Color>true</Color>
+          <Landscape>false</Landscape>
+          <Margins>
+            <Bottom>100</Bottom>
+            <Top>100</Top>
+            <Left>100</Left>
+            <Right>100</Right>
+          </Margins>
+          <PaperSize>
+            <Kind>Letter</Kind>
+          </PaperSize>
+          <PaperSource>
+            <Kind>FormSource</Kind>
+          </PaperSource>
+          <PrinterResolution>
+            <Kind>Custom</Kind>
+            <X>600</X>
+            <Y>600</Y>
+          </PrinterResolution>
+        </PageSettings>
       </Diagram>
     </SystemElement>
   </Children>
