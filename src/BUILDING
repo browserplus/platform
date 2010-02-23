@@ -14,6 +14,12 @@ Building on OSX:
   Setting up your environment:
     1. install the latest version of XCode (at time of writing 2.5 or 3.0 for tiger/leopard)
     2. install cmake version 2.6.2 or greater from http://www.cmake.org/cmake/resources/software.html
+       Note:  If you want to use Xcode rather than make to build/debug, install cmake 2.6.x
+       rather than cmake 2.8.  BrowserPlus requires backward compatibility flags and compilers
+       in order to run on OSX 10.4.  In particular, we must use gcc 4.0, not gcc 4.2. 
+       Unfortunately, we haven't been able to convince cmake to specify gcc 4.0 to Xcode.
+       Even after running cmake, you'll need to "open BrowserPlus.xcode", File -> Get Info.  
+       Then change the "C/C++ Compiler Version" from GCC 4.2 to GCC 4.0.
     3. install ruby from http://www.ruby-lang.org
  
   Building the tree:    
