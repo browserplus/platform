@@ -32,6 +32,7 @@
 #include <sstream>
 
 #include "AutoShutdown.h"
+#include "BPUtils/bpexitcodes.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/ProcessLock.h"
 #include "BPUtils/ProductPaths.h"
@@ -218,9 +219,9 @@ BPDaemon::BPDaemon(int argc, const char** argv)
     if (!m_configReader.load(configFilePath)) {
         std::cerr << "couldn't read config file at: "
                   << configFilePath << std::endl;
-        ::exit(-2);
+        ::exit(bp::exit::kCantLoadConfigFile);
     }
-    
+
     // If options present in config, grab them
     std::string configOptions;
     std::vector<std::string> options;
@@ -247,7 +248,7 @@ BPDaemon::BPDaemon(int argc, const char** argv)
     if (!argsOk)
     {
         // Exit on invalid cmd line.
-        ::exit(-3);
+        ::exit(bp::exit::kCantProcessCommandLine);
     }
 
     // set the foreground flag as soon as possible 
@@ -280,7 +281,7 @@ BPDaemon::run()
     if (NULL == (g_DaemonLockHandle = bp::acquireProcessLock(false)))
     {
         // another BrowserPlusCore process is running
-        ::exit(-7);
+        ::exit(bp::exit::kDuplicateProcess);
     }
 
 #ifdef DEBUG
@@ -298,7 +299,7 @@ BPDaemon::run()
     PermissionsManager* pmgr = PermissionsManager::get();
     if (!pmgr) 
     {
-        ::exit(-1);
+        ::exit(bp::exit::kNoPermissionsManager);
     }
         
     // do we have adequate permissions to try to run?
@@ -523,7 +524,7 @@ BPDaemon::cantGetUpToDate()
         std::cerr << "Cannot fetch up-to-date permissions, exiting..."
                   << std::endl;
     }
-    exit(-1);
+    exit(bp::exit::kCantGetUpToDatePerms);
 }
 
 void
@@ -535,7 +536,7 @@ BPDaemon::startup()
     if (!checkKillSwitch())
     {
         // this exit code known to BPProtocol SessionCreator.cpp
-        ::exit(-666);
+        ::exit(bp::exit::kKillswitch);
     }        
 
     RequireLock::initialize();
@@ -554,24 +555,24 @@ BPDaemon::startup()
     
     if (!setupServer())
     {
-        ::exit(-4);
+        ::exit(bp::exit::kCantSetupIpcServer);
     }
     
     if (!setupCoreletInstaller())
     {
-        ::exit(-5);
+        ::exit(bp::exit::kCantSetupCoreletInstaller);
     }
     
     if (!setupCoreletUpdater()) {
-        ::exit(-6);
+        ::exit(bp::exit::kCantSetupCoreletUpdater);
     }
     
     if (!setupPlatformUpdater()) {
-        ::exit(-7);
+        ::exit(bp::exit::kCantSetupPlatformUpdater);
     }
 
     if (!setupPermissionsUpdater()) {
-        ::exit(-8);
+        ::exit(bp::exit::kCantSetupPermissionsUpdater);
     }
     
     // don't do autoshutdown if running in foreground
