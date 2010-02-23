@@ -33,6 +33,7 @@
  */
 
 #include "BPUtils/ARGVConverter.h"
+#include "BPUtils/bpexitcodes.h"
 #include "BPUtils/ProductPaths.h"
 #include "Daemon/BPDaemon.h"
 #include "ServiceRunnerLib/ServiceRunnerLib.h"
@@ -60,7 +61,9 @@ int main(int argc, const char ** argv)
     // flag causes us to run a service, rather than running the Daemon
     if (argc > 1 && !std::string(argv[1]).compare("-runService"))
     {
-        ServiceRunner::runServiceProcess(argc, argv);
+        if (!ServiceRunner::runServiceProcess(argc, argv)) {
+            return bp::exit::kCantRunServiceProcess;
+        }
     }
     else
     {
@@ -69,4 +72,7 @@ int main(int argc, const char ** argv)
             new BPDaemon(argc, (const char **) argv));
         daemon->run();
     }
+
+    return bp::exit::kOk;
 }
+
