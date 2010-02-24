@@ -27,31 +27,32 @@
 #include "BPUtils/bpfile.h"
 
 
-// The installer depends upon having the following directory
-// structure in "dir"
+// The installer/updater depends upon having the following directory
+// structure in "dir", wher "dir" is a version number (e.g. "2.7.0")
 //  dir
-//      BrowserPlusUninstaller
-//      BrowserPlusUpdater
-//      BPUninstallRunonce.exe (windows only)
-//      platformInfo.json
-//      strings.json
-//      uninstallOldPlatform.bat (windows only)
-//      ybang.ico (windows only)
 //      daemon
 //          <the bits that will be copied to the versioned daemon dir>
-//      plugins
-//          IE
-//              <IE plugin, windows only>
-//          NPAPI
-//              <npapi plugin>
-//      prefPane
-//          <preference panel bits>
 //      permissions
 //          BrowserPlus.crt
+//          configAutoUpatePermissions [optional]
 //          updateDomainPermissions [optional]
 //          configDomainPermissions [optional]
+//      plugins
+//          IE (windows only)
+//              <IE plugin>
+//          NPAPI (windows only)
+//              <npapi plugin>
+//          BrowserPlus_<version>.plugin (OSX only)
+//              <OSX npapi plugin>
+//      prefPane
+//          <preference panel bits>
 //      services [optional]
 //          <any services to be pre-installed, e.g. TextToSpeech]/1.0.1
+//      BrowserPlusUninstaller
+//      BrowserPlusUpdater
+//      platformInfo.json
+//      strings.json
+//      ybang.ico (windows only)
 //
 // The installation order is:
 //      preflight
