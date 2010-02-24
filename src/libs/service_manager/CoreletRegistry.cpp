@@ -212,12 +212,14 @@ CoreletRegistry::instantiate(
     weak_ptr<CoreletExecutionContext> context,
     weak_ptr<ICoreletRegistryListener> listener)
 {
-    // DOC TODO: lloyd, is this area of code only applicable to
-    // built-in services, namely InactiveServiceCorelet?
-    // A comment to that effect might be nice if so.
+    // get a factory which would allow us to allocate an instance of a
+    // registered service. This will look through *built in* services
+    // (at time of writing this comment there's only one, "InactiveServices"), 
     shared_ptr<CoreletFactory> fact =
         getReg(name, version, std::string()).second;
 
+    // if 'fact' is NULL, we couldn't find a registered built-in service
+    // which satisfied the requirement, we'll check dynamic services
     if (fact != NULL)
     {
         shared_ptr<CoreletInstance> inst;
