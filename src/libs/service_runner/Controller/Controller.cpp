@@ -43,15 +43,42 @@ namespace bpf = bp::file;
 namespace bfs = boost::filesystem;
 
 Controller::Controller(const std::string & service,
-                       const std::string & version)
-    : m_pid(0), m_listener(NULL), m_id(0)
+                       const std::string & version) :
+    m_service(),
+    m_version(),
+    m_path(),
+    m_pid(0),
+    m_spawnStatus(),
+    m_listener(NULL),
+    m_sw(),
+    m_chan(),
+    m_id(0),
+    m_spawnCheckTimer(),
+    m_processExitCode(0),
+    m_chanTermReason(bp::ipc::IConnectionListener::InternalError),
+    m_chanTermErrorString()
 {
+    // TODO: set m_service & m_version?
+    
     m_path = bp::paths::getCoreletDirectory() / service / version;
 }
 
-Controller::Controller(const bpf::Path & path)
-    : m_path(path), m_pid(0), m_listener(NULL), m_id(0)
+Controller::Controller(const bpf::Path & path) :
+    m_service(),
+    m_version(),
+    m_path(path),
+    m_pid(0),
+    m_spawnStatus(),
+    m_listener(NULL),
+    m_sw(),
+    m_chan(),
+    m_id(0),
+    m_spawnCheckTimer(),
+    m_processExitCode(0),
+    m_chanTermReason(bp::ipc::IConnectionListener::InternalError),
+    m_chanTermErrorString()
 {
+    // TODO: set m_service & m_version?
 }
 
 Controller::~Controller()
@@ -178,6 +205,8 @@ Controller::timesUp(bp::time::Timer *)
         BPLOG_ERROR_STRM("Spawned service process exited with code: "
                          << exitCode);
         m_spawnCheckTimer.cancel();
+
+        m_processExitCode = exitCode;
         
         // this callback may delete us
         if (m_listener) {
@@ -315,11 +344,22 @@ Controller::channelEnded(bp::ipc::Channel * c,
     // no need to poll process spawning status, it exited
     m_spawnCheckTimer.cancel();
 
-	// the channel fell down!  we'll invoke our listener
+    // the channel fell down!
+    BPLOG_ERROR_STRM("IPC channel ended, " <<
+                     bp::ipc::
+                     IConnectionListener::terminationReasonToString(why) <<
+                     ", " <<
+                     errorString);
+
+    // Store the termination info.
+    // TODO: as mentioned below, should we grab process exit code?
+    m_chanTermReason = why;
+    m_chanTermErrorString = errorString;
     
     // TODO: we should wait for the child process and return useful
     // information, like processor used, etc.
 
+    // Notify our listener.
     if (m_listener) {
         m_listener->onEnded(this);
     }

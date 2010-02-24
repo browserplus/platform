@@ -128,15 +128,19 @@ namespace ServiceRunner
          */
         Controller(const bp::file::Path & pathToService);
 
+        ~Controller();
+        
         // valid after constructor invoked with the full path to the
         // service.  Depending on the constructor invoked this is either
         // calculated or specified.
         bp::file::Path path() { return m_path; }
 
         // return the name of the service we manage.
+        // This is currently only valid after IPC connection succeeds
         std::string serviceName() { return m_service; }
 
         // return the version of the service we manage.
+        // This is currently only valid after IPC connection succeeds
         std::string serviceVersion() { return m_version; }
         
         void setListener(IControllerListener * listener);
@@ -188,8 +192,10 @@ namespace ServiceRunner
         // send a user's response to an html prompt
         void sendResponse(unsigned int promptId,
                           const bp::Object * arguments);
-        
-        ~Controller();
+
+        // Exit code of the process we manage.
+        // Currently only valid in the premature exit case.
+        int processExitCode() { return m_processExitCode; }
         
       private:
         std::string m_service;
@@ -237,6 +243,14 @@ namespace ServiceRunner
         void timesUp(bp::time::Timer *);
 
         std::tr1::shared_ptr<class Connector> m_serviceConnector;
+
+        // Process exit code (currently only set in premature exit case).
+        int m_processExitCode;
+
+        // Information about termination of the IPC channel (currently
+        // only set in channelEnded case).
+        bp::ipc::IConnectionListener::TerminationReason m_chanTermReason;
+        std::string m_chanTermErrorString;
     };
 };
 
