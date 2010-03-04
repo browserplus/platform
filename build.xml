@@ -1,0 +1,10 @@
+<project name="BrowserPlusPlatform" default="build">
+    <target name="clean">
+        <ant dir="external" target="clean"/>
+        <ant dir="src" target="clean"/>
+    </target>
+    <target name="build">
+        <ant dir="external" target="build"/>
+        <ant dir="src" target="build"/>
+    </target>
+</project>

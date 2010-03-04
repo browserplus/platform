@@ -1,0 +1,14 @@
+<project name="BrowserPlusPlatform_src" default="build">
+    <target name="clean">
+        <delete dir="build" />
+    </target>
+    <target name="build">
+        <mkdir dir="build" />
+        <exec executable="cmake" dir="build">
+            <arg line=".." />
+        </exec>
+        <exec executable="make" dir="build">
+            <arg line="-j3" />
+        </exec>
+    </target>
+</project>
