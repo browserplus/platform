@@ -475,7 +475,7 @@ FileBrowsePluglet::execute(unsigned int tid,
     std::set<std::string> mimetypes;
     if (arguments->has("mimeTypes", BPTList)) {
         const bp::List* l = (const bp::List*) arguments->get("mimeTypes");
-        for (unsigned int i = 0; i < l->size(); i++) {
+        for (unsigned int i = 0; l && (i < l->size()); i++) {
             const bp::String* s = dynamic_cast<const bp::String*>(l->value(i));
             if (s) {
                 mimetypes.insert(s->value());

@@ -85,7 +85,7 @@ DnDPluglet::execute(unsigned int tid,
                     std::set<std::string> mimetypes;
                     if (arguments->has("mimeTypes", BPTList)) {
                         const bp::List* l = (const bp::List*) arguments->get("mimeTypes");
-                        for (unsigned int i = 0; i < l->size(); i++) {
+                        for (unsigned int i = 0; l && (i < l->size()); i++) {
                             const bp::String* s = dynamic_cast<const bp::String*>(l->value(i));
                             if (s) {
                                 mimetypes.insert(s->value());
@@ -100,9 +100,9 @@ DnDPluglet::execute(unsigned int tid,
                     if (arguments->has("limit", BPTInteger)) {
                         limit = (unsigned int) (((bp::Integer*) arguments->get("limit"))->value());
                     }
-                    rv = m_dropMgr->addTarget(id, mimetypes, gestureInfo, limit);
+                    rv = m_dropMgr && m_dropMgr->addTarget(id, mimetypes, gestureInfo, limit);
                 } else {
-                    rv = m_dropMgr->addTarget(id, m_desc.versionString());
+                    rv = m_dropMgr && m_dropMgr->addTarget(id, m_desc.versionString());
                 }
                 m_targets[id] = DnDCallbackInfo();
                 bp::Bool res(rv);
@@ -117,7 +117,7 @@ DnDPluglet::execute(unsigned int tid,
                           "This id is not registered as a drop target");
             } else {
                 m_targets.erase(it);
-                bp::Bool rv(m_dropMgr->removeTarget(id));
+                bp::Bool rv(m_dropMgr && m_dropMgr->removeTarget(id));
                 successCB(callbackArgument, tid, &rv);
             }
             

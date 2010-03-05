@@ -157,12 +157,12 @@ FileBrowsePluglet::execute(unsigned int tid,
     if (m_desc.majorVersion() == 1) {
         // Dig out args
         if (arguments->has("recurse", BPTBoolean)) {
-          recurse = ((bp::Bool*) arguments->get("recurse"))->value();
+            recurse = ((bp::Bool*) arguments->get("recurse"))->value();
         }
     
         if (arguments->has("mimeTypes", BPTList)) {
             const bp::List* l = (const bp::List*) arguments->get("mimeTypes");
-            for (unsigned int i = 0; i < l->size(); i++) {
+            for (unsigned int i = 0; l && (i < l->size()); i++) {
                 const bp::String* s = dynamic_cast<const bp::String*>(l->value(i));
                 if (s) {
                     mimetypes.insert(s->value());
