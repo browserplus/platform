@@ -61,7 +61,7 @@ Building on win32:
           ensure that perl is in your path from a vs command shell (you'll need this at
           least for building openssl in external/)
    12. install ptch.exe:
-          get patch.exe from http://gnuwin32.sourceforge.net/packages/patchutils.htm
+          get patch.exe from http://gnuwin32.sourceforge.net/packages/patch.htm
           rename it to ptch.exe and put it in your path
    13. install 7z.exe into your path
           get and install it from http://www.7-zip.org
