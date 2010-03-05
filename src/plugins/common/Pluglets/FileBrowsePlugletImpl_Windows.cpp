@@ -471,6 +471,8 @@ FileBrowsePluglet::execute(unsigned int tid,
     std::set<std::string> mimetypes;
     bool includeGestureInfo = false;
     unsigned int limit = 1000;
+    wstring filterName;
+    wstring filterPattern;
     if (m_desc.majorVersion() == 1) {
         if (!arguments) {
             BPLOG_WARN_STRM("execute called will NULL arguments");
@@ -501,8 +503,6 @@ FileBrowsePluglet::execute(unsigned int tid,
         }
 
         // Get extensions for mimetypes and set filter from them
-        wstring filterName;
-        wstring filterPattern;
         if (mimetypes.empty()) {
             string lstr;
             (void) getLocalizedString(FileBrowsePluglet::kAllFilesFoldersKey,
