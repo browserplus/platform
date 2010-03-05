@@ -453,6 +453,12 @@ FileBrowsePluglet::execute(unsigned int tid,
                            plugletInvokeCallbackCB   /*callbackCB*/,
                            void* callbackArgument )
 {
+    if (!function || !arguments) {
+        BPLOG_WARN_STRM("execute called will NULL function or arguments");
+        failureCB(callbackArgument, tid, pluginerrors::InvalidParameters, NULL);
+        return;
+    }
+
     if (strcmp(function, "OpenBrowseDialog")) {
         std::string s("unknown FileBrowse function " 
                       + std::string(function) + " called");

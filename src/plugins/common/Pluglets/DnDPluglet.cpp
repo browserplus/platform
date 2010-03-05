@@ -57,6 +57,12 @@ DnDPluglet::execute(unsigned int tid,
                     plugletInvokeCallbackCB   callbackCB,
                     void* callbackArgument)
 {
+    if (!function || !arguments) {
+        BPLOG_WARN_STRM("execute called will NULL function or arguments");
+        failureCB(callbackArgument, tid, pluginerrors::InvalidParameters, NULL);
+        return;
+    }
+
     if (!strcmp("AddDropTarget", function) ||
         !strcmp("RemoveDropTarget", function) ||
         !strcmp("AttachCallbacks", function) ||
@@ -208,6 +214,11 @@ void
 DnDPluglet::onDrop(const std::string& id,
                    const bp::Object* items)
 {
+    if (!items) {
+        BPLOG_WARN_STRM(id << " got drop with no items");
+        return;
+    }
+
     std::string s = items->toPlainJsonString(true);
     BPLOG_INFO_STRM(id << " get drop " << s);
     

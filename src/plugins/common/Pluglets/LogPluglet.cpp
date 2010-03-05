@@ -60,6 +60,11 @@ LogPluglet::execute( unsigned int /*nTid*/,
                      plugletInvokeCallbackCB /*cbCallback*/,
                      void* /*pvCallbackArgument*/ )
 {
+    if (!cszFunction || !poArguments) {
+        BPLOG_WARN_STRM("execute called will NULL function or arguments");
+        return;
+    }
+
     string sLocation, sMessage;
     if (!getArguments( *poArguments, sLocation, sMessage ))
     {
