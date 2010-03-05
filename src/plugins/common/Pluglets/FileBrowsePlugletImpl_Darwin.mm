@@ -136,8 +136,8 @@ FileBrowsePluglet::execute(unsigned int tid,
                            plugletInvokeCallbackCB   callbackCB,
                            void * callbackArgument)
 {
-    if (!function || !arguments) {
-        BPLOG_WARN_STRM("execute called will NULL function or arguments");
+    if (!function) {
+        BPLOG_WARN_STRM("execute called will NULL function");
         failureCB(callbackArgument, tid, pluginerrors::InvalidParameters, NULL);
         return;
     }
@@ -156,6 +156,11 @@ FileBrowsePluglet::execute(unsigned int tid,
     unsigned int limit = 10000;
     if (m_desc.majorVersion() == 1) {
         // Dig out args
+        if (!arguments) {
+            BPLOG_WARN_STRM("execute called will NULL arguments");
+            failureCB(callbackArgument, tid, pluginerrors::InvalidParameters, NULL);
+            return;
+        }
         if (arguments->has("recurse", BPTBoolean)) {
             recurse = ((bp::Bool*) arguments->get("recurse"))->value();
         }

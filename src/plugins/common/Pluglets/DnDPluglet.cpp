@@ -57,8 +57,8 @@ DnDPluglet::execute(unsigned int tid,
                     plugletInvokeCallbackCB   callbackCB,
                     void* callbackArgument)
 {
-    if (!function || !arguments) {
-        BPLOG_WARN_STRM("execute called will NULL function or arguments");
+    if (!function) {
+        BPLOG_WARN_STRM("execute called will NULL function");
         failureCB(callbackArgument, tid, pluginerrors::InvalidParameters, NULL);
         return;
     }
@@ -67,7 +67,7 @@ DnDPluglet::execute(unsigned int tid,
         !strcmp("RemoveDropTarget", function) ||
         !strcmp("AttachCallbacks", function) ||
         !strcmp("EnableDropTarget", function)) {
-        if (!arguments->has("id", BPTString)) {
+        if (!arguments || !arguments->has("id", BPTString)) {
             failureCB(callbackArgument, tid, pluginerrors::InvalidParameters, NULL);
             return;
         }

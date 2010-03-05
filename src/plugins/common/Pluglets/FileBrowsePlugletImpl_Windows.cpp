@@ -453,8 +453,8 @@ FileBrowsePluglet::execute(unsigned int tid,
                            plugletInvokeCallbackCB   /*callbackCB*/,
                            void* callbackArgument )
 {
-    if (!function || !arguments) {
-        BPLOG_WARN_STRM("execute called will NULL function or arguments");
+    if (!function) {
+        BPLOG_WARN_STRM("execute called will NULL function");
         failureCB(callbackArgument, tid, pluginerrors::InvalidParameters, NULL);
         return;
     }
@@ -468,62 +468,70 @@ FileBrowsePluglet::execute(unsigned int tid,
     }
 
     bool recurse = true;
-    if (arguments->has("recurse", BPTBoolean)) {
-        recurse = ((bp::Bool*) arguments->get("recurse"))->value();
-    }
-    
     std::set<std::string> mimetypes;
-    if (arguments->has("mimeTypes", BPTList)) {
-        const bp::List* l = (const bp::List*) arguments->get("mimeTypes");
-        for (unsigned int i = 0; l && (i < l->size()); i++) {
-            const bp::String* s = dynamic_cast<const bp::String*>(l->value(i));
-            if (s) {
-                mimetypes.insert(s->value());
-            }
-        }
-    } 
-    
     bool includeGestureInfo = false;
-    if (arguments->has("includeGestureInfo", BPTBoolean)) {
-        includeGestureInfo = ((bp::Bool*) arguments->get("includeGestureInfo"))->value();
-    }
-    
     unsigned int limit = 1000;
-    if (arguments->has("limit", BPTInteger)) {
-        limit = (unsigned int)(((bp::Integer*) arguments->get("limit"))->value());
-    }
-
-    // Get extensions for mimetypes and set filter from them
-    wstring filterName;
-    wstring filterPattern;
-    if (mimetypes.empty()) {
-        string lstr;
-        (void) getLocalizedString(FileBrowsePluglet::kAllFilesFoldersKey,
-                                  m_locale, lstr);
-        filterName = bp::strutil::utf8ToWide(lstr);
-        filterPattern.append(L"*.*");
-    } else {
-        set<string> extensions;
-        set<string>::const_iterator iter;
-        for (iter = mimetypes.begin(); iter != mimetypes.end(); ++iter) {
-            filterName.append(bp::strutil::utf8ToWide(*iter));
-            filterName.append(L", ");
-            vector<string> e = bpf::extensionsFromMimeType(*iter);
-            for (unsigned int i  = 0; i < e.size(); ++i) {
-                const string& s = e[i];
-                extensions.insert(s);
-            }
+    if (m_desc.majorVersion() == 1) {
+        if (!arguments) {
+            BPLOG_WARN_STRM("execute called will NULL arguments");
+            failureCB(callbackArgument, tid, pluginerrors::InvalidParameters, NULL);
+            return;
         }
-        filterName.erase(filterName.length()-2);  // nuke trailing ', '
-        if (!extensions.empty()) {
-            for (iter = extensions.begin(); iter != extensions.end(); ++iter) {
-                filterPattern.append(L"*.");
-                filterPattern.append(bp::strutil::utf8ToWide(*iter));
-                filterPattern.append(1, L';');
+
+        if (arguments->has("recurse", BPTBoolean)) {
+            recurse = ((bp::Bool*) arguments->get("recurse"))->value();
+        }
+    
+        if (arguments->has("mimeTypes", BPTList)) {
+            const bp::List* l = (const bp::List*) arguments->get("mimeTypes");
+            for (unsigned int i = 0; l && (i < l->size()); i++) {
+                const bp::String* s = dynamic_cast<const bp::String*>(l->value(i));
+                if (s) {
+                    mimetypes.insert(s->value());
+                }
             }
-            filterPattern.erase(filterPattern.length()-1);  // nuke trailing ;
-        } else {
+        } 
+    
+        if (arguments->has("includeGestureInfo", BPTBoolean)) {
+            includeGestureInfo = ((bp::Bool*) arguments->get("includeGestureInfo"))->value();
+        }
+    
+        if (arguments->has("limit", BPTInteger)) {
+            limit = (unsigned int)(((bp::Integer*) arguments->get("limit"))->value());
+        }
+
+        // Get extensions for mimetypes and set filter from them
+        wstring filterName;
+        wstring filterPattern;
+        if (mimetypes.empty()) {
+            string lstr;
+            (void) getLocalizedString(FileBrowsePluglet::kAllFilesFoldersKey,
+                                      m_locale, lstr);
+            filterName = bp::strutil::utf8ToWide(lstr);
             filterPattern.append(L"*.*");
+        } else {
+            set<string> extensions;
+            set<string>::const_iterator iter;
+            for (iter = mimetypes.begin(); iter != mimetypes.end(); ++iter) {
+                filterName.append(bp::strutil::utf8ToWide(*iter));
+                filterName.append(L", ");
+                vector<string> e = bpf::extensionsFromMimeType(*iter);
+                for (unsigned int i  = 0; i < e.size(); ++i) {
+                    const string& s = e[i];
+                    extensions.insert(s);
+                }
+            }
+            filterName.erase(filterName.length()-2);  // nuke trailing ', '
+            if (!extensions.empty()) {
+                for (iter = extensions.begin(); iter != extensions.end(); ++iter) {
+                    filterPattern.append(L"*.");
+                    filterPattern.append(bp::strutil::utf8ToWide(*iter));
+                    filterPattern.append(1, L';');
+                }
+                filterPattern.erase(filterPattern.length()-1);  // nuke trailing ;
+            } else {
+                filterPattern.append(L"*.*");
+            }
         }
     }
 
