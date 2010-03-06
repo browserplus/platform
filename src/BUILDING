@@ -79,7 +79,7 @@ Building on win32:
   Building the tree
     1. start a windows command prompt with visual studio env set 
        (e.g. invoke vsvars32.bat)
-    2. cd [yourdevdir]\platform\external
+    2. cd [yourdevdir]\BrowserPlus\public_platform\external
     3. ruby build.rb keepSource (will take a while, only needs to be done once)
     4. cd [yourdevdir]\BrowserPlus\public_platform\src
     5. mkdir build
