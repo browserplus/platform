@@ -21,7 +21,7 @@
  */
 
 /**
- * ServiceLibrary unix specific implementations.
+ * ServiceLibrary windows-specific implementations.
  */
 
 #include "ServiceLibrary.h"
@@ -43,15 +43,13 @@ ServiceLibrary::dlopenNP(const bp::file::Path & path)
     // determine the target directory
     std::wstring nativePath = path.external_file_string();
 
-    // TODO: maybe call bp::file::canonicalPath
-    
     void * libptr = (void *) LoadLibraryExW(nativePath.c_str(),
                                             (HANDLE) NULL,
                                             LOAD_WITH_ALTERED_SEARCH_PATH);
     if (libptr == NULL) {
-        BPLOG_ERROR_STRM("LoadLibraryExW(" <<
+        BPLOG_ERROR_STRM("LoadLibraryExW for " <<
                          bp::strutil::wideToUtf8(nativePath) <<
-                         ") failed: " <<
+                         " failed: " <<
                          bp::error::lastErrorString());
     }
     
