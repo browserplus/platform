@@ -621,35 +621,34 @@ DiskScanner::scanDiskForServices(
     BPLOG_INFO_STRM("Service disk scan complete in "
                     << sw.elapsedSec() << "s, "
                     << thisScan.size() << " loaded");
-    // now we're report basic stats in log at info level (info justified
+    // now we're reporting basic stats in log at info level (info justified
     // because scanning is fairly rare, and probably interesting)
     if (newServices > 0) {
         if (refreshedServices > 0) {
-            BPLOG_INFO_STRM(newServices << " services loaded from disk ("
+            BPLOG_INFO_STRM(newServices << " service(s) loaded from disk ("
                             << refreshedServices << " had changed).");
         } else {
-            BPLOG_INFO_STRM(newServices << " services loaded from disk.");
+            BPLOG_INFO_STRM(newServices << " service(s) loaded from disk.");
         }
     } 
     
     if (alreadyLoadedServices > 0) {
-        BPLOG_INFO_STRM(alreadyLoadedServices << " already loaded services "
+        BPLOG_INFO_STRM(alreadyLoadedServices << " already loaded service(s) "
                         << "detected.");
     }
 
     if (cachedServices) {
-        BPLOG_INFO_STRM(cachedServices << " service interfaces hydrated "
+        BPLOG_INFO_STRM(cachedServices << " service interface(s) hydrated "
                         "from disk cache");
     }
 
     if (postponedServices) {
-        BPLOG_INFO_STRM(postponedServices << " have changed on disk, but "
-                        "are currently running (update postponed)");
+        BPLOG_INFO_STRM(postponedServices << " service(s) changed on disk, but "
+                        << "is/are currently running (update postponed)");
     }
 
     if (bogusServices.size()) {
-        BPLOG_WARN_STRM(bogusServices.size() << " broken services "
-                        << "detected!");
+        BPLOG_WARN_STRM(bogusServices.size() << " broken service(s) detected!");
         std::set<bp::service::Summary>::iterator i;
 
         for (i = bogusServices.begin(); i != bogusServices.end(); i++)
