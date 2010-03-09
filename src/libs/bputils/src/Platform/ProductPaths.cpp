@@ -353,6 +353,7 @@ bp::paths::createDirectories(int major,
         bfs::create_directories(getPermissionsDirectory());
         bfs::create_directories(getCoreletDirectory());
         bfs::create_directories(getCoreletCacheDirectory());
+        bfs::create_directories(getCoreletInterfaceCachePath());
         bfs::create_directories(getProductTopDirectory() / "CoreletData");
         bfs::create_directories(getPluginWritableDirectory(major, minor, micro));
         bfs::create_directories(getObfuscatedWritableDirectory(major, minor, micro));
