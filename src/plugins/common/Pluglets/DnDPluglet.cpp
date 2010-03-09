@@ -38,6 +38,8 @@ DnDPluglet::DnDPluglet(BPPlugin* plugin,
 {
     if (m_dropMgr) {
         m_dropMgr->registerDropListener(this);
+    } else {
+        BPLOG_WARN_STRM("DnDPluglet ctor with NULL m_dropMgr");
     }
 }
 
@@ -61,6 +63,10 @@ DnDPluglet::execute(unsigned int tid,
         BPLOG_WARN_STRM("execute called will NULL function");
         failureCB(callbackArgument, tid, pluginerrors::InvalidParameters, NULL);
         return;
+    }
+
+    if (m_dropMgr == NULL) {
+        BPLOG_WARN_STRM("DnDPluglet::execute " << function << " with NULL m_dropMgr");
     }
 
     if (!strcmp("AddDropTarget", function) ||
