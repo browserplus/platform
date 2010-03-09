@@ -10,8 +10,7 @@
     </target>
     <target name="build_make" depends="build" >
         <exec executable="cmake" dir="build">
-            <arg line="-G \"Unix Makefiles\"" />
-            <arg line=".." />
+            <arg line="-G &quot;Unix Makefiles&quot; .." />
         </exec>
         <exec executable="make" dir="build">
             <arg line="-j3" />
@@ -19,28 +18,21 @@
     </target>
     <target name="build_xcode">
         <exec executable="cmake" dir="build">
-            <arg line="-G \"Xcode\"" />
-            <arg line=".." />
+            <arg line="-G &quot;Xcode&quot; .." />
         </exec>
         <exec executable="xcodebuild" dir="build">
-            <arg line="-project BrowserPlus.xcodeproj" />
-            <arg line="-alltargets" />
+            <arg line="-project BrowserPlus.xcodeproj -alltargets" />
         </exec>
     </target>
     <target name="build_vc08">
         <exec executable="cmake" dir="build">
-            <arg line="-G \"Visual Studio 9 2008\"" />
-            <arg line=".." />
+            <arg line="-G &quot;Visual Studio 9 2008&quot; .." />
         </exec>
         <exec executable="devenv" dir="build">
-            <arg line="BrowserPlus.sln" />
-            <arg line="/Build" />
-            <arg line="Release" />
+            <arg line="BrowserPlus.sln /Build Release" />
         </exec>
         <exec executable="devenv" dir="build">
-            <arg line="BrowserPlus.sln" />
-            <arg line="/Build" />
-            <arg line="Release" />
+            <arg line="BrowserPlus.sln /Build Debug" />
         </exec>
     </target>
 </project>
