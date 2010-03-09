@@ -1,10 +1,26 @@
-<project name="BrowserPlusPlatform" default="build">
-    <target name="clean">
-        <ant dir="external" target="clean"/>
-        <ant dir="src" target="clean"/>
+<project name="BrowserPlusPlatform" default="build_make">
+    <target name="clean_make">
+        <ant dir="external" target="clean_make"/>
+        <ant dir="src" target="clean_make"/>
     </target>
-    <target name="build">
-        <ant dir="external" target="build"/>
-        <ant dir="src" target="build"/>
+    <target name="clean_xcode">
+        <ant dir="external" target="clean_xcode"/>
+        <ant dir="src" target="clean_xcode"/>
+    </target>
+    <target name="clean_vc08">
+        <ant dir="external" target="clean_vc08"/>
+        <ant dir="src" target="clean_vc08"/>
+    </target>
+    <target name="build_make">
+        <ant dir="external" target="build_make"/>
+        <ant dir="src" target="build_make"/>
+    </target>
+    <target name="build_xcode">
+        <ant dir="external" target="build_xcode"/>
+        <ant dir="src" target="build_xcode"/>
+    </target>
+    <target name="build_vc08">
+        <ant dir="external" target="build_vc08"/>
+        <ant dir="src" target="build_vc08"/>
     </target>
 </project>

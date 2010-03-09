@@ -1,14 +1,46 @@
-<project name="BrowserPlusPlatform_src" default="build">
+<project name="BrowserPlusPlatform_src" default="build_make">
     <target name="clean">
         <delete dir="build" />
     </target>
+    <target name="clean_make" depends="clean" />
+    <target name="clean_xcode" depends="clean" />
+    <target name="clean_vc08" depends="clean" />
     <target name="build">
         <mkdir dir="build" />
+    </target>
+    <target name="build_make" depends="build" >
         <exec executable="cmake" dir="build">
+            <arg line="-G \"Unix Makefiles\"" />
             <arg line=".." />
         </exec>
         <exec executable="make" dir="build">
             <arg line="-j3" />
+        </exec>
+    </target>
+    <target name="build_xcode">
+        <exec executable="cmake" dir="build">
+            <arg line="-G \"Xcode\"" />
+            <arg line=".." />
+        </exec>
+        <exec executable="xcodebuild" dir="build">
+            <arg line="-project BrowserPlus.xcodeproj" />
+            <arg line="-alltargets" />
+        </exec>
+    </target>
+    <target name="build_vc08">
+        <exec executable="cmake" dir="build">
+            <arg line="-G \"Visual Studio 9 2008\"" />
+            <arg line=".." />
+        </exec>
+        <exec executable="devenv" dir="build">
+            <arg line="BrowserPlus.sln" />
+            <arg line="/Build" />
+            <arg line="Release" />
+        </exec>
+        <exec executable="devenv" dir="build">
+            <arg line="BrowserPlus.sln" />
+            <arg line="/Build" />
+            <arg line="Release" />
         </exec>
     </target>
 </project>
