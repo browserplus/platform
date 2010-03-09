@@ -14,5 +14,10 @@
     </target>
     <target name="build_make" depends="build" />
     <target name="build_xcode" depends="build" />
-    <target name="build_vc08" depends="build" />
+    <target name="build_vc08" />
+        <exec executable="cmd" dir="build" failonerror="true">
+            <arg value="/C" />
+            <arg line="&quot;C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat&quot; &amp;&amp; ruby .\build.rb keepSource" />
+        </exec>
+    </target>
 </project>
