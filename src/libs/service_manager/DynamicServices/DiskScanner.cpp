@@ -98,9 +98,14 @@ static void
 storeToCache(const bp::service::Description & description)
 {
     bp::Object * o = description.toBPObject();
-    bp::serviceInterfaceCache::set(description.name(),
-                                   description.versionString(), o);
-    if (o) delete o;
+    if (!bp::serviceInterfaceCache::set(description.name(),
+                                        description.versionString(), o)) {
+        BPLOG_WARN( "Caching of service description failed!" );
+    }
+    
+    if (o) {
+        delete o;
+    }
 }
 
 // given a dependant summary and a set of provider summaries, attain

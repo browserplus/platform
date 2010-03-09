@@ -28,8 +28,9 @@
  * (c) 2008 Yahoo!
  */
 
-#include "BPUtils/bptime.h"
 #include "BPUtils/bpfile.h"
+#include "BPUtils/BPLog.h"
+#include "BPUtils/bptime.h"
 #include "BPUtils/bptypeutil.h"
 #include "BPUtils/bpstrutil.h"
 #include "BPUtils/ProductPaths.h"
@@ -94,7 +95,11 @@ bp::serviceInterfaceCache::set(const std::string & name,
     if (name.empty() || version.empty() || obj == NULL) return false;
     bp::file::Path path = buildPath(name, version);
     std::string jsonRep = obj->toPlainJsonString();
-    return bp::strutil::storeToFile(path, jsonRep);
+    bool ok = bp::strutil::storeToFile(path, jsonRep);
+    if (!ok) {
+        BPLOG_WARN( "Unable to save jsonRep to file." );
+    }
+    return ok;
 }
 
 bool
