@@ -68,6 +68,7 @@ DnDPluglet::execute(unsigned int tid,
         !strcmp("AttachCallbacks", function) ||
         !strcmp("EnableDropTarget", function)) {
         if (!arguments || !arguments->has("id", BPTString)) {
+            BPLOG_WARN_STRM("execute " << function << " called will NULL arguments");
             failureCB(callbackArgument, tid, pluginerrors::InvalidParameters, NULL);
             return;
         }
