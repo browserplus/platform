@@ -25,14 +25,17 @@
         </exec>
     </target>
     <target name="build_vc08">
-        <exec executable="cmake" dir="build">
-            <arg line="-G &quot;Visual Studio 9 2008&quot; .." />
+        <exec executable="cmd" dir="build" failonerror="true">
+            <arg value="/C" />
+            <arg line="&quot;C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat&quot; &amp;&amp; cmake -G &quot;Visual Studio 9 2008&quot; .." />
         </exec>
-        <exec executable="devenv" dir="build">
-            <arg line="BrowserPlus.sln /Build Release" />
+        <exec executable="cmd" dir="build" failonerror="true">
+            <arg value="/C" />
+            <arg line="&quot;C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat&quot; &amp;&amp; devenv BrowserPlus.sln /Build Release" />
         </exec>
-        <exec executable="devenv" dir="build">
-            <arg line="BrowserPlus.sln /Build Debug" />
+        <exec executable="cmd" dir="build" failonerror="true">
+            <arg value="/C" />
+            <arg line="&quot;C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat&quot; &amp;&amp; devenv BrowserPlus.sln /Build Debug" />
         </exec>
     </target>
 </project>
