@@ -25,6 +25,7 @@
  */
 
 #include "BPUtils/APTArgParse.h"
+#include "BPUtils/ARGVConverter.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bprunloop.h"
@@ -166,6 +167,10 @@ setupLogging(shared_ptr<APTArgParse> argParser)
 
 int main(int argc, const char ** argv)
 {
+    // handle non-ascii args on windows
+    APT::ARGVConverter conv;
+    conv.convert(argc, argv);
+
     // which mode are we running in?
     if (argc > 1 && !std::string("-runService").compare(argv[1])) {
         if (ServiceRunner::runServiceProcess(argc, argv)) return 0;
