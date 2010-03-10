@@ -193,10 +193,15 @@ namespace ServiceRunner
         void sendResponse(unsigned int promptId,
                           const bp::Object * arguments);
 
-        // Exit code of the process we manage.
-        // Currently only valid in the premature exit case.
+        // exit code of the process we manage.
+        // currently only valid in the premature exit case.
         int processExitCode() { return m_processExitCode; }
-        
+
+        // Returns a nice name for the service we manage.
+        // If service has connected it'll be "name (version)",
+        // otherwise it'll be the service path.
+        std::string friendlyServiceName();
+                
       private:
         std::string m_service;
         std::string m_version;
@@ -244,6 +249,10 @@ namespace ServiceRunner
 
         std::tr1::shared_ptr<class Connector> m_serviceConnector;
 
+        // whether controlled service ever connected
+        // note currently serviceName/Version are not valid until connected.
+        bool m_everConnected;
+        
         // Process exit code (currently only set in premature exit case).
         int m_processExitCode;
 

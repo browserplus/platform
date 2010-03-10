@@ -54,6 +54,7 @@ Controller::Controller(const std::string & service,
     m_chan(),
     m_id(0),
     m_spawnCheckTimer(),
+    m_everConnected(false),
     m_processExitCode(0),
     m_chanTermReason(bp::ipc::IConnectionListener::InternalError),
     m_chanTermErrorString()
@@ -74,6 +75,7 @@ Controller::Controller(const bpf::Path & path) :
     m_chan(),
     m_id(0),
     m_spawnCheckTimer(),
+    m_everConnected(false),
     m_processExitCode(0),
     m_chanTermReason(bp::ipc::IConnectionListener::InternalError),
     m_chanTermErrorString()
@@ -314,6 +316,8 @@ Controller::onConnected(bp::ipc::Channel * c, const std::string & name,
                         const std::string & version,
                         unsigned int apiVersion)
 {
+    m_everConnected = true;
+    
     // no need to check spawn status anymore
     m_spawnCheckTimer.cancel();
 
@@ -504,3 +508,16 @@ Controller::onResponse(bp::ipc::Channel *,
         //       performed for protocol errors?
     }
 }
+
+std::string
+Controller::friendlyServiceName()
+{
+    std::stringstream ss;
+    if (m_everConnected) {
+        ss << m_service << " (" << m_version << ")";
+    } else {
+        ss << "service at " << m_path;
+    }
+    return ss.str();
+}
+

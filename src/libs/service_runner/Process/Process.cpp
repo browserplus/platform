@@ -158,7 +158,8 @@ ServiceRunner::runServiceProcess(int argc, const char ** argv)
 
         // attempt to load service
         if (!lib.load(providerPath, err)) {
-            BPLOG_ERROR_STRM("Couldn't load service: " << err);
+            BPLOG_ERROR_STRM("Couldn't load service"
+                             << (err.length() ? ": " + err : "."));
             return false;
         }
         

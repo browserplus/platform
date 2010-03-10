@@ -409,11 +409,7 @@ DynamicServiceManager::startAllocation(
 void
 DynamicServiceManager::onEnded(ServiceRunner::Controller * c)
 {
-    // TODO: serviceName and serviceVersion are currently not
-    // initialized until a connection is made, meaning they'll be empty
-    // if we're called as a result of a connection failure.
-    BPLOG_ERROR_STRM(c->serviceName() << " (" << c->serviceVersion() << ") " <<
-                     "ended unexpectedly.");
+    BPLOG_ERROR_STRM(c->friendlyServiceName() << " ended unexpectedly.");
 
     // Pull all the pending allocations for this controller out of our
     // map.  We'll assume ownership here and they'll die when we go out
@@ -650,4 +646,5 @@ DynamicServiceManager::onPromptResponse(DynamicServiceInstance * instance,
                         "longer exists");
     }
 }
+
 
