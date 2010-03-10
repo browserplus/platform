@@ -29,6 +29,8 @@
 
 #include "DynamicServiceManager.h"
 #include "BPUtils/bpfile.h"
+#include "BPUtils/bpstrutil.h"
+#include "BPUtils/bpexitcodes.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/ProductPaths.h"
 #include "BPUtils/ServiceInterfaceCache.h"
