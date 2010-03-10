@@ -47,10 +47,15 @@ ServiceLibrary::dlopenNP(const bp::file::Path & path)
                                             (HANDLE) NULL,
                                             LOAD_WITH_ALTERED_SEARCH_PATH);
     if (libptr == NULL) {
-        BPLOG_ERROR_STRM("LoadLibraryExW for " <<
-                         bp::strutil::wideToUtf8(nativePath) <<
-                         " failed: " <<
-                         bp::error::lastErrorString());
+        std::string utf8path = bp::strutil::wideToUtf8(nativePath);
+        BPLOG_ERROR_STRM("LoadLibraryExW for " << utf8path << " failed: "
+                         << bp::error::lastErrorString());
+
+        bp::file::FileInfo fi;
+        if (statFile(path, fi)) {
+            BPLOG_ERROR_STRM("Size of " << utf8path << ": "
+                             << fi.sizeInBytes << " bytes.");
+        }
     }
     
     return libptr;
