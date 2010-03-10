@@ -164,7 +164,10 @@ InterceptDropManager::InterceptDropManager(NPP instance,
 
 InterceptDropManager::~InterceptDropManager()
 {
-    npu::releaseObject(m_getXYFunction);
+    if (m_getXYFunction) {
+        npu::releaseObject(m_getXYFunction);
+        m_getXYFunction = NULL;
+    }
 }
 
 
@@ -244,8 +247,20 @@ InterceptDropManager::updateBounds()
         // if for whatever reason we cannot attain drop bounds for an
         // element, we'll reset it's bounds to zero.
         bool gotBounds = false;
-        
-        if (npu::callFunction(m_instance, m_getXYFunction, &nameArg, 1, &result)) {
+
+        // [bug #96] on-demand compilation of getXY javascript function
+        // prevents freezeups in chrome (otherwise in the ctor it's too
+        // early)
+        if (m_getXYFunction == NULL) {
+  	    m_getXYFunction = compileGetXY(m_instance);
+	    if (m_getXYFunction == NULL) {
+	        BPLOG_FATAL("Couldn't compile getXY function!");
+            }
+        }
+
+        if (npu::callFunction(m_instance, m_getXYFunction, &nameArg,
+			      1, &result))
+        {
             if (NPVARIANT_IS_STRING(result)) {
                 NPString s = NPVARIANT_TO_STRING(result);
                 string boundsStr;
