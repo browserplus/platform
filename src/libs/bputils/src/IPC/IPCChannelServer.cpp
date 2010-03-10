@@ -29,8 +29,12 @@ ChannelServer::deliverChannel(void * ctx)
 {
     std::pair<Connection *, ChannelServer *> * p =
         (std::pair<Connection *, ChannelServer *> *) ctx;
-    Channel * chan = new Channel(p->first);
-    p->second->m_listener->gotChannel(chan); 
+    if (p->second && p->second->m_listener) { 
+        Channel * chan = new Channel(p->first);
+        p->second->m_listener->gotChannel(chan); 
+    } else {
+        delete p->first;
+    }
     delete p;
 }
 
@@ -49,6 +53,16 @@ ChannelServer::ChannelServer()
 
 ChannelServer::~ChannelServer()
 {
+    // [bug #8] null out listener before calling stop().
+    // in the case where we're shutting down with established
+    // connections in the queue (already posted cross-thread
+    // via thread hopper), this will indicate to deliverChannel
+    // that we should clean up, rather than calling into our
+    // listener further.  At a higher level application level
+    // this will cause clients who call just as we're shutting
+    // down to get connections closed.  This is desirable as
+    // they're expected to have some sort of retry logic.
+    m_listener = NULL;
     stop();
 }
 
