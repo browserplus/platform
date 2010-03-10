@@ -411,13 +411,43 @@ DynamicServiceManager::onEnded(ServiceRunner::Controller * c)
 {
     BPLOG_ERROR_STRM(c->friendlyServiceName() << " ended unexpectedly.");
 
+    // TODO: this could be done more elegantly by taking ownership of
+    // the controller.
+    bool bPurgeService = false;
+    string servName;
+    string servVersion;
+    
+    // If the controller ended because the harness couldn't load the
+    // service dylib - record that we need to purge that service.
+    // Don't purge the service yet though - that has side effects we don't want.
+    if (c->processExitCode() == bp::exit::kCantRunServiceProcess) {
+        bPurgeService = true;
+        
+        // In this case the service never connected, so
+        // Controller::serviceName()/Version() are not usable (they'll
+        // return empty string).
+        // Instead, parse the name and version from the path.
+        // Yes this may not work for developers with services in
+        // non-standard locations, but internalFind has checks that
+        // should protect that case.
+        // In the very worst case, we'll merely do an unnecesary purge.
+        string path = c->path().utf8();
+        vector<string> nodes = bp::strutil::splitAndTrim( path, "/" );
+        if (nodes.size() >= 2) {
+            servName    = nodes[nodes.size()-2];
+            servVersion = nodes[nodes.size()-1];
+        }
+    }
+    
     // Pull all the pending allocations for this controller out of our
     // map.  We'll assume ownership here and they'll die when we go out
     // of scope.
+    // Note: currently the popPendingAllocations call causes 'c'
+    // (controller of interest) to be deleted.
     typedef set<shared_ptr<DynamicServiceInstance> > tInstSet;
     tInstSet pendingAllocs;
     m_state.popPendingAllocations(c, pendingAllocs);
-
+    
     // Notify each pending allocation's listener that it ain't gonna happen.
     for (tInstSet::iterator it = pendingAllocs.begin();
          it != pendingAllocs.end(); ++it) {
@@ -426,6 +456,11 @@ DynamicServiceManager::onEnded(ServiceRunner::Controller * c)
         if (listener != NULL) {
             listener->onAllocationFailure((*it)->m_instantiateId);
         }
+    }
+
+    // Now purge the service if appropriate.
+    if (bPurgeService) {
+        purgeService( servName, servVersion );
     }
 }
 
