@@ -25,7 +25,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"File/cartella:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Rapporto inviato",
             "troubleshootSending":"Invio...",
             "troubleshoot3":"3",
@@ -53,7 +53,7 @@
             "servicesTab":"Servizi",
             "generalUninstallButton":"Disinstalla BrowserPlus...",
             "nonResponsive":"BrowserPlus non risponde. Timeout {secs} secondi",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Chiedi sempre prima di permettere ai nuovi siti che visito di usare BrowserPlus.",
             "generalTab":"Generali",
             "troubleshoot4Body":"Se nessuno di questi rimedi è di aiuto, potrebbe esserci un problema con BrowserPlus o con il sito che lo usa. Inviaci un rapporto dei bug riscontrati, descrivendo in dettaglio i problemi nel campo qui sotto.",
@@ -195,7 +195,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"Archivo/carpeta:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Informe enviado",
             "troubleshootSending":"Enviando…",
             "troubleshoot3":"3",
@@ -223,7 +223,7 @@
             "servicesTab":"Servicios",
             "generalUninstallButton":"Desinstalar BrowserPlus…",
             "nonResponsive":"BrowserPlus no responde desde hace {secs} segundos",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Preguntarme siempre antes de permitir que los sitios web nuevos que visito utilicen BrowserPlus.",
             "generalTab":"General",
             "troubleshoot4Body":"Si ninguno de estos pasos ayuda a solucionar el problema, puede que éste se encuentre en BrowserPlus o en el sitio que está utilizando BrowserPlus. Por favor, envíanos un informe de error con una explicación detallada utilizando el campo a continuación.",
@@ -365,7 +365,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"檔案/資料夾﹕"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"報告已送出",
             "troubleshootSending":"傳送中...",
             "troubleshoot3":"3",
@@ -393,7 +393,7 @@
             "servicesTab":"服務",
             "generalUninstallButton":"正在解除安裝的 BrowserPlus...",
             "nonResponsive":"BrowserPlus 無回應﹕ 愈時 {secs} 秒",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"每當我瀏覽新網站時，若需使用 BrowserPlus，先徵求我的同意。",
             "generalTab":"一般",
             "troubleshoot4Body":"如果所有方法都不能解決問題，則可能是 BrowserPlus 或使用 BrowserPlus 的網站的問題。請在下面的空欄內描述遇到的問題，並將報告傳送至本部",
@@ -535,7 +535,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"檔案/資料夾﹕"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"報告已送出",
             "troubleshootSending":"傳送中...",
             "troubleshoot3":"3",
@@ -563,7 +563,7 @@
             "servicesTab":"服務",
             "generalUninstallButton":"移除 BrowserPlus...",
             "nonResponsive":"BrowserPlus 沒有回應﹕ 逾時 {secs} 秒",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"每當我瀏覽新網站時，若需使用 BrowserPlus，先徵求我的同意。",
             "generalTab":"一般",
             "troubleshoot4Body":"如果你嘗試過上述所有方法，都不能解決問題的話，則有可能是 BrowserPlus ，或是在該網站中使用 BrowserPlus 發生問題。請在下面的表單中，描述您遇到的問題，並將報告傳送至我們的開發團隊處理。",
@@ -705,7 +705,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"Datei/Ordner:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Bericht gesendet",
             "troubleshootSending":"Senden...",
             "troubleshoot3":"3",
@@ -733,7 +733,7 @@
             "servicesTab":"Services",
             "generalUninstallButton":"BrowserPlus deinstallieren...",
             "nonResponsive":"BrowserPlus antwortet nicht: Timeout {secs} Sekunden",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Mich fragen, bevor neue Sites, die ich besuche, BrowserPlus verwenden dürfen.",
             "generalTab":"Allgemein",
             "troubleshoot4Body":"Wenn keine dieser Schritte helfen, liegt möglicherweise ein Problem mit BrowserPlus oder der Site, die BrowserPlus verwendet, vor. Bitte senden Sie uns über das Feld unten einen Fehlerbericht mit detaillierten Angaben.",
@@ -875,7 +875,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"Fichier/dossier :"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Le rapport a été transmis",
             "troubleshootSending":"Envoi...",
             "troubleshoot3":"3",
@@ -903,7 +903,7 @@
             "servicesTab":"Services",
             "generalUninstallButton":"Désinstaller BrowserPlus...",
             "nonResponsive":"BrowserPlus ne répond pas : temporisation de {secs} secondes",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Toujours me demander avant d'autoriser les nouveaux sites que je visite à utiliser BrowserPlus",
             "generalTab":"Généralités",
             "troubleshoot4Body":"Si aucune de ces solutions n'est efficace, il s'agit sans doute d'un problème interne de BrowserPlus (ou du site qui utilise BrowserPlus) : utilisez la zone ci-dessous pour nous faire parvenir une description détaillée du problème.",
@@ -1045,7 +1045,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"File/Folder:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Report sent",
             "troubleshootSending":"Sending...",
             "troubleshoot3":"3",
@@ -1073,7 +1073,7 @@
             "servicesTab":"Services",
             "generalUninstallButton":"Uninstall BrowserPlus...",
             "nonResponsive":"BrowserPlus is not responding: Timeout {secs} seconds",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Always ask me before allowing new sites I visit to use BrowserPlus.",
             "generalTab":"General",
             "troubleshoot4Body":"If none of these steps help, there could be a problem with BrowserPlus or with the site using BrowserPlus. Please send us a bug report with a detailed explanation using the field below",
@@ -1215,7 +1215,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"Archivo/carpeta:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Informe enviado",
             "troubleshootSending":"Enviando…",
             "troubleshoot3":"3",
@@ -1243,7 +1243,7 @@
             "servicesTab":"Servicios",
             "generalUninstallButton":"Desinstalar BrowserPlus…",
             "nonResponsive":"BrowserPlus no responde desde hace {secs} segundos",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Preguntarme siempre antes de permitir que los sitios web nuevos que visito utilicen BrowserPlus.",
             "generalTab":"General",
             "troubleshoot4Body":"Si ninguno de estos pasos ayuda a solucionar el problema, puede que éste se encuentre en BrowserPlus o en el sitio que está utilizando BrowserPlus. Por favor, envíanos un informe de error con una explicación detallada utilizando el campo a continuación.",
@@ -1385,7 +1385,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"Fil/Mappe:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Rapport sendt",
             "troubleshootSending":"Sender...",
             "troubleshoot3":"3",
@@ -1413,7 +1413,7 @@
             "servicesTab":"Tjenester",
             "generalUninstallButton":"Afinstaller BrowserPlus...",
             "nonResponsive":"BrowserPlus reagerer ikke: Timeout efter {secs} sekunder",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Spørg mig altid før nye sites, som jeg besøger, gives tilladelse til at bruge BrowserPlus.",
             "generalTab":"Generelt",
             "troubleshoot4Body":"Hvis ingen af disse trin hjælper, kan der være et problem med BrowserPlus eller med den site, som bruger BrowserPlus. Send os en fejlrapport med en detaljeret forklaring ved brug af feltet nedenfor",
@@ -1555,7 +1555,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"Archivo/carpeta:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Informe enviado",
             "troubleshootSending":"Enviando…",
             "troubleshoot3":"3",
@@ -1583,7 +1583,7 @@
             "servicesTab":"Servicios",
             "generalUninstallButton":"Desinstalar BrowserPlus…",
             "nonResponsive":"BrowserPlus no responde desde hace {secs} segundos",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Preguntarme siempre antes de permitir que los sitios web nuevos que visito utilicen BrowserPlus.",
             "generalTab":"General",
             "troubleshoot4Body":"Si ninguno de estos pasos ayuda a solucionar el problema, puede que éste se encuentre en BrowserPlus o en el sitio que está utilizando BrowserPlus. Por favor, envíanos un informe de error con una explicación detallada utilizando el campo a continuación.",
@@ -1725,7 +1725,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"Fichier/dossier :"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Le rapport a été transmis",
             "troubleshootSending":"Envoi en cours...",
             "troubleshoot3":"3",
@@ -1753,7 +1753,7 @@
             "servicesTab":"Services",
             "generalUninstallButton":"Désinstaller BrowserPlus...",
             "nonResponsive":"BrowserPlus ne répond pas : temporisation de {secs} secondes",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Toujours me demander avant d'autoriser les nouveaux sites que je visite à utiliser BrowserPlus",
             "generalTab":"Généralités",
             "troubleshoot4Body":"Si aucune de ces solutions n'est efficace, il s'agit sans doute d'un problème interne de BrowserPlus (ou du site qui utilise BrowserPlus) : utilisez la zone ci-dessous pour nous faire parvenir une description détaillée du problème.",
@@ -1895,7 +1895,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"File/Folder:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Laporan dikirim",
             "troubleshootSending":"Mengirim...",
             "troubleshoot3":"3",
@@ -1923,7 +1923,7 @@
             "servicesTab":"Layanan",
             "generalUninstallButton":"Hapus instalan BrowserPlus...",
             "nonResponsive":"BrowserPlus tidak merespon: Waktu habis {secs} detik",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Selalu tanya ke saya sebelum mengizinkan situs baru yang saya kunjungi menggunakan BrowserPlus.",
             "generalTab":"Umum",
             "troubleshoot4Body":"Bila langkah-langkah ini tidak dapat membantu, mungkin ada masalah dengan BrowserPlus atau dengan situs yang menggunakan BrowserPlus. Silakan kirim laporan bug kepada kami dengan penjelasan detail menggunakan kolom di bawah.",
@@ -2065,7 +2065,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"File/Folder:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Report sent",
             "troubleshootSending":"Sending...",
             "troubleshoot3":"3",
@@ -2093,7 +2093,7 @@
             "servicesTab":"Services",
             "generalUninstallButton":"Uninstall BrowserPlus...",
             "nonResponsive":"BrowserPlus is not responding: Timeout {secs} seconds",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Always ask me before allowing new sites I visit to use BrowserPlus.",
             "generalTab":"General",
             "troubleshoot4Body":"If none of these steps help, there could be a problem with BrowserPlus or with the site using BrowserPlus. Please send us a bug report with a detailed explanation using the field below",
@@ -2235,7 +2235,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"File/Folder:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Report sent",
             "troubleshootSending":"Sending...",
             "troubleshoot3":"3",
@@ -2263,7 +2263,7 @@
             "servicesTab":"Services",
             "generalUninstallButton":"Uninstall BrowserPlus...",
             "nonResponsive":"BrowserPlus is not responding: Timeout {secs} seconds",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Always ask me before allowing new sites I visit to use BrowserPlus.",
             "generalTab":"General",
             "troubleshoot4Body":"If none of these steps help, there could be a problem with BrowserPlus or with the site using BrowserPlus. Please send us a bug report with a detailed explanation using the field below",
@@ -2405,7 +2405,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"File/cartella:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Rapporto inviato",
             "troubleshootSending":"Invio...",
             "troubleshoot3":"3",
@@ -2433,7 +2433,7 @@
             "servicesTab":"Servizi",
             "generalUninstallButton":"Disinstalla BrowserPlus...",
             "nonResponsive":"BrowserPlus non risponde. Timeout {secs} secondi",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Chiedi sempre prima di permettere ai nuovi siti che visito di usare BrowserPlus.",
             "generalTab":"Generali",
             "troubleshoot4Body":"Se nessuno di questi rimedi è di aiuto, potrebbe esserci un problema con BrowserPlus o con il sito che lo usa. Inviaci un rapporto dei bug riscontrati, descrivendo in dettaglio i problemi nel campo qui sotto.",
@@ -2575,7 +2575,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"Archivo/carpeta:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Informe enviado",
             "troubleshootSending":"Enviando…",
             "troubleshoot3":"3",
@@ -2603,7 +2603,7 @@
             "servicesTab":"Servicios",
             "generalUninstallButton":"Desinstalar BrowserPlus…",
             "nonResponsive":"BrowserPlus no responde desde hace {secs} segundos",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Preguntarme siempre antes de permitir que los sitios web nuevos que visito utilicen BrowserPlus.",
             "generalTab":"General",
             "troubleshoot4Body":"Si ninguno de estos pasos ayuda a solucionar el problema, puede que éste se encuentre en BrowserPlus o en el sitio que está utilizando BrowserPlus. Por favor, envíanos un informe de error con una explicación detallada utilizando el campo a continuación.",
@@ -2745,7 +2745,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"Fil/mapp:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Rapporten har skickats",
             "troubleshootSending":"Skickar...",
             "troubleshoot3":"3",
@@ -2773,7 +2773,7 @@
             "servicesTab":"Tjänster",
             "generalUninstallButton":"Avinstallera BrowserPlus...",
             "nonResponsive":"BrowserPlus svarar inte: Tidsgräns {secs} sekunder",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Fråga alltid innan nya webbplatser jag besöker tillåts att använda BrowserPlus.",
             "generalTab":"Allmänt",
             "troubleshoot4Body":"Om inget av de här stegen hjälper kan det vara något fel på BrowserPlus eller med den webbplats som använder BrowserPlus. Skicka en felrapport med en detaljerad förklaring i nedanstående fält",
@@ -2915,7 +2915,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"文件/文件夹﹕"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"报告已送出",
             "troubleshootSending":"传送中...",
             "troubleshoot3":"3",
@@ -2943,7 +2943,7 @@
             "servicesTab":"服务",
             "generalUninstallButton":"正在卸载 BrowserPlus...",
             "nonResponsive":"BrowserPlus 不回应﹕ 超时 {secs} 秒",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"每当我浏览新网站时，若需使用 BrowserPlus，先征求我的同意。",
             "generalTab":"常规",
             "troubleshoot4Body":"如果所有方法都不能解决问题，则可能是 BrowserPlus 或使用 BrowserPlus 的网站的问题。请在下面的空栏内描述遇到的问题，并将报告传送至本部",
@@ -3085,7 +3085,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"Archivo/carpeta:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Informe enviado",
             "troubleshootSending":"Enviando…",
             "troubleshoot3":"3",
@@ -3113,7 +3113,7 @@
             "servicesTab":"Servicios",
             "generalUninstallButton":"Desinstalar BrowserPlus…",
             "nonResponsive":"BrowserPlus no responde desde hace {secs} segundos",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Preguntarme siempre antes de permitir que los sitios web nuevos que visito utilicen BrowserPlus.",
             "generalTab":"General",
             "troubleshoot4Body":"Si ninguno de estos pasos ayuda a solucionar el problema, puede que éste se encuentre en BrowserPlus o en el sitio que está utilizando BrowserPlus. Por favor, envíanos un informe de error con una explicación detallada utilizando el campo a continuación.",
@@ -3255,7 +3255,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"파일/폴더:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"보고서를 보냈습니다",
             "troubleshootSending":"보내는 중...",
             "troubleshoot3":"3",
@@ -3283,7 +3283,7 @@
             "servicesTab":"서비스",
             "generalUninstallButton":"BrowserPlus 제거...",
             "nonResponsive":"BrowserPlus 응답이 없습니다: 타임아웃 {secs}초",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"내가 방문하는 새 사이트가 BrowserPlus사용을 허용하기 전에 항상 내게 묻습니다.",
             "generalTab":"일반",
             "troubleshoot4Body":"위의 단계들이 전혀 도움이 되지 않는다면 BrowserPlus나 BrowserPlus를 사용하는 사이트의 문제일 수 있습니다. 아래 입력란을 사용하여 자세한 설명과 함께 버그 보고서를 보내주세요.",
@@ -3425,7 +3425,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"Arquivo/pasta:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Relatório enviado",
             "troubleshootSending":"Enviando...",
             "troubleshoot3":"3",
@@ -3453,7 +3453,7 @@
             "servicesTab":"Serviços",
             "generalUninstallButton":"Desinstalar o BrowserPlus...",
             "nonResponsive":"BrowserPlus não está respondendo: Timeout {secs} segundos",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Sempre perguntar antes de permitir que os novos sites acessados usem o BrowserPlus.",
             "generalTab":"Geral",
             "troubleshoot4Body":"Se nenhuma destas etapas ajudar, talvez exista um problema com o BrowserPlus ou com o site que está usando o BrowserPlus. Envie-nos um relatório de bug com uma explicação detalhada usando o campo abaixo.",
@@ -3595,7 +3595,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"Archivo/carpeta:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Informe enviado",
             "troubleshootSending":"Enviando…",
             "troubleshoot3":"3",
@@ -3623,7 +3623,7 @@
             "servicesTab":"Servicios",
             "generalUninstallButton":"Desinstalar BrowserPlus…",
             "nonResponsive":"BrowserPlus no responde desde hace {secs} segundos",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Preguntarme siempre antes de permitir que los sitios web nuevos que visito utilicen BrowserPlus.",
             "generalTab":"General",
             "troubleshoot4Body":"Si ninguno de estos pasos ayuda a solucionar el problema, puede que éste se encuentre en BrowserPlus o en el sitio que está utilizando BrowserPlus. Por favor, envíanos un informe de error con una explicación detallada utilizando el campo a continuación.",
@@ -3765,7 +3765,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"Fil/mappe:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Rapport er sendt",
             "troubleshootSending":"Sender...",
             "troubleshoot3":"3",
@@ -3793,7 +3793,7 @@
             "servicesTab":"Tjenester",
             "generalUninstallButton":"Avinstaller BrowserPlus...",
             "nonResponsive":"BrowserPlus gir ikke respons. Tidsavbrudd {secs} sekunder",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Spør meg alltid før nye nettområder jeg besøker får tillatelse til å bruke BrowserPlus.",
             "generalTab":"Generelt",
             "troubleshoot4Body":"Hvis ingen av disse trinnene hjelper, kan det være et problem med BrowserPlus eller med nettområdet som bruker BrowserPlus. Send en feilrapport med detaljert forklaring, og bruk feltene nedenfor",
@@ -3935,7 +3935,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"File/Folder:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Laporan dikirim",
             "troubleshootSending":"Mengirim...",
             "troubleshoot3":"3",
@@ -3963,7 +3963,7 @@
             "servicesTab":"Layanan",
             "generalUninstallButton":"Hapus instalan BrowserPlus...",
             "nonResponsive":"BrowserPlus tidak merespon: Waktu habis {secs} detik",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Selalu tanya ke saya sebelum mengizinkan situs baru yang saya kunjungi menggunakan BrowserPlus.",
             "generalTab":"Umum",
             "troubleshoot4Body":"Bila langkah-langkah ini tidak dapat membantu, mungkin ada masalah dengan BrowserPlus atau dengan situs yang menggunakan BrowserPlus. Silakan kirim laporan bug kepada kami dengan penjelasan detail menggunakan kolom di bawah.",
@@ -4105,7 +4105,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"File/Folder:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Report sent",
             "troubleshootSending":"Sending...",
             "troubleshoot3":"3",
@@ -4133,7 +4133,7 @@
             "servicesTab":"Services",
             "generalUninstallButton":"Uninstall BrowserPlus...",
             "nonResponsive":"BrowserPlus is not responding: Timeout {secs} seconds",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Always ask me before allowing new sites I visit to use BrowserPlus.",
             "generalTab":"General",
             "troubleshoot4Body":"If none of these steps help, there could be a problem with BrowserPlus or with the site using BrowserPlus. Please send us a bug report with a detailed explanation using the field below",
@@ -4275,7 +4275,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"Fichier/dossier :"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Le rapport a été transmis",
             "troubleshootSending":"Envoi...",
             "troubleshoot3":"3",
@@ -4303,7 +4303,7 @@
             "servicesTab":"Services",
             "generalUninstallButton":"Désinstaller BrowserPlus...",
             "nonResponsive":"BrowserPlus ne répond pas : temporisation de {secs} secondes",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Toujours me demander avant d'autoriser les nouveaux sites que je visite à utiliser BrowserPlus",
             "generalTab":"Généralités",
             "troubleshoot4Body":"Si aucune de ces solutions n'est efficace, il s'agit sans doute d'un problème interne de BrowserPlus (ou du site qui utilise BrowserPlus) : utilisez la zone ci-dessous pour nous faire parvenir une description détaillée du problème.",
@@ -4615,7 +4615,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"Archivo/Carpeta:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Informe enviado",
             "troubleshootSending":"Enviando…",
             "troubleshoot3":"3",
@@ -4643,7 +4643,7 @@
             "servicesTab":"Servicios",
             "generalUninstallButton":"Desinstalar BrowserPlus…",
             "nonResponsive":"BrowserPlus no responde desde hace {secs} segundos",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Preguntarme siempre antes de permitir que los sitios web nuevos que visito utilicen BrowserPlus.",
             "generalTab":"General",
             "troubleshoot4Body":"Si ninguno de estos pasos ayuda a solucionar el problema, puede que el problema esté en BrowserPlus o en el sitio que está utilizando BrowserPlus. Por favor, envíanos un informe de error con una explicación detallada utilizando el campo a continuación.",
@@ -4785,7 +4785,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"File/Folder:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Report sent",
             "troubleshootSending":"Sending...",
             "troubleshoot3":"3",
@@ -4813,7 +4813,7 @@
             "servicesTab":"Services",
             "generalUninstallButton":"Uninstall BrowserPlus...",
             "nonResponsive":"BrowserPlus is not responding: Timeout {secs} seconds",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Always ask me before allowing new sites I visit to use BrowserPlus.",
             "generalTab":"General",
             "troubleshoot4Body":"If none of these steps help, there could be a problem with BrowserPlus or with the site using BrowserPlus. Please send us a bug report with a detailed explanation using the field below",
@@ -4955,7 +4955,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"ไฟล์/โฟลเดอร์:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"ส่งรายงานแล้ว",
             "troubleshootSending":"กำลังส่ง...",
             "troubleshoot3":"3",
@@ -4983,7 +4983,7 @@
             "servicesTab":"เซอร์วิส",
             "generalUninstallButton":"ยกเลิกการติดตั้ง BrowserPlus...",
             "nonResponsive":"BrowserPlus ไม่ตอบสนอง: หมดเวลา{secs} วินาที",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"ถามฉันก่อนที่จะอนุญาตไซต์ใหม่ให้ใช้ BrowserPlus",
             "generalTab":"ทั่วไป",
             "troubleshoot4Body":"หากขั้นตอนทั้งหมดนี้ไม่สามารถแก้ปัญหาได้  อาจมีปัญหากับ BrowserPlus  หรือกับไซต์ที่ใช้ BrowserPlus  โปรดแจ้งบั๊กให้เราทราบพร้อมอธิบายละเอียดตามช่องด้านล่างนี้",
@@ -5125,7 +5125,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"Datei/Ordner:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Bericht gesendet",
             "troubleshootSending":"Senden...",
             "troubleshoot3":"3",
@@ -5153,7 +5153,7 @@
             "servicesTab":"Services",
             "generalUninstallButton":"BrowserPlus deinstallieren...",
             "nonResponsive":"BrowserPlus antwortet nicht: Timeout {secs} Sekunden",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Mich fragen, bevor neue Sites, die ich besuche, BrowserPlus verwenden dürfen.",
             "generalTab":"Allgemein",
             "troubleshoot4Body":"Wenn keine dieser Schritte helfen, liegt möglicherweise ein Problem mit BrowserPlus oder der Site, die BrowserPlus verwendet, vor. Bitte senden Sie uns über das Feld unten einen Fehlerbericht mit detaillierten Angaben.",
@@ -5295,7 +5295,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"File/Folder:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Report sent",
             "troubleshootSending":"Sending...",
             "troubleshoot3":"3",
@@ -5323,7 +5323,7 @@
             "servicesTab":"Services",
             "generalUninstallButton":"Uninstall BrowserPlus...",
             "nonResponsive":"BrowserPlus is not responding: Timeout {secs} seconds",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Always ask me before allowing new sites I visit to use BrowserPlus.",
             "generalTab":"General",
             "troubleshoot4Body":"If none of these steps help, there could be a problem with BrowserPlus or with the site using BrowserPlus. Please send us a bug report with a detailed explanation using the field below",
@@ -5465,7 +5465,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"Fil/mapp:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Rapporten har skickats",
             "troubleshootSending":"Skickar...",
             "troubleshoot3":"3",
@@ -5493,7 +5493,7 @@
             "servicesTab":"Tjänster",
             "generalUninstallButton":"Avinstallera BrowserPlus...",
             "nonResponsive":"BrowserPlus svarar inte: Tidsgräns {secs} sekunder",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Fråga alltid innan nya webbplatser jag besöker tillåts att använda BrowserPlus.",
             "generalTab":"Allmänt",
             "troubleshoot4Body":"Om inget av de här stegen hjälper kan det vara något fel på BrowserPlus eller med den webbplats som använder BrowserPlus. Skicka en felrapport med en detaljerad förklaring i nedanstående fält",
@@ -5635,7 +5635,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"Fil/Mappe:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Rapport sendt",
             "troubleshootSending":"Sender...",
             "troubleshoot3":"3",
@@ -5663,7 +5663,7 @@
             "servicesTab":"Tjenester",
             "generalUninstallButton":"Afinstaller BrowserPlus...",
             "nonResponsive":"BrowserPlus reagerer ikke: Timeout efter {secs} sekunder",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Spørg mig altid før nye sites, som jeg besøger, gives tilladelse til at bruge BrowserPlus.",
             "generalTab":"Generelt",
             "troubleshoot4Body":"Hvis ingen af disse trin hjælper, kan der være et problem med BrowserPlus eller med den site, som bruger BrowserPlus. Send os en fejlrapport med en detaljeret forklaring ved brug af feltet nedenfor",
@@ -5805,7 +5805,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"文件/文件夹﹕"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"报告已送出",
             "troubleshootSending":"传送中...",
             "troubleshoot3":"3",
@@ -5833,7 +5833,7 @@
             "servicesTab":"服务",
             "generalUninstallButton":"正在卸载 BrowserPlus...",
             "nonResponsive":"BrowserPlus 不回应﹕ 超时 {secs} 秒",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"每当我浏览新网站时，若需使用 BrowserPlus，先征求我的同意。",
             "generalTab":"常规",
             "troubleshoot4Body":"如果所有方法都不能解决问题，则可能是 BrowserPlus 或使用 BrowserPlus 的网站的问题。请在下面的空栏内描述遇到的问题，并将报告传送至本部",
@@ -5975,7 +5975,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"Arquivo/pasta:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Relatório enviado",
             "troubleshootSending":"Enviando...",
             "troubleshoot3":"3",
@@ -6003,7 +6003,7 @@
             "servicesTab":"Serviços",
             "generalUninstallButton":"Desinstalar o BrowserPlus...",
             "nonResponsive":"BrowserPlus não está respondendo: Timeout {secs} segundos",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Sempre perguntar antes de permitir que os novos sites acessados usem o BrowserPlus.",
             "generalTab":"Geral",
             "troubleshoot4Body":"Se nenhuma destas etapas ajudar, talvez exista um problema com o BrowserPlus ou com o site que está usando o BrowserPlus. Envie-nos um relatório de bug com uma explicação detalhada usando o campo abaixo.",
@@ -6145,7 +6145,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"Archivo/carpeta:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Informe enviado",
             "troubleshootSending":"Enviando…",
             "troubleshoot3":"3",
@@ -6173,7 +6173,7 @@
             "servicesTab":"Servicios",
             "generalUninstallButton":"Desinstalar BrowserPlus…",
             "nonResponsive":"BrowserPlus no responde desde hace {secs} segundos",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Preguntarme siempre antes de permitir que los sitios web nuevos que visito utilicen BrowserPlus.",
             "generalTab":"General",
             "troubleshoot4Body":"Si ninguno de estos pasos ayuda a solucionar el problema, puede que éste se encuentre en BrowserPlus o en el sitio que está utilizando BrowserPlus. Por favor, envíanos un informe de error con una explicación detallada utilizando el campo a continuación.",
@@ -6315,7 +6315,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"Tập tin/Thư mục:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Đã gửi báo cáo",
             "troubleshootSending":"Đang gửi...",
             "troubleshoot3":"3",
@@ -6343,7 +6343,7 @@
             "servicesTab":"Dịch vụ",
             "generalUninstallButton":"Bỏ cài đặt BrowserPlus...",
             "nonResponsive":"BrowserPlus đang bị treo: Thời gian tạm ngưng {secs} giây",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Luôn hỏi tôi trước khi cho phép trang web tôi mới vào dùng BrowserPlus.",
             "generalTab":"Tổng quát",
             "troubleshoot4Body":"Nếu tất cả các bước trên đều không khắc phục được sự cố, có thể do BrowserPlus hoặc trang web dùng BrowserPlus có vấn đề. Vui lòng gửi báo cáo lỗi cho chúng tôi kèm theo trình bày chi tiết của bạn về sự cố.",
@@ -6485,7 +6485,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"Tập tin/Thư mục:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Đã gửi báo cáo",
             "troubleshootSending":"Đang gửi...",
             "troubleshoot3":"3",
@@ -6513,7 +6513,7 @@
             "servicesTab":"Dịch vụ",
             "generalUninstallButton":"Bỏ cài đặt BrowserPlus...",
             "nonResponsive":"BrowserPlus đang bị treo: Thời gian tạm ngưng {secs} giây",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Luôn hỏi tôi trước khi cho phép trang web tôi mới vào dùng BrowserPlus.",
             "generalTab":"Tổng quát",
             "troubleshoot4Body":"Nếu tất cả các bước trên đều không khắc phục được sự cố, có thể do BrowserPlus hoặc trang web dùng BrowserPlus có vấn đề. Vui lòng gửi báo cáo lỗi cho chúng tôi kèm theo trình bày chi tiết của bạn về sự cố.",
@@ -6655,7 +6655,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"檔案/資料夾﹕"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"報告已送出",
             "troubleshootSending":"傳送中...",
             "troubleshoot3":"3",
@@ -6683,7 +6683,7 @@
             "servicesTab":"服務",
             "generalUninstallButton":"移除 BrowserPlus...",
             "nonResponsive":"BrowserPlus 沒有回應﹕ 逾時 {secs} 秒",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"每當我瀏覽新網站時，若需使用 BrowserPlus，先徵求我的同意。",
             "generalTab":"一般",
             "troubleshoot4Body":"如果你嘗試過上述所有方法，都不能解決問題的話，則有可能是 BrowserPlus ，或是在該網站中使用 BrowserPlus 發生問題。請在下面的表單中，描述您遇到的問題，並將報告傳送至我們的開發團隊處理。",
@@ -6825,7 +6825,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"Fil/mappe:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Rapport er sendt",
             "troubleshootSending":"Sender...",
             "troubleshoot3":"3",
@@ -6853,7 +6853,7 @@
             "servicesTab":"Tjenester",
             "generalUninstallButton":"Avinstaller BrowserPlus...",
             "nonResponsive":"BrowserPlus gir ikke respons. Tidsavbrudd {secs} sekunder",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Spør meg alltid før nye nettområder jeg besøker får tillatelse til å bruke BrowserPlus.",
             "generalTab":"Generelt",
             "troubleshoot4Body":"Hvis ingen av disse trinnene hjelper, kan det være et problem med BrowserPlus eller med nettområdet som bruker BrowserPlus. Send en feilrapport med detaljert forklaring, og bruk feltene nedenfor",
@@ -6995,7 +6995,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"ไฟล์/โฟลเดอร์:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"ส่งรายงานแล้ว",
             "troubleshootSending":"กำลังส่ง...",
             "troubleshoot3":"3",
@@ -7023,7 +7023,7 @@
             "servicesTab":"เซอร์วิส",
             "generalUninstallButton":"ยกเลิกการติดตั้ง BrowserPlus...",
             "nonResponsive":"BrowserPlus ไม่ตอบสนอง: หมดเวลา{secs} วินาที",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"ถามฉันก่อนที่จะอนุญาตไซต์ใหม่ให้ใช้ BrowserPlus",
             "generalTab":"ทั่วไป",
             "troubleshoot4Body":"หากขั้นตอนทั้งหมดนี้ไม่สามารถแก้ปัญหาได้  อาจมีปัญหากับ BrowserPlus  หรือกับไซต์ที่ใช้ BrowserPlus  โปรดแจ้งบั๊กให้เราทราบพร้อมอธิบายละเอียดตามช่องด้านล่างนี้",
@@ -7165,7 +7165,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"File/Folder:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Report sent",
             "troubleshootSending":"Sending...",
             "troubleshoot3":"3",
@@ -7193,7 +7193,7 @@
             "servicesTab":"Services",
             "generalUninstallButton":"Uninstall BrowserPlus...",
             "nonResponsive":"BrowserPlus is not responding: Timeout {secs} seconds",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Always ask me before allowing new sites I visit to use BrowserPlus.",
             "generalTab":"General",
             "troubleshoot4Body":"If none of these steps help, there could be a problem with BrowserPlus or with the site using BrowserPlus. Please send us a bug report with a detailed explanation using the field below",
@@ -7335,7 +7335,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"文件/文件夹﹕"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"报告已送出",
             "troubleshootSending":"传送中...",
             "troubleshoot3":"3",
@@ -7363,7 +7363,7 @@
             "servicesTab":"服务",
             "generalUninstallButton":"正在卸载 BrowserPlus...",
             "nonResponsive":"BrowserPlus 不回应﹕ 超时 {secs} 秒",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"每当我浏览新网站时，若需使用 BrowserPlus，先征求我的同意。",
             "generalTab":"常规",
             "troubleshoot4Body":"如果所有方法都不能解决问题，则可能是 BrowserPlus 或使用 BrowserPlus 的网站的问题。请在下面的空栏内描述遇到的问题，并将报告传送至本部",
@@ -7505,7 +7505,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"File/Folder:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Report sent",
             "troubleshootSending":"Sending...",
             "troubleshoot3":"3",
@@ -7533,7 +7533,7 @@
             "servicesTab":"Services",
             "generalUninstallButton":"Uninstall BrowserPlus...",
             "nonResponsive":"BrowserPlus is not responding: Timeout {secs} seconds",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Always ask me before allowing new sites I visit to use BrowserPlus.",
             "generalTab":"General",
             "troubleshoot4Body":"If none of these steps help, there could be a problem with BrowserPlus or with the site using BrowserPlus. Please send us a bug report with a detailed explanation using the field below",
@@ -7675,7 +7675,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"File/Folder:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Report sent",
             "troubleshootSending":"Sending...",
             "troubleshoot3":"3",
@@ -7703,7 +7703,7 @@
             "servicesTab":"Services",
             "generalUninstallButton":"Uninstall BrowserPlus...",
             "nonResponsive":"BrowserPlus is not responding: Timeout {secs} seconds",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Always ask me before allowing new sites I visit to use BrowserPlus.",
             "generalTab":"General",
             "troubleshoot4Body":"If none of these steps help, there could be a problem with BrowserPlus or with the site using BrowserPlus. Please send us a bug report with a detailed explanation using the field below",
@@ -7845,7 +7845,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"Archivo/carpeta:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Informe enviado",
             "troubleshootSending":"Enviando…",
             "troubleshoot3":"3",
@@ -7873,7 +7873,7 @@
             "servicesTab":"Servicios",
             "generalUninstallButton":"Desinstalar BrowserPlus…",
             "nonResponsive":"BrowserPlus no ha respondido en {secs} segundos",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Preguntarme siempre antes de permitir que los sitios web nuevos que visito utilicen BrowserPlus.",
             "generalTab":"General",
             "troubleshoot4Body":"Si ninguno de estos pasos ayuda a solucionar el problema, tal vez éste se encuentre en BrowserPlus o en el sitio que está utilizando BrowserPlus. Por favor, envianos un informe de error con una explicación detallada utilizando el campo que aparece a continuación.",
@@ -8015,7 +8015,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"파일/폴더:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"보고서를 보냈습니다",
             "troubleshootSending":"보내는 중...",
             "troubleshoot3":"3",
@@ -8043,7 +8043,7 @@
             "servicesTab":"서비스",
             "generalUninstallButton":"BrowserPlus 제거...",
             "nonResponsive":"BrowserPlus 응답이 없습니다: 타임아웃 {secs}초",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"내가 방문하는 새 사이트가 BrowserPlus사용을 허용하기 전에 항상 내게 묻습니다.",
             "generalTab":"일반",
             "troubleshoot4Body":"위의 단계들이 전혀 도움이 되지 않는다면 BrowserPlus나 BrowserPlus를 사용하는 사이트의 문제일 수 있습니다. 아래 입력란을 사용하여 자세한 설명과 함께 버그 보고서를 보내주세요.",
@@ -8185,7 +8185,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"File/Folder:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Report sent",
             "troubleshootSending":"Sending...",
             "troubleshoot3":"3",
@@ -8213,7 +8213,7 @@
             "servicesTab":"Services",
             "generalUninstallButton":"Uninstall BrowserPlus...",
             "nonResponsive":"BrowserPlus is not responding: Timeout {secs} seconds",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Always ask me before allowing new sites I visit to use BrowserPlus.",
             "generalTab":"General",
             "troubleshoot4Body":"If none of these steps help, there could be a problem with BrowserPlus or with the site using BrowserPlus. Please send us a bug report with a detailed explanation using the field below",
@@ -8355,7 +8355,7 @@
             "FileBrowsePluglet::kFileFolderNameKey":"File/Folder:"
         },
         "config":{
-            "troubleshootEmailLabel":"XXX",
+            "troubleshootEmailLabel":"",
             "troubleshootSentYes":"Report sent",
             "troubleshootSending":"Sending...",
             "troubleshoot3":"3",
@@ -8383,7 +8383,7 @@
             "servicesTab":"Services",
             "generalUninstallButton":"Uninstall BrowserPlus...",
             "nonResponsive":"BrowserPlus is not responding: Timeout {secs} seconds",
-            "troubleshootEnterBugReport":"XXX",
+            "troubleshootEnterBugReport":"",
             "generalAskAlwaysText":"Always ask me before allowing new sites I visit to use BrowserPlus.",
             "generalTab":"General",
             "troubleshoot4Body":"If none of these steps help, there could be a problem with BrowserPlus or with the site using BrowserPlus. Please send us a bug report with a detailed explanation using the field below",
