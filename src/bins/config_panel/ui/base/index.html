@@ -81,7 +81,7 @@
                     <tr>
                         <td class="stepNumber"><span id="troubleshoot1"><%= config.troubleshoot1 %></span></td>
                         <td class="stepBody">
-                            <button id="troubleshootRestart"><%= config.troubleshootRestart %></button> <span id="troubleshootConnectStatus"><%= config.troubleshootConnectStatus %></span>
+                            <button id="troubleshootRestart"><%= config.troubleshootRestart %></button>
                         </td>
                     </tr>
                     <tr>
@@ -99,12 +99,16 @@
                 </table>
 
                 <div id="troubleReport">
-                    <textarea id="troubleDescription" rows="13" cols="68"></textarea>
+					<div id="troubleEmailSection" style="display:none">
+						<label><%= config.troubleshootEmailLabel %></label>
+						<input id="troubleEmail" type="text">
+					</div>
+                    <textarea id="troubleDescription" rows="13" cols="68"><%= config.troubleshootEnterBugReport %></textarea>
                 </div>
                 <div id="troubleAction">
                     <input id="troubleshootIncludeLogs" type="checkbox" checked/>
                     <label for="troubleshootIncludeLogs">
-                        <span id="troubleshootLogfile"><%= config.troubleshootLogfile %></span> (<span id="troubleshootLogSize">0.00 KB</span>)
+                        <span id="troubleshootLogfile"><%= config.troubleshootLogfile %></span>
                     </label>
                     <button id="troubleshootSend"><%= config.troubleshootSend %></button>
                     <span id="troubleshootSendStatus"></span>

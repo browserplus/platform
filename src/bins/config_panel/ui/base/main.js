@@ -20,20 +20,6 @@ var ViewMan = (function() {
         '  <div class="entryDesc">{desc}</div>' + 
         '</div>';
 
-    var prettySize = function(s) {
-        var rval, oneMeg = (1024*1024), oneK = 1024, suffix;
-        if (s > oneMeg) {
-            rval = s / oneMeg;
-            suffix = "MB";
-        } else {
-            rval = s / oneK;
-            suffix = "KB";
-        }
-        rval = rval.toString();
-        rval = rval.slice(0, rval.indexOf('.') + 3);
-        return rval + suffix;
-    };
-    
     var wbr = function(s) {
         return s.replace(/\//g, "/<wbr>");
     };
@@ -126,8 +112,15 @@ var ViewMan = (function() {
 
     YE.addListener("troubleshootSend", "click", 
         function(e) {
+			var emailStr = "";
             var includeLogs = YD.get("troubleshootIncludeLogs").checked;
-            var report = '"' + YD.get("troubleDescription").value + '"';
+
+			// for locales with email addr, prepend it to issue description
+			if (YD.get("troubleEmail") && YD.get("troubleEmail").value) {
+				emailStr = "Email:" + YD.get("troubleEmail").value + "\n";
+			}
+            var report = '"' + emailStr + YD.get("troubleDescription").value + '"';
+
             YD.get("troubleshootSendStatus").innerHTML = "<%= config.troubleshootSending %>";
             var rv = BPState.sendReport(report, includeLogs);
             YD.get("troubleshootSendStatus").innerHTML = rv ? "<%= config.troubleshootSentYes %>" : "<%= config.troubleshootSentNo %>";
@@ -288,29 +281,15 @@ var ViewMan = (function() {
         troubleshooting: {
             divId: "troubleshootingPane",
             buttonId: "troubleshootingTab",
-            updatePollMS: 20000,
+            updatePollMS: 2000000,
             
             update: function() {
                 // Can we talk to daemon?
                 var poll = this.updatePollMS;
                 var timeoutHandle = setTimeout(
                     function() { 
-                        YD.get("troubleshootConnectStatus").innerHTML = 
-						YAHOO.lang.substitute(
-						  "<%= config.nonResponsive %>",
-						  {secs: (poll/1000)});
+						// do nothing
                     }, this.poll);
-
-                BPState.get("activeSites", 
-                            function(e) {
-                                clearTimeout(timeoutHandle);
-                                YD.get("troubleshootConnectStatus").innerHTML = 
-								"<%= config.connected %>";
-                            });
-
-                // get log sizes (doesn't require daemon connection)
-                var s = BPState.getSync("logSize");
-                YD.get("troubleshootLogSize").innerHTML = prettySize(s);
             }
         }
     };
@@ -379,6 +358,12 @@ var ViewMan = (function() {
 
 try {
     // tab is ("general" | "services" | "permissions" |"troubleshooting" )
+
+	// if email label is set, show email section in trouble shooting panel
+	if ("<%= config.troubleshootEmailLabel %>") {
+		YAHOO.util.Dom.setStyle("troubleEmailSection", "display", "block");
+	}
+
     var tab = "general";
     ViewMan.show(tab);
 } catch (e) {
