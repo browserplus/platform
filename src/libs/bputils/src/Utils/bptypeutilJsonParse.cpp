@@ -37,7 +37,7 @@ struct ParseContext {
 #define GOT_ELEMENT(pc, elem) {                                         \
   if ((pc)->nodeStack.size() == 0) {                                    \
       (pc)->nodeStack.push(elem);                                       \
-  } else if ((pc)->nodeStack.top()->type() == BPTList) {                \   
+  } else if ((pc)->nodeStack.top()->type() == BPTList) {                \
       dynamic_cast<bp::List *>((pc)->nodeStack.top())->append(elem);    \
   } else if ((pc)->nodeStack.top()->type() == BPTMap) {                 \
       dynamic_cast<bp::Map *>((pc)->nodeStack.top())->add(              \
