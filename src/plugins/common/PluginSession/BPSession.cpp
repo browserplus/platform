@@ -299,6 +299,7 @@ BPSession::variantToBPObject( const plugin::Variant* input,
             // Get array length.
             int nArrLen;
             if (!plugin().getArrayLength( arr, nArrLen )) {
+                delete l;
                 return false;
             }
                     

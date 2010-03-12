@@ -209,6 +209,7 @@ BPSession::executeMethod(const std::string &service,
         argsObj->type() != BPTMap)
     {
         delete transaction;
+        delete argsObj;
         return false;
     }
 

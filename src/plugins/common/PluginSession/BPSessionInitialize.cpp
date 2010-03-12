@@ -167,6 +167,7 @@ BPSession::initialize(const plugin::Variant* args,
         if (s) {
             locale = s->value();
         }
+        delete obj;
     }
     
     // tell pluglets about locale

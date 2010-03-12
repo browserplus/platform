@@ -216,6 +216,8 @@ BPSession::describeService(const plugin::Variant* args,
         ctx->serviceDescription = serviceDesc;
     }
 
+    delete obj;
+
     // at this point, if we found a service description OR encountered
     // an error, we should hop over and return.  Otherwise we should
     // hit the server to get a description

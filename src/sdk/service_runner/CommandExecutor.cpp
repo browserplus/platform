@@ -132,9 +132,9 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::invoke)
             }
         } else if (it->type() == bp::service::Argument::List) {
             // deal with lists of files
-            bp::List* newList = new bp::List;
             const bp::List* argList = NULL;
             if (argMap.getList(it->name().c_str(), argList)) {
+                bp::List* newList = new bp::List;
                 for (size_t i = 0; i < argList->size(); i++) {
                     // get the string out of the argList
                     const bp::Object* obj = argList->value(i);
