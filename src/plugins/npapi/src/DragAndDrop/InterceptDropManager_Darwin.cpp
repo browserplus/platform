@@ -621,6 +621,7 @@ CarbonDropManager::dragHandler(DragTrackingMessage message,
                                 << " enter drop window: " 
                                 << x1 << "," << y1);
             }
+            break;
         }
             
         case kDragTrackingInWindow: {
