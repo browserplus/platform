@@ -65,10 +65,11 @@ static Path
 readLink(const Path& path)
 {
     Path rval;
-    char buf[PATH_MAX];
+    char buf[PATH_MAX+1];
     int r = ::readlink(path.external_file_string().c_str(), buf, sizeof(buf));
     if (r > 0) {
-        buf[r] = '\0';
+        int index = r < PATH_MAX ? r : PATH_MAX;
+        buf[index] = '\0';
         rval = buf;
     }
 #ifdef MACOSX
@@ -150,7 +151,7 @@ canonicalPath(const Path& path,
             }
         }
             
-        char buf[PATH_MAX];
+        char buf[PATH_MAX+1];
         if (::realpath(path.external_file_string().c_str(), buf) == NULL) {
             throw string("realpath failed on " + string(buf));
         }
