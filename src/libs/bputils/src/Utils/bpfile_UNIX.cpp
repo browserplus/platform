@@ -253,7 +253,7 @@ touch(const Path& path)
     }
 
     int fd = open(path.external_file_string().c_str(),
-                  O_EXCL | O_CREAT | O_WRONLY);
+                  O_EXCL | O_CREAT | O_WRONLY, 0644);
     if (fd < 0) return false;
     close(fd);
 
