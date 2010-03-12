@@ -229,7 +229,7 @@ BPSession::notInitialized(const plugin::Object* callback,
     if (!m_initialized) {
         if (callback) {
             plugin::Variant* err = plugin().allocVariant();
-            plugin::Variant* result = plugin().allocVariant();
+            plugin::Variant* result2 = plugin().allocVariant();
             
             if (!generateErrorReturn(pluginerrors::NotInitialized,
                                      NULL, err))
@@ -237,10 +237,10 @@ BPSession::notInitialized(const plugin::Object* callback,
                 err->clear();
             }
 
-            (void) plugin().callJsFunction(callback, &err, 1, result);
+            (void) plugin().callJsFunction(callback, &err, 1, result2);
 
             plugin().freeVariant(err);
-            plugin().freeVariant(result);    
+            plugin().freeVariant(result2);    
         }
         else
         {

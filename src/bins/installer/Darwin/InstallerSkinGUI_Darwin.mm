@@ -121,7 +121,7 @@
 @end
 
 InstallerSkinGUI::InstallerSkinGUI(const bp::file::Path & uiDirectory)
-		: m_uiDirectory(uiDirectory)
+		: m_uiDirectory(uiDirectory), m_sio()
 {
 }
 

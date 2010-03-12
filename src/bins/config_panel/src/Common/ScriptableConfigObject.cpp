@@ -103,22 +103,22 @@ ScriptableConfigObject::connectIfNeeded(BPErrorCode ec)
         m_hand = BPAlloc();
         
         // set a handler for the user prompt callback
-        BPErrorCode ec = BPSetUserPromptCallback(m_hand,
-                                                 handleUserPrompt,
-                                                 (void *) this);
-        if (ec != BP_EC_OK) {
+        BPErrorCode ec2 = BPSetUserPromptCallback(m_hand,
+                                                  handleUserPrompt,
+                                                  (void *) this);
+        if (ec2 != BP_EC_OK) {
             BPLOG_ERROR_STRM("Failed to set user prompt handler: "
-                             << BPErrorCodeToString(ec));
+                             << BPErrorCodeToString(ec2));
         }
 
         std::string locale = bp::localization::getUsersLocale();
-        ec = BPConnect(m_hand, m_uri.c_str(), locale.c_str(),
-                       "BrowserPlus configuration panel",
-                       connectCB, (void *) this);
+        ec2 = BPConnect(m_hand, m_uri.c_str(), locale.c_str(),
+                        "BrowserPlus configuration panel",
+                        connectCB, (void *) this);
 
-        if (ec != BP_EC_OK) {
+        if (ec2 != BP_EC_OK) {
             BPLOG_ERROR_STRM("Synchronous connection error: "
-                             << BPErrorCodeToString(ec));
+                             << BPErrorCodeToString(ec2));
         }
     }
 }
@@ -339,7 +339,7 @@ ScriptableConfigObject::invoke(const string & functionName,
     else if (!functionName.compare("uninstall"))
     {
         string cmd;
-        vector<string> args;
+        vector<string> uninstArgs;
         Path uninstaller = bp::paths::getUninstallerPath();
         
         // Forcefully kill daemon and don't let us reconnect
@@ -365,7 +365,8 @@ ScriptableConfigObject::invoke(const string & functionName,
 
         // now run uninstaller
         bp::process::spawnStatus status;
-        bp::process::spawn(uninstaller, std::string(), Path(), args, &status);
+        bp::process::spawn(uninstaller, std::string(), Path(), 
+                           uninstArgs, &status);
 
         if (lock) {
             bp::releaseProcessLock(lock);

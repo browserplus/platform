@@ -67,12 +67,12 @@ static void connectCallback(BPErrorCode ec, void * cookie,
             "{\"services\":[{\"service\":\"InactiveServices\"}]}");
 
         // now require the InactiveServices service on this connection
-        BPErrorCode ec;
-        ec = BPRequire(*pph, args->elemPtr(), requireCallback,
-                       (void *) pph, NULL, NULL, NULL);
+        BPErrorCode ec2;
+        ec2 = BPRequire(*pph, args->elemPtr(), requireCallback,
+                        (void *) pph, NULL, NULL, NULL);
         delete args;
 
-        if (ec != BP_EC_OK) s_failures++;
+        if (ec2 != BP_EC_OK) s_failures++;
     } else {
         s_failures++;
     }

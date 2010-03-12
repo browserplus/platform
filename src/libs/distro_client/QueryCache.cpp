@@ -200,10 +200,10 @@ QueryCache::listenerCompleted(MyListener* l,
         // now let's prune any queries that failed
         std::map<std::string, MyListener*>::iterator it = m_listeners.begin();
         while (it != m_listeners.end()) {
-            MyListener* l = it->second;
-            if (l->response()->status.code() != bp::http::Status::OK) {
-                BPLOG_ERROR_STRM("HTTP error " << l->response()->status.code() 
-                                 << "(" << l->response()->status.toString()
+            MyListener* l2 = it->second;
+            if (l2->response()->status.code() != bp::http::Status::OK) {
+                BPLOG_ERROR_STRM("HTTP error " << l2->response()->status.code() 
+                                 << "(" << l2->response()->status.toString()
                                  << ")");
                 m_listenersToReap.insert(it->second);
                 m_listeners.erase(it);

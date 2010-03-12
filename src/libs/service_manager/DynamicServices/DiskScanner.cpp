@@ -329,7 +329,7 @@ attainDescriptions(const std::set<bp::service::Summary> & summaries,
 
 std::map<bp::service::Summary, bp::service::Description>
 DiskScanner::scanDiskForServices(
-    const bp::file::Path & path,
+    const bp::file::Path & pathArg,
     std::map<bp::service::Summary, bp::service::Description> lastScan,
     std::set<bp::service::Summary> running,
     const std::string & logLevel,
@@ -379,7 +379,7 @@ DiskScanner::scanDiskForServices(
 
     // first let's just build a list of summaries
     std::stack<bp::file::Path> dirStack;
-    dirStack.push(path);
+    dirStack.push(pathArg);
     
     while (dirStack.size() > 0)
     {
