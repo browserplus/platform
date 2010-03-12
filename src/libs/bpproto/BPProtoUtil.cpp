@@ -185,6 +185,11 @@ BPCoreletDefinition * objectToDefinition(const bp::Object * obj)
                         const bp::Map * arg =
                             dynamic_cast<const bp::Map *>(args->value(j));
 
+                        if (!arg) {
+                            BPLOG_WARN_STRM("bad argument def: "
+                                            << args->value(j)->toJsonString());
+                            continue;
+                        }
                         argdef->name = getStringValue(arg->get("name"));
                         argdef->docString =
                             getStringValue(arg->get("documentation"));

@@ -37,7 +37,7 @@ struct ParseContext {
 #define GOT_ELEMENT(pc, elem) {                                         \
   if ((pc)->nodeStack.size() == 0) {                                    \
       (pc)->nodeStack.push(elem);                                       \
-  } else if ((pc)->nodeStack.top()->type() == BPTList) {                \
+  } else if ((pc)->nodeStack.top()->type() == BPTList) {                \   
       dynamic_cast<bp::List *>((pc)->nodeStack.top())->append(elem);    \
   } else if ((pc)->nodeStack.top()->type() == BPTMap) {                 \
       dynamic_cast<bp::Map *>((pc)->nodeStack.top())->add(              \
@@ -50,7 +50,9 @@ static int
 null_cb(void * ctx)
 {
     ParseContext * pc = (ParseContext *) ctx;
-    GOT_ELEMENT(pc, new bp::Null);
+    if (pc) {
+        GOT_ELEMENT(pc, new bp::Null);
+    }
     return 1;
 }
 
@@ -58,7 +60,9 @@ static int
 boolean_cb(void * ctx, int boolVal)
 {
     ParseContext * pc = (ParseContext *) ctx;
-    GOT_ELEMENT(pc, new bp::Bool(boolVal));
+    if (pc) {
+        GOT_ELEMENT(pc, new bp::Bool(boolVal));
+    }
     return 1;
 }
 
@@ -66,7 +70,9 @@ static int
 integer_cb(void * ctx, long integerVal)
 {
     ParseContext * pc = (ParseContext *) ctx;
-    GOT_ELEMENT(pc, new bp::Integer(integerVal));
+    if (pc) {
+        GOT_ELEMENT(pc, new bp::Integer(integerVal));
+    }
     return 1;
 }
 
@@ -74,7 +80,9 @@ static int
 double_cb(void * ctx, double doubleVal)
 {
     ParseContext * pc = (ParseContext *) ctx;
-    GOT_ELEMENT(pc, new bp::Double(doubleVal));
+    if (pc) {
+        GOT_ELEMENT(pc, new bp::Double(doubleVal));
+    }
     return 1;
 }
 
@@ -83,7 +91,9 @@ string_cb(void * ctx, const unsigned char * stringVal,
                             unsigned int stringLen)
 {
     ParseContext * pc = (ParseContext *) ctx;
-    GOT_ELEMENT(pc, new bp::String((const char *) stringVal, stringLen));
+    if (pc) {
+        GOT_ELEMENT(pc, new bp::String((const char *) stringVal, stringLen));
+    }
     return 1;
 }
 
@@ -91,10 +101,11 @@ static int
 start_map_cb(void * ctx)
 {
     ParseContext * pc = (ParseContext *) ctx;
-
-    pc->depth++;
-    // map starts.  push a map onto the nodestack
-    pc->nodeStack.push(new bp::Map);
+    if (pc) {
+        pc->depth++;
+        // map starts.  push a map onto the nodestack
+        pc->nodeStack.push(new bp::Map);
+    }
     return 1;
 }
 
@@ -103,9 +114,11 @@ map_key_cb(void * ctx, const unsigned char * key,
            unsigned int keyLen)
 {
     ParseContext * pc = (ParseContext *) ctx;
-    std::string keyStr;
-    keyStr.append((const char *) key, keyLen);
-    pc->keyStack.push(keyStr);
+    if (pc) {
+        std::string keyStr;
+        keyStr.append((const char *) key, keyLen);
+        pc->keyStack.push(keyStr);
+    }
     return 1;
 }
 
@@ -113,21 +126,23 @@ static int
 end_map_cb(void * ctx)
 {
     ParseContext * pc = (ParseContext *) ctx;    
-    bp::Object * obj = pc->nodeStack.top();
-    pc->nodeStack.pop();
-    assert(obj->type() == BPTMap);
+    if (pc) {
+        bp::Object * obj = pc->nodeStack.top();
+        pc->nodeStack.pop();
+        assert(obj->type() == BPTMap);
     
-    // See if map describes one of our BP types
-    // If so, replace map with instance of BP object.
-    bp::Map * map = dynamic_cast<bp::Map*>(obj);
-    if (pc->depth % 2) {
-        obj = createBPObject(map);
-        delete map;
-    }
+        // See if map describes one of our BP types
+        // If so, replace map with instance of BP object.
+        bp::Map * map = dynamic_cast<bp::Map*>(obj);
+        if (pc->depth % 2) {
+            obj = createBPObject(map);
+            delete map;
+        }
     
-    GOT_ELEMENT(pc, obj);    
+        GOT_ELEMENT(pc, obj);    
 
-    pc->depth--;
+        pc->depth--;
+    }
     return 1;
 }
 
@@ -135,9 +150,11 @@ static int
 start_array_cb(void * ctx)
 {
     ParseContext * pc = (ParseContext *) ctx;
-    // array starts.  push an empty array onto the nodestack
-    pc->nodeStack.push(new bp::List);
-    pc->depth++;
+    if (pc) {
+        // array starts.  push an empty array onto the nodestack
+        pc->nodeStack.push(new bp::List);
+        pc->depth++;
+    }
     return 1;
 }
 
@@ -145,11 +162,13 @@ static int
 end_array_cb(void * ctx)
 {
     ParseContext * pc = (ParseContext *) ctx;    
-    bp::Object * obj = pc->nodeStack.top();
-    pc->nodeStack.pop();
-    assert(obj->type() == BPTList);
-    GOT_ELEMENT(pc, obj);    
-    pc->depth--;
+    if (pc) {
+        bp::Object * obj = pc->nodeStack.top();
+        pc->nodeStack.pop();
+        assert(obj->type() == BPTList);
+        GOT_ELEMENT(pc, obj);    
+        pc->depth--;
+    }
     return 1;
 }
 
