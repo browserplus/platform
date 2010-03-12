@@ -112,7 +112,10 @@ main(int argc, char ** argv)
     // allocate a listener
     MyServerListener list(verbose);
 
-    s.setListener(&list);
+    if (!s.setListener(&list)) {
+        std::cerr << "Couldn't set IPC server listener" << std::endl;
+        exit(1);
+    }
 
     // start up the server
     std::string errBuf;

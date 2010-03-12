@@ -61,8 +61,9 @@ public:
             std::string mt = *(mimeTypes(path).begin());
             response.headers.add(Headers::ksContentType,mt.c_str());
             std::string sBody;
-            bp::strutil::loadFromFile(path, sBody);
-            response.body.assign(sBody);
+            if (bp::strutil::loadFromFile(path, sBody)) {
+                response.body.assign(sBody);
+            }
         } else if (boost::filesystem::is_directory(path)) {
             response.body.append("<html><head><title>");
             response.body.append("Contents of " + path.utf8());

@@ -122,13 +122,12 @@ PermissionsManager::mayRun()
 {  
     string version = bp::paths::versionString();
     bp::ServiceVersion ourVersion;
-    ourVersion.parse(version);
+    (void) ourVersion.parse(version);
     
     vector<string>::const_iterator it;
     for (it = m_platformBlacklist.begin(); it != m_platformBlacklist.end(); ++it) {
         bp::ServiceVersion bad;
-        bad.parse(*it);
-        if (ourVersion.match(bad)) {
+        if (bad.parse(*it) && ourVersion.match(bad)) {
             m_error = true;
             return false;
         }
@@ -218,13 +217,16 @@ PermissionsManager::serviceMayRun(const string& name,
         return true;
     }
     bp::ServiceVersion ourVersion;
-    ourVersion.parse(version);
+    if (!ourVersion.parse(version)) {
+        BPLOG_ERROR_STRM("serviceMayRun(" << name
+                         << "," << version << "), bad version");
+        return false;
+    }
     
     for (unsigned int i = 0; i < it->second.size(); i++) {
         const string& v = it->second[i];
         bp::ServiceVersion bad;
-        bad.parse(v);
-        if (ourVersion.match(bad)) {
+        if (bad.parse(v) && ourVersion.match(bad)) {
             return false;
         }
     }

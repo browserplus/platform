@@ -235,7 +235,7 @@ SessionCreator::tryConnect()
                     BPLOG_ERROR_STRM("daemon not running, blacklisted");
                     BPLOG_ERROR_STRM("removing blacklisted platform");
                     bp::ServiceVersion version;
-                    version.parse(bp::paths::versionString());
+                    (void) version.parse(bp::paths::versionString());
                     bp::platformutil::removePlatform(version, true);
                     reportError(BP_EC_PLATFORM_BLACKLISTED,
                                 "BrowserPlus platform version blacklisted");

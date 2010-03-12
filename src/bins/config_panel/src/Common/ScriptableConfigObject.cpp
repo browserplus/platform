@@ -321,7 +321,7 @@ ScriptableConfigObject::invoke(const string & functionName,
                 BPTime now;
                 string s = "BrowserPlus disabled at: " 
                     + now.asString() + "\n";
-                bp::strutil::storeToFile(path, s);
+                (void) bp::strutil::storeToFile(path, s);
             }
             return new bp::Bool(true);
         }

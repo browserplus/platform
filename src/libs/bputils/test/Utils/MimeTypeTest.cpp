@@ -104,12 +104,12 @@ MimeTypeTest::chaseLink()
     // link to jpeg should be application/x-link,
     // chasing link should give image/jpeg
     bp::file::Path path = dir / "foo.jpg";
-    bp::strutil::storeToFile(path, "hello world");
-    bp::file::createLink(linkPath, path);
+    CPPUNIT_ASSERT(bp::strutil::storeToFile(path, "hello world"));
+    CPPUNIT_ASSERT(bp::file::createLink(linkPath, path));
     std::set<std::string> t = bp::file::mimeTypes(linkPath);
     CPPUNIT_ASSERT(t.count(bp::file::kLinkMimeType) > 0);
     bp::file::Path resolved;
-    bp::file::resolveLink(linkPath, resolved);
+    CPPUNIT_ASSERT(bp::file::resolveLink(linkPath, resolved));
     CPPUNIT_ASSERT(boost::filesystem::equivalent(resolved, path));
     t = bp::file::mimeTypes(resolved);
     CPPUNIT_ASSERT(t.count("image/jpeg") > 0);
@@ -118,18 +118,18 @@ MimeTypeTest::chaseLink()
     // chasing link should give application/x-folder
     bp::file::Path newDir = dir / "myDir";
     boost::filesystem::create_directories(newDir);
-    bp::file::remove(linkPath);
-    bp::file::createLink(linkPath, newDir);
+    CPPUNIT_ASSERT(bp::file::remove(linkPath));
+    CPPUNIT_ASSERT(bp::file::createLink(linkPath, newDir));
     t = bp::file::mimeTypes(linkPath);
     CPPUNIT_ASSERT(t.count(bp::file::kLinkMimeType) > 0);
-    bp::file::resolveLink(linkPath, resolved);
+    CPPUNIT_ASSERT(bp::file::resolveLink(linkPath, resolved));
     CPPUNIT_ASSERT(boost::filesystem::equivalent(resolved, newDir));
     t = bp::file::mimeTypes(resolved);
     CPPUNIT_ASSERT(t.count(bp::file::kFolderMimeType) > 0); 
     
     // broken link should be application/x-badlink
     bp::file::remove(linkPath);
-    bp::file::createLink(linkPath, dir/"i_do_not_exist");
+    CPPUNIT_ASSERT(bp::file::createLink(linkPath, dir/"i_do_not_exist"));
     t = bp::file::mimeTypes(linkPath);
     CPPUNIT_ASSERT(t.count(bp::file::kBadLinkMimeType) > 0);
     

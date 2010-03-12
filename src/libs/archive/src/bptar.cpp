@@ -242,7 +242,7 @@ Create::Create()
     
 Create::~Create()
 {
-    close();
+    (void) close();
 }
 
 static

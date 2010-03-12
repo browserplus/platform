@@ -131,6 +131,6 @@ bp::phash::remove(const std::string & key)
     std::string val;
     if (get(key, val)) {
         s_cache.removeStringValue(key);
-        bp::strutil::storeToFile(s_phashPath, s_cache.toString());
+        (void) bp::strutil::storeToFile(s_phashPath, s_cache.toString());
     }
 }

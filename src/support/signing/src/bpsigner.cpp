@@ -106,7 +106,9 @@ main(int argc, const char* argv[])
         if (sig.empty()) {
             fprintf(stderr, "signing failed\n");
         } else {
-            bp::strutil::storeToFile(output, sig);
+            if (!bp::strutil::storeToFile(output, sig)) {
+                BP_THROW("unable to store to file" + output.externalUtf8());
+            }
             fprintf(stderr, "signing succeeded\n");
         }
     } else if (cmd.compare("verify") == 0) {

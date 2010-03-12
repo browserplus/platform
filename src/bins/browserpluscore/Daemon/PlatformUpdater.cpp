@@ -290,7 +290,7 @@ PlatformUpdaterSingleton::gotLatestPlatformVersion(unsigned int,
     }
         
     bp::ServiceVersion current;
-    current.parse(bp::paths::versionString());
+    (void) current.parse(bp::paths::versionString());
     if (latestVersion.compare(current) == 1) {
         Path cacheDir = getPlatformCacheDirectory() / latestVersion.asString();
         if (!boost::filesystem::is_directory(cacheDir)) {

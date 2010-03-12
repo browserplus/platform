@@ -807,8 +807,10 @@ RequireRequest::updateRequireHistory(
         string minversion(it->m_minversion);
         
         string mapStr;
-        bp::phash::get(kRequireStatementsKey, mapStr);
-        bp::Map* m = dynamic_cast<bp::Map*>(bp::Object::fromPlainJsonString(mapStr));
+        bp::Map* m = NULL;
+        if (bp::phash::get(kRequireStatementsKey, mapStr)) {
+            m = dynamic_cast<bp::Map*>(bp::Object::fromPlainJsonString(mapStr));
+        }
         if (!m) m = new bp::Map;
         if (!m->has(name.c_str(), BPTList)) {
             m->add(name, new bp::List);
