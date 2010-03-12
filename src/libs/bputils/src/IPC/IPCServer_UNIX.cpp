@@ -206,6 +206,10 @@ Server::start(const std::string & location,
 
     // bind the socket to the specified path
     struct sockaddr_un unix_addr;
+    if (strlen(path) > sizeof(unix_addr.sun_path)) {
+        *error = "location too long";
+        return false;
+    }
     memset((void *) &unix_addr, 0, sizeof(unix_addr));
     unix_addr.sun_family = AF_UNIX;
     ::strcpy(unix_addr.sun_path, path);
