@@ -287,13 +287,13 @@ Installer::disablePlugins(const bp::ServiceVersion& version)
                           / "Plugins" / bpf::Path("YBPAddon__" + versionStr + ".dll");
         if (bfs::is_regular(path)) { 
             // unregister control
-            string version, typeLibGuid, activeXGuid;
+            string vers, typeLibGuid, activeXGuid;
             vector<string> mtypes;
-            if (getControlInfo(path, version, typeLibGuid, activeXGuid, mtypes)) {
+            if (getControlInfo(path, vers, typeLibGuid, activeXGuid, mtypes)) {
                 if (unRegisterControl(mtypes, typeLibGuid, 
                                       path, activeXGuid,
                                       "CBPCtl Object", "Yahoo.BPCtl",
-                                      "Yahoo.BPCtl." + version) != 0) {
+                                      "Yahoo.BPCtl." + vers) != 0) {
                     BPLOG_WARN_STRM("unable to unregister " << path);
                 }
             }
