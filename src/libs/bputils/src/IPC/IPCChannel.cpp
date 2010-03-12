@@ -46,8 +46,8 @@ void
 Channel::deliverMessageEvent(void * ctx)
 {
     ChannelEvent * ce = (ChannelEvent *) ctx;
-    IChannelListener * l = ce->c->m_cListener;
     assert(ce != NULL);
+    IChannelListener * l = ce->c->m_cListener;
 
     if (ce->m) {
         l->onMessage(ce->c, *(ce->m));
