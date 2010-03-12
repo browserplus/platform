@@ -61,7 +61,7 @@ class IPCTestServer : virtual public bp::ipc::IChannelServerListener,
     ///// IChannelServerListener /////
     void gotChannel(bp::ipc::Channel * c);
     void serverEnded(bp::ipc::IServerListener::TerminationReason why,
-                     const char * errorString);
+                     const char * errorString) const;
 
     ///// IChannelListener /////
     virtual void channelEnded(

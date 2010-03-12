@@ -74,7 +74,7 @@ IPCTestServer::gotChannel(bp::ipc::Channel * c)
 
 void 
 IPCTestServer::serverEnded(bp::ipc::IServerListener::TerminationReason,
-                           const char *)
+                           const char *) const
 {
 }
 
