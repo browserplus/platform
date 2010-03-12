@@ -54,7 +54,7 @@ struct DarwinTimerData
     NSTimer * currentTimer;
 };
 
-Timer::Timer() : m_osSpecific(NULL)
+Timer::Timer() : m_osSpecific(NULL), m_listener(NULL)
 {
     DarwinTimerData * dtd = new DarwinTimerData;
     dtd->recipient = [ [ MY_TIMER_FIRED_CLASS alloc ] init ];
