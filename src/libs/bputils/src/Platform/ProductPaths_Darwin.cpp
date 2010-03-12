@@ -58,7 +58,7 @@ stringRefToUTF8(CFStringRef cfStr)
         char stackBuffer[2048], *dynamicBuf = NULL;
         char * buf = stackBuffer;
         if ((size_t) (cfLen*4) >= sizeof(stackBuffer)) {
-            buf = (char*) malloc(cfLen*4 + 1);
+            dynamicBuf = (char*) malloc(cfLen*4 + 1);
             buf = dynamicBuf;
         }
         CFStringGetCString(cfStr, buf, cfLen*4 + 1,

@@ -88,10 +88,6 @@ bool
 PermissionsManager::upToDateCheck(IPermissionsManagerListener * listener)
 {
     // TODO:  would eventually like to do an "am I online" check
-    bool online = true;
-    if (!online) {
-        return true;
-    }
     
     bool mustCheck = true;
     string lastCheck;

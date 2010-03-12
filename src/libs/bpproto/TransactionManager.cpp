@@ -226,8 +226,6 @@ TransactionManager::onResponse(bp::ipc::Channel *,
     
             std::string e, ve;
     
-            const bp::List * list = NULL;
-    
             if (ec == BP_EC_OK) {
                 // translate "results" into a list of BPCoreletDefinition 
                 if (!payload || payload->type() != BPTList) {
@@ -253,7 +251,6 @@ TransactionManager::onResponse(bp::ipc::Channel *,
                          ve.empty() ? NULL : ve.c_str());
             
             if (ec == BP_EC_OK) {
-                delete list;
                 for (unsigned int i = 0; i < numDefs; ++i) {
                     freeDefinition(defs[i]);
                 }

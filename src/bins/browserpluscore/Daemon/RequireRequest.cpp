@@ -659,8 +659,8 @@ RequireRequest::onUserResponse(unsigned int cookie, const bp::Object & resp)
         return;
     }
         
-    bool allow = response.find("Allow") != std::string::npos;
-    bool always = response.find("Always") != std::string::npos;
+    bool allow = (response.find("Allow") != std::string::npos);
+    bool always = (response.find("Always") != std::string::npos);
         
     // if user said "always", update domain permissions, else
     // update session's transient permissions
@@ -690,7 +690,7 @@ RequireRequest::onUserResponse(unsigned int cookie, const bp::Object & resp)
                     pmgr->disallowDomain(domain);
                 }
             } else {
-                if (always) {
+                if (allow) {
                     pmgr->addDomainPermission(domain, perm);
                 } else {
                     pmgr->revokeDomainPermission(domain, perm);
