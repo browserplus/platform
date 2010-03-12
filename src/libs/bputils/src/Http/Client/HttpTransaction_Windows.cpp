@@ -836,10 +836,13 @@ Transaction::Impl::getDataToPost()
 
     DWORD rval = ERROR_SUCCESS;
     switch (m_ePostSource) {
-    case eFromBuffer: 
+    case eFromBuffer: {
         m_pPostBuffer = (unsigned char*) m_pRequest->body.elementAddr(m_bytesSent);
-        m_bytesToPost = m_pRequest->body.size() - m_bytesSent;
-        assert(m_bytesToPost >= 0);
+        int toPost = m_pRequest->body.size() - m_bytesSent;
+        assert(toPost >= 0);
+        if (toPost >= 0) {
+            m_bytesToPost = toPost;
+        }
         if (m_bytesToPost > kBufferSize) {
             m_bytesToPost = kBufferSize;
         }
