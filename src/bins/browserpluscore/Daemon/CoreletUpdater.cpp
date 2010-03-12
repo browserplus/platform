@@ -129,6 +129,7 @@ UpdaterSingleton::UpdaterSingleton(unsigned int pollPeriod,
 
 UpdaterSingleton::~UpdaterSingleton()
 {
+    delete m_distQuery;
 }
 
 

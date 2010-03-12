@@ -145,6 +145,7 @@ PlatformUpdaterSingleton::PlatformUpdaterSingleton(list<string> distroServers,
 
 PlatformUpdaterSingleton::~PlatformUpdaterSingleton()
 {
+    delete m_distQuery;
 }
 
 
