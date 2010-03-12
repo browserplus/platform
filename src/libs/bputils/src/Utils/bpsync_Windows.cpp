@@ -35,7 +35,7 @@ bp::sync::Mutex::Mutex()
 bp::sync::Mutex::~Mutex()
 {
     DeleteCriticalSection((CRITICAL_SECTION *) m_osDep);
-    free m_osDep;
+    free(m_osDep);
 }
 
 void

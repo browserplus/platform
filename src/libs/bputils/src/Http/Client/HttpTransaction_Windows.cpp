@@ -847,6 +847,7 @@ Transaction::Impl::getDataToPost()
             m_bytesToPost = kBufferSize;
         }
         break;
+    }
     case eFromFile:
         if (!ReadFile(m_hUploadFile, m_pPostBuffer, 
                       kBufferSize, &m_bytesToPost, NULL)) {
