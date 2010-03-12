@@ -44,7 +44,9 @@ using namespace std;
 DropChannel::DropChannel( int nChanNum, AxDropManager* pDropMgr ) :
     DropTargetBase(),
     m_nChanNum( nChanNum ),
-    m_pDropMgr( pDropMgr )
+    m_pDropMgr( pDropMgr ),
+    m_elemSource( NULL ),
+    m_enabled( false )
 {
 
 }
@@ -52,7 +54,9 @@ DropChannel::DropChannel( int nChanNum, AxDropManager* pDropMgr ) :
 DropChannel::DropChannel( const DropChannel& rhs ) :
     DropTargetBase(rhs),
     m_nChanNum( rhs.m_nChanNum ),
-    m_pDropMgr( rhs.m_pDropMgr )
+    m_pDropMgr( rhs.m_pDropMgr ),
+    m_elemSource( rhs.m_elemSource ),
+    m_enabled( rhs.m_enabled )
 {
 
 }

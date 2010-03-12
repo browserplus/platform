@@ -444,9 +444,9 @@ ServiceLibrary::getFunctionTable()
 
 ServiceLibrary::ServiceLibrary() :
     m_currentId(1), m_attachId(0), m_handle(NULL), m_funcTable(NULL),
-    m_coreletAPIVersion(0),
-	m_levelForwardToHarness( bp::log::LEVEL_DEBUG ),
-    m_serviceLogger()
+    m_desc(), m_coreletAPIVersion(0), m_instances(), m_listener(NULL),
+    m_promptToTransaction(), 
+    m_levelForwardToHarness( bp::log::LEVEL_DEBUG ), m_serviceLogger()
 {
     s_libObjectPtr = this;
 }

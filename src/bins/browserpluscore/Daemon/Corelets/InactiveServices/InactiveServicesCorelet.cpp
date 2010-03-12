@@ -41,7 +41,7 @@ using namespace std::tr1;
 
 InactiveServicesCorelet::InactiveServicesCorelet(
     weak_ptr<CoreletExecutionContext> context)
-  : CoreletInstance(context)
+    : CoreletInstance(context), m_distQuery(NULL)
 {
     // Setup a config file reader.
     bp::config::ConfigReader configReader;

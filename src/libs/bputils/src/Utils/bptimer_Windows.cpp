@@ -65,7 +65,7 @@ WindowsTimerCallback(HWND, UINT, UINT id, DWORD)
 }
 
 Timer::Timer()
-    : m_osSpecific(NULL)
+    : m_osSpecific(NULL), m_listener(NULL)
 {
 }
 

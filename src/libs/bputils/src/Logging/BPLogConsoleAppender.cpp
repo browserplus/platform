@@ -73,6 +73,7 @@ ConsoleAppender::ConsoleAppender( LayoutPtr layout,
     }
     
     m_hConsoleBuff = GetStdHandle( STD_OUTPUT_HANDLE );
+    m_hwndConsole = NULL;
 #endif
 }
 
