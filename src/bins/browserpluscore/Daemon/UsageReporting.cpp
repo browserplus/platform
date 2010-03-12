@@ -111,7 +111,8 @@ UsageReporter::instance()
 UsageReporter::UsageReporter() :
 m_bEnabled( false ),
 m_bReportUrl( false ),
-m_bReportId( false )    
+m_bReportId( false ),
+m_distQuery( NULL )
 {
     if (!configure())
     {

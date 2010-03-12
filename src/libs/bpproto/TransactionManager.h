@@ -31,8 +31,8 @@ class Transaction
 {
   public:
     Transaction()
-      : cookie(NULL), genericCB(NULL), describeCB(NULL),
-        requireCB(NULL), resultsCB(NULL), invokeCB(NULL), invokeCookie(NULL)
+        : type(Enumerate), cookie(NULL), genericCB(NULL), describeCB(NULL),
+          requireCB(NULL), resultsCB(NULL), invokeCB(NULL), invokeCookie(NULL)
     {
     }
 

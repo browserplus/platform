@@ -266,8 +266,8 @@ SingleCoreletInstaller::SingleCoreletInstaller(
     const bp::file::Path & dir,
     unsigned int iid,
     weak_ptr<CoreletInstaller::IListener> listener)
-    : m_name(name),
-      m_version(version)
+    : m_name(name), m_version(version), m_distQuery(NULL), m_dir(),
+      m_iid(0), m_pkgBuffer()
 {
     m_distQuery = new DistQuery(distroServers, PermissionsManager::get());
     m_distQuery->setListener(this);
@@ -284,13 +284,10 @@ SingleCoreletInstaller::SingleCoreletInstaller(
     const bp::file::Path & dir,
     unsigned int iid,
     weak_ptr<CoreletInstaller::IListener> listener)
+    :  m_name(name), m_version(version), m_listeners(),
+       m_distQuery(NULL), m_dir(dir), m_iid(iid), m_pkgBuffer(buffer)
 {
     m_listeners.push_back(listener);
-    m_name = name;
-    m_version = version; 
-    m_iid = iid;
-    m_dir = dir;
-    m_pkgBuffer = buffer;
 }
 
 

@@ -38,7 +38,7 @@
 
 
 bp::URLCollection::URLCollection()
-    : m_useDomainForHTTP(false), m_data(NULL)
+    : m_useDomainForHTTP(false), m_data(NULL), m_list(NULL)
 {
 }
 

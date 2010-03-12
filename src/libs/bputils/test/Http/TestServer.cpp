@@ -148,7 +148,8 @@ bool EchoHandler::processRequest(const bp::http::Request& request,
 class ShapingHandler : public bp::http::server::IHandler
 {
 public:
-    ShapingHandler() {}
+    ShapingHandler() 
+        : m_bShapePackets(false), m_fPacketDelaySec(0.0), m_nMaxRateKBs(0) {}
     ~ShapingHandler() {}    
 
     bool processRequest(const bp::http::Request& request,

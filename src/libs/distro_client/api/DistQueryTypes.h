@@ -84,7 +84,8 @@ class CoreletRequireStatement
 class ServiceSynopsis
 {
   public:
-    ServiceSynopsis() : m_isUpdate(false) { }
+    ServiceSynopsis()
+        : m_sizeInBytes(0), m_isUpdate(false), m_permissions() { }
   
     std::string m_name;
     std::string m_version;

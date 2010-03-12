@@ -74,7 +74,10 @@ struct InstanceResponse
     void * responseCookie;
     unsigned int promptId;
 
-    InstanceResponse() : type(T_Results), tid(0), o(NULL), callbackId(0) {  }
+    InstanceResponse()
+        : type(T_Results), tid(0), o(NULL), callbackId(0),
+          dialogPath(), responseCallback(NULL),
+          responseCookie(NULL), promptId(0)  {  }
     ~InstanceResponse() { if (o) delete o; }
 };
 

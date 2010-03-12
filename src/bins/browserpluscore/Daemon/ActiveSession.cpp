@@ -77,10 +77,10 @@ ActiveSession::ActiveSession(bp::ipc::Channel * session,
                              shared_ptr<CoreletRegistry> registry,
                              const std::string & primaryDistroServer,
                              const std::list<std::string> secondaryDistroServers)
-    : CoreletExecutionContext(), m_createSessionCalled(false),
-      m_listener(NULL), m_primaryDistroServer(primaryDistroServer),
+    : CoreletExecutionContext(), m_sessionMessage(NULL),
+      m_createSessionCalled(false), m_listener(NULL),
+      m_primaryDistroServer(primaryDistroServer),
       m_secondaryDistroServers(secondaryDistroServers)
-          
 {
     m_locale = sDefaultLocale;  // default if not set
     m_clientPid = 0;

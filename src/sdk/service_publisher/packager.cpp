@@ -111,7 +111,7 @@ class ServiceManager :  public ServiceRunner::IControllerListener
 {
 public:
     ServiceManager(shared_ptr<APTArgParse> argParser)
-        : m_argParser(argParser)
+        : m_apiVersion(), m_argParser(argParser)
     {
     }
 

@@ -43,9 +43,10 @@ namespace log {
 class LocationInfo
 {
 public:
-    LocationInfo() {}    
-    LocationInfo( const std::string& sFile, const std::string& sFunc,
-                  int nLine ) :
+    LocationInfo() :
+        m_sFile( "unknown" ), m_sFunc( "unknown" ), m_nLine( 0 ) {}
+   LocationInfo( const std::string& sFile, const std::string& sFunc,
+                 int nLine ) :
         m_sFile( sFile ), m_sFunc( sFunc ), m_nLine( nLine ) {}
     LocationInfo( const std::string& sFunc ) :
         m_sFile( "unknown" ), m_sFunc( sFunc ), m_nLine( 0 ) {}
