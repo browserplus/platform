@@ -160,6 +160,7 @@ bp::Object* JsTypeConverter::toBPObject( CComPtr<IDispatch> dispObj )
         if (!bp::ie::getArrayLength( dispObj, nArrLen ))
         {
             BPLOG_ERROR( "bp::ie::getArrayLength failed." );
+            delete l;
             return 0;
         }
         

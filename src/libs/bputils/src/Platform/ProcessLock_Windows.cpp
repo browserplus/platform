@@ -50,9 +50,11 @@ bp::ProcessLock bp::acquireProcessLock(bool block,
         if (block) {
             DWORD waitResult = WaitForSingleObject(lock, INFINITE);
             if (waitResult != WAIT_OBJECT_0 && waitResult != WAIT_ABANDONED) {
+                CloseHandle(lock);
                 return NULL;
             }
         } else {
+            CloseHandle(lock);
             return NULL;
         }
     }

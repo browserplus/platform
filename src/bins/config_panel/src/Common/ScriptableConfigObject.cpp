@@ -355,7 +355,7 @@ ScriptableConfigObject::invoke(const string & functionName,
         string lockName = bp::paths::getIPCLockName();
         int count = 0;
         while (!lock && count < 10) {
-            bp::acquireProcessLock(false, lockName);
+            lock = bp::acquireProcessLock(false, lockName);
             if (!lock) {
                 Sleep(500);
                 count++;
