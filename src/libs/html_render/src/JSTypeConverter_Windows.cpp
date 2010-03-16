@@ -171,6 +171,7 @@ bp::Object* JsTypeConverter::toBPObject( CComPtr<IDispatch> dispObj )
             if (!bp::ie::getArrayElement( dispObj, i, vtElem ))
             {
                 BPLOG_ERROR( "bp::ie::getArrayElement failed." );
+                delete l;
                 return 0;
             }
             
@@ -178,6 +179,7 @@ bp::Object* JsTypeConverter::toBPObject( CComPtr<IDispatch> dispObj )
             if (!poSubObj)
             {
                 BPLOG_ERROR( "toBPObject failed." );
+                delete l;
                 return 0;
             }
 
