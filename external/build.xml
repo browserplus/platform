@@ -6,7 +6,11 @@
     </target>
     <target name="clean_make" depends="clean" />
     <target name="clean_xcode" depends="clean" />
-    <target name="clean_vc08" depends="clean" />
+    <target name="clean_vc08" >
+        <exec executable="cmd" failonerror="true">
+	    <arg line="/C &quot;C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat&quot; &amp;&amp; ruby .\build.rb clean" />
+        </exec>
+    </target>
     <target name="build">
         <exec executable="ruby">
             <arg line="./build.rb keepSource" />
@@ -14,10 +18,9 @@
     </target>
     <target name="build_make" depends="build" />
     <target name="build_xcode" depends="build" />
-    <target name="build_vc08" />
-        <exec executable="cmd" dir="build" failonerror="true">
-            <arg value="/C" />
-            <arg line="&quot;C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat&quot; &amp;&amp; ruby .\build.rb keepSource" />
+    <target name="build_vc08">
+        <exec executable="cmd" failonerror="true">
+	    <arg line="/C &quot;C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat&quot; &amp;&amp; ruby .\build.rb keepSource" />
         </exec>
     </target>
 </project>
