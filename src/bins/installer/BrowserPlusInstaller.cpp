@@ -763,111 +763,114 @@ resolvePath(Path pathToBinary,
 int
 main(int argc, const char** argv)
 {
-	// on win32, may have non-ascii chars in args.  deal with it
-	APT::ARGVConverter conv;
-    conv.convert(argc, argv);
-
     int rval = 0;
-    Path exeDir = canonicalPath(Path(argv[0])).parent_path();
+    Path destDir;
+    try {
+        // on win32, may have non-ascii chars in args.  deal with it
+        APT::ARGVConverter conv;
+        conv.convert(argc, argv);
+
+        Path exeDir = canonicalPath(Path(argv[0])).parent_path();
     
-    // debug logging on be default.  logfile cannot be in same dir
-    // as executable since a mounted mac .dmg is read-only
-    Path logFile = getTempDirectory() / "BrowserPlusInstaller.log";
-    (void) remove(logFile);
-    string logLevel = bp::log::levelToString(bp::log::LEVEL_ALL);
+        // debug logging on be default.  logfile cannot be in same dir
+        // as executable since a mounted mac .dmg is read-only
+        Path logFile = getTempDirectory() / "BrowserPlusInstaller.log";
+        (void) remove(logFile);
+        string logLevel = bp::log::levelToString(bp::log::LEVEL_ALL);
 
-    // we must get current user's locale, this may be overridded with the
-    // -locale flag.
-    string locale = bp::localization::getUsersLocale();
+        // we must get current user's locale, this may be overridded with the
+        // -locale flag.
+        string locale = bp::localization::getUsersLocale();
 
-    // the user interaction skin, defaults to GUI but can be set
-    // to cmd line with flags.
-    shared_ptr<InstallerSkin> skin;
+        // the user interaction skin, defaults to GUI but can be set
+        // to cmd line with flags.
+        shared_ptr<InstallerSkin> skin;
 
-    Path updatePkg;
-    string version;
-    bool truncateLog = true;
+        Path updatePkg;
+        string version;
+        bool truncateLog = true;
 
-    vector<string> args;
-    for (int i = 1; i < argc; i++) {
-        // skip args starting with -psn which deliver the "Process Serial
-        // Number" and are added by the OSX launcher
-        if (!strncmp(argv[i], "-psn", 4)) continue;
+        vector<string> args;
+        for (int i = 1; i < argc; i++) {
+            // skip args starting with -psn which deliver the "Process Serial
+            // Number" and are added by the OSX launcher
+            if (!strncmp(argv[i], "-psn", 4)) continue;
 
-        args = bp::strutil::split(argv[i], "=");
-        if (!args[0].compare("-logfile")) {
-            if (!args[1].compare("console")) {
-                logFile.clear();
+            args = bp::strutil::split(argv[i], "=");
+            if (!args[0].compare("-logfile")) {
+                if (!args[1].compare("console")) {
+                    logFile.clear();
+                } else {
+                    logFile = Path(args[1]);
+                }
+            } else if (!args[0].compare("-log")) {
+                logLevel = args[1];
+            } else if (!args[0].compare("-appendToLog")) {
+                truncateLog = false;
+            } else if (!args[0].compare("-verbose")) {
+                skin.reset(new InstallerSkinVerbose);
+            } else if (!args[0].compare("-nogui")) {
+                skin.reset(new InstallerSkin);
+            } else if (!args[0].compare("-pkg")) {
+                updatePkg = Path(args[1]);
+                version = versionFromPackage(updatePkg);
+                if (version.empty()) {
+                    usage();
+                }
+                // handle the case where the path is relative to the binary
+                // (YIB-2917492)
+                updatePkg = resolvePath(Path(argv[0]), updatePkg);
+                if (!exists(updatePkg)) {
+                    BP_THROW("update package " + updatePkg.externalUtf8()
+                             + " not found");
+                }
+            } else if (!args[0].compare("-version")) {
+                version = args[1];
+            } else if (!args[0].compare("-locale")) {
+                locale = args[1];
             } else {
-                logFile = Path(args[1]);
-            }
-        } else if (!args[0].compare("-log")) {
-            logLevel = args[1];
-        } else if (!args[0].compare("-appendToLog")) {
-            truncateLog = false;
-        } else if (!args[0].compare("-verbose")) {
-			skin.reset(new InstallerSkinVerbose);
-        } else if (!args[0].compare("-nogui")) {
-			skin.reset(new InstallerSkin);
-        } else if (!args[0].compare("-pkg")) {
-            updatePkg = Path(args[1]);
-            version = versionFromPackage(updatePkg);
-            if (version.empty()) {
                 usage();
             }
-            // handle the case where the path is relative to the binary
-            // (YIB-2917492)
-            updatePkg = resolvePath(Path(argv[0]), updatePkg);
-            if (!exists(updatePkg)) {
-                BP_THROW("update package " + updatePkg.externalUtf8()
-                         + " not found");
+        }
+    
+        // set the appropriate locale for strings generated from the Installer
+        Path stringsPath = exeDir / "strings.json";
+        Installer::setLocalizedStringsPath(stringsPath, locale);
+    
+        if (!logFile.empty()) {
+            bp::log::setupLogToFile(logFile, logLevel, truncateLog);
+        } else if (!logLevel.empty()) {
+            bp::log::setupLogToConsole(logLevel);
+        }
+
+        BPLOG_INFO_STRM("exeDir = " << exeDir);
+
+        // if skin is NULL, we're in GUI mode.  we'll find the correct
+        // UI based on locale, then we'll 
+        if (skin == NULL) 
+            {
+                Path uiDir = exeDir / "ui";
+                Path uiPath = bp::localization::getLocalizedUIPath(uiDir,
+                                                                   locale);
+                if (uiPath.empty()) {
+                    stringstream ss;
+                    ss << "Running in GUI mode, no interface found in '"
+                       << uiDir << "'.  cannot "
+                       << "continue!";
+                    BPLOG_ERROR(ss.str());
+                    cerr << ss.str() << endl;
+                    exit(1);
+                }
+                skin.reset(new InstallerSkinGUI(uiPath));        
+                BPLOG_INFO("got GUI installer skin");
             }
-        } else if (!args[0].compare("-version")) {
-            version = args[1];
-        } else if (!args[0].compare("-locale")) {
-            locale = args[1];
-        } else {
-            usage();
-        }
-    }
-    
-    // set the appropriate locale for strings generated from the Installer
-    Path stringsPath = exeDir / "strings.json";
-    Installer::setLocalizedStringsPath(stringsPath, locale);
-    
-    if (!logFile.empty()) {
-        bp::log::setupLogToFile(logFile, logLevel, truncateLog);
-    } else if (!logLevel.empty()) {
-        bp::log::setupLogToConsole(logLevel);
-    }
 
-    BPLOG_INFO_STRM("exeDir = " << exeDir);
+        Path configPath = exeDir / "installer.config";
+        Path keyPath = exeDir / "BrowserPlus.crt";
 
-    // if skin is NULL, we're in GUI mode.  we'll find the correct
-    // UI based on locale, then we'll 
-    if (skin == NULL) 
-    {
-        Path uiDir = exeDir / "ui";
-        Path uiPath = bp::localization::getLocalizedUIPath(uiDir, locale);
-        if (uiPath.empty()) {
-            stringstream ss;
-            ss << "Running in GUI mode, no interface found in '"
-               << uiDir << "'.  cannot "
-               << "continue!";
-            BPLOG_ERROR(ss.str());
-            cerr << ss.str() << endl;
-            exit(1);
-        }
-        skin.reset(new InstallerSkinGUI(uiPath));        
-        BPLOG_INFO("got GUI installer skin");
-    }
+        destDir = getTempPath(getTempDirectory(), "BrowserPlusInstaller");
+        (void) remove(destDir);  // doze re-uses same dir.  sigh
 
-	Path configPath = exeDir / "installer.config";
-	Path keyPath = exeDir / "BrowserPlus.crt";
-
-    Path destDir = getTempPath(getTempDirectory(), "BrowserPlusInstaller");
-    (void) remove(destDir);  // doze re-uses same dir.  sigh
-    try {
         list<string> servers;
         list<CoreletRequireStatement> services;
         string permissions;
@@ -918,10 +921,18 @@ main(int argc, const char** argv)
     } catch (const bp::error::Exception& e) {
         BPLOG_ERROR(e.what());
         rval = -1;
+    } catch (const bp::error::FatalException& e) {
+        BPLOG_ERROR(e.what());
+        rval = -1;
+    } catch (const bp::file::tFileSystemError& e) {
+        BPLOG_ERROR(e.what());
+        rval = -1;
     }
 
     // Note, we will only get here on exceptions.  Otherwiser, 
     // InstallerManager exits
-    bp::file::remove(destDir);
+    if (!destDir.empty()) {
+        bp::file::remove(destDir);
+    }
     exit(rval);
 }

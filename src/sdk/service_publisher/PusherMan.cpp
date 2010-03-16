@@ -46,7 +46,13 @@ pushFile(bp::file::Path file, string baseurl,
     baseurl.append("/");    
     baseurl.append(platform);            
 
-    RequestPtr req(new Request(Method::HTTP_POST, baseurl));
+    RequestPtr req;
+    try {
+        req.reset(new Request(Method::HTTP_POST, baseurl));
+    } catch (const bp::url::ParseError& e) {
+        cerr << "unable to parse " << baseurl << ": " << e.what() << endl;
+        return false;
+    }
 
     // now let's populate the request body
     req->body.fromPath(file);

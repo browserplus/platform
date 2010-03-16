@@ -119,61 +119,61 @@ usage()
 int
 main(int argc, const char** argv)
 {
-	// on win32, may have non-ascii chars in args.  deal with it
-	APT::ARGVConverter conv;
-    conv.convert(argc, argv);
-
-    // set the appropriate locale for strings generated from the Installer
-    string locale = bp::localization::getUsersLocale();
-    Path stringsPath = canonicalPath(Path(argv[0])).parent_path() / "strings.json";
-    Installer::setLocalizedStringsPath(stringsPath, locale);
-
-    // setup logging, may be overridden by -logPath=<path> and/or -logLevel=<level>
-    Path logFile = getTempDirectory() / "BrowserPlusUpdater.log";
-    string logLevel = bp::log::levelToString(bp::log::LEVEL_ALL);
-
-    // crack argv
-    // usage is: BrowserPlusUpdater [-ipcName=<ipcName>] [-logPath=<logPath>] 
-    //                              [-logLevel=<level> dir [lockfile]
-    // we no longer need lockfile arg
-    IPCProxy* proxy = NULL;
-    if (argc < 2) {
-        usage();
-    }
-    int argIndex = 1;
-    string ipcName;
-    string curArg(argv[argIndex]);
-    bool loggingChanged = false;
-    if (curArg.find("-ipcName=") == 0) {
-        ipcName = curArg.substr(strlen("-ipcName="));
-        proxy = new IPCProxy(ipcName);
-        curArg = argv[++argIndex];
-    }
-    if (curArg.find("-logPath=") == 0) {
-        logFile = curArg.substr(strlen("-logPath="));
-        curArg = argv[++argIndex];
-        loggingChanged = true;
-    }
-    if (curArg.find("-logLevel=") == 0) {
-        logLevel = curArg.substr(strlen("-logLevel="));
-        curArg = argv[++argIndex];
-        loggingChanged = true;
-    }
-    Path dir(argv[argIndex++]);
-
-    if (loggingChanged) {
-        if (!logFile.empty()) {
-            bp::log::setupLogToFile(logFile, logLevel, false);
-        } else {
-            bp::log::setupLogToConsole(logLevel);
-        }
-    } else {
-        (void) remove(logFile);
-        bp::log::setupLogToFile(logFile, logLevel, true);
-    }
-    
     int rval = 0;
     try {
+        // on win32, may have non-ascii chars in args.  deal with it
+        APT::ARGVConverter conv;
+        conv.convert(argc, argv);
+
+        // set the appropriate locale for strings generated from the Installer
+        string locale = bp::localization::getUsersLocale();
+        Path stringsPath = canonicalPath(Path(argv[0])).parent_path() / "strings.json";
+        Installer::setLocalizedStringsPath(stringsPath, locale);
+
+        // setup logging, may be overridden by -logPath=<path> and/or -logLevel=<level>
+        Path logFile = getTempDirectory() / "BrowserPlusUpdater.log";
+        string logLevel = bp::log::levelToString(bp::log::LEVEL_ALL);
+
+        // crack argv
+        // usage is: BrowserPlusUpdater [-ipcName=<ipcName>] [-logPath=<logPath>] 
+        //                              [-logLevel=<level> dir [lockfile]
+        // we no longer need lockfile arg
+        IPCProxy* proxy = NULL;
+        if (argc < 2) {
+            usage();
+        }
+        int argIndex = 1;
+        string ipcName;
+        string curArg(argv[argIndex]);
+        bool loggingChanged = false;
+        if (curArg.find("-ipcName=") == 0) {
+            ipcName = curArg.substr(strlen("-ipcName="));
+            proxy = new IPCProxy(ipcName);
+            curArg = argv[++argIndex];
+        }
+        if (curArg.find("-logPath=") == 0) {
+            logFile = curArg.substr(strlen("-logPath="));
+            curArg = argv[++argIndex];
+            loggingChanged = true;
+        }
+        if (curArg.find("-logLevel=") == 0) {
+            logLevel = curArg.substr(strlen("-logLevel="));
+            curArg = argv[++argIndex];
+            loggingChanged = true;
+        }
+        Path dir(argv[argIndex++]);
+
+        if (loggingChanged) {
+            if (!logFile.empty()) {
+                bp::log::setupLogToFile(logFile, logLevel, false);
+            } else {
+                bp::log::setupLogToConsole(logLevel);
+            }
+        } else {
+            (void) remove(logFile);
+            bp::log::setupLogToFile(logFile, logLevel, true);
+        }
+    
         // install out of dir
         shared_ptr<IInstallerListener> p;
         Installer inst(dir, true);
@@ -183,6 +183,12 @@ main(int argc, const char** argv)
         }
         inst.run();
     } catch (const bp::error::Exception& e) {
+        BPLOG_ERROR(e.what());
+        rval = -1;
+    } catch (const bp::error::FatalException& e) {
+        BPLOG_ERROR(e.what());
+        rval = -1;
+    } catch (const tFileSystemError& e) {
         BPLOG_ERROR(e.what());
         rval = -1;
     }

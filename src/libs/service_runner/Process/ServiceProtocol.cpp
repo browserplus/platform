@@ -59,7 +59,12 @@ ServiceProtocol::connect()
     payload->add("version", new bp::String(m_lib->version()));    
     payload->add("apiVersion", new bp::Integer(m_lib->apiVersion()));
 
-    m.setPayload(payload);
+    try {
+        m.setPayload(payload);
+    } catch (const bp::error::Exception& e) {
+        BPLOG_ERROR_STRM("unable to set payload: " << e.what());
+        return false;
+    }
     
     if (!m_chan.sendMessage(m)) return false;
 

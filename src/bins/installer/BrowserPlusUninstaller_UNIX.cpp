@@ -32,36 +32,42 @@ using namespace bp::file;
 int
 main(int argc, const char** argv)
 {
-    // debug logging on be default
-    Path logFile = getTempDirectory() / "BrowserPlusUninstaller.log";
-    remove(logFile);
-    string logLevel = "debug";
+    try {
+        // debug logging on be default
+        Path logFile = getTempDirectory() / "BrowserPlusUninstaller.log";
+        remove(logFile);
+        string logLevel = "debug";
 
-    vector<string> args;
-    for (int i = 1; i < argc; i++) {
-        // skip args starting with -psn which deliver the "Process Serial
-        // Number" and are added by the OSX launcher
-        if (!strncmp(argv[i], "-psn", 4)) continue;
+        vector<string> args;
+        for (int i = 1; i < argc; i++) {
+            // skip args starting with -psn which deliver the "Process Serial
+            // Number" and are added by the OSX launcher
+            if (!strncmp(argv[i], "-psn", 4)) continue;
 
-        args = bp::strutil::split(argv[i], "=");
-        if (!args[0].compare("-logfile")) {
-            if (!args[1].compare("console")) {
-                logFile.clear();
-            } else {
-                logFile = args[1];
+            args = bp::strutil::split(argv[i], "=");
+            if (!args[0].compare("-logfile")) {
+                if (!args[1].compare("console")) {
+                    logFile.clear();
+                } else {
+                    logFile = args[1];
+                }
+            } else if (!args[0].compare("-log")) {
+                logLevel = args[1];
             }
-        } else if (!args[0].compare("-log")) {
-            logLevel = args[1];
         }
-    }
     
-    if (!logLevel.empty()) {
-        if (logFile.empty()) {
-            bp::log::setupLogToConsole(logLevel);
-        } else {
-            bp::log::setupLogToFile(logFile, logLevel, true);        
+        if (!logLevel.empty()) {
+            if (logFile.empty()) {
+                bp::log::setupLogToConsole(logLevel);
+            } else {
+                bp::log::setupLogToFile(logFile, logLevel, true);        
+            }
         }
+        bp::install::Uninstaller unins;
+        unins.run();
+    } catch (const bp::error::Exception& e) {
+        BPLOG_ERROR_STRM("Uninstall failed: " << e.what());
+    } catch (const bp::error::FatalException& e) {
+        BPLOG_ERROR_STRM("Uninstall failed: " << e.what());
     }
-    bp::install::Uninstaller unins;
-    unins.run();
 }

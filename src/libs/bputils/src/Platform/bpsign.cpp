@@ -78,7 +78,13 @@ Signer::get(const Path& publicKeyPath)
     map<Path, Signer*>::const_iterator it;
     it = s_singletons.find(path);
     if (it == s_singletons.end()) {
-        rval = new Signer(path);
+        try {
+            rval = new Signer(path);
+        } catch (const SSLException& e) {
+            BPLOG_ERROR_STRM("unable to get signer for " << publicKeyPath
+                             << ": " << e.what());
+            return NULL;
+        }
         s_singletons[path] = rval;
     } else {
         rval = it->second;

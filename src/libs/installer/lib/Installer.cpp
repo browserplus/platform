@@ -160,6 +160,9 @@ Installer::run()
     } catch (const bp::error::Exception& e) {
         BPLOG_ERROR_STRM("Installer.run() catches " << e.what());
         sendError(e.what());
+    } catch (const bpf::tFileSystemError& e) {
+        BPLOG_ERROR_STRM("Installer.run() catches " << e.what());
+        sendError(e.what());
     }
     (void) remove(installingPath);
     sendProgress(100);
