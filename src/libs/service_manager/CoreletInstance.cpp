@@ -154,7 +154,8 @@ CoreletInstance::onHop(void * ctx)
     switch (dtc->type) {
         case DataToCore::T_InvokeCallback: 
         {
-            assert(dtc->data != NULL);
+            assert((dtc->data != NULL)
+                   && (dtc->data.get()->type() == BPTMap));
             context->invokeCallback(dtc->tid,
                                     dynamic_cast<bp::Map *>(dtc->data.get()));
             break;

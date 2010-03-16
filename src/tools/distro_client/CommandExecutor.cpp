@@ -296,6 +296,10 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::satisfy)
         }
         Map * m = dynamic_cast<Map*>(obj);
         assert(m != NULL);
+        if (!m) {
+            std::cout << "expected a map, got " << tokens[0] << std::endl;
+            onFailure();
+        }
         const String * s = dynamic_cast<const String*>(m->value("platform"));
         if (s) {
             platform = s->value();

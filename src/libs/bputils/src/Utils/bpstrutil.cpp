@@ -406,7 +406,7 @@ loadFromFile(const bp::file::Path& path, std::string& sOut)
         if (!boost::filesystem::is_regular_file(path)) {
             return false;
         }
-    } catch (const bp::file::tFileSystemError& e) {
+    } catch (const bp::file::tFileSystemError&) {
         return false;
     }
 

@@ -377,7 +377,9 @@ void
 Transaction::Impl::timesUp(bp::time::Timer* t)
 {
     BPLOG_INFO_STRM(m_id << ": timer fired");
-    t->cancel();
+    if (t) {
+        t->cancel();
+    }
     m_eState = eTimedOut;
     m_hopper.invokeOnThread(processRequestCB, this);
 }
