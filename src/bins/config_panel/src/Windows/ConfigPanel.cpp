@@ -33,6 +33,7 @@
 #include <atlwin.h>
 #include <comutil.h>
 #include "BPUtils/bplocalization.h"
+#include "BPUtils/bpconfig.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/ProductPaths.h"
@@ -41,13 +42,44 @@
 #include "ScriptableConfigObject.h"
 
 
-
 using namespace bp::html;
 
 
 // Create global module object required by atl.
 [module(name="ConfigPanel")];
 CAppModule _Module;
+
+
+void setupLogging()
+{
+    bp::file::Path logPath = bp::paths::getObfuscatedWritableDirectory() /
+                             "ConfigPanel.log";
+    
+    // now obliterate the old log file if it exists.  This behavior
+    // should possibly be configurable in the config file.
+    (void) bp::file::remove(logPath);
+
+    // now attempt to figure out logging level from config file
+    std::string level = "info";
+
+    bp::file::Path configFilePath = bp::paths::getConfigFilePath();
+    bp::config::ConfigReader reader;
+    if (!reader.load(configFilePath)) {
+            // what else can we do?
+        std::cerr << "couldn't read config file at: "
+                << configFilePath << ", logging at info level"
+                << std::endl;
+    } else {
+        std::string configLevel;
+        if (reader.getStringValue("ConfigPanelLogLevel", configLevel))
+        {
+            level = configLevel;
+        }
+    }
+
+    bp::log::setupLogToFile(logPath, level);
+}
+
 
 
 int APIENTRY WinMain( HINSTANCE hInst, HINSTANCE /*hinstPrev*/,
@@ -62,7 +94,10 @@ int APIENTRY WinMain( HINSTANCE hInst, HINSTANCE /*hinstPrev*/,
 
     AtlAxWinInit();
 
+    try
     {
+        setupLogging();
+        
         bp::file::Path path = bp::paths::getPreferencePanelUIPath(
                                 bp::localization::getUsersLocale() );
         if (path.empty())
@@ -73,6 +108,8 @@ int APIENTRY WinMain( HINSTANCE hInst, HINSTANCE /*hinstPrev*/,
                          L"Unable to start control panel.",
                          L"BrowserPlus Control Panel",
                          MB_OK );
+
+            BPLOG_FATAL( "getPreferencePanelUIPath failed.  Exiting." );
             return 0;
         }
 
@@ -92,6 +129,12 @@ int APIENTRY WinMain( HINSTANCE hInst, HINSTANCE /*hinstPrev*/,
         HtmlDialog dlg( title, path.url(), hIcon, &gateway );
 
         dlg.DoModal();
+
+        BPLOG_INFO( "Normal exit." );
+    }
+    catch (bp::error::Exception& e)
+    {
+        BP_REPORTCATCH(e);
     }
 
     _Module.Term();
