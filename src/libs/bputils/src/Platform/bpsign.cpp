@@ -340,7 +340,7 @@ Signer::doVerify(BIO* contentBio,
 
 bool
 Signer::getTimestamp(PKCS7* pkcs7,
-                      BPTime& t)
+                     BPTime& t)
 {
     bool rval = false;
     ASN1_UTCTIME* time = NULL;
@@ -369,7 +369,11 @@ Signer::getTimestamp(PKCS7* pkcs7,
                     "20%02d-%02d-%02d %02d:%02d:%02dZ", 
                     y, m, d, h, min, s);
             string str(buf);
-            t = BPTime(str);
+            try {
+                t = BPTime(str);
+            } catch (const runtime_error&) {
+                return false;
+            }
             rval = true;
             break;
         }
