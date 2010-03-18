@@ -727,14 +727,14 @@ bp::service::validateArguments(const bp::service::Function & desc,
             // we're cool.  add this to the set of arguments we have
             haveArgs.insert(name);
         }
+
+        // modify args as needed
+        std::map<std::string, bp::Object*>::iterator miter;
+        for (miter = mods.begin(); miter != mods.end(); ++miter) {
+            arguments->add(miter->first.c_str(), miter->second);
+        }
     }
         
-    // modify args as needed
-    std::map<std::string, bp::Object*>::iterator miter;
-    for (miter = mods.begin(); miter != mods.end(); ++miter) {
-        arguments->add(miter->first.c_str(), miter->second);
-    }
-    
     // verify all required arguments are present
     std::list<bp::service::Argument> args = desc.arguments();
     std::list<bp::service::Argument>::iterator ait;    
