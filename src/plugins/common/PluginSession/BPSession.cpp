@@ -27,6 +27,8 @@
  *  Copyright 2007 Yahoo! Inc. All rights reserved.
  *
  */
+#include <boost/scoped_ptr.hpp>
+
 #include "BPSession.h"
 #include <assert.h>
 #include "BPHandleMapper.h"
@@ -284,17 +286,18 @@ BPSession::variantToBPObject( const plugin::Variant* input,
         input->getStringValue(sVal);
         output = new bp::String(sVal);
     } else if (input->isObject()) {
-        plugin::Object* oVal;
-        input->getObjectValue(oVal);
+        plugin::Object* p = NULL;
+        input->getObjectValue(p);
+        boost::scoped_ptr<plugin::Object> oVal(p);
            
-        if (plugin().isJsFunction(oVal)) {
-            plugin::Object * callback = oVal;
+        if (plugin().isJsFunction(oVal.get())) {
+            plugin::Object * callback = oVal.get();
             unsigned int cid = transaction->addCallback(callback);
             output = new bp::CallBack(cid);
-        } else if (plugin().isJsArray(oVal)) {
+        } else if (plugin().isJsArray(oVal.get())) {
             bp::List * l = new bp::List;
 
-            plugin::Object * arr = oVal;
+            plugin::Object * arr = oVal.get();
 
             // Get array length.
             int nArrLen;
@@ -332,14 +335,14 @@ BPSession::variantToBPObject( const plugin::Variant* input,
 
             // get the keys
             std::vector<std::string> keys;
-            if (!plugin().enumerateProperties(oVal, keys)) {
+            if (!plugin().enumerateProperties(oVal.get(), keys)) {
                 delete m;
                 return false;
             }
             
             for (unsigned int i = 0; i < keys.size(); i++) {
                 plugin::Variant* val = plugin().allocVariant();
-                if (!plugin().getProperty(oVal, keys[i], val)) {
+                if (!plugin().getProperty(oVal.get(), keys[i], val)) {
                     delete m;
                     return false;
                 }
