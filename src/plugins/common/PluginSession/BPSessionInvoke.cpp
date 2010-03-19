@@ -359,6 +359,7 @@ BPSession::executeMethodInvokeCallbackRelayCB(void * cookie)
     }
 
     plugin.freeVariant(result);
+    plugin.freeVariant(arg);
     delete cic;
 }
 
