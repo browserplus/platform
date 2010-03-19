@@ -356,9 +356,9 @@ BPSession::executeMethodInvokeCallbackRelayCB(void * cookie)
     // now we can invoke JS function
     if (callback) {
         (void) plugin.callJsFunction(callback, &arg, 1, result);    
-        plugin.freeVariant(result);
     }
 
+    plugin.freeVariant(result);
     delete cic;
 }
 
