@@ -1340,6 +1340,10 @@ remove(const Path& path)
                 } catch (const tFileSystemError& e) {
                     BPLOG_WARN_STRM("unable to iterate thru " << path
                                     << ": " << e.what());
+                } catch (const length_error& e) {
+                    BPLOG_WARN_STRM("std::length_error exception trying "
+                                    << "to iterate thru " << path
+                                    << ": " << e.what());
                 }
             } else {
                 (void) unsetReadOnly(path);
