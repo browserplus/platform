@@ -42,8 +42,8 @@
 #include "ScriptableConfigObject.h"
 
 
-using namespace bp::html;
-
+using namespace bp::localization;
+using namespace std;
 
 // Create global module object required by atl.
 [module(name="ConfigPanel")];
@@ -60,17 +60,17 @@ void setupLogging()
     (void) bp::file::remove(logPath);
 
     // now attempt to figure out logging level from config file
-    std::string level = "info";
+    string level = "info";
 
     bp::file::Path configFilePath = bp::paths::getConfigFilePath();
     bp::config::ConfigReader reader;
     if (!reader.load(configFilePath)) {
-            // what else can we do?
-        std::cerr << "couldn't read config file at: "
-                << configFilePath << ", logging at info level"
-                << std::endl;
+        // what else can we do?
+        cerr << "couldn't read config file at: "
+             << configFilePath << ", logging at info level"
+             << endl;
     } else {
-        std::string configLevel;
+        string configLevel;
         if (reader.getStringValue("ConfigPanelLogLevel", configLevel))
         {
             level = configLevel;
@@ -97,9 +97,10 @@ int APIENTRY WinMain( HINSTANCE hInst, HINSTANCE /*hinstPrev*/,
     try
     {
         setupLogging();
+
+        string sLocale = getUsersLocale();
         
-        bp::file::Path path = bp::paths::getPreferencePanelUIPath(
-                                bp::localization::getUsersLocale() );
+        bp::file::Path path = bp::paths::getPreferencePanelUIPath( sLocale );
         if (path.empty())
         {
             // TODO: localize
@@ -122,11 +123,11 @@ int APIENTRY WinMain( HINSTANCE hInst, HINSTANCE /*hinstPrev*/,
                                          LR_DEFAULTCOLOR);
         
         ScriptableConfigObject sco;
-        ScriptGateway gateway( *sco.getScriptableObject(), "BPState" );
-        std::string title;
-        bp::localization::getLocalizedString(
-            "configPanelTitle", bp::localization::getUsersLocale(), title);
-        HtmlDialog dlg( title, path.url(), hIcon, &gateway );
+		bp::html::ScriptGateway gateway( *sco.getScriptableObject(), "BPState" );
+        string title;
+        getLocalizedString( "configPanelTitle", sLocale, title );
+        
+        bp::html::HtmlDialog dlg( title, path.externalUtf8(), hIcon, &gateway );
 
         dlg.DoModal();
 
