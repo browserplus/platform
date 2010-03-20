@@ -67,7 +67,7 @@ public:
     struct EventListener
     {
         // src:     source
-        // sUrl:    proposed url, client may change
+        // sUrl:    proposed url in utf-8, client may change
         // return:  true to allow, false to cancel
         virtual bool onBeforeNavigate( HtmlDialog& /*src*/,
                                        std::string& /*sUrl*/ )
@@ -82,7 +82,7 @@ public:
 
     
 // Construction/destruction
-public:    
+public:
     HtmlDialog( const std::string& sTitle,
                 const std::string& sPathToHtml,
                 HICON hIcon = 0,
