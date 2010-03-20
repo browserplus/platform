@@ -255,8 +255,8 @@ void __stdcall HtmlDialog::OnBeforeNavigate2( IDispatch* /*pDisp*/,
 {
     if (m_pListener)
     {
-        // TODO: might need to assign this to a wide str, then wideToUtf8.
-        std::string sUrl = _bstr_t( pvtUrl->bstrVal );
+        std::string sUrl = bp::strutil::wideToUtf8(
+                               std::wstring( _bstr_t( pvtUrl->bstrVal ) ) );
         
         bool bRet = m_pListener->onBeforeNavigate( *this, sUrl );
         
