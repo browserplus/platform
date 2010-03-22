@@ -299,6 +299,7 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::satisfy)
         if (!m) {
             std::cout << "expected a map, got " << tokens[0] << std::endl;
             onFailure();
+	    return;
         }
         const String * s = dynamic_cast<const String*>(m->value("platform"));
         if (s) {
