@@ -27,44 +27,77 @@
 * (c) 2007, Yahoo! Inc, all rights reserved.
 */
 
-#include "BPHandleMapper.h"
 #include <iostream>
+#include "BPHandleMapper.h"
 #include "BPUtils/bpfile.h"
+#include "BPUtils/bperrorutil.h"
 
-std::map<bp::file::Path, BPHandle> s_pathMap;
-std::map<BPHandle, bp::file::Path> s_handleMap;
+using namespace std;
+namespace bpf = bp::file;
+
+map<bpf::Path, pair<BPHandle, bpf::FileInfo> > s_pathMap;
+map<BPHandle, pair<bpf::Path, bpf::FileInfo> > s_handleMap;
 
 BPHandle 
-BPHandleMapper::pathToHandle(const bp::file::Path& path)
+BPHandleMapper::pathToHandle(const bpf::Path& path)
  {
     static int sHandle = ::rand();
 
-    std::map<bp::file::Path, BPHandle>::iterator it = s_pathMap.find(path);
+    map<bpf::Path, pair<BPHandle, bpf::FileInfo> >::iterator it = s_pathMap.find(path);
     if (it != s_pathMap.end()) {
-        return it->second;
+        // allegedly found handle.  make sure it refers to same file
+        // as path.  If so, update size and return.
+        BPHandle& h = it->second.first;
+        const bpf::FileInfo& info = it->second.second;
+        bpf::FileInfo curInfo;
+        if (statFile(path, curInfo)
+            && info.deviceId == curInfo.deviceId
+            && info.fileIdHigh == curInfo.fileIdHigh
+            && info.fileIdLow == curInfo.fileIdLow) {
+            long size = boost::filesystem::is_regular_file(path) ?
+                        (long) boost::filesystem::file_size(path) : 0;
+            if (h.m_size != size) {
+                h.m_size = size;
+            }
+            return h;
+        }
+
+        // Hmm, something has changed.  Nuke old handle
+        s_pathMap.erase(it);
     }
 
     // no known handle, add one
-    std::string safeName = bp::file::utf8FromNative(path.filename());
+    bpf::FileInfo info;
+    if (!statFile(path, info)) {
+        BP_THROW("unable to stat " + path.externalUtf8());
+    }
+    string safeName = bpf::utf8FromNative(path.filename());
     long size = boost::filesystem::is_regular_file(path) ?
-        (long) boost::filesystem::file_size(path) : 0;
-    std::set<std::string> mimeTypes = bp::file::mimeTypes(path);
+                (long) boost::filesystem::file_size(path) : 0;
+    set<string> mimeTypes = bpf::mimeTypes(path);
     BPHandle h("BPTPath", sHandle++, safeName, size, mimeTypes);
-    s_pathMap.insert(std::make_pair(path, h));
-    s_handleMap.insert(std::make_pair(h, path));
+    s_pathMap.insert(make_pair(path, make_pair(h, info)));
+    s_handleMap.insert(make_pair(h, make_pair(path, info)));
     return h;
 }
 
 
-bp::file::Path
+bpf::Path
 BPHandleMapper::handleValue(const BPHandle& handle)
 {
-    bp::file::Path rval;
-    std::map<BPHandle, bp::file::Path>::iterator it = s_handleMap.find(handle);
+    bpf::Path rval;
+    map<BPHandle, pair<bpf::Path, bpf::FileInfo> >::iterator it = s_handleMap.find(handle);
     if (it != s_handleMap.end()) {
-        if (it->first.type().compare(handle.type()) == 0
+        bpf::Path path = it->second.first;
+        const bpf::FileInfo& info = it->second.second;
+        bpf::FileInfo curInfo;
+        if (statFile(path, curInfo)
+            && info.deviceId == curInfo.deviceId
+            && info.fileIdHigh == curInfo.fileIdHigh
+            && info.fileIdLow == curInfo.fileIdLow
+            && it->first.type().compare(handle.type()) == 0
             && it->first.name().compare(handle.name()) == 0) {
-            rval = it->second;
+            rval = path;
         }
     } 
     return rval;
@@ -100,7 +133,7 @@ BPHandleMapper::insertHandles(const bp::Object* bpObj)
         {
             // Path must become a map containing id/name keys
             const Path* pObj = dynamic_cast<const Path*>(bpObj);
-            bp::file::Path path = bp::file::pathFromURL(pObj->value());
+            bpf::Path path = bpf::pathFromURL(pObj->value());
             BPHandle handle = pathToHandle(path);
             Map* m = new Map;
             m->add(BROWSERPLUS_HANDLETYPE_KEY, new String(handle.type()));
@@ -110,8 +143,8 @@ BPHandleMapper::insertHandles(const bp::Object* bpObj)
             m->add(DEPRECATED_BROWSERPLUS_HANDLENAME_KEY, new String(handle.name()));
             m->add(BROWSERPLUS_HANDLENAME_KEY, new String(handle.name()));
             m->add(BROWSERPLUS_HANDLESIZE_KEY, new Integer(handle.size()));
-            std::set<std::string> mt = handle.mimeTypes();
-            std::set<std::string>::const_iterator it;
+            set<string> mt = handle.mimeTypes();
+            set<string>::const_iterator it;
             List* l = new List;
             for (it = mt.begin(); it != mt.end(); ++it) {
                 l->append(new String(it->c_str()));
@@ -192,7 +225,7 @@ BPHandleMapper::expandHandles(const bp::Object* bpObj)
             const List* mimeTypeObj = 
                 dynamic_cast<const List*>(me->value(BROWSERPLUS_HANDLEMIMETYPE_KEY));
             if (typeObj && idObj && nameObj && sizeObj && mimeTypeObj) {
-                std::set<std::string> mt;
+                set<string> mt;
                 for (unsigned int i = 0; i < mimeTypeObj->size(); ++i) {
                     const String* s = 
                         dynamic_cast<const String*>(mimeTypeObj->value(i));
@@ -203,7 +236,7 @@ BPHandleMapper::expandHandles(const bp::Object* bpObj)
                 BPHandle h(typeObj->value(), (int) idObj->value(),
                            nameObj->value(), (long) sizeObj->value(),
                            mt);
-                bp::file::Path val = handleValue(h);
+                bpf::Path val = handleValue(h);
                 if (!val.empty()) {
                     rval = new Path(val);
                 }

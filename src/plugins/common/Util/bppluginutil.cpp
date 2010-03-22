@@ -183,9 +183,14 @@ bp::pluginutil::applyFilters(const vector<bp::file::Path>& selection,
         if (flags & kIncludeGestureInfo) {
             bp::Path* itemPath = new bp::Path(item);
             bp::file::Path path = bp::file::pathFromURL(itemPath->value());
-            BPHandle h = BPHandleMapper::pathToHandle(path);
-            parentID = h.id();
-            selList->append(itemPath);
+            try {
+                BPHandle h = BPHandleMapper::pathToHandle(path);
+                parentID = h.id();
+                selList->append(itemPath);
+            } catch (const bp::error::Exception& e) {
+                BPLOG_WARN_STRM("unable to add " << path 
+                                << " to selection: " << e.what());
+            }
         }
         
         // visit selected item (and maybe it's kids)

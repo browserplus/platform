@@ -33,7 +33,6 @@
 #include <set>
 #include <string>
 
-
 namespace bp {
     class Map;
 }
@@ -84,6 +83,7 @@ public:
     bp::Map* toBPMap() const;
 
 private:
+    friend class BPHandleMapper;
     std::string m_type;
     int m_id;
     std::string m_name;

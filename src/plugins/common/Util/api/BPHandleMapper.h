@@ -40,7 +40,8 @@
 class BPHandleMapper
 {
 public:
-    // get a handle for a path
+    // get a handle for a path.  throws bp::error::Exception
+    // if bp::file::statFile(path) fails
     static BPHandle pathToHandle(const bp::file::Path& path);
         
     // get the path represented by a handle
