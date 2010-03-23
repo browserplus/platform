@@ -33,6 +33,7 @@
 #include "ActiveSession.h"
 #include "BPUtils/ProductPaths.h"
 #include "BPUtils/ServicesUpdatedFile.h"
+#include "BPUtils/bprandom.h"
 #include "I18n/idna.h"
 #include "Permissions/Permissions.h"
 #include "SystemConfig.h"
@@ -1432,7 +1433,7 @@ ActiveSession::doNextDispatch()
     
     // still gotta prompt
     ServiceSynopsisList emptyList;
-    ctx->m_cookie = rand();
+    ctx->m_cookie = bp::random::generate();
     PermissionsManager* pmgr = PermissionsManager::get();
     std::vector<std::string> desc;
     for (unsigned int i = 0; i < ctx->m_perms.size(); i++) {

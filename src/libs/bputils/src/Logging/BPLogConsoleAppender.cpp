@@ -29,6 +29,7 @@
  */
 #include "BPLogConsoleAppender.h"
 #include "bpstrutil.h"
+#include "bprandom.h"
 
 #include <iostream>
 #ifdef WIN32
@@ -94,7 +95,7 @@ ConsoleAppender::~ConsoleAppender()
 //    for (unsigned int i=0; i<sMsg.length(); ++i)
 //    {
 //        printf( "%c", sMsg[i] );
-//        Sleep( rand() % 5 );
+//        Sleep( bp::random::generate() % 5 );
 //    }
 //    printf( "%c", '\n' );
 //}

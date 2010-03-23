@@ -30,6 +30,7 @@
 #include "BPUtils/bpfile.h"
 #include "BPUtils/bplocalization.h"
 #include "BPUtils/bpphash.h"
+#include "BPUtils/bprandom.h"
 #include "BPUtils/OS.h"
 #include "BPUtils/ProductPaths.h"
 #include "CoreletInstaller.h"
@@ -923,7 +924,7 @@ RequireRequest::promptUser()
         if (m_toInstall.empty()) postSuccess();
         else installNextCorelet();
     } else {
-        m_promptCookie = rand();
+        m_promptCookie = bp::random::generate();
         asp->displayInstallPrompt(shared_from_this(), m_promptCookie, perms,
                                   m_platformUpdateDescriptions,
                                   servicesToPromptFor);

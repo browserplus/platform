@@ -30,6 +30,7 @@
 #include <iostream>
 #include "BPHandleMapper.h"
 #include "BPUtils/bpfile.h"
+#include "BPUtils/bprandom.h"
 #include "BPUtils/bperrorutil.h"
 
 using namespace std;
@@ -40,9 +41,7 @@ map<BPHandle, pair<bpf::Path, bpf::FileInfo> > s_handleMap;
 
 BPHandle 
 BPHandleMapper::pathToHandle(const bpf::Path& path)
- {
-    static int sHandle = ::rand();
-
+{
     map<bpf::Path, pair<BPHandle, bpf::FileInfo> >::iterator it = s_pathMap.find(path);
     if (it != s_pathMap.end()) {
         // allegedly found handle.  make sure it refers to same file
@@ -75,7 +74,7 @@ BPHandleMapper::pathToHandle(const bpf::Path& path)
     long size = boost::filesystem::is_regular_file(path) ?
                 (long) boost::filesystem::file_size(path) : 0;
     set<string> mimeTypes = bpf::mimeTypes(path);
-    BPHandle h("BPTPath", sHandle++, safeName, size, mimeTypes);
+    BPHandle h("BPTPath", bp::random::generate(), safeName, size, mimeTypes);
     s_pathMap.insert(make_pair(path, make_pair(h, info)));
     s_handleMap.insert(make_pair(h, make_pair(path, info)));
     return h;
