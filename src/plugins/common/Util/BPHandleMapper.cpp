@@ -31,7 +31,7 @@
 #include "BPHandleMapper.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/bprandom.h"
-#include "BPUtils/bperrorutil.h"
+#include "BPUtils/BPLog.h"
 
 using namespace std;
 namespace bpf = bp::file;
@@ -68,7 +68,7 @@ BPHandleMapper::pathToHandle(const bpf::Path& path)
     // no known handle, add one
     bpf::FileInfo info;
     if (!statFile(path, info)) {
-        BP_THROW("unable to stat " + path.externalUtf8());
+        BPLOG_WARN_STRM("unable to stat " + path.externalUtf8());
     }
     string safeName = bpf::utf8FromNative(path.filename());
     long size = boost::filesystem::is_regular_file(path) ?
