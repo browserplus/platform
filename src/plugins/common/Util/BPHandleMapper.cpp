@@ -36,47 +36,28 @@
 using namespace std;
 namespace bpf = bp::file;
 
-map<bpf::Path, pair<BPHandle, bpf::FileInfo> > s_pathMap;
-map<BPHandle, pair<bpf::Path, bpf::FileInfo> > s_handleMap;
+map<bpf::Path, BPHandle> s_pathMap;
+map<BPHandle, bpf::Path> s_handleMap;
 
 BPHandle 
 BPHandleMapper::pathToHandle(const bpf::Path& path)
 {
-    map<bpf::Path, pair<BPHandle, bpf::FileInfo> >::iterator it = s_pathMap.find(path);
-    if (it != s_pathMap.end()) {
-        // allegedly found handle.  make sure it refers to same file
-        // as path.  If so, update size and return.
-        BPHandle& h = it->second.first;
-        const bpf::FileInfo& info = it->second.second;
-        bpf::FileInfo curInfo;
-        if (statFile(path, curInfo)
-            && info.deviceId == curInfo.deviceId
-            && info.fileIdHigh == curInfo.fileIdHigh
-            && info.fileIdLow == curInfo.fileIdLow) {
-            long size = boost::filesystem::is_regular_file(path) ?
-                        (long) boost::filesystem::file_size(path) : 0;
-            if (h.m_size != size) {
-                h.m_size = size;
-            }
-            return h;
-        }
+    long size = boost::filesystem::is_regular_file(path) ?
+                (long) boost::filesystem::file_size(path) : 0;
 
-        // Hmm, something has changed.  Nuke old handle
-        s_pathMap.erase(it);
+    map<bpf::Path, BPHandle>::iterator it = s_pathMap.find(path);
+    if (it != s_pathMap.end()) {
+        // allegedly found handle, update size and return.
+        it->second.m_size = size;
+        return it->second;
     }
 
     // no known handle, add one
-    bpf::FileInfo info;
-    if (!statFile(path, info)) {
-        BPLOG_WARN_STRM("unable to stat " + path.externalUtf8());
-    }
     string safeName = bpf::utf8FromNative(path.filename());
-    long size = boost::filesystem::is_regular_file(path) ?
-                (long) boost::filesystem::file_size(path) : 0;
     set<string> mimeTypes = bpf::mimeTypes(path);
     BPHandle h("BPTPath", bp::random::generate(), safeName, size, mimeTypes);
-    s_pathMap.insert(make_pair(path, make_pair(h, info)));
-    s_handleMap.insert(make_pair(h, make_pair(path, info)));
+    s_pathMap.insert(make_pair(path, h));
+    s_handleMap.insert(make_pair(h, path));
     return h;
 }
 
@@ -85,18 +66,11 @@ bpf::Path
 BPHandleMapper::handleValue(const BPHandle& handle)
 {
     bpf::Path rval;
-    map<BPHandle, pair<bpf::Path, bpf::FileInfo> >::iterator it = s_handleMap.find(handle);
+    map<BPHandle, bpf::Path>::iterator it = s_handleMap.find(handle);
     if (it != s_handleMap.end()) {
-        bpf::Path path = it->second.first;
-        const bpf::FileInfo& info = it->second.second;
-        bpf::FileInfo curInfo;
-        if (statFile(path, curInfo)
-            && info.deviceId == curInfo.deviceId
-            && info.fileIdHigh == curInfo.fileIdHigh
-            && info.fileIdLow == curInfo.fileIdLow
-            && it->first.type().compare(handle.type()) == 0
+        if (it->first.type().compare(handle.type()) == 0
             && it->first.name().compare(handle.name()) == 0) {
-            rval = path;
+            rval = it->second;
         }
     } 
     return rval;
