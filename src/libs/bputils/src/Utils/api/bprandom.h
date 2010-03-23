@@ -31,8 +31,6 @@
 #ifndef _BPRANDOM_H_
 #define _BPRANDOM_H_
 
-#include <stdlib.h>
-
 namespace bp {
     namespace random {
         int generate();

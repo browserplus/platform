@@ -29,8 +29,9 @@
  *
  */
 
+#include <stdlib.h>
 #include "bprandom.h"
-
+#include "BPLog.h"
 
 namespace bp {
 namespace random {
@@ -39,16 +40,16 @@ namespace random {
 int
 generate()
 {
+    unsigned int i = 0;
 #ifdef WIN32
-    static bool inited = false;
-    if (!inited) {
-        srand((unsigned)time(NULL));
-        inited = true;
+    if (::rand_s(&i) != 0) {
+        BPLOG_WARN("::rand_s() failed, reverting to ::rand()");
+        i = (unsigned int) ::rand();
     }
-    return(rand());
 #else
-    return(arc4random() % ((unsigned)RAND_MAX + 1));
+    i = ::arc4random();
 #endif
+    return(i % ((unsigned)RAND_MAX + 1));
 }
 
    
