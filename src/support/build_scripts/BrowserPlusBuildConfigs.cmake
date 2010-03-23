@@ -21,8 +21,8 @@
 # Special build configuration used throughout browserplus.
 #
 
-# require cmake 2.6.2 or higher
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6.2 FATAL_ERROR)
+# require cmake 2.8.1 or higher
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.1 FATAL_ERROR)
 
 IF (POLICY CMP0011) 
   cmake_policy(SET CMP0011 OLD)
