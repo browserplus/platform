@@ -83,7 +83,14 @@ IF(WIN32)
 ELSE ()
     SET(isysrootFlag)
     IF (APPLE)
-      SET (CMAKE_OSX_DEPLOYMENT_TARGET "10.4"
+      # Must tell cmake that we really, really, really want gcc-4.0
+      INCLUDE(CMakeForceCompiler)
+      CMAKE_FORCE_C_COMPILER(gcc-4.0 GNU)
+      CMAKE_FORCE_CXX_COMPILER(gcc-4.0 GNU)
+
+      # and we want 32bit i386 for osx 10.4
+      SET(CMAKE_OSX_ARCHITECTURES i386)
+      Set (CMAKE_OSX_DEPLOYMENT_TARGET "10.4"
 	       CACHE STRING "Compile for tiger deployment" FORCE)
       SET (CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.4u.sdk"
 	       CACHE STRING "Compile for tiger backwards compat" FORCE)

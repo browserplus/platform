@@ -21,8 +21,15 @@ Building on OSX:
     2. ruby build.rb keepSource (will take a while, only needs to be done once)
     3. mkdir <some_build_dir>
     4. cd <some_build_dir>
-    5. cmake <path to public_platform>/src
-    6. "make -j3"
+    5. cmake <path to public_platform>/src 
+         or
+       cmake -G Xcode <path to public_platform>/src if you like Xcode
+          Note:  On OSX 10.6 and later, you'll need to 
+          "open BrowserPlus.xcode", File -> Get Info.  
+          Then change the "C/C++ Compiler Version" from GCC 4.2 to GCC 4.0.
+    6. make -j3
+         or
+       open BrowserPlus.xcodeproj (or xcodebuild)
 
 
 Building on win32:
