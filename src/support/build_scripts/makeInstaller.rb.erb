@@ -31,8 +31,7 @@ if ARGV[0] =~ /help/ || $intDir == nil
     exit 1
 end
 
-topDir = File.dirname(File.dirname(File.dirname(File.dirname(File.expand_path(__FILE__)))))
-
+topDir = "<%= $cmake['CMAKE_CURRENT_SOURCE_DIR'] %>"
 beVerbose = defined?($verbose) ? $verbose : false
 bpVersion = "<%= $cmake["VersionString"] %>"
 
@@ -65,12 +64,13 @@ def flushTurds(dir, verbose)
 end
 
 # find build directory, externals
+buildDir = "<%= $cmake['CMAKE_CURRENT_BINARY_DIR'] %>"
 externalsDir = File.expand_path(File.join(topDir, "..", "external"))
 
 artifactsName = "pab_#{bpVersion}-#{plat_fname}"
 artifactsDir = File.join($buildDir, artifactsName)
-shippingBinsDir = File.join(topDir, "build", "ShippingBinaries")
-shippingResDir = File.join(topDir, "build", "ShippingResources",
+shippingBinsDir = File.join(buildDir, "ShippingBinaries")
+shippingResDir = File.join(buildDir, "ShippingResources",
                                  bpVersion)
 
 puts "Parameterizable artifacts bundle to be left in #{artifactsDir}"
@@ -269,10 +269,10 @@ FileUtils.mkdir_p("#{artifactsDir}/tools")
 FileUtils.install("#{$buildDir}/dist/bin/#{$intDir}/bpkg#{exeSuffix}",
                   "#{artifactsDir}/tools",
                   :mode => 0755, :verbose => $verbose)
-FileUtils.install("#{$buildDir}/../support/signing/sign.rb",
+FileUtils.install("#{topDir}/support/signing/sign.rb",
                   "#{artifactsDir}/tools",
                   :mode => 0755, :verbose => $verbose)
-FileUtils.cp_r("#{$buildDir}/../support/build_scripts/json",
+FileUtils.cp_r("#{topDir}/support/build_scripts/json",
                "#{artifactsDir}/tools")
 
 # finally let's drop our friend browserplus.js in the PAB so that it

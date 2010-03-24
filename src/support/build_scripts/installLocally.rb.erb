@@ -26,11 +26,12 @@ bpVersion = "<%= $cmake["VersionString"] %>"
 updatePkgName = "BrowserPlus_#{bpVersion}.bpkg"
 
 puts "installing locally..."
-$topDir = File.dirname(File.dirname(File.dirname(File.dirname(File.expand_path(__FILE__)))))
-$workDir = File.join($topDir, "build", "pab_#{bpVersion}-#{platform}",
-                     "work")
+$topDir = "<%= $cmake['CMAKE_CURRENT_SOURCE_DIR'] %>"
+$buildDir = "<%= $cmake['CMAKE_CURRENT_BINARY_DIR'] %>"
+$workDir = File.join($buildDir, "pab_#{bpVersion}-#{platform}", "work")
+
 installerExe = File.join($workDir, "install", "BrowserPlusInstaller")
-updatePkg = File.join($topDir, "build", updatePkgName)
+updatePkg = File.join($buildDir, updatePkgName)
 if CONFIG['arch'] =~ /mswin/
     installerExe.gsub!(/\//, '\\')
     updatePkg.gsub!(/\//, '\\')

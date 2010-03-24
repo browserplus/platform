@@ -44,7 +44,7 @@ end
 
 puts "Packaging BrowserPlus SDK"
 
-$topDir = File.dirname(File.dirname(File.dirname(File.dirname(File.expand_path(__FILE__)))))
+$topDir = "<%= $cmake['CMAKE_CURRENT_SOURCE_DIR'] %>"
 
 # make a pass thru dir removing .svn and .git turds
 def flushTurds(dir) 

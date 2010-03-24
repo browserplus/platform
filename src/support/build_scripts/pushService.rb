@@ -58,7 +58,7 @@ for i in coreletStart..ARGV.length-1
     end
 
 
-    topDir = File.dirname(File.expand_path(__FILE__))
+    topDir = "<%= $cmake['CMAKE_CURRENT_SOURCE_DIR'] %>"
     coreletDir = File.join(corelet, "Main", ARGV[i])
     coreletDir = File.directory?(coreletDir) ? coreletDir : ARGV[i]
     srcDir = File.join(topDir, "..", "..")

@@ -8,7 +8,7 @@
 require 'pathname'
 
 $pathToLicense =
-  File.join(File.dirname(__FILE__), "..", "..", "..", "LICENSE.txt")
+  File.join("<%= $cmake['CMAKE_CURRENT_SOURCE_DIR'] %>", "LICENSE.txt")
 $licenseContent = File.new($pathToLicense).read
 
 LICENSE_BEGIN_MARK = "***** BEGIN LICENSE BLOCK *****"
