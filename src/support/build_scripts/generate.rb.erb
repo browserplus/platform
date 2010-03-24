@@ -14,7 +14,7 @@
 #              to a certStore (combine keys by concatenating public keys
 #              into a single file)
 #   -pass      password associated with keypair
-#   -authKey   path authenticode signing key (only meaningful on win32)
+#   -authKey   path to authenticode signing key (only meaningful on win32)
 #   -outdir    path where output should be left (should be a directory)
 #   -prefix    filename prefix to append to installer and bpkg
 #   -primary   hostname of primary distribution server
@@ -71,6 +71,9 @@ $buildType = "unknown"
 $logLevel = "info"
 $instCfgKeys = Hash.new
 
+# authKey only needed for win32 prod signing.
+$authKey = "unknown"
+
 ARGV.each { |arg|
   k,v,a = arg.sub(/^-/, "").split '='
   # -secondary is special, it may be multiply provided
@@ -118,7 +121,9 @@ puts
 raise "cannot find file: #{$pubKey}" if !File.exist? $pubKey
 raise "cannot find file: #{$privKey}" if !File.exist? $privKey
 raise "cannot find file: #{$certStore}" if !File.exist? $certStore
-
+if platform=="Windows" && $buildType=="prod"
+  raise "cannot find authenticode .pfx file" if !File.exist? $authKey
+end
 FileUtils.mkdir_p $outdir
 
 $bpkg = File.join($topDir, "tools", "bpkg")
@@ -181,7 +186,7 @@ if platform=="Windows" && $buildType=="prod"
   Dir.chdir($workDir) do
     signScript = File.join($topDir, "tools", "sign.rb")
     filesToSign = Dir.glob("**/*.{cab,dll,exe}").join(" ")
-    signCmd = "ruby -s \"#{signScript}\" sign -certType=prod #{filesToSign}"
+    signCmd = "ruby -s \"#{signScript}\" sign -certType=prod -authKey=\"#{$authKey}\" #{filesToSign}"
     puts signCmd
     system(signCmd)
   end
