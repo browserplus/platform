@@ -27,14 +27,16 @@
 
 
 #define LIBARCHIVE_STATIC
+
 #include "bptar.h"
-#include <assert.h>
-#include <fstream>
 #include "BPUtils/bpfile.h"
 #include "BPUtils/bpstrutil.h"
 #include "libarchive/archive.h"
 #include "libarchive/archive_entry.h"
 
+#include <assert.h>
+#include <fstream>
+#include <string.h>
 
 #define BP_TAR_BUF_SIZE (1024 * 64)
 

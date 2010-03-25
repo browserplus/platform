@@ -53,6 +53,7 @@ void RunLoopTest::basicRunLoopTest()
     // run on a single thread, post some events before we run the runloop
 
     bp::runloop::RunLoop rl;
+
     SumAndLoop snl = { 0, &rl };
 
     rl.setCallBacks(processEventSumming, &snl);

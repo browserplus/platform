@@ -144,7 +144,7 @@ class DynamicServiceState : public bp::time::ITimerListener
 
     PendControllerMap m_pendingAllocations;
 
-    typedef struct ControllerContext {
+    struct ControllerContext {
         // smart pointer to the controller
         std::tr1::shared_ptr<ServiceRunner::Controller> controller;
         // a set of all of the active instances

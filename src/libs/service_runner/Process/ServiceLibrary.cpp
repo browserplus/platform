@@ -29,7 +29,6 @@
  */
 
 #include "ServiceLibrary.h"
-#include <stdarg.h>
 #include <ServiceAPI/bptypes.h>
 #include <ServiceAPI/bpdefinition.h>
 #include <ServiceAPI/bpcfunctions.h>
@@ -39,6 +38,9 @@
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bpstrutil.h"
 #include "BPUtils/ProductPaths.h"
+
+#include <stdarg.h>
+#include <string.h>
 
 using namespace std;
 using namespace std::tr1;

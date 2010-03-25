@@ -24,9 +24,11 @@
  * BPProtoUtil.h -- custom little tools used by the corelet library.
  */
 #include "BPProtoUtil.h"
-#include <assert.h>
 #include "BPUtils/BPLog.h"
 #include "BPUtils/ProductPaths.h"
+
+#include <assert.h>
+#include <string.h>
 
 void freeBPElement(BPElement * elem)
 {
