@@ -54,8 +54,10 @@ generate()
 #elif defined(MACOSX)
     i = ::arc4random();
 #else
-    RAND_bytes((unsigned char *) &i, sizeof(i));
-    // XXX: failure?  should we throw fatal in case of failure?
+    if (0 == ::RAND_bytes((unsigned char *) &i, sizeof(i))) {
+        BPLOG_WARN("RAND_bytes failed, reverting to ::rand()");
+        i = (unsigned int) ::rand();
+    }
 #endif
     return(i % ((unsigned)RAND_MAX + 1));
 }
