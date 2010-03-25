@@ -24,32 +24,32 @@
 #include "bpsync.h"
 #include "api/bpuuid.h"
 #include "api/bpstrutil.h"
+#include "api/bpthread.h"
+#include "bprunloop_Linux.h"
 
 #include <stdlib.h>
-
-#warning "threadhopper not implemented on linux, will abort at runtime!"   
 
 bool
 bp::thread::Hopper::initializeOnCurrentThread()
 {
-    abort();
-    return false;
+    m_osSpecific = (void *) bp::thread::Thread::currentThreadID();
+    return true;
 }
 
 bool
 bp::thread::Hopper::invokeOnThread(InvokeFuncPtr invokeFunc, void * context)
 {
-    abort();
-    return false;
+    unsigned int tid = (unsigned int) ((size_t) m_osSpecific);
+    bprll_invokeOnThread(tid, invokeFunc, context);
+    return true;
 }
 
 bp::thread::Hopper::~Hopper()
 {
-    abort();
 }
 
 void
 bp::thread::Hopper::processOutstandingRequests()
 {
-    abort();
+    // XXX
 }
