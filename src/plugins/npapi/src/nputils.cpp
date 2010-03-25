@@ -162,9 +162,9 @@ npu::getCurrentURL(NPP instance, std::string &outUrl)
     // Firefox supports document.URL or document.location.href
     if (!getElementProperty(instance, &document, "URL", &docURL)) {
         NPVariant loc;
-		if (getElementProperty(instance, &document, "location", &loc))
+        if (getElementProperty(instance, &document, "location", &loc))
         {
-            getElementProperty(instance, &loc, "href", &docURL);
+            (void)getElementProperty(instance, &loc, "href", &docURL);
             releaseVariant(loc);
         }
     }

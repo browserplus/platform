@@ -194,7 +194,10 @@ ServiceProtocol::onResults(unsigned int instance, unsigned int tid,
     m->add("instance", new bp::Integer(instance));
     if (o) m->add("results", o->clone());
     r.setPayload(m);
-    m_chan.sendResponse(r);
+    if (!m_chan.sendResponse(r)) {
+        BPLOG_WARN_STRM("failed to send result response for tid " << tid);
+    }
+
 }
 
 void
@@ -217,7 +220,9 @@ ServiceProtocol::onError(unsigned int instance,
         m->add("verboseError", new bp::String(verboseError));
     }
     r.setPayload(m);
-    m_chan.sendResponse(r);
+    if (!m_chan.sendResponse(r)) {
+        BPLOG_WARN_STRM("failed to send error response for tid " << tid);
+    }
 }
 
 void
