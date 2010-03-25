@@ -40,7 +40,7 @@ class MyChannelListener : public bp::ipc::IChannelListener
 {
 public:
     MyChannelListener(bp::runloop::RunLoop * rl)
-        : m_why(bp::ipc::IConnectionListener::InternalError), m_rl(rl) { }
+        : m_why(bp::ipc::IConnectionListener::InternalError), m_rl(rl)  { }
     
     void channelEnded(bp::ipc::Channel *,
                       bp::ipc::IConnectionListener::TerminationReason why,
@@ -101,27 +101,31 @@ IPCChannelTest::stopTest()
 
     rl.init();
 
-    // allocate a server
-    IPCTestServer server;
-
-    // allocate a client
-    MyChannelListener listener(&rl);
     {
-        ipc::Channel c;
-        c.setListener(&listener);
+        // allocate a server
+        IPCTestServer server;
 
-        // now connect the client
-        CPPUNIT_ASSERT( c.connect(server.location()) );
+        // allocate a client
+        MyChannelListener listener(&rl);
+        {
+            ipc::Channel c;
+            c.setListener(&listener);
 
-        // now let's send a "stop" string to be echo'd back to us.
-        // when we get the response, we'll stop the runloop
-        bp::ipc::Query q;
-        q.setCommand("echo");
-        q.setPayload(bp::String("quit"));
-        CPPUNIT_ASSERT( c.sendQuery(q) );
+            // now connect the client
+            CPPUNIT_ASSERT( c.connect(server.location()) );
 
-        rl.run();
+            // now let's send a "stop" string to be echo'd back to us.
+            // when we get the response, we'll stop the runloop
+            bp::ipc::Query q;
+            q.setCommand("echo");
+            q.setPayload(bp::String("quit"));
+            CPPUNIT_ASSERT( c.sendQuery(q) );
+
+            rl.run();
+        }
     }
+    
+    rl.shutdown();
 }
 
 void
@@ -134,28 +138,32 @@ IPCChannelTest::fiveHundredTest()
 
     rl.init();
 
-    // allocate a server
-    IPCTestServer server;
-
-    // allocate a client
-    MyChannelListener listener(&rl);
     {
-        ipc::Channel c;
-        c.setListener(&listener);
+        // allocate a server
+        IPCTestServer server;
 
-        // now connect the client
-        CPPUNIT_ASSERT( c.connect(server.location()) );
+        // allocate a client
+        MyChannelListener listener(&rl);
+        {
+            ipc::Channel c;
+            c.setListener(&listener);
 
-        // now let's send an integer to be echo'd back to us.
-        // when we get the response, we'll increment the count and resend
-        // the message.  When the count gets to 500 we'll call it quits
-        bp::ipc::Query q;
-        q.setCommand("echo");
-        q.setPayload(bp::Integer(0));
-        CPPUNIT_ASSERT( c.sendQuery(q) );
+            // now connect the client
+            CPPUNIT_ASSERT( c.connect(server.location()) );
 
-        rl.run();
+            // now let's send an integer to be echo'd back to us.
+            // when we get the response, we'll increment the count and resend
+            // the message.  When the count gets to 500 we'll call it quits
+            bp::ipc::Query q;
+            q.setCommand("echo");
+            q.setPayload(bp::Integer(0));
+            CPPUNIT_ASSERT( c.sendQuery(q) );
+
+            rl.run();
+        }
     }
+    
+    rl.shutdown();
 }
 
 void
@@ -168,27 +176,31 @@ IPCChannelTest::peerTerminatedTest()
 
     rl.init();
 
-    // allocate a client listener (which will stop the runloop when
-    // it detects disconnect)
-    MyChannelListener listener(&rl);
     {
-        ipc::Channel c;
-        c.setListener(&listener);
-
+        // allocate a client listener (which will stop the runloop when
+        // it detects disconnect)
+        MyChannelListener listener(&rl);
         {
-            // allocate and start a server
-            IPCTestServer server;
-            // now connect the client
-            CPPUNIT_ASSERT( c.connect(server.location()) );
-        }
-        // server is now destroyed, ensure our listener kicks us out of
-        // the runloop
-        rl.run();
+            ipc::Channel c;
+            c.setListener(&listener);
 
-        // and that the termination reason is appropriate
-        CPPUNIT_ASSERT_EQUAL( listener.m_why,
-                              bp::ipc::IConnectionListener::PeerClosed );
+            {
+                // allocate and start a server
+                IPCTestServer server;
+                // now connect the client
+                CPPUNIT_ASSERT( c.connect(server.location()) );
+            }
+            // server is now destroyed, ensure our listener kicks us out of
+            // the runloop
+            rl.run();
+
+            // and that the termination reason is appropriate
+            CPPUNIT_ASSERT_EQUAL( listener.m_why,
+                                  bp::ipc::IConnectionListener::PeerClosed );
+        }
     }
+    
+    rl.shutdown();
 }
 
 // a simple channel listener which calls stop on a runloop when the
@@ -266,36 +278,40 @@ IPCChannelTest::tenTimesFourHundredTest()
 
     rl.init();
 
-    // allocate a server
-    IPCTestServer server;
-
-    // allocate a client
-    MyChannelListener2 listener(&rl);
     {
-        ipc::Channel c[10];
-        // now connect the clients
-        for (int i = 0; i < 10; i++)  {
-			listener.addChannel(c+i);
-            c[i].setListener(&listener);
-            std::string errBuf;
-            bool connected = c[i].connect(server.location(), &errBuf);
-            CPPUNIT_ASSERT_MESSAGE( errBuf, connected );
-            // lth: hack!  The way windows named pipes are implemented,
-            //      it doesn't seem possible to avoid a temporary period
-            //      after connecting a pipe where a 231 error would
-            //      be returned "all named pipe instances are busy",
-            //      A 20ms sleep allows the named pipe server thread to
-            //      allocate and "connect" a new listening pipe.  very
-            //      silly.
+        // allocate a server
+        IPCTestServer server;
+
+        // allocate a client
+        MyChannelListener2 listener(&rl);
+        {
+            ipc::Channel c[10];
+            // now connect the clients
+            for (int i = 0; i < 10; i++)  {
+                listener.addChannel(c+i);
+                c[i].setListener(&listener);
+                std::string errBuf;
+                bool connected = c[i].connect(server.location(), &errBuf);
+                CPPUNIT_ASSERT_MESSAGE( errBuf, connected );
+                // lth: hack!  The way windows named pipes are implemented,
+                //      it doesn't seem possible to avoid a temporary period
+                //      after connecting a pipe where a 231 error would
+                //      be returned "all named pipe instances are busy",
+                //      A 20ms sleep allows the named pipe server thread to
+                //      allocate and "connect" a new listening pipe.  very
+                //      silly.
 #ifdef WIN32
-            Sleep(20);
+                Sleep(20);
 #endif            
-            bp::ipc::Query q;
-            q.setCommand("echo");
-            q.setPayload(bp::Integer(1));
-            CPPUNIT_ASSERT( c[i].sendQuery(q) );
+                bp::ipc::Query q;
+                q.setCommand("echo");
+                q.setPayload(bp::Integer(1));
+                CPPUNIT_ASSERT( c[i].sendQuery(q) );
+            }
+            // wait for all channels to end before calling shutdown
+            rl.run();
         }
-        
-        rl.run();
     }
+
+    rl.shutdown();
 }
