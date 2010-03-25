@@ -55,7 +55,7 @@ generate()
     i = ::arc4random();
 #else
     if (0 == ::RAND_bytes((unsigned char *) &i, sizeof(i))) {
-        BPLOG_WARN("RAND_bytes failed, reverting to ::rand()");
+        BPLOG_WARN("::RAND_bytes() failed, reverting to ::rand()");
         i = (unsigned int) ::rand();
     }
 #endif
