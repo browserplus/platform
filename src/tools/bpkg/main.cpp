@@ -117,7 +117,7 @@ main(int argc, const char ** argv)
         bp::file::Path publicKey(packArgParser.argument("publicKey"));
         bp::file::Path privateKey(packArgParser.argument("privateKey"));
 
-        if (boost::filesystem::is_regular(packArgParser.argument("in"))) 
+        if (bp::file::isRegularFile(packArgParser.argument("in")))
         {
             if (!bp::pkg::packFile(privateKey, publicKey, 
                                    packArgParser.argument("password"), 
@@ -127,7 +127,7 @@ main(int argc, const char ** argv)
                 return 1;
             }
         }
-        else if (boost::filesystem::is_directory(inPath))
+        else if (bp::file::isDirectory(inPath))
         {
             if (!bp::pkg::packDirectory(privateKey, publicKey,
                                         packArgParser.argument("password"),

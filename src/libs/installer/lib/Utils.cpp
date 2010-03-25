@@ -67,7 +67,7 @@ bp::install::utils::readPlatformInfo(const bpf::Path& path)
 
     // determine what other versions of this major rev exist on disk
     bpf::Path dir = getProductTopDirectory();
-    if (boost::filesystem::is_directory(dir)) {
+    if (bpf::isDirectory(dir)) {
         bpf::tDirIter end;
         try {
             for (bpf::tDirIter it(dir); it != end; ++it) {

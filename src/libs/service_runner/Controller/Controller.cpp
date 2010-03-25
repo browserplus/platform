@@ -120,7 +120,7 @@ Controller::run(const bpf::Path & pathToHarness,
     }
 
     // ensure that the target directory exists
-    if (!bfs::is_directory(m_path)) {
+    if (!bpf::isDirectory(m_path)) {
         err.append("no such directory: ");
         err.append(m_path.externalUtf8());
         return false;

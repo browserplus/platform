@@ -133,7 +133,7 @@ getNewestInstalledPlatform()
 {
     bp::ServiceVersion newest;
     bp::file::Path dir = bp::paths::getProductTopDirectory();
-    if (boost::filesystem::is_directory(dir)) {
+    if (bp::file::isDirectory(dir)) {
         try {
             bp::file::tDirIter end;
             for (bp::file::tDirIter it(dir); it != end; ++it)

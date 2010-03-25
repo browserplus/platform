@@ -59,7 +59,7 @@ bp::file::Path Body::path() const
 int Body::size() const
 {
     int rval = 0;
-    if (boost::filesystem::is_regular_file(m_path)) {
+    if (bp::file::isRegularFile(m_path)) {
         rval = (int) boost::filesystem::file_size(m_path);
         if (rval == -1) rval = 0;
     } else {

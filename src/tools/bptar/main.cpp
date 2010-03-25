@@ -81,7 +81,7 @@ main(int argc, char ** argv)
                 continue;
             }
             
-            if (boost::filesystem::is_directory(path)) {
+            if (bp::file::isDirectory(path)) {
                 // add the directory entry
                 if (!tar.addFile(path, path)) {
                     std::cerr << "couldn't add directory: "

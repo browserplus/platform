@@ -174,7 +174,7 @@ DropTargetBase::canAcceptDrop()
             m_dropState = CannotAccept;
             for (unsigned int i = 0; i < m_dragItems.size(); ++i) {
                 Path path = m_dragItems[i];
-                if (boost::filesystem::is_directory(path)) {
+                if (isDirectory(path)) {
                     if (directoryContainsMimeType(path)) {
                         m_dropState = CanAccept;
                         break;
@@ -269,12 +269,12 @@ DropTargetBase::directoryContainsMimeType(const Path& path)
                     return eOk;
                 }
             }
-            if (boost::filesystem::is_directory(resolved)) {
+            if (isDirectory(resolved)) {
                 if (m_mimeTypes.count(kFolderMimeType)) {
                     m_found = true;
                     return eStop;
                 }
-            } else if (boost::filesystem::is_regular_file(resolved)) {
+            } else if (isRegularFile(resolved)) {
                 if (isMimeType(resolved, m_mimeTypes)) {
                     m_found = true;
                     return eStop;

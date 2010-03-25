@@ -118,7 +118,7 @@ getBrowseTitle(const char* key,
 - (BOOL) panel: (id)sender shouldShowFilename: (NSString*)filename
 {
     string path([filename UTF8String]);
-    if (boost::filesystem::is_directory(path)) {
+    if (bp::file::isDirectory(path)) {
         return YES;
     }
     return bp::file::isMimeType(path, *m_mimetypes) ? YES : NO;

@@ -271,12 +271,12 @@ ScriptableConfigObject::invoke(const string & functionName,
         } else if (!strcmp(key->value(), "logSize")) {
             unsigned long totalSize = 0;
             Path dir = bp::paths::getObfuscatedWritableDirectory();
-            if (boost::filesystem::is_directory(dir)) {
+            if (isDirectory(dir)) {
                 try {
                     tDirIter end;
                     tString logExt = nativeFromUtf8(".log");
                     for (tDirIter iter(dir); iter != end; ++iter) {
-                        if (boost::filesystem::is_regular_file(*iter)) {
+                        if (isRegularFile(iter->path())) {
                             if (boost::filesystem::extension(*iter).compare(logExt) == 0) {
                                 long sz = (long) boost::filesystem::file_size(iter->path());
                                 if (sz > 0) {
@@ -439,7 +439,7 @@ ScriptableConfigObject::invoke(const string & functionName,
             if (includeLogs->value()) {
                 tString logExt = nativeFromUtf8(".log");
                 Path dir = bp::paths::getObfuscatedWritableDirectory();
-                if (boost::filesystem::is_directory(dir)) {
+                if (isDirectory(dir)) {
                     try {
                         tDirIter end;
                         for (tDirIter iter(dir); iter != end; ++iter) {
@@ -494,7 +494,7 @@ ScriptableConfigObject::invoke(const string & functionName,
                              + filevar + "\"; filename=\"" + 
                              utf8FromNative(postBodyPath.filename()) + "\"");
             req->headers.add(Headers::ksContentType, "application/x-lzip");
-            int contentLength = boost::filesystem::is_regular_file(postBodyPath) 
+            int contentLength = isRegularFile(postBodyPath)
                                 ? (int) boost::filesystem::file_size(postBodyPath) : 0;
             req->headers.add(Headers::ksContentLength,
                              bp::conv::toString(contentLength));

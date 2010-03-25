@@ -89,7 +89,7 @@ bool createDirectoryTestData(const bpf::Path & dirPath)
 static
 bool verifyDirectoryTestData(const bpf::Path & dirPath)
 {
-    if (!bfs::is_directory(dirPath)) return false;
+    if (!bpf::isDirectory(dirPath)) return false;
 
     // verify existence and contents of top level file
     {

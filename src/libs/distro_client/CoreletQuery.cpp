@@ -404,7 +404,7 @@ CoreletQuery::getNextLocalization()
             // This happens when minversion in a require forces us
             // to download a newer version before we cache the update.
             bpf::Path coreletPath = bp::paths::getCoreletDirectory() / name;
-            synopsis.m_isUpdate = boost::filesystem::is_directory(coreletPath);
+            synopsis.m_isUpdate = bpf::isDirectory(coreletPath);
             
             m_locDescs.push_back(synopsis);
             fetchLocalization(acp);

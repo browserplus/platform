@@ -52,7 +52,7 @@ Installer::preflight()
 
     // remove existing start menu items
     bpf::Path dir = getFolderPath(CSIDL_PROGRAMS) / getString(kProductNameShort);
-    if (bfs::is_directory(dir)) {
+    if (bpf::isDirectory(dir)) {
         BPLOG_INFO_STRM("preflight: delete " << dir);
         (void) remove(dir);
     } else {
@@ -61,7 +61,7 @@ Installer::preflight()
 
     // remove existing non-localized start menu items
     dir = getFolderPath(CSIDL_PROGRAMS) / "Yahoo! BrowserPlus";
-    if (bfs::is_directory(dir)) {
+    if (bpf::isDirectory(dir)) {
         BPLOG_INFO_STRM("preflight: delete " << dir);
         (void) remove(dir);
     } else {

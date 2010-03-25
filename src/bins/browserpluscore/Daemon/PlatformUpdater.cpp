@@ -294,7 +294,7 @@ PlatformUpdaterSingleton::gotLatestPlatformVersion(unsigned int,
     (void) current.parse(bp::paths::versionString());
     if (latestVersion.compare(current) == 1) {
         Path cacheDir = getPlatformCacheDirectory() / latestVersion.asString();
-        if (!boost::filesystem::is_directory(cacheDir)) {
+        if (!isDirectory(cacheDir)) {
             // newer version available and we don't have it, initiate download
             m_tid = m_distQuery->downloadLatestPlatform(m_platform);
             if (m_tid == 0) {

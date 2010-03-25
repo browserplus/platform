@@ -45,7 +45,7 @@ PendingUpdateCache::cached()
         bp::file::Path path(dirStack.top());
         dirStack.pop();
 
-        if (boost::filesystem::is_directory(path)) {
+        if (bp::file::isDirectory(path)) {
             try {
                 bp::file::tDirIter end;
                 for (bp::file::tDirIter it(path); it != end; ++it) {            
@@ -55,7 +55,7 @@ PendingUpdateCache::cached()
                     bp::file::tString dot = bp::file::nativeFromUtf8(".");
                     if (p.filename().compare(0, 1, dot) == 0) continue;
                     
-                    if (!boost::filesystem::is_directory(p)) continue;
+                    if (!bp::file::isDirectory(p)) continue;
                     
                     // check to see if this is a valid corelet
                     std::string error;
@@ -121,7 +121,7 @@ PendingUpdateCache::install(std::string name, std::string version)
     bp::file::Path shortDest = bp::paths::getCoreletDirectory() / name;
 
     // if source doesn't exist, fail
-    if (!boost::filesystem::is_directory(source)) return false;
+    if (!bp::file::isDirectory(source)) return false;
 
     // kill dest if it exists
     (void) bp::file::remove(dest);

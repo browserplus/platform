@@ -386,7 +386,7 @@ DiskScanner::scanDiskForServices(
         bp::file::Path path = dirStack.top();
         dirStack.pop();
         
-        if (!boost::filesystem::is_directory(path))
+        if (!bp::file::isDirectory(path))
         {
             BPLOG_INFO_STRM("skipping '" << path << "', not directory.");
         }
@@ -404,7 +404,7 @@ DiskScanner::scanDiskForServices(
                         continue;
 
                     // verify it's a directory
-                    if (!boost::filesystem::is_directory(subpath))  
+                    if (!bp::file::isDirectory(subpath))
                         continue;
                     
                     // check to see if this is a valid corelet

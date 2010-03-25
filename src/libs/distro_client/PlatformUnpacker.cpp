@@ -77,7 +77,7 @@ PlatformUnpacker::install(string& errMsg)
     errMsg.clear();
     Path platformDir = m_destDir / m_version;
     try {
-        if (m_unpackError || !bfs::is_directory(m_tmpDir)) {
+        if (m_unpackError || !isDirectory(m_tmpDir)) {
             throw string("unpack error or no tmp dir");
         }
         

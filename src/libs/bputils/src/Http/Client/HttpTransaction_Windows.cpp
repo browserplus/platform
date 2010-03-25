@@ -801,7 +801,7 @@ Transaction::Impl::sendRequestWithBody()
             setError("unable to allocate buffer");
             return GetLastError();
         }
-        m_sendTotalBytes = boost::filesystem::is_regular_file(path) ? 
+        m_sendTotalBytes = bp::file::isRegularFile(path) ?
                            (size_t) boost::filesystem::file_size(path) : 0;
 	} else {
         m_ePostSource = eFromBuffer;

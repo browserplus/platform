@@ -42,7 +42,7 @@ map<BPHandle, bpf::Path> s_handleMap;
 BPHandle 
 BPHandleMapper::pathToHandle(const bpf::Path& path)
 {
-    long size = boost::filesystem::is_regular_file(path) ?
+    long size = bpf::isRegularFile(path) ?
                 (long) boost::filesystem::file_size(path) : 0;
 
     map<bpf::Path, BPHandle>::iterator it = s_pathMap.find(path);

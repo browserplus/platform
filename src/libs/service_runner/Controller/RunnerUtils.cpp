@@ -35,7 +35,7 @@ ServiceRunner::determineProviderPath(const bp::service::Summary & s,
     // build directory where versions of this service should be
     bp::file::Path d = bp::paths::getCoreletDirectory() / name;
 
-    if (!boost::filesystem::is_directory(d)) {
+    if (!bp::file::isDirectory(d)) {
         err.append("No such service installed: ");
         err.append(name);
         return bp::file::Path();

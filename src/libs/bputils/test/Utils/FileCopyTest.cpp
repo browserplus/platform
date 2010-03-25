@@ -73,7 +73,7 @@ FileCopyTest::sourceFile()
     src = m_testSourceDir / "foo.txt";
     dst = m_testDestDir / "testDir1";
     bfs::create_directories(dst);
-    CPPUNIT_ASSERT(bfs::is_directory(dst));
+    CPPUNIT_ASSERT(isDirectory(dst));
     CPPUNIT_ASSERT(bp::file::copy(src, dst));    
     dst /= "foo.txt";
     CPPUNIT_ASSERT(exists(dst));
@@ -141,7 +141,7 @@ FileCopyTest::sourceDir()
     dst = m_testDestDir / "dirCopyTest3";    
 
     bfs::create_directories(dst);
-    CPPUNIT_ASSERT(bfs::is_directory(dst));
+    CPPUNIT_ASSERT(isDirectory(dst));
     CPPUNIT_ASSERT(copy(src, dst));        
     dst /= "fooDir";        
     CPPUNIT_ASSERT(dirsAreSame(src, dst));    
@@ -167,8 +167,8 @@ FileCopyTest::sourceDNE()
 bool
 FileCopyTest::dirsAreSame(Path lhs, Path rhs)
 {
-    CPPUNIT_ASSERT(bfs::is_directory(lhs));
-    CPPUNIT_ASSERT(bfs::is_directory(rhs));
+    CPPUNIT_ASSERT(isDirectory(lhs));
+    CPPUNIT_ASSERT(isDirectory(rhs));
 
     // get contents of lhs relative to lhs
     std::vector<Path> lhsKids;
@@ -237,8 +237,8 @@ FileCopyTest::setUp()
     CPPUNIT_ASSERT(remove(dst));
     bfs::create_directories(src);
     bfs::create_directories(dst);
-    CPPUNIT_ASSERT(bfs::is_directory(src));
-    CPPUNIT_ASSERT(bfs::is_directory(dst));
+    CPPUNIT_ASSERT(isDirectory(src));
+    CPPUNIT_ASSERT(isDirectory(dst));
 
     m_testSourceDir = src;
     m_testDestDir = dst;    

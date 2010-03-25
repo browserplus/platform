@@ -430,7 +430,7 @@ bp::localization::getLocalizedUIPath(const bp::file::Path & uiDir,
     for (unsigned int i = 0; i < candidates.size(); i++)
     {
         bp::file::Path p = uiDir / candidates[i];
-        if (boost::filesystem::is_directory(p)) {
+        if (bp::file::isDirectory(p)) {
             path = p;
             break;
         }

@@ -351,7 +351,7 @@ int main(int argc, const char ** argv)
                       << std::endl;
         }
         
-        if (boost::filesystem::is_directory(source)) {
+        if (bp::file::isDirectory(source)) {
             try {
                 bp::file::tDirIter end;
                 for (bp::file::tDirIter it(source); it != end; ++it) {

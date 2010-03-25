@@ -475,7 +475,7 @@ extractPathArguments(NPP npp,
             CHECK_RETURN(bp::file::resolveLink(path, resolvedPath),
                          "unable to resolve link");
         }
-        if (boost::filesystem::is_regular_file(resolvedPath)) {
+        if (bp::file::isRegularFile(resolvedPath)) {
             CHECK_RETURN((size_t)boost::filesystem::file_size(resolvedPath) == size,
                          "size mismatch");
         }

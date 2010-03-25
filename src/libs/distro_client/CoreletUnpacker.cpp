@@ -89,7 +89,7 @@ CoreletUnpacker::install(string& errMsg)
     errMsg.clear();
     bool rval = true;
     try {
-        if (m_unpackError || !boost::filesystem::is_directory(m_tmpDir)) {
+        if (m_unpackError || !isDirectory(m_tmpDir)) {
             stringstream ss;
             ss << "error, m_unpackError = " << m_unpackError
                << ", m_tmpDir = " << m_tmpDir;

@@ -57,7 +57,7 @@ public:
         std::string urlPath = request.url.path();
         if (!urlPath.empty()) path /= urlPath;
 
-        if (boost::filesystem::is_regular(path)) {
+        if (isRegularFile(path)) {
             std::string mt = *(mimeTypes(path).begin());
             response.headers.add(Headers::ksContentType,mt.c_str());
             std::string sBody;
@@ -91,8 +91,8 @@ public:
                     }
                     // files size
                     {
-                        size_t size = boost::filesystem::is_regular_file(pathToKid) ?
-                        (size_t) boost::filesystem::file_size(pathToKid) : 0;
+                        size_t size = isRegularFile(pathToKid) ?
+                           (size_t) boost::filesystem::file_size(pathToKid) : 0;
                         std::stringstream ss;
                         ss << size;
                         response.body.append(ss.str());

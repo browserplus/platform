@@ -863,7 +863,7 @@ doRemoveAll(const Path& path)
     bool rval = true;
     try {
         // don't recurse into symlinks
-        if (!isSymlink(path) && bfs::is_directory(path)) {
+        if (!isSymlink(path) && isDirectory(path)) {
             try {
                 tDirIter end;
                 for (tDirIter iter(path); iter != end; ++iter) {
@@ -960,9 +960,9 @@ doVisit(const bp::file::Path& p,
     }
 
     // visit this node, but don't visit top directory of a non-recursive
-    if (recursive || !relativeDir.empty() || !bfs::is_directory(target)) {
+    if (recursive || !relativeDir.empty() || !isDirectory(target)) {
         bp::file::Path rp = relativeDir;
-        if (!bfs::is_directory(target)) {
+        if (!isDirectory(target)) {
             rp /= p.filename();
         }
         if (v.visitNode(target, rp) == IVisitor::eStop) {
@@ -975,7 +975,7 @@ doVisit(const bp::file::Path& p,
         return true;
     }
 
-    if (bfs::is_directory(target)) {
+    if (isDirectory(target)) {
         // remember ourselves for cycle detection
         pathStack.push_back(DirEntry::fromPath(target));
 
@@ -994,14 +994,14 @@ doVisit(const bp::file::Path& p,
                 }
 
                 // check for cycles
-                if (bfs::is_directory(nodeTarget)
+                if (isDirectory(nodeTarget)
                     && isCircular(nodeTarget, pathStack)) {
                     continue;
                 }
 
                 // visit child
                 bool diveIn = false;
-                if (recursive && bfs::is_directory(nodeTarget)) {
+                if (recursive && isDirectory(nodeTarget)) {
                     diveIn = !isLink(node) || followLinks;
                 }
                 if (diveIn) {
@@ -1330,7 +1330,7 @@ remove(const Path& path)
             BPLOG_DEBUG_STRM("doRemoveAll(" << path
                              << ") failed, removing read-only attributes "
                              << "and trying again");
-            if (bfs::is_directory(path)) {
+            if (isDirectory(path)) {
                 try {
                     tRecursiveDirIter end;
                     for (tRecursiveDirIter it(path); it != end; ++it) {
@@ -1419,6 +1419,34 @@ exists(const Path& path)
 }
 
 
+bool
+isDirectory(const Path& path)
+{
+    try {
+        return bfs::is_directory(path);
+    } catch(const tFileSystemError& e) {
+        BPLOG_DEBUG_STRM("bfs::is_directory(" << path << ") failed.");
+        BPLOG_INFO_STRM("bfs::is_directory failed: " << e.what() <<
+                        ", returning false.");
+        return false;
+    }
+}
+
+
+bool
+isRegularFile(const Path& path)
+{
+    try {
+        return bfs::is_regular_file(path);
+    } catch(const tFileSystemError& e) {
+        BPLOG_DEBUG_STRM("bfs::is_regular_file(" << path << ") failed.");
+        BPLOG_INFO_STRM("bfs::is_regular_file failed: " << e.what() <<
+                        ", returning false.");
+        return false;
+    }
+}
+
+
 static void
 copyDir(const Path& from,
         const Path& to)
@@ -1428,7 +1456,7 @@ copyDir(const Path& from,
     for (tRecursiveDirIter it(from); it != end; ++it) {
         Path relPath = Path(it->path()).relativeTo(from);
         Path target = to / relPath;
-        if (bfs::is_directory(it->path())) {
+        if (isDirectory(it->path())) {
             bfs::create_directories(target);
         } else {
             bfs::copy_file(it->path(), target);
@@ -1454,7 +1482,7 @@ copy(const Path& src,
         }
     
         // fail if destination file exists (no implicit overwrite)
-        if (exists(dst) && !bfs::is_directory(dst)) {
+        if (exists(dst) && !isDirectory(dst)) {
             return false;
         }
 
@@ -1475,7 +1503,7 @@ copy(const Path& src,
         // trailing / on dirs ok, but not on files
         string fromStr = from.utf8();
         if (fromStr.rfind("/") == fromStr.length()-1) {
-            if (bfs::is_directory(from)) {
+            if (isDirectory(from)) {
                 from = fromStr.substr(0, fromStr.length()-1);
             } else {
                 return false;
@@ -1483,21 +1511,21 @@ copy(const Path& src,
         }
         string toStr = to.utf8();
         if (toStr.rfind("/") == toStr.length()-1) {
-            if (exists(to) && !bfs::is_directory(to)) {
+            if (exists(to) && !isDirectory(to)) {
                 return false;
             }
             to = toStr.substr(0, toStr.length()-1);
         }
 
-        if (bfs::is_directory(from)) {
+        if (isDirectory(from)) {
             // source is a directory
             Path target = to;
-            if (bfs::is_directory(to)) {
+            if (isDirectory(to)) {
                 // copy into dest, creating new dir with
                 // basename of source
                 target = to / from.filename();
                 bfs::create_directory(target);
-            } else if (bfs::is_directory(to.parent_path())) {
+            } else if (isDirectory(to.parent_path())) {
                 // copy source to new dir, losing original basename
                 bfs::create_directory(target);
             } else {
@@ -1512,10 +1540,10 @@ copy(const Path& src,
                 return false;
             }
             Path target = to;
-            if (bfs::is_directory(to)) {
+            if (isDirectory(to)) {
                 // dest is directory, copy preserving filename
                 target = to / from.filename();
-            } else if (!bfs::is_directory(to.parent_path())) {
+            } else if (!isDirectory(to.parent_path())) {
                 // dest isn't a dir, nor is it's parent. fail
                 return false;
             }
@@ -1625,7 +1653,7 @@ mimeTypes(const Path& p)
         return rval;
     }
 
-    if (bfs::is_directory(target)) {
+    if (isDirectory(target)) {
         rval.insert(kFolderMimeType);
         return rval;
     }

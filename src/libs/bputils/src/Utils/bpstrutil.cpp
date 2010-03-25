@@ -402,11 +402,7 @@ quoteJsonString(const std::string& str)
 bool
 loadFromFile(const bp::file::Path& path, std::string& sOut)
 {
-    try {
-        if (!boost::filesystem::is_regular_file(path)) {
-            return false;
-        }
-    } catch (const bp::file::tFileSystemError&) {
+    if (!bp::file::isRegularFile(path)) {
         return false;
     }
 

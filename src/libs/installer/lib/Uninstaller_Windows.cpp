@@ -73,12 +73,12 @@ Uninstaller::run(bool fromRunonce)
 
     // remove IE plugin and daemon registry gunk
     bpf::Path topDir = getProductTopDirectory();
-    if (bfs::is_directory(topDir)) {
+    if (bpf::isDirectory(topDir)) {
         bpf::tDirIter topEnd;
         for (bpf::tDirIter topIter(topDir); topIter != topEnd; ++topIter) {
             // Unregister our IE plugins
             bpf::Path pluginsDir = topIter->path() / "Plugins";
-            if (bfs::is_directory(pluginsDir)) {
+            if (bpf::isDirectory(pluginsDir)) {
                 bpf::tDirIter pluginEnd;
                 for (bpf::tDirIter pluginIter(pluginsDir); pluginIter != pluginEnd;
                      ++pluginIter) {
@@ -144,7 +144,7 @@ Uninstaller::run(bool fromRunonce)
                             m_error = true;
                         }
                         // deal with ugly npapi dir if it exists
-                        if (bfs::is_directory(kUglyNpapiDir)) {
+                        if (bpf::isDirectory(kUglyNpapiDir)) {
                             removeDirIfEmpty(path.parent_path());
                             removeDirIfEmpty(kUglyNpapiDir);
                         }
@@ -168,7 +168,7 @@ Uninstaller::run(bool fromRunonce)
     // Remove NPAPI plugin for those folks who have firefox2 (we used to
     // support it).  
     bpf::Path ffx2Dir = ffx2PluginDir();
-    if (bfs::is_directory(ffx2Dir)) {
+    if (bpf::isDirectory(ffx2Dir)) {
         bpf::tDirIter end;
         for (bpf::tDirIter it(ffx2Dir); it != end; ++it) {
             bpf::Path plugin(it->path());
@@ -258,7 +258,7 @@ Uninstaller::removeDirIfEmpty(const bpf::Path& dir)
         // be paranoid
         return;
     }
-    if (bfs::is_directory(dir) && bfs::is_empty(dir)) {
+    if (bpf::isDirectory(dir) && bfs::is_empty(dir)) {
         BPLOG_DEBUG_STRM("remove " << dir);
         if (!bpf::remove(dir)) {
             BPLOG_WARN(lastErrorString("unable to delete " + dir.externalUtf8()));

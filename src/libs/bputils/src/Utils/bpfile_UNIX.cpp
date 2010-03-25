@@ -249,7 +249,7 @@ touch(const Path& path)
         return (utimes(path.external_file_string().c_str(), NULL) == 0);
     }
 
-    if (!bfs::is_directory(path.parent_path())) {
+    if (!isDirectory(path.parent_path())) {
         return false;
     }
 

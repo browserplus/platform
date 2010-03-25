@@ -340,7 +340,7 @@ Create::addFile(const bp::file::Path& fileToAdd,
     archive_entry_set_mode(ae, static_cast<unsigned short>(fi.mode));
 
     bp::file::Path fileNameInTar = fileNameInTarIn;
-    if (bfs::is_directory(fileToAdd)) {
+    if (bp::file::isDirectory(fileToAdd)) {
         // append a trailing pathsep to directories, this seems to be
         // a convention
         std::string s = fileNameInTar.utf8();

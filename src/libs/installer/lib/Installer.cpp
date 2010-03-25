@@ -361,7 +361,7 @@ Installer::installServices()
     BPLOG_DEBUG("begin Installer::installServices");
 
     bpf::Path servicesDir = m_dir / "services";
-    if (!bfs::is_directory(servicesDir)) {
+    if (!bpf::isDirectory(servicesDir)) {
         BPLOG_DEBUG_STRM(servicesDir << " does not exist, no services installed");
         return;
     }
@@ -431,7 +431,7 @@ Installer::installUninstaller()
     bpf::Path ydir = bpf::Path(getenv("HOME")) / "Applications" / "Yahoo!";
     bpf::Path s = ydir / "BrowserPlus";
     (void) remove(s);
-    if (bfs::is_directory(ydir) && bfs::is_empty(ydir)) {
+    if (bpf::isDirectory(ydir) && bfs::is_empty(ydir)) {
         (void) remove(ydir);
     }
 #endif
@@ -518,7 +518,7 @@ Installer::doCopy(const bpf::Path& src,
         BP_THROW(lastErrorString(src.externalUtf8() + " does not exist"));
     }
     
-    if (bfs::is_directory(src)) {
+    if (bpf::isDirectory(src)) {
         try {
             bfs::create_directories(dest);
         } catch(const bpf::tFileSystemError&) {
@@ -530,7 +530,7 @@ Installer::doCopy(const bpf::Path& src,
                 bpf::Path srcPath = bpf::Path(it->path());
                 bpf::Path relPath = srcPath.relativeTo(src);
                 bpf::Path destPath = dest / relPath;
-                if (bfs::is_regular(srcPath)) {
+                if (bpf::isRegularFile(srcPath)) {
                     doSingleFileCopy(srcPath, destPath);
                 }
             }
@@ -563,7 +563,7 @@ Installer::doSingleFileCopy(const bpf::Path& src,
     }
     
     bpf::Path realDest = dest;
-    if (bfs::is_directory(dest)) {
+    if (bpf::isDirectory(dest)) {
         realDest /= src.filename();
     }
 
@@ -596,8 +596,8 @@ Installer::filesAreIdentical(const bpf::Path& f1,
 {
     bool rval = false;
 
-    int f1Size = bfs::is_regular_file(f1) ? (int) bfs::file_size(f1) : 0;
-    int f2Size = bfs::is_regular_file(f2) ? (int) bfs::file_size(f2) : 0;
+    int f1Size = bpf::isRegularFile(f1) ? (int) bfs::file_size(f1) : 0;
+    int f2Size = bpf::isRegularFile(f2) ? (int) bfs::file_size(f2) : 0;
     if (f1Size != f2Size) {
         return false;
     }

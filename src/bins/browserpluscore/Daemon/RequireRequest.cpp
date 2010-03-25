@@ -432,7 +432,7 @@ RequireRequest::checkPlatformUpdates()
     vector<string> updates;
     tDirIter end;
     Path platCache = bp::paths::getPlatformCacheDirectory();
-    if (boost::filesystem::is_directory(platCache)) {
+    if (isDirectory(platCache)) {
         try {
             for (tDirIter iter(platCache); iter != end; ++iter) {
                 updates.push_back(utf8FromNative(iter->path().filename()));;
