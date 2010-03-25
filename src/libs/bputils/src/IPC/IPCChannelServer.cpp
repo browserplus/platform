@@ -46,7 +46,7 @@ ChannelServer::gotConnection(Connection * c)
     m_hopper.invokeOnThread(deliverChannel, (void *) p);
 }
 
-ChannelServer::ChannelServer()
+ChannelServer::ChannelServer() : m_listener(NULL)
 {
     m_hopper.initializeOnCurrentThread();
 }
