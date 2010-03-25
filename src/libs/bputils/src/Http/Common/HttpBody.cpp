@@ -58,14 +58,8 @@ bp::file::Path Body::path() const
 
 int Body::size() const
 {
-    int rval = 0;
-    if (bp::file::isRegularFile(m_path)) {
-        rval = (int) boost::filesystem::file_size(m_path);
-        if (rval == -1) rval = 0;
-    } else {
-        rval = m_vbBody.size();
-    }
-    return rval;
+    return bp::file::isRegularFile(m_path) ?
+               bp::file::size(m_path) : m_vbBody.size();
 }
 
 

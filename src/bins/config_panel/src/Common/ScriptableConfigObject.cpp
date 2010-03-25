@@ -278,7 +278,7 @@ ScriptableConfigObject::invoke(const string & functionName,
                     for (tDirIter iter(dir); iter != end; ++iter) {
                         if (isRegularFile(iter->path())) {
                             if (boost::filesystem::extension(*iter).compare(logExt) == 0) {
-                                long sz = (long) boost::filesystem::file_size(iter->path());
+                                long sz = (long) size(iter->path());
                                 if (sz > 0) {
                                     totalSize += sz;
                                 }
@@ -494,8 +494,7 @@ ScriptableConfigObject::invoke(const string & functionName,
                              + filevar + "\"; filename=\"" + 
                              utf8FromNative(postBodyPath.filename()) + "\"");
             req->headers.add(Headers::ksContentType, "application/x-lzip");
-            int contentLength = isRegularFile(postBodyPath)
-                                ? (int) boost::filesystem::file_size(postBodyPath) : 0;
+            int contentLength = size(postBodyPath);
             req->headers.add(Headers::ksContentLength,
                              bp::conv::toString(contentLength));
             req->headers.add(Headers::ksConnection, "close");

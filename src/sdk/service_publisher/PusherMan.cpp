@@ -61,7 +61,7 @@ pushFile(bp::file::Path file, string baseurl,
     SyncTransaction::FinalStatus results;
 
     cout << "publishing service: "
-         << "(" << boost::filesystem::file_size(file) << " bytes) "
+         << "(" << bp::file::size(file) << " bytes) "
          << "to " << baseurl << "..." << endl;
 
     ResponsePtr resp = tran.execute( results );

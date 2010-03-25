@@ -91,10 +91,9 @@ public:
                     }
                     // files size
                     {
-                        size_t size = isRegularFile(pathToKid) ?
-                           (size_t) boost::filesystem::file_size(pathToKid) : 0;
+                        size_t sz = size(pathToKid);
                         std::stringstream ss;
-                        ss << size;
+                        ss << sz;
                         response.body.append(ss.str());
                         for (j = ss.str().length(); j < 20; j++) {
                             response.body.append(" ");

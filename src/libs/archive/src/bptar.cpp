@@ -350,8 +350,8 @@ Create::addFile(const bp::file::Path& fileToAdd,
         }
         archive_entry_set_filetype(ae, AE_IFDIR);
         isDir = true;
-    }  else if (!bfs::is_other(fileToAdd)) {
-        archive_entry_set_size(ae, bfs::file_size(fileToAdd));
+    }  else if (!bp::file::isOther(fileToAdd)) {
+        archive_entry_set_size(ae, bp::file::size(fileToAdd));
         archive_entry_set_filetype(ae, AE_IFREG);
     }
 

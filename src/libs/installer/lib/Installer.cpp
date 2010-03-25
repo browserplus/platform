@@ -596,8 +596,8 @@ Installer::filesAreIdentical(const bpf::Path& f1,
 {
     bool rval = false;
 
-    int f1Size = bpf::isRegularFile(f1) ? (int) bfs::file_size(f1) : 0;
-    int f2Size = bpf::isRegularFile(f2) ? (int) bfs::file_size(f2) : 0;
+    int f1Size = bpf::size(f1);
+    int f2Size = bpf::size(f2);
     if (f1Size != f2Size) {
         return false;
     }

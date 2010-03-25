@@ -179,7 +179,14 @@ canonicalProgramPath(const Path& path,
 bool 
 isSymlink(const Path& path)
 {
-    return bfs::is_symlink(path);
+    try {
+        return bfs::is_symlink(path);
+    } catch(const tFileSystemError& e) {
+        BPLOG_DEBUG_STRM("bfs::is_symlink(" << path << ") failed.");
+        BPLOG_INFO_STRM("bfs::is_symlink failed: " << e.what() <<
+                        ", returning false.");
+        return false;
+    }
 }
 
 
@@ -192,7 +199,7 @@ isLink(const Path& path)
 
 #ifdef MACOSX
     // aliases appear as regular files
-    if (bfs::is_regular(path)) {
+    if (isRegularFile(path)) {
         FSRef ref;
         if (FSPathMakeRef((const UInt8*)path.external_file_string().c_str(),
                           &ref, NULL) == noErr) {

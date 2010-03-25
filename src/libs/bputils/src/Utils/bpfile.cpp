@@ -1419,6 +1419,20 @@ exists(const Path& path)
 }
 
 
+size_t
+size(const Path& path)
+{
+    try {
+        return isRegularFile(path) ? bfs::file_size(path) : 0;
+    } catch(const tFileSystemError& e) {
+        BPLOG_DEBUG_STRM("bfs::file_size(" << path << ") failed.");
+        BPLOG_INFO_STRM("bfs::file_size failed: " << e.what() <<
+                        ", returning 0.");
+        return 0;
+    }
+}
+
+
 bool
 isDirectory(const Path& path)
 {
@@ -1441,6 +1455,20 @@ isRegularFile(const Path& path)
     } catch(const tFileSystemError& e) {
         BPLOG_DEBUG_STRM("bfs::is_regular_file(" << path << ") failed.");
         BPLOG_INFO_STRM("bfs::is_regular_file failed: " << e.what() <<
+                        ", returning false.");
+        return false;
+    }
+}
+
+
+bool
+isOther(const Path& path)
+{
+    try {
+        return bfs::is_other(path);
+    } catch(const tFileSystemError& e) {
+        BPLOG_DEBUG_STRM("bfs::is_other(" << path << ") failed.");
+        BPLOG_INFO_STRM("bfs::is_other failed: " << e.what() <<
                         ", returning false.");
         return false;
     }
