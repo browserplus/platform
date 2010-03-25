@@ -33,6 +33,11 @@
 #include "bprandom.h"
 #include "BPLog.h"
 
+#ifdef LINUX
+// on linux we use openssl for true random numbers
+#include <openssl/rand.h>
+#endif
+
 namespace bp {
 namespace random {
 
@@ -46,8 +51,11 @@ generate()
         BPLOG_WARN("::rand_s() failed, reverting to ::rand()");
         i = (unsigned int) ::rand();
     }
-#else
+#elif defined(MACOSX)
     i = ::arc4random();
+#else
+    RAND_bytes((unsigned char *) &i, sizeof(i));
+    // XXX: failure?  should we throw fatal in case of failure?
 #endif
     return(i % ((unsigned)RAND_MAX + 1));
 }
