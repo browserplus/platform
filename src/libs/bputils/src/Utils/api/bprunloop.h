@@ -92,6 +92,11 @@ namespace bp { namespace runloop {
 
       std::vector<bp::runloop::Event> m_workQueue;
       bp::sync::Mutex m_lock;
+
+      // linux has a global runloop collection with deep access to runloops
+      // to allow us to implement "thread hopping" at the application level,
+      // as os frameworks provide no such notion.
+      friend class GlobalRunLoopCollection;
   };
 }}
 

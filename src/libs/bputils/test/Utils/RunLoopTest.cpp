@@ -79,6 +79,7 @@ static void mtSummingCallback(void * ptr, bp::runloop::Event e)
 }
 
 static void * mtSummingThreadFunc(void * ptr) 
+
 {
     static int s_numFinished = 0;
     static bp::sync::Mutex s_m;
@@ -117,7 +118,7 @@ void RunLoopTest::mtSafetyTest()
     t2.join();
     t3.join();
     
-    CPPUNIT_ASSERT(sum == 1498500);
+    CPPUNIT_ASSERT_EQUAL((long long) 1498500, sum);
 
     rl.shutdown();
 }
