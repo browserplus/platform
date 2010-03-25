@@ -20,6 +20,40 @@
  * ***** END LICENSE BLOCK *****
  */
 
+/*
+ * On runloops and threadhopping and async event driven systems on linux:
+ *
+ * In BrowserPlus there are a couple key abstractions upon which the whole
+ * darn system is built.  Those are:
+ * 1. runloops - an abstraction around a thread of execution that encapsulates
+ *               the event delivery.
+ * 2. threadhopper - A tool used that allows you to get from any give thread
+ *               back to a runloop thread. 
+ *
+ * #2 is key, as the lowest levels of browserplus will be implemented in a
+ * multithreaded fashion for performance reasons (to use multiple cores or
+ * to prevent synchronous activies from blocking up other compute tasks.)
+ * to make this work, we have a generalized notion of a "threadhopper" which
+ * allows the specific threaded subsystem to hop onto the runloop/main thread
+ * before calling back into client code.  The fallout of this design is that
+ * the large majority of the system is non-blocking event driven async code,
+ * and locking is never required.  Some low level modules, conversely, bear
+ * all the burden of the complexity of threading to provide great performance.
+ * 
+ * Implementation of these two abstractions on windows and osx is pretty natural,
+ * as there are already constructs available that fit,  window message pumps
+ * or "RunLoops"..  That is on both platforms it's possible from a thread to
+ * use vendor provided framework calls to post a message cross thread.
+ *
+ * On linux, no such mechanism exists.  This is why the runloop must have a
+ * special relationship with threadhopper.  That special linux specific
+ * interface is exposed in bprunloop_Linux.h and used by threadhopper.
+ * The basic functionality exposed includes:
+ *
+ * 1. give me a token which represents the current thread
+ * 2. call this function with this argument on the thread represented by this token
+ */
+
 #include "api/bprunloop.h"
 
 #include <stdlib.h>
