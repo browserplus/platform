@@ -55,9 +55,58 @@
  */
 
 #include "api/bprunloop.h"
+#include "api/bpsync.h"
+#include "api/bperrorutil.h"
 
 #include <stdlib.h>
 #include <assert.h>
+#include <stdio.h>
+
+#include <map>
+
+class GlobalRunLoopCollection 
+{
+public:
+    GlobalRunLoopCollection() 
+    {
+        printf("Global run loop collection allocated\n");
+    }
+
+    ~GlobalRunLoopCollection() 
+    {
+        printf("Global run loop collection shut down (%d left)\n",
+               (int) m_runloops.size());
+    }
+    
+    void addRunLoop(bp::runloop::RunLoop * rl) 
+    {
+        bp::sync::Lock l(m_lock);
+        unsigned int tid = bp::thread::Thread::currentThreadID();
+        if (m_runloops.find(tid) != m_runloops.end()) {
+            BP_THROW_FATAL("multiple runloops allocated on the same thread");
+        }
+        m_runloops[tid] = rl;
+    }
+
+    void removeRunLoop() 
+    {
+        bp::sync::Lock l(m_lock);
+        unsigned int tid = bp::thread::Thread::currentThreadID();
+        std::map<unsigned int, bp::runloop::RunLoop *>::iterator rlit;        
+        rlit = m_runloops.find(tid);
+
+        if (rlit == m_runloops.end()) {
+            BP_THROW_FATAL("no runloop to remove from thread");
+        }
+        m_runloops.erase(rlit);
+    }
+    
+private:
+    std::map<unsigned int, bp::runloop::RunLoop *> m_runloops;
+    bp::sync::Mutex m_lock;
+};
+
+static GlobalRunLoopCollection s_runloopColl;
 
 struct BasicRunLoopData 
 {
@@ -75,11 +124,13 @@ bp::runloop::RunLoop::init()
     m_osSpecific =  (void *) rld;
     rld->m_stopped = false;
     rld->m_running = false;
+    s_runloopColl.addRunLoop(this);
 }
 
 void
 bp::runloop::RunLoop::shutdown()
 {
+    s_runloopColl.removeRunLoop();
     assert(m_osSpecific != NULL);
     delete ((BasicRunLoopData *) m_osSpecific);
     m_osSpecific = NULL;
