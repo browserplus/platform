@@ -320,7 +320,7 @@ BPDaemon::run()
     // uninstalled, non-running platforms
     BPLOG_INFO("removing uninstalled platforms...");
     bp::file::Path dir = getProductTopDirectory();
-    if (boost::filesystem::is_directory(dir)) {
+    if (bp::file::isDirectory(dir)) {
         try {
             bp::file::tDirIter end;
             for (bp::file::tDirIter iter(dir); iter != end; ++iter) {

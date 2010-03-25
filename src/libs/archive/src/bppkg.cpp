@@ -55,9 +55,16 @@ doPack(const bpf::Path& keyFile,
        const bpf::Path& outFile,
        bool isTar)
 {
-    bpf::Path sigFile = bpf::getTempPath(bpf::getTempDirectory(), "bpkg_sig");
-    bpf::Path pkgtar = bpf::getTempPath(bpf::getTempDirectory(), "bpkg_tar");
+    bpf::Path sigFile;
+    bpf::Path pkgtar;
     try {
+        try {
+            sigFile = bpf::getTempPath(bpf::getTempDirectory(), "bpkg_sig");
+            pkgtar = bpf::getTempPath(bpf::getTempDirectory(), "bpkg_tar");
+        } catch (const bpf::tFileSystemError& e) {
+            throw string("unable to get temp path names: " + string(e.what()));
+        }
+
         // get contentsFile signature and write to file
         //
         bp::sign::Signer* signer = bp::sign::Signer::get(certFile);
@@ -253,7 +260,12 @@ bp::pkg::packDirectory(const bpf::Path& keyFile,
             throw string(inDir.utf8() + " does not exist");
         }
 
-        tarFile = bpf::getTempPath(bpf::getTempDirectory(), "bpkg_tarFile");
+        try {
+            tarFile = bpf::getTempPath(bpf::getTempDirectory(), "bpkg_tarFile");
+        } catch (const bpf::tFileSystemError& e) {
+            throw string("unable to create temp file: " + string(e.what()));
+        }
+
         bp::tar::Create tar;
         if (!tar.open(tarFile)) {
             throw string("unable to open " + tarFile.utf8());
@@ -391,8 +403,13 @@ bp::pkg::unpackToFile(const bpf::Path& bpkgPath,
                       const bpf::Path& certPath) 
 {
     bool rval = true;
-    bpf::Path tmpDir = bpf::getTempPath(bpf::getTempDirectory(), "bpkg");
+    bpf::Path tmpDir;
     try {
+        try {
+            tmpDir = bpf::getTempPath(bpf::getTempDirectory(), "bpkg");
+        } catch(bpf::tFileSystemError& e) {
+            throw string("unable to get tmpDir path: " + string(e.what()));
+        }
         try {
             bfs::create_directories(tmpDir);
         } catch(bpf::tFileSystemError&) {
@@ -432,7 +449,11 @@ bp::pkg::packString(const bpf::Path& keyFile,
     bool rval = true;
     bpf::Path inFile;
     try {
-        inFile = bpf::getTempPath(bpf::getTempDirectory(), "bpkg_string");
+        try {
+            inFile = bpf::getTempPath(bpf::getTempDirectory(), "bpkg_string");
+        } catch (const bpf::tFileSystemError& e) {
+            throw string("unable to get temp path: " + string(e.what()));
+        }
         if (!bp::strutil::storeToFile(inFile, inStr)) {
             throw string("unable to save string to " + inFile.utf8());
         }
@@ -457,8 +478,13 @@ bp::pkg::unpackToString(const bpf::Path& bpkgPath,
                         const bpf::Path& certPath)
 {
     bool rval = true;
-    bpf::Path tmpDir = bpf::getTempPath(bpf::getTempDirectory(), "bpkg");
+    bpf::Path tmpDir;
     try {
+        try {
+            tmpDir = bpf::getTempPath(bpf::getTempDirectory(), "bpkg");
+        } catch (const bpf::tFileSystemError& e) {
+            throw string("unable to get temp path: " + string(e.what()));
+        }
         try {
             bfs::create_directories(tmpDir);
         } catch(const bpf::tFileSystemError&) {
