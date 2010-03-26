@@ -156,7 +156,7 @@ int main( int argc, const char ** argv )
         CPPUNIT_NS::TextTestProgressListener progress;
         controller.addListener( &progress );
 
-        CPPUNIT_NS::TextOutputter textOutputter(&result, std::cerr);
+        CPPUNIT_NS::TextOutputter textOutputter(&result, std::cout);
 
         //--- Add the top suite to the test runner
         CPPUNIT_NS::TestRunner runner;
