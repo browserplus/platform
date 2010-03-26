@@ -109,12 +109,16 @@ class StressHttpClient : virtual public bp::http::client::IListener
 public:
     void startTransaction() 
     {
+        checkThreadId();
         m_transaction->initiate(this);
     }
     
     StressHttpClient(HTRunLoopContext * context) 
-        : m_body(), m_context(context)
+        : m_body(), m_context(context), m_tid(0)
     {
+        // capture the current thread id for sanity checks later
+        m_tid = bp::thread::Thread::currentThreadID();
+        
         m_chosenMD5 = (*(m_context->contentMD5s))[bp::random::generate() % AMOUNT_OF_CONTENT];
         // create the url picking one of the available content bodies (md5s)
         std::stringstream urlss;
@@ -128,28 +132,39 @@ public:
     
     virtual ~StressHttpClient() 
     {
+        checkThreadId();
+
         delete m_transaction;
     }
 
     virtual void onResponseBodyBytes(const unsigned char* pBytes, 
                                      unsigned int size) 
     {
+        checkThreadId();
+
         m_body.append(pBytes, size);
     }
 
     virtual void onClosed() 
     {
+        checkThreadId();
         // test response body
         std::string md5 = bp::md5::hash(m_body.toString());
         die(0 == md5.compare(m_chosenMD5));
     }
     
-    virtual void onTimeout() { die(false); }
-    virtual void onCancel() { die(false); }
-    virtual void onError(const std::string&) { die(false); }
+    virtual void onTimeout() { checkThreadId(); die(false); }
+    virtual void onCancel() { checkThreadId(); die(false); }
+    virtual void onError(const std::string&) { checkThreadId(); die(false); }
+
+    void checkThreadId() 
+    {
+        assert (m_tid == bp::thread::Thread::currentThreadID() );
+    }
     
     virtual void die(bool success) 
     {
+        checkThreadId();
         if (success) m_context->successes++;
         else m_context->failures++;
 
@@ -176,15 +191,14 @@ public:
         }
     }
 
-    // stupid I have to manually define these
-    virtual void onConnected() { }
-    virtual void onConnecting() { }
-    virtual void onComplete() { }
-    virtual void onRedirect(const bp::url::Url&) { }
-    virtual void onRequestSent() { }
-    virtual void onResponseStatus(const bp::http::Status&, const bp::http::Headers&) { }
-    virtual void onSendProgress(size_t, size_t, double) { }
-    virtual void onReceiveProgress(size_t, size_t, double) { }
+    virtual void onConnected() { checkThreadId(); }
+    virtual void onConnecting() { checkThreadId(); }
+    virtual void onComplete() { checkThreadId(); }
+    virtual void onRedirect(const bp::url::Url&) { checkThreadId(); }
+    virtual void onRequestSent() { checkThreadId(); }
+    virtual void onResponseStatus(const bp::http::Status&, const bp::http::Headers&) { checkThreadId(); }
+    virtual void onSendProgress(size_t, size_t, double) { checkThreadId(); }
+    virtual void onReceiveProgress(size_t, size_t, double) { checkThreadId(); }
     
     bp::http::client::Transaction* m_transaction;
     bp::http::RequestPtr m_request;
@@ -194,6 +208,7 @@ public:
     // when the test is complete, this class will stop the runloop,
     // returning control to the testcase
     HTRunLoopContext * m_context;
+    unsigned int m_tid;
 };
 
 void addTransactions(HTRunLoopContext * context) 
