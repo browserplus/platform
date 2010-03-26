@@ -65,6 +65,7 @@ end
 ## step 0: determine and output configuration
 $version = "<%= $cmake["VersionString"] %>"
 $topDir = File.dirname(__FILE__)
+$topDirAbs = File.expand_path($topDir)
 $workDir = File.join($topDir, "work")
 $secondary = Array.new if !$secondary
 $buildType = "unknown"
@@ -184,7 +185,7 @@ subs = {
 # step 3: authenticode sign binaries if required
 if platform=="Windows" && $buildType=="prod"
   Dir.chdir($workDir) do
-    signScript = File.join($topDir, "tools", "sign.rb")
+    signScript = File.join($topDirAbs, "tools", "sign.rb")
     filesToSign = Dir.glob("**/*.{cab,dll,exe}").join(" ")
     signCmd = "ruby -s \"#{signScript}\" sign -certType=prod -authKey=\"#{$authKey}\" #{filesToSign}"
     puts signCmd
