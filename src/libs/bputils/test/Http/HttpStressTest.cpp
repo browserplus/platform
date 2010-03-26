@@ -39,6 +39,8 @@
 #include "BPUtils/HttpSyncTransaction.h"
 #include "BPUtils/HttpTransaction.h"
 #include "BPUtils/OS.h"
+#include "BPUtils/bprandom.h"
+#include "BPUtils/bpmd5.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION(HttpStressTest);
 
@@ -53,7 +55,9 @@ CPPUNIT_TEST_SUITE_REGISTRATION(HttpStressTest);
 // * upon completion all runloop threads are joined and we tally up how many
 //   transactions were completed successfully
 
-// parameters of the test (x, y, and z respectively)
+// parameters of the test
+#define AMOUNT_OF_CONTENT 10
+#define SIZE_OF_CONTENT (1024 * 100)
 #define RUNLOOP_THREADS 2
 #define TRANS_PER_THREAD 100
 #define SIMUL_TRANS 10
@@ -61,4 +65,24 @@ CPPUNIT_TEST_SUITE_REGISTRATION(HttpStressTest);
 
 void HttpStressTest::beatTheSnotOutOfIt()
 {
+    // first let's generate random content key'd by its md5 value
+    std::map<std::string, std::string> content;
+    std::vector<std::string> contentMD5s;
+
+    for (unsigned int i = 0; i < AMOUNT_OF_CONTENT; i++) {
+        std::string c;
+        while (c.length() < SIZE_OF_CONTENT) {
+            char ch = (bp::random::generate() % 26) + 'a';
+            c.push_back(ch);
+        }
+        // now md5
+        std::string md5 = bp::md5::hash(c);
+        
+        // and add
+        contentMD5s.push_back(md5);
+        content[md5] = c;
+    }
+
+    // now we need a lil' webserver that will serve this conent
+
 }
