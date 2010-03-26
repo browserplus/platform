@@ -62,6 +62,35 @@ CPPUNIT_TEST_SUITE_REGISTRATION(HttpStressTest);
 #define TRANS_PER_THREAD 100
 #define SIMUL_TRANS 10
 
+class HttpStressHandler : public bp::http::server::IHandler 
+{
+public:
+    HttpStressHandler(std::map<std::string, std::string> & content) 
+        : m_content(content)
+    {
+    }
+
+private:
+    virtual bool processRequest(const bp::http::Request & request,
+                                bp::http::Response & response)
+    {
+        std::string path = request.url.path().substr(1);        
+        std::map<std::string, std::string>::const_iterator i;
+        i = m_content.find(path);
+        if (i == m_content.end()) {
+            response.status.setCode(bp::http::Status::NOT_FOUND);
+            response.body.append("Hey dude.  I can't find what yer lookin' for.");
+            response.headers.add(bp::http::Headers::ksContentType, "text/plain");
+        } else {
+            response.headers.add(bp::http::Headers::ksContentType, "text/plain");
+            response.body.append(i->second);
+        }
+        return true;
+    }
+    
+    std::map<std::string, std::string> & m_content;
+};
+    
 
 void HttpStressTest::beatTheSnotOutOfIt()
 {
@@ -84,5 +113,22 @@ void HttpStressTest::beatTheSnotOutOfIt()
     }
 
     // now we need a lil' webserver that will serve this conent
+    {
+        bp::http::server::Server server;
+        HttpStressHandler handler(content);
+        
+        unsigned short port = 0;
+        CPPUNIT_ASSERT( server.bind(port) );
 
+        // now mount the little handler that serves content.
+        CPPUNIT_ASSERT( server.mount(std::string(".*"), &handler) );
+        
+        // start our webserver
+        CPPUNIT_ASSERT( server.start() );
+
+        // XXX spawn clients here.
+        
+        // stop our webserver
+        CPPUNIT_ASSERT( server.stop() );        
+    }
 }
