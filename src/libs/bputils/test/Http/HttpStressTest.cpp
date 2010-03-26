@@ -58,7 +58,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(HttpStressTest);
 // parameters of the test
 #define AMOUNT_OF_CONTENT 10
 #define SIZE_OF_CONTENT (1024 * 100)
-#define RUNLOOP_THREADS 2
+#define RUNLOOP_THREADS 5
 #define TRANS_PER_THREAD 100
 #define SIMUL_TRANS 10
 
@@ -90,7 +90,137 @@ private:
     
     std::map<std::string, std::string> & m_content;
 };
+
+//////////////////////////////////////////////////////////////////////
+// client implementation
+struct HTRunLoopContext {
+    bp::runloop::RunLoopThread * rlt;
+    unsigned int successes;
+    unsigned int failures;
+    std::vector<std::string> * contentMD5s;    
+    std::list<class StressHttpClient *> clients;
+    unsigned short port;
+};
+
+void addTransactions(HTRunLoopContext * context);
+
+class StressHttpClient : virtual public bp::http::client::IListener
+{
+public:
+    void startTransaction() 
+    {
+        m_transaction->initiate(this);
+    }
     
+    StressHttpClient(HTRunLoopContext * context) 
+        : m_body(), m_context(context)
+    {
+        m_chosenMD5 = (*(m_context->contentMD5s))[bp::random::generate() % AMOUNT_OF_CONTENT];
+        // create the url picking one of the available content bodies (md5s)
+        std::stringstream urlss;
+        urlss << "http://127.0.0.1:" << m_context->port << "/" << m_chosenMD5;
+
+        // lets build up the request
+        m_request.reset(new bp::http::Request(bp::http::Method::HTTP_GET, urlss.str()));
+        m_transaction = new bp::http::client::Transaction(m_request);
+        m_transaction->setTimeoutSec(3.0);
+    }
+    
+    virtual ~StressHttpClient() 
+    {
+        delete m_transaction;
+    }
+
+    virtual void onResponseBodyBytes(const unsigned char* pBytes, 
+                                     unsigned int size) 
+    {
+        m_body.append(pBytes, size);
+    }
+
+    virtual void onClosed() 
+    {
+        // test response body
+        std::string md5 = bp::md5::hash(m_body.toString());
+        die(0 == md5.compare(m_chosenMD5));
+    }
+    
+    virtual void onTimeout() { die(false); }
+    virtual void onCancel() { die(false); }
+    virtual void onError(const std::string&) { die(false); }
+    
+    virtual void die(bool success) 
+    {
+        if (success) m_context->successes++;
+        else m_context->failures++;
+
+        // *delete ourselves*, kinda nuts!!  
+        std::list<class StressHttpClient *>::iterator it;
+        HTRunLoopContext * context = m_context;
+        for (it = context->clients.begin(); it != context->clients.end(); it++)
+        {
+            if (*it == this) break;
+        }
+        if (it == context->clients.end()) {
+            // FATAL!  we can't find a reference to ourselves.
+            abort(); // XXX: we need to fail better here.
+        } 
+        delete *it; // delete self!
+        context->clients.erase(it);
+
+        // allocate more clients as neccesary
+        addTransactions(context);
+
+        // if there are no more clients, then we must be done
+        if (context->clients.size() == 0) {
+            context->rlt->stop();
+        }
+    }
+
+    // stupid I have to manually define these
+    virtual void onConnected() { }
+    virtual void onConnecting() { }
+    virtual void onComplete() { }
+    virtual void onRedirect(const bp::url::Url&) { }
+    virtual void onRequestSent() { }
+    virtual void onResponseStatus(const bp::http::Status&, const bp::http::Headers&) { }
+    virtual void onSendProgress(size_t, size_t, double) { }
+    virtual void onReceiveProgress(size_t, size_t, double) { }
+    
+    bp::http::client::Transaction* m_transaction;
+    bp::http::RequestPtr m_request;
+    bp::http::Body m_body;
+    std::string m_chosenMD5;
+    
+    // when the test is complete, this class will stop the runloop,
+    // returning control to the testcase
+    HTRunLoopContext * m_context;
+};
+
+void addTransactions(HTRunLoopContext * context) 
+{
+    while ((context->clients.size() + context->successes + context->failures) < TRANS_PER_THREAD &&
+           context->clients.size() < SIMUL_TRANS)
+    {
+        StressHttpClient * shc = new StressHttpClient(context);
+        context->clients.push_back(shc);
+        shc->startTransaction();
+    }
+}
+
+void
+runLoopStart(void * cookie, bp::runloop::Event e)
+{
+    HTRunLoopContext * context = (HTRunLoopContext *) e.payload();
+    // allocate the number of simul clients
+    addTransactions(context);
+}
+
+void
+runLoopEnd(void * cookie)
+{
+}
+
+//////////////////////////////////////////////////////////////////////    
 
 void HttpStressTest::beatTheSnotOutOfIt()
 {
@@ -121,14 +251,42 @@ void HttpStressTest::beatTheSnotOutOfIt()
         CPPUNIT_ASSERT( server.bind(port) );
 
         // now mount the little handler that serves content.
-        CPPUNIT_ASSERT( server.mount(std::string(".*"), &handler) );
+        CPPUNIT_ASSERT( server.mount(std::string("*"), &handler) );
         
         // start our webserver
         CPPUNIT_ASSERT( server.start() );
 
-        // XXX spawn clients here.
+        // spawn the appropriate number of runloop threads here
+        bp::runloop::RunLoopThread runLoopThreads[RUNLOOP_THREADS];
+        HTRunLoopContext contexts[RUNLOOP_THREADS];
+
+        // spawn all of our runloops that themselves will run some
+        // number of HTTP clients
+        for (unsigned int i = 0; i < RUNLOOP_THREADS; i++) {
+            contexts[i].rlt = runLoopThreads + i;
+            contexts[i].successes = contexts[i].failures = 0;
+            contexts[i].contentMD5s = &contentMD5s;
+            contexts[i].port = port;
+            runLoopThreads[i].setCallBacks(NULL, NULL, 
+                                           runLoopEnd, contexts + i,
+                                           runLoopStart, contexts + i);
+            CPPUNIT_ASSERT( runLoopThreads[i].run() );
+
+            CPPUNIT_ASSERT( runLoopThreads[i].sendEvent( bp::runloop::Event(contexts + i) ) );
+        }
+
+        // now wait for all the runloops to complete
+        for (unsigned int i = 0; i < RUNLOOP_THREADS; i++) {
+            CPPUNIT_ASSERT( runLoopThreads[i].join() );
+        }
         
         // stop our webserver
         CPPUNIT_ASSERT( server.stop() );        
+
+        // validate the data in runloop contexts
+        for (unsigned int i = 0; i < RUNLOOP_THREADS; i++) {
+            std::cout << i << ": " << contexts[i].successes
+                      << "/" << contexts[i].failures << std::endl;
+        }
     }
 }
