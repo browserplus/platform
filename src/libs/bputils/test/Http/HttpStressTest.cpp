@@ -59,13 +59,13 @@ CPPUNIT_TEST_SUITE_REGISTRATION(HttpStressTest);
 #define AMOUNT_OF_CONTENT 10
 #define SIZE_OF_CONTENT (1024 * 100)
 #define RUNLOOP_THREADS 5
-#define TRANS_PER_THREAD 100
-#define SIMUL_TRANS 10
+#define TRANS_PER_THREAD 50
+#define SIMUL_TRANS 5
 
 class HttpStressHandler : public bp::http::server::IHandler 
 {
 public:
-    HttpStressHandler(std::map<std::string, std::string> & content) 
+    HttpStressHandler(std::map<std::string, std::string> * content) 
         : m_content(content)
     {
     }
@@ -76,8 +76,8 @@ private:
     {
         std::string path = request.url.path().substr(1);        
         std::map<std::string, std::string>::const_iterator i;
-        i = m_content.find(path);
-        if (i == m_content.end()) {
+        i = m_content->find(path);
+        if (i == m_content->end()) {
             response.status.setCode(bp::http::Status::NOT_FOUND);
             response.body.append("Hey dude.  I can't find what yer lookin' for.");
             response.headers.add(bp::http::Headers::ksContentType, "text/plain");
@@ -88,7 +88,7 @@ private:
         return true;
     }
     
-    std::map<std::string, std::string> & m_content;
+    std::map<std::string, std::string> * m_content;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -245,7 +245,7 @@ void HttpStressTest::beatTheSnotOutOfIt()
     // now we need a lil' webserver that will serve this conent
     {
         bp::http::server::Server server;
-        HttpStressHandler handler(content);
+        HttpStressHandler handler(&content);
         
         unsigned short port = 0;
         CPPUNIT_ASSERT( server.bind(port) );
@@ -285,8 +285,8 @@ void HttpStressTest::beatTheSnotOutOfIt()
 
         // validate the data in runloop contexts
         for (unsigned int i = 0; i < RUNLOOP_THREADS; i++) {
-            std::cout << i << ": " << contexts[i].successes
-                      << "/" << contexts[i].failures << std::endl;
+            CPPUNIT_ASSERT_EQUAL( (unsigned int) TRANS_PER_THREAD, contexts[i].successes );
+            CPPUNIT_ASSERT_EQUAL( (unsigned int) 0, contexts[i].failures );            
         }
     }
 }
