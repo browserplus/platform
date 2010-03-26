@@ -46,7 +46,7 @@ public:
      *         &port.
      *  returns true on success, false on failure
      */
-    bool bind( unsigned short& port);
+    bool bind( unsigned short& port );
 
     /** mount a handler to service incoming requests.  client owns handler
      *  and must ensure that it is not deallocated until after stop()
