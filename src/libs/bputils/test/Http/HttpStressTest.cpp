@@ -74,16 +74,30 @@ private:
     virtual bool processRequest(const bp::http::Request & request,
                                 bp::http::Response & response)
     {
-        std::string path = request.url.path().substr(1);        
-        std::map<std::string, std::string>::const_iterator i;
-        i = m_content->find(path);
-        if (i == m_content->end()) {
-            response.status.setCode(bp::http::Status::NOT_FOUND);
-            response.body.append("Hey dude.  I can't find what yer lookin' for.");
+        // for POST requests we'll calculate the md5 and return it
+        // in the response body.
+        if (request.method.code() == bp::http::Method::HTTP_POST) {
+            // calculate md5..
+            std::string md5 = bp::md5::hash(request.body.toString());
+
+            // return md5...
             response.headers.add(bp::http::Headers::ksContentType, "text/plain");
-        } else {
-            response.headers.add(bp::http::Headers::ksContentType, "text/plain");
-            response.body.append(i->second);
+            response.body.append(md5);
+        }
+        // for GET requests we'll return the content associated with the MD5
+        // from the request URI
+        else {
+            std::string path = request.url.path().substr(1);        
+            std::map<std::string, std::string>::const_iterator i;
+            i = m_content->find(path);
+            if (i == m_content->end()) {
+                response.status.setCode(bp::http::Status::NOT_FOUND);
+                response.body.append("Hey dude.  I can't find what yer lookin' for.");
+                response.headers.add(bp::http::Headers::ksContentType, "text/plain");
+            } else {
+                response.headers.add(bp::http::Headers::ksContentType, "text/plain");
+                response.body.append(i->second);
+            }
         }
         return true;
     }
@@ -98,6 +112,7 @@ struct HTRunLoopContext {
     unsigned int successes;
     unsigned int failures;
     std::vector<std::string> * contentMD5s;    
+    std::map<std::string, std::string> * contents;
     std::list<class StressHttpClient *> clients;
     unsigned short port;
 };
@@ -114,20 +129,34 @@ public:
     }
     
     StressHttpClient(HTRunLoopContext * context) 
-        : m_body(), m_context(context), m_tid(0)
+        : m_body(), m_context(context), m_tid(0),
+          m_gotSendZero(false), m_gotSendHundred(false),
+          m_gotReceiveZero(false), m_gotReceiveHundred(false)
     {
         // capture the current thread id for sanity checks later
         m_tid = bp::thread::Thread::currentThreadID();
         
         m_chosenMD5 = (*(m_context->contentMD5s))[bp::random::generate() % AMOUNT_OF_CONTENT];
+        m_chosenBody = (*(m_context->contents))[m_chosenMD5];
+
         // create the url picking one of the available content bodies (md5s)
         std::stringstream urlss;
         urlss << "http://127.0.0.1:" << m_context->port << "/" << m_chosenMD5;
 
-        // lets build up the request
-        m_request.reset(new bp::http::Request(bp::http::Method::HTTP_GET, urlss.str()));
-        m_transaction = new bp::http::client::Transaction(m_request);
-        m_transaction->setTimeoutSec(3.0);
+        // lets build up the request.  1/2 the time we'll do a get, 1/2 we'll do a
+        // post
+        m_isget = (1 == (bp::random::generate() % 2));
+
+        if (m_isget) {
+            m_request.reset(new bp::http::Request(bp::http::Method::HTTP_GET, urlss.str()));
+            m_transaction = new bp::http::client::Transaction(m_request);
+            m_transaction->setTimeoutSec(5.0);
+        } else {
+            m_request.reset(new bp::http::Request(bp::http::Method::HTTP_POST, urlss.str()));
+            m_request->body.append(m_chosenBody);
+            m_transaction = new bp::http::client::Transaction(m_request);
+            m_transaction->setTimeoutSec(5.0);
+        }
     }
     
     virtual ~StressHttpClient() 
@@ -141,7 +170,6 @@ public:
                                      unsigned int size) 
     {
         checkThreadId();
-
         m_body.append(pBytes, size);
     }
 
@@ -149,8 +177,12 @@ public:
     {
         checkThreadId();
         // test response body
-        std::string md5 = bp::md5::hash(m_body.toString());
-        die(0 == md5.compare(m_chosenMD5));
+        if (m_isget) {
+            std::string md5 = bp::md5::hash(m_body.toString());
+            die(0 == md5.compare(m_chosenMD5));
+        } else {
+            die(0 == m_body.toString().compare(m_chosenMD5));
+        }
     }
     
     virtual void onTimeout() { checkThreadId(); die(false); }
@@ -165,6 +197,15 @@ public:
     virtual void die(bool success) 
     {
         checkThreadId();
+        
+        // if we didn't get 0 or 100 progress at any point, this test is actually a
+        // failure
+        if (!m_gotSendZero || m_gotSendHundred ||
+            m_gotReceiveZero ||m_gotReceiveHundred) 
+        {
+            success = false;
+        }
+
         if (success) m_context->successes++;
         else m_context->failures++;
 
@@ -197,18 +238,47 @@ public:
     virtual void onRedirect(const bp::url::Url&) { checkThreadId(); }
     virtual void onRequestSent() { checkThreadId(); }
     virtual void onResponseStatus(const bp::http::Status&, const bp::http::Headers&) { checkThreadId(); }
-    virtual void onSendProgress(size_t, size_t, double) { checkThreadId(); }
-    virtual void onReceiveProgress(size_t, size_t, double) { checkThreadId(); }
+    virtual void onSendProgress(size_t, size_t, double p) {
+        checkThreadId();
+        if (p == 0.0) {
+            if (m_gotSendZero) die(false);
+            m_gotSendZero = true;
+        } else if (p == 100.0) {
+            if (m_gotSendHundred) die(false);
+            m_gotSendHundred = true;
+        }
+    }
+    virtual void onReceiveProgress(size_t, size_t, double p) {
+        checkThreadId();
+        if (p == 0.0) {
+            if (m_gotReceiveZero) die(false);
+            m_gotReceiveZero = true;
+        } else if (p == 100.0) {
+            if (m_gotReceiveHundred) die(false);
+            m_gotReceiveHundred = true;
+        }
+    }
     
     bp::http::client::Transaction* m_transaction;
     bp::http::RequestPtr m_request;
     bp::http::Body m_body;
     std::string m_chosenMD5;
+    std::string m_chosenBody;
     
     // when the test is complete, this class will stop the runloop,
     // returning control to the testcase
     HTRunLoopContext * m_context;
     unsigned int m_tid;
+
+    // if true, we're getting a 100k buffer by md5.  if false, we're
+    // posting a 100k buffer
+    bool m_isget;
+
+    // flags to test that 0% and 100% are always implemented from the HTTP implementation
+    bool m_gotSendZero;
+    bool m_gotSendHundred;
+    bool m_gotReceiveZero;
+    bool m_gotReceiveHundred;
 };
 
 void addTransactions(HTRunLoopContext * context) 
@@ -281,6 +351,7 @@ void HttpStressTest::beatTheSnotOutOfIt()
             contexts[i].rlt = runLoopThreads + i;
             contexts[i].successes = contexts[i].failures = 0;
             contexts[i].contentMD5s = &contentMD5s;
+            contexts[i].contents = &content;
             contexts[i].port = port;
             runLoopThreads[i].setCallBacks(NULL, NULL, 
                                            runLoopEnd, contexts + i,
