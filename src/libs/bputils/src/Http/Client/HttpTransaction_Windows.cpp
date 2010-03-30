@@ -229,21 +229,28 @@ private:
     static bp::sync::Mutex s_lock;
     static DWORD           s_id;
     static std::map<DWORD, Transaction::Impl*> s_activeImpls;
-    static std::set<Transaction::Impl*> s_activeImplsSet;    
     DWORD                  m_id;
 
     void addToImplMap() {
         s_lock.lock();
         s_activeImpls[m_id] = this;
-        s_activeImplsSet.insert(this);
         s_lock.unlock();
     }
 
     void removeFromImplMap() {
         s_lock.lock();
         s_activeImpls.erase(m_id);
-        s_activeImplsSet.erase(this);
         s_lock.unlock();
+    }
+
+    bool findImplNoLock(DWORD id, Transaction::Impl * &found) {
+        std::map<DWORD, Transaction::Impl*>::const_iterator it;
+        it = s_activeImpls.find(id);
+        if (it == s_activeImpls.end()) {
+            return false;
+        }
+        found = it->second;
+        return true;
     }
 
     void setError(const std::string& msg) {
@@ -268,7 +275,6 @@ const DWORD Transaction::Impl::kBufferSize = 16*1024;
 bp::sync::Mutex Transaction::Impl::s_lock;
 DWORD Transaction::Impl::s_id = 1000;
 std::map<DWORD, Transaction::Impl*> Transaction::Impl::s_activeImpls;
-std::set<Transaction::Impl*> Transaction::Impl::s_activeImplsSet;    
 
 // each of these xxxCB calls will be invoked on the thread where the
 // HttpTransaction was allocated, their primary purpose is to proxy a 
@@ -282,8 +288,9 @@ std::set<Transaction::Impl*> Transaction::Impl::s_activeImplsSet;
 void 
 Transaction::Impl::processRequestCB(void* ctx)
 {
-    Transaction::Impl* self = (Transaction::Impl*) ctx;
-    if (s_activeImplsSet.find(self) == s_activeImplsSet.end()) {
+    Transaction::Impl* self = NULL;
+
+    if (!findImplNoLock((DWORD) ctx, self) {
         BPLOG_DEBUG_STRM("Dropping processRequest call, implementation has been free'd");
         DebugBreak();
     } else {
@@ -294,8 +301,9 @@ Transaction::Impl::processRequestCB(void* ctx)
 void 
 Transaction::Impl::redirectCB(void* ctx)
 {
-    Transaction::Impl* self = (Transaction::Impl*) ctx;
-    if (s_activeImplsSet.find(self) == s_activeImplsSet.end()) {
+    Transaction::Impl* self = NULL;
+
+    if (!findImplNoLock((DWORD) ctx, self) {
         BPLOG_DEBUG_STRM("Dropping processRequest call, implementation has been free'd");
         DebugBreak();
     } else {
@@ -306,8 +314,9 @@ Transaction::Impl::redirectCB(void* ctx)
 void 
 Transaction::Impl::closedCB(void* ctx)
 {
-    Transaction::Impl* self = (Transaction::Impl*) ctx;
-    if (s_activeImplsSet.find(self) == s_activeImplsSet.end()) {
+    Transaction::Impl* self = NULL;
+
+    if (!findImplNoLock((DWORD) ctx, self) {
         BPLOG_DEBUG_STRM("Dropping processRequest call, implementation has been free'd");
         DebugBreak();
     } else {
@@ -407,7 +416,7 @@ Transaction::Impl::timesUp(bp::time::Timer* t)
         t->cancel();
     }
     m_eState = eTimedOut;
-    m_hopper.invokeOnThread(processRequestCB, this);
+    m_hopper.invokeOnThread(processRequestCB, (void *) m_id);
 }
 
 
@@ -626,7 +635,7 @@ Transaction::Impl::processRequest(DWORD error)
                 // now we'll invoke closed after an async break so that
                 // if we're deleted on the onClosed call, we don't
                 // go and try to romp around in our memory later.
-                m_hopper.invokeOnThread(closedCB, this);
+                m_hopper.invokeOnThread(closedCB, (void *) m_id);
             }
             break;
         }
@@ -1202,13 +1211,13 @@ Transaction::Impl::onWininetCallback(HINTERNET /* hInternet */,
         BPLOG_INFO_STRM(m_id << ": Status: Redirect");
         BPLOG_DEBUG_STRM("Redirect to " << (const char*) pStatusInfo);
         (void) m_redirectUrl.parse((const char*) pStatusInfo);
-        m_hopper.invokeOnThread(redirectCB, this);
+        m_hopper.invokeOnThread(redirectCB, (void *) m_id);
         break;
 
     case INTERNET_STATUS_REQUEST_COMPLETE:
         BPLOG_DEBUG_STRM(m_id << ": Status: Request complete");
         m_error = ((INTERNET_ASYNC_RESULT*)pStatusInfo)->dwError;
-        m_hopper.invokeOnThread(processRequestCB, this);
+        m_hopper.invokeOnThread(processRequestCB, (void *) m_id);
         break;
             
     case INTERNET_STATUS_REQUEST_SENT:
