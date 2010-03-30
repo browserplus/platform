@@ -158,7 +158,7 @@ private:
     // A debug-only runtime consistency check to ensure that:
     // 1. m_id is still valid
     // 2. we're on the same thread as we were constructed on
-    void consistencyCheck() 
+    void consistencyCheck() const
     {
 #ifdef DEBUG
         // valid ids are *even* numbers and they must be
@@ -274,14 +274,17 @@ private:
         s_lock.unlock();
     }
 
-    bool findImplNoLock(DWORD id, Transaction::Impl * &found) {
+    static bool findImpl(DWORD id, Transaction::Impl * &found) {
         std::map<DWORD, Transaction::Impl*>::const_iterator it;
+		bool rv = false;
+        s_lock.lock();
         it = s_activeImpls.find(id);
-        if (it == s_activeImpls.end()) {
-            return false;
-        }
-        found = it->second;
-        return true;
+        if (it != s_activeImpls.end()) {
+            rv = true;
+            found = it->second;
+		}
+        s_lock.unlock();
+        return rv;
     }
 
     void setError(const std::string& msg) {
@@ -312,16 +315,16 @@ std::map<DWORD, Transaction::Impl*> Transaction::Impl::s_activeImpls;
 // call from wininent into the appropriate object.   NOTE:  See bug
 // {#6}, because of the threaded nature of wininet, it's possible that
 // the instance has been deleted by the time we get here.  To catch
-// that case we ensure that the impl is still present in s_activeImplsSet.
-// no locking is neccesary because this set is only modified on the thread
-// where this class is allocated.
+// that case we ensure that the impl is still present in s_activeImpls.
+// Final note:  the use of ids rather than memory addresses is important!
+// The win32 allocator tends to aggressively reuse memory.
 
 void 
 Transaction::Impl::processRequestCB(void* ctx)
 {
     Transaction::Impl* self = NULL;
 
-    if (!findImplNoLock((DWORD) ctx, self) {
+    if (!findImpl((DWORD) ctx, self)) {
         BPLOG_DEBUG_STRM("Dropping processRequest call, implementation has been free'd");
         DebugBreak();
     } else {
@@ -334,7 +337,7 @@ Transaction::Impl::redirectCB(void* ctx)
 {
     Transaction::Impl* self = NULL;
 
-    if (!findImplNoLock((DWORD) ctx, self) {
+    if (!findImpl((DWORD) ctx, self)) {
         BPLOG_DEBUG_STRM("Dropping processRequest call, implementation has been free'd");
         DebugBreak();
     } else {
@@ -347,7 +350,7 @@ Transaction::Impl::closedCB(void* ctx)
 {
     Transaction::Impl* self = NULL;
 
-    if (!findImplNoLock((DWORD) ctx, self) {
+    if (!findImpl((DWORD) ctx, self)) {
         BPLOG_DEBUG_STRM("Dropping processRequest call, implementation has been free'd");
         DebugBreak();
     } else {
@@ -453,7 +456,7 @@ Transaction::Impl::wininetCallback(HINTERNET hInternet,
 void
 Transaction::Impl::timesUp(bp::time::Timer* t)
 {
-    consistencyCheck()
+    consistencyCheck();
 
     BPLOG_INFO_STRM(m_id << ": timer fired");
     if (t) {
@@ -1306,7 +1309,7 @@ Transaction::Impl::onWininetCallback(HINTERNET /* hInternet */,
             
     case INTERNET_STATUS_REQUEST_SENT:
         BPLOG_DEBUG_STRM(m_id << ": HTTP transaction status: Request sent " 
-p                        << *((LPDWORD)pStatusInfo) << " bytes");
+                         << *((LPDWORD)pStatusInfo) << " bytes");
         break;
             
     case INTERNET_STATUS_DETECTING_PROXY:
