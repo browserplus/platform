@@ -229,17 +229,20 @@ private:
     static bp::sync::Mutex s_lock;
     static DWORD           s_id;
     static std::map<DWORD, Transaction::Impl*> s_activeImpls;
+    static std::set<Transaction::Impl*> s_activeImplsSet;    
     DWORD                  m_id;
 
     void addToImplMap() {
         s_lock.lock();
         s_activeImpls[m_id] = this;
+        s_activeImplsSet.insert(this);
         s_lock.unlock();
     }
 
     void removeFromImplMap() {
         s_lock.lock();
         s_activeImpls.erase(m_id);
+        s_activeImplsSet.erase(this);
         s_lock.unlock();
     }
 
@@ -265,28 +268,51 @@ const DWORD Transaction::Impl::kBufferSize = 16*1024;
 bp::sync::Mutex Transaction::Impl::s_lock;
 DWORD Transaction::Impl::s_id = 1000;
 std::map<DWORD, Transaction::Impl*> Transaction::Impl::s_activeImpls;
-    
+std::set<Transaction::Impl*> Transaction::Impl::s_activeImplsSet;    
+
+// each of these xxxCB calls will be invoked on the thread where the
+// HttpTransaction was allocated, their primary purpose is to proxy a 
+// call from wininent into the appropriate object.   NOTE:  See bug
+// {#6}, because of the threaded nature of wininet, it's possible that
+// the instance has been deleted by the time we get here.  To catch
+// that case we ensure that the impl is still present in s_activeImplsSet.
+// no locking is neccesary because this set is only modified on the thread
+// where this class is allocated.
 
 void 
 Transaction::Impl::processRequestCB(void* ctx)
 {
     Transaction::Impl* self = (Transaction::Impl*) ctx;
-    self->processRequest(self->m_error);
+    if (s_activeImplsSet.find(self) == s_activeImplsSet.end()) {
+        BPLOG_DEBUG_STRM("Dropping processRequest call, implementation has been free'd");
+        DebugBreak();
+    } else {
+        self->processRequest(self->m_error);
+    }
 }
-
 
 void 
 Transaction::Impl::redirectCB(void* ctx)
 {
     Transaction::Impl* self = (Transaction::Impl*) ctx;
-    self->m_pListener->onRedirect(self->m_redirectUrl);
+    if (s_activeImplsSet.find(self) == s_activeImplsSet.end()) {
+        BPLOG_DEBUG_STRM("Dropping processRequest call, implementation has been free'd");
+        DebugBreak();
+    } else {
+        self->m_pListener->onRedirect(self->m_redirectUrl);
+    }
 }
 
 void 
 Transaction::Impl::closedCB(void* ctx)
 {
     Transaction::Impl* self = (Transaction::Impl*) ctx;
-    self->m_pListener->onClosed();
+    if (s_activeImplsSet.find(self) == s_activeImplsSet.end()) {
+        BPLOG_DEBUG_STRM("Dropping processRequest call, implementation has been free'd");
+        DebugBreak();
+    } else {
+        self->m_pListener->onClosed();
+    }
 }
 
 
