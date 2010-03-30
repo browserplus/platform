@@ -370,14 +370,14 @@ Transaction::Impl::Impl(RequestPtr ptrRequest) :
     // from WinINET worker threads.
     addToImplMap();
 
-    BPLOG_DEBUG_STRM(m_id << ": create Transaction::Impl");
+    BPLOG_DEBUG_STRM(m_id << ": HTTP transaction registered");
 }
 
 
 Transaction::Impl::~Impl()
 {
-    BPLOG_DEBUG_STRM(m_id << ": destroy Transaction::Impl");
     removeFromImplMap();
+    BPLOG_DEBUG_STRM(m_id << ":  HTTP transaction unregistered");
 
     closeConnection();
 
@@ -389,7 +389,7 @@ Transaction::Impl::~Impl()
 }
 
 
-// Class-scope Static Func
+// Class-scoped static function
 void CALLBACK
 Transaction::Impl::wininetCallback(HINTERNET hInternet,
                                    DWORD_PTR dwContext,
