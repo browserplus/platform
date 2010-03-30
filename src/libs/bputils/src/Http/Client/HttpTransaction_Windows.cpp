@@ -402,8 +402,8 @@ Transaction::Impl::wininetCallback(HINTERNET hInternet,
     s_lock.lock();
     it = s_activeImpls.find((DWORD) dwContext);
     if (it == s_activeImpls.end()) {
-        BPLOG_WARN_STRM("wininetCallback invoked for missing impl "
-                        << dwContext);
+        BPLOG_DEBUG_STRM("late wininet callback for deleted HTTP instance "
+                         "ignored: " << (DWORD) dwContext);
         s_lock.unlock();
         return;
     }
