@@ -143,8 +143,8 @@ public:
         std::stringstream urlss;
         urlss << "http://127.0.0.1:" << m_context->port << "/" << m_chosenMD5;
 
-        // lets build up the request.  1/2 the time we'll do a get, 1/2 we'll do a
-        // post
+        // lets build up the request.  1/2 the time we'll do a get,
+        // 1/2 we'll do a post
         m_isget = (1 == (bp::random::generate() % 2));
 
         if (m_isget) {
@@ -198,10 +198,10 @@ public:
     {
         checkThreadId();
         
-        // if we didn't get 0 or 100 progress at any point, this test is actually a
-        // failure
-        if (!m_gotSendZero || m_gotSendHundred ||
-            m_gotReceiveZero ||m_gotReceiveHundred) 
+        // if we didn't get 0 or 100 progress at any point, this
+        // test is actually a failure
+        if (!m_gotSendZero || !m_gotSendHundred ||
+            !m_gotReceiveZero || !m_gotReceiveHundred) 
         {
             success = false;
         }

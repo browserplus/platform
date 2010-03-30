@@ -78,7 +78,9 @@ static void streamCB(CFReadStreamRef stream,
     NSTimer* m_progressTimer;
     bp::time::Stopwatch * m_timeoutStopwatch;
     double m_lastProgressSent;
-    bool m_zeroProgressSent;
+    bool m_zeroSendProgressSent;
+    bool m_hundredSendProgressSent;
+    bool m_zeroReceiveProgressSent;
     
     // needed to respect system proxy settings in async CFHTTP case.
     CFDictionaryRef m_proxyDict;
@@ -152,7 +154,9 @@ static void streamCB(CFReadStreamRef stream,
         m_pathFd = -1;
         m_proxyDict = nil;
         m_lastProgressSent = 0.0;
-        m_zeroProgressSent = false;
+        m_zeroSendProgressSent = false;
+        m_hundredSendProgressSent = false;
+        m_zeroReceiveProgressSent = false;
         m_timeoutStopwatch = new bp::time::Stopwatch;
     }
     return self;
@@ -493,11 +497,6 @@ static void streamCB(CFReadStreamRef stream,
         CFRelease(response);
     }
     
-    // make sure that we send a 100% progress
-    if (m_bytesSent != m_sendTotalBytes) {
-        m_listener->onSendProgress(m_sendTotalBytes, m_sendTotalBytes, 100.0);
-    }
-    
     m_stream = NULL;
     [m_progressTimer invalidate];
     [self handleComplete];
@@ -550,14 +549,20 @@ static void streamCB(CFReadStreamRef stream,
                 double percent = m_sendTotalBytes ? 
                     (((double) m_bytesSent / m_sendTotalBytes) * 100) : 0.0;
                 // honor our 0% guarantee, 100% will be sent on completion
-                if (!m_zeroProgressSent) {
+                if (!m_zeroSendProgressSent) {
                     m_listener->onSendProgress(0, m_sendTotalBytes, 0.0);
-                    m_zeroProgressSent = true;
+                    m_zeroSendProgressSent = true;
                     m_lastProgressSent = 0.0;
                 }
                 if (percent > m_lastProgressSent) {
                     m_listener->onSendProgress(m_bytesSent, m_sendTotalBytes, percent);
                     m_lastProgressSent = percent;
+
+                    // if percent here is exactly 100%, flip a bit
+                    // so we don't double send it.
+                    if (percent == 100.0) {
+                        m_hundredSendProgressSent = true;
+                    }
                 }
             }
 
@@ -607,16 +612,28 @@ static void streamCB(CFReadStreamRef stream,
 
 - (void) handleResponseData: (const unsigned char*) buf length: (size_t) length
 {
+    // honor 0% and 100% guarantees for send progress
+    if (!m_zeroSendProgressSent) {
+        m_zeroSendProgressSent = true;
+        m_listener->onSendProgress(m_sendTotalBytes, m_sendTotalBytes, 0.0);
+    }
+
+    // make sure that we send a 100% progress
+    if (!m_hundredSendProgressSent) {
+        m_hundredSendProgressSent = true;
+        m_listener->onSendProgress(m_sendTotalBytes, m_sendTotalBytes, 100.0);
+    }
+    
     BPLOG_DEBUG_STRM(self << ": gets " << length << " response data bytes");
     m_bytesReceived += length; 
     double percent = m_receiveTotalBytes ? 
         (((double) m_bytesReceived / m_receiveTotalBytes) * 100) : 0.0;
 
     // honor our 0% guarantee, 100% will be sent on final buffer 
-    if (!m_zeroProgressSent) {
+    if (!m_zeroReceiveProgressSent) {
         m_listener->onReceiveProgress(0, m_receiveTotalBytes, 0.0);
         m_lastProgressSent = 0.0;
-        m_zeroProgressSent = true;
+        m_zeroReceiveProgressSent = true;
     }
 
     if (percent > m_lastProgressSent) {
