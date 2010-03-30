@@ -369,7 +369,6 @@ Transaction::Impl::Impl(RequestPtr ptrRequest) :
     // to correlate ids to instances for events posted cross thread
     // from WinINET worker threads.
     addToImplMap();
-
     BPLOG_DEBUG_STRM(m_id << ": HTTP transaction registered");
 }
 
@@ -767,7 +766,7 @@ DWORD
 Transaction::Impl::sendRequest()
 {
     assert(m_pRequest->method.code() != bp::http::Method::HTTP_POST);
-    BPLOG_INFO_STRM(m_id << ": sendRequest");
+    BPLOG_DEBUG_STRM(m_id << ": sendRequest");
    
     // If we have request headers, add them to request.
     Headers& headers = m_pRequest->headers;
@@ -938,7 +937,7 @@ Transaction::Impl::postData(bool& done)
 DWORD
 Transaction::Impl::completePostRequest()
 {
-    BPLOG_INFO_STRM(m_id << ": completePostRequest");
+    BPLOG_DEBUG_STRM(m_id << ": completePostRequest");
     DWORD rval = ERROR_SUCCESS;
     if (HttpEndRequest(m_hinetRequest, NULL, 0, 0)) {
         clearTimer();
@@ -1273,8 +1272,7 @@ p                        << *((LPDWORD)pStatusInfo) << " bytes");
 Transaction::Transaction(RequestPtr ptrRequest) :
     m_pImpl(new Impl(ptrRequest))
 {
-    BPLOG_DEBUG_STRM("transaction to "
-                     <<  ptrRequest->url.toString());
+    BPLOG_DEBUG_STRM("transaction to " <<  ptrRequest->url.toString());
 }
 
 
