@@ -325,8 +325,7 @@ Transaction::Impl::processRequestCB(void* ctx)
     Transaction::Impl* self = NULL;
 
     if (!findImpl((DWORD) ctx, self)) {
-        BPLOG_DEBUG_STRM("Dropping processRequest call, implementation has been free'd");
-        DebugBreak();
+        BPLOG_WARN_STRM("Dropping processRequest call, implementation has been free'd");
     } else {
         self->processRequest(self->m_error);
     }
@@ -338,8 +337,7 @@ Transaction::Impl::redirectCB(void* ctx)
     Transaction::Impl* self = NULL;
 
     if (!findImpl((DWORD) ctx, self)) {
-        BPLOG_DEBUG_STRM("Dropping processRequest call, implementation has been free'd");
-        DebugBreak();
+        BPLOG_WARN_STRM("Dropping processRequest call, implementation has been free'd");
     } else {
         self->m_pListener->onRedirect(self->m_redirectUrl);
     }
@@ -351,8 +349,7 @@ Transaction::Impl::closedCB(void* ctx)
     Transaction::Impl* self = NULL;
 
     if (!findImpl((DWORD) ctx, self)) {
-        BPLOG_DEBUG_STRM("Dropping processRequest call, implementation has been free'd");
-        DebugBreak();
+        BPLOG_WARN_STRM("Dropping processRequest call, implementation has been free'd");
     } else {
         self->m_pListener->onClosed();
     }
