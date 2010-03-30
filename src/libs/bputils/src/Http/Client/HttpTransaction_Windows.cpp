@@ -87,7 +87,7 @@ public:
         ePostGetData, ePostSendData, ePostComplete,
         eResponseGetHeaders,
         eResponseReceiveData, eResponseWriteData,
-		eDone, eTimedOut, eError
+        eDone, eTimedOut, eError
     };
 
     // Static wininet callback.
@@ -430,7 +430,7 @@ void
 Transaction::Impl::initiate(IListener* pListener)
 {
     m_pListener = pListener;
-	processRequest(ERROR_SUCCESS);
+    processRequest(ERROR_SUCCESS);
 }
 
 
@@ -604,11 +604,11 @@ Transaction::Impl::processRequest(DWORD error)
 
         case eResponseReceiveData:
             // since we use a non-blocking InternetReadFileEx, must only
-			// advance state if we actually got data
+            // advance state if we actually got data
             error = receiveResponseData();
-			if (error != ERROR_IO_PENDING) {
-				m_eState = eResponseWriteData;
-			}
+            if (error != ERROR_IO_PENDING) {
+                m_eState = eResponseWriteData;
+            }
             break;
 
         case eResponseWriteData: {
@@ -692,7 +692,7 @@ Transaction::Impl::openConnection()
 
     // TODO: (longer term) it's possible to cache connection handles
     // into a pool for better performance.
-	DWORD rval = ERROR_SUCCESS;
+    DWORD rval = ERROR_SUCCESS;
     wstring wsHost = bp::strutil::utf8ToWide(m_pRequest->url.host());
     m_hinetConnection = InternetConnectW(m_hinetSession,
                                          wsHost.c_str(),
@@ -705,22 +705,22 @@ Transaction::Impl::openConnection()
     if (m_hinetConnection != NULL) {
         clearTimer();
     } else {
-	    rval = GetLastError();
-	    if (rval == ERROR_IO_PENDING) {
+        rval = GetLastError();
+        if (rval == ERROR_IO_PENDING) {
             setTimer();
         } else {
-		    // Could also call InternetGetLastResponseInfo here.
-		    setError(lastErrorString("InternetConnect"));
+            // Could also call InternetGetLastResponseInfo here.
+            setError(lastErrorString("InternetConnect"));
         }
     }
-	return rval;
+    return rval;
 }
 
 
 DWORD
 Transaction::Impl::openRequest()
 {
-    BPLOG_INFO_STRM(m_id << ": openRequest");
+    BPLOG_DEBUG_STRM(m_id << ": openRequest");
     
     // Bypass the browser cache.
     DWORD dwRequestFlags = INTERNET_FLAG_RELOAD | 
@@ -729,10 +729,10 @@ Transaction::Impl::openRequest()
 
     wstring wsMethod = bp::strutil::utf8ToWide(m_pRequest->method.toString());
     wstring wsResource = bp::strutil::utf8ToWide(
-                             m_pRequest->url.pathAndQueryString());
+        m_pRequest->url.pathAndQueryString());
 
     // Create a Request handle
-	DWORD rval = ERROR_SUCCESS;
+    DWORD rval = ERROR_SUCCESS;
     m_hinetRequest = HttpOpenRequestW(m_hinetConnection,
                                       wsMethod.c_str(),
                                       wsResource.c_str(),  
@@ -759,7 +759,7 @@ Transaction::Impl::openRequest()
             setError(lastErrorString("HttpOpenRequest"));
         }
     }
-	return rval;
+    return rval;
 }
 
 
@@ -786,8 +786,8 @@ Transaction::Impl::sendRequest()
         }
     }
 
-	DWORD rval = ERROR_SUCCESS;
-	if (HttpSendRequest(m_hinetRequest, NULL, 0, NULL, 0)) {
+    DWORD rval = ERROR_SUCCESS;
+    if (HttpSendRequest(m_hinetRequest, NULL, 0, NULL, 0)) {
         clearTimer();
     } else {
         rval = GetLastError();
@@ -797,7 +797,7 @@ Transaction::Impl::sendRequest()
             setError(lastErrorString("HttpSendRequest"));
         }
     }
-	return rval;
+    return rval;
 }
 
 
@@ -813,25 +813,25 @@ Transaction::Impl::sendRequestWithBody()
     headers.add("Connection", "close");
     if (!headers.empty()) {
         wstring wsHeaders = bp::strutil::utf8ToWide(headers.toString());
-	    if (!HttpAddRequestHeadersW(m_hinetRequest, 
-								    wsHeaders.c_str(),
-								    DWORD(-1), 
+        if (!HttpAddRequestHeadersW(m_hinetRequest, 
+                                    wsHeaders.c_str(),
+                                    DWORD(-1), 
                                     HTTP_ADDREQ_FLAG_ADD_IF_NEW)) {
             setError(lastErrorString("HttpAddRequestHeaders"));
             return GetLastError();
         }
     }
 
-	m_sendTotalBytes = 0;
+    m_sendTotalBytes = 0;
     bp::file::Path path = m_pRequest->body.path();
-	if (!path.empty()) {
+    if (!path.empty()) {
         m_ePostSource = eFromFile;
-		m_hUploadFile = CreateFileW(path.external_file_string().c_str(),
-	                                GENERIC_READ,
-	                                FILE_SHARE_READ,
-	                                NULL,
-	                                OPEN_ALWAYS,
-	                                FILE_ATTRIBUTE_NORMAL,
+        m_hUploadFile = CreateFileW(path.external_file_string().c_str(),
+                                    GENERIC_READ,
+                                    FILE_SHARE_READ,
+                                    NULL,
+                                    OPEN_ALWAYS,
+                                    FILE_ATTRIBUTE_NORMAL,
                                     NULL);
         if (m_hUploadFile == INVALID_HANDLE_VALUE) {
             setError(lastErrorString("CreateFileW"));
@@ -843,28 +843,28 @@ Transaction::Impl::sendRequestWithBody()
             return GetLastError();
         }
         m_sendTotalBytes = bp::file::size(path);
-	} else {
+    } else {
         m_ePostSource = eFromBuffer;
-	    m_sendTotalBytes = m_pRequest->body.size();
-	}
+        m_sendTotalBytes = m_pRequest->body.size();
+    }
 
-	// setup buffer for HttpSendRequestEx
-	FillMemory(&m_ibuf, sizeof(m_ibuf), 0);
-	m_ibuf.dwStructSize = sizeof(m_ibuf);
-	m_ibuf.dwBufferTotal = m_sendTotalBytes;
+    // setup buffer for HttpSendRequestEx
+    FillMemory(&m_ibuf, sizeof(m_ibuf), 0);
+    m_ibuf.dwStructSize = sizeof(m_ibuf);
+    m_ibuf.dwBufferTotal = m_sendTotalBytes;
 
-	DWORD rval = ERROR_SUCCESS;
-	if (HttpSendRequestEx(m_hinetRequest, &m_ibuf, NULL, 0, 0)) {
+    DWORD rval = ERROR_SUCCESS;
+    if (HttpSendRequestEx(m_hinetRequest, &m_ibuf, NULL, 0, 0)) {
         clearTimer();
     } else {
-	    rval = GetLastError();
-	    if (rval == ERROR_IO_PENDING) {
+        rval = GetLastError();
+        if (rval == ERROR_IO_PENDING) {
             setTimer();
         } else {
-		    setError(lastErrorString("HttpSendRequestEx"));
-	    }
-	}
-	return rval;
+            setError(lastErrorString("HttpSendRequestEx"));
+        }
+    }
+    return rval;
 }
 
 
@@ -1056,7 +1056,7 @@ DWORD
 Transaction::Impl::receiveResponseData()
 {
     BPLOG_DEBUG_STRM(m_id << ": receiveResponseData");    
-	DWORD rval = ERROR_SUCCESS;
+    DWORD rval = ERROR_SUCCESS;
 
     /* (lth) wininet.dll that ships with IE6 does not implement
      * InternetReadFileExW.  We must use InternetReadFileExA to
@@ -1076,7 +1076,7 @@ Transaction::Impl::receiveResponseData()
         BPLOG_DEBUG_STRM(m_id << ": InternetReadFileEx got " 
                          << m_bytesInReceiveBuffer << " bytes");
     } else {
-		m_bytesInReceiveBuffer = 0;
+        m_bytesInReceiveBuffer = 0;
         rval = GetLastError();
         if (rval == ERROR_IO_PENDING) {
             setTimer();
@@ -1109,17 +1109,17 @@ Transaction::Impl::closeConnection()
     m_bClosed = true;
     clearTimer();
     if (m_hinetRequest != INVALID_HANDLE_VALUE) {
-		(void) InternetSetStatusCallback(m_hinetRequest, NULL);
+        (void) InternetSetStatusCallback(m_hinetRequest, NULL);
         InternetCloseHandle(m_hinetRequest);
         m_hinetRequest = INVALID_HANDLE_VALUE;
     }
     if (m_hinetConnection != INVALID_HANDLE_VALUE) {
-		(void) InternetSetStatusCallback(m_hinetConnection, NULL);
+        (void) InternetSetStatusCallback(m_hinetConnection, NULL);
         InternetCloseHandle(m_hinetConnection);
         m_hinetConnection = INVALID_HANDLE_VALUE;
     }
     if (m_hinetSession != INVALID_HANDLE_VALUE) {
-		(void) InternetSetStatusCallback(m_hinetSession, NULL);
+        (void) InternetSetStatusCallback(m_hinetSession, NULL);
         InternetCloseHandle(m_hinetSession);
         m_hinetSession = INVALID_HANDLE_VALUE;
     }
