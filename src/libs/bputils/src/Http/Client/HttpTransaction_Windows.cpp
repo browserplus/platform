@@ -1162,24 +1162,24 @@ Transaction::Impl::onWininetCallback(HINTERNET /* hInternet */,
     }
             
     case INTERNET_STATUS_CONNECTED_TO_SERVER: {
-        BPLOG_INFO_STRM(m_id << ": Status: Connected to Server");
+        BPLOG_INFO_STRM(m_id << ": HTTP transaction connected to Server");
         break;
     }
             
     case INTERNET_STATUS_CONNECTING_TO_SERVER:
-        BPLOG_DEBUG_STRM(m_id << ": Status: Connecting to Server");
+        BPLOG_DEBUG_STRM(m_id << ": HTTP transaction connecting to Server");
         break;
             
     case INTERNET_STATUS_CLOSING_CONNECTION:
-        BPLOG_INFO_STRM(m_id << ": Status: Closing Connection (one of perhaps many)");
+        BPLOG_DEBUG_STRM(m_id << ": HTTP transaction - closing Connection (one of perhaps many)");
         break;
             
     case INTERNET_STATUS_CONNECTION_CLOSED:
-        BPLOG_INFO_STRM(m_id << ": Status: Connection Closed (one of perhaps many)");
+        BPLOG_INFO_STRM(m_id << ": HTTP transaction - connection closed (one of perhaps many)");
         break;
             
     case INTERNET_STATUS_HANDLE_CLOSING:
-        BPLOG_INFO_STRM(m_id << ": Status: Handle Closing");
+        BPLOG_DEBUG_STRM(m_id << ": HTTP transaction - WinINET handle Closing");
         break;
             
     case INTERNET_STATUS_HANDLE_CREATED: {
@@ -1201,62 +1201,63 @@ Transaction::Impl::onWininetCallback(HINTERNET /* hInternet */,
     }
             
     case INTERNET_STATUS_INTERMEDIATE_RESPONSE:
-        BPLOG_DEBUG_STRM(m_id << ": Status: Intermediate response");
+        BPLOG_DEBUG_STRM(m_id << ": HTTP transaction status: Intermediate response");
         break;
             
     case INTERNET_STATUS_RECEIVING_RESPONSE:
-        BPLOG_DEBUG_STRM(m_id << ": Status: Receiving Response");    
+        BPLOG_DEBUG_STRM(m_id << ": HTTP transaction status: Receiving Response");    
         break;
             
     case INTERNET_STATUS_RESPONSE_RECEIVED:
-        BPLOG_INFO_STRM(m_id << ": Status: Response Received " 
+        BPLOG_INFO_STRM(m_id << ": HTTP transaction received response of " 
                          << *((LPDWORD)pStatusInfo) << " bytes");
         break;
             
     case INTERNET_STATUS_REDIRECT:
-        BPLOG_INFO_STRM(m_id << ": Status: Redirect");
+        BPLOG_INFO_STRM(m_id << ": HTTP transaction received redirect");
         BPLOG_DEBUG_STRM("Redirect to " << (const char*) pStatusInfo);
         (void) m_redirectUrl.parse((const char*) pStatusInfo);
         m_hopper.invokeOnThread(redirectCB, (void *) m_id);
         break;
 
     case INTERNET_STATUS_REQUEST_COMPLETE:
-        BPLOG_DEBUG_STRM(m_id << ": Status: Request complete");
+        BPLOG_DEBUG_STRM(m_id << ": HTTP transaction request is complete");
         m_error = ((INTERNET_ASYNC_RESULT*)pStatusInfo)->dwError;
         m_hopper.invokeOnThread(processRequestCB, (void *) m_id);
         break;
             
     case INTERNET_STATUS_REQUEST_SENT:
-        BPLOG_DEBUG_STRM(m_id << ": Status: Request sent " 
-                        << *((LPDWORD)pStatusInfo) << " bytes");
+        BPLOG_DEBUG_STRM(m_id << ": HTTP transaction status: Request sent " 
+p                        << *((LPDWORD)pStatusInfo) << " bytes");
         break;
             
     case INTERNET_STATUS_DETECTING_PROXY:
-        BPLOG_DEBUG_STRM(m_id << ": Status: Detecting Proxy");
+        BPLOG_DEBUG_STRM(m_id << ": HTTP transaction status: Detecting Proxy");
         break;            
             
     case INTERNET_STATUS_RESOLVING_NAME:
-        BPLOG_DEBUG_STRM(m_id << ": Status: Resolving Name");
+        BPLOG_DEBUG_STRM(m_id << ": HTTP transaction status: Resolving Name");
         break;
             
     case INTERNET_STATUS_NAME_RESOLVED:
-        BPLOG_DEBUG_STRM(m_id << ": Status: Name Resolved");
+        BPLOG_DEBUG_STRM(m_id << ": HTTP transaction status: Name Resolved");
         break;
             
     case INTERNET_STATUS_SENDING_REQUEST:
-        BPLOG_DEBUG_STRM(m_id << ": Status: Sending request");
+        BPLOG_DEBUG_STRM(m_id << ": HTTP transaction status: Sending request");
         break;
             
     case INTERNET_STATUS_STATE_CHANGE:
-        BPLOG_DEBUG_STRM(m_id << ": Status: State Change");
+        BPLOG_DEBUG_STRM(m_id << ": HTTP transaction status: State Change");
         break;
             
     case INTERNET_STATUS_P3P_HEADER:
-        BPLOG_DEBUG_STRM(m_id << ": Status: Received P3P header");
+        BPLOG_DEBUG_STRM(m_id << ": HTTP transaction status: Received P3P header");
         break;
             
     default:
-        BPLOG_INFO_STRM(m_id << ": Status: Unknown " << dwInternetStatus);
+        BPLOG_WARN_STRM(m_id << ": HTTP transaction got unknown status: "
+                        << dwInternetStatus);
         break;
     }
 }
