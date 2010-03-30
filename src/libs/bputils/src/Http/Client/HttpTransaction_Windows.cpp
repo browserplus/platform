@@ -255,8 +255,8 @@ private:
     }
 
     void setError(const std::string& msg) {
-        m_pListener->onError(msg);
         m_eState = eError;
+        m_pListener->onError(msg);
     }
 
     // Prevent copying
@@ -502,8 +502,8 @@ Transaction::Impl::processRequest(DWORD error)
     // do nothing if connection has been closed
     if (m_bClosed) {
         BPLOG_WARN_STRM(m_id
-                        << ": connect had been closed, request ignored, state = "
-                        << stateNames[m_eState]);
+                        << ": connect had been closed, request ignored, "
+                        << "state = " << stateNames[m_eState]);
         return;
     }
 
@@ -662,7 +662,7 @@ Transaction::Impl::processRequest(DWORD error)
 void
 Transaction::Impl::openSession()
 {
-    BPLOG_INFO_STRM(m_id << ": openSession");
+    BPLOG_DEBUG_STRM(m_id << ": openSession");
     // TODO: Does a UserAgent header override lpszAgent arg to this func?
     // Note: this call is synchronous.
     wstring wsUserAgent = bp::strutil::utf8ToWide(m_sUserAgent);
