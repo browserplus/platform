@@ -58,11 +58,11 @@ for i in coreletStart..ARGV.length-1
     end
 
 
-    topDir = "<%= $cmake['CMAKE_CURRENT_SOURCE_DIR'] %>"
+    srcDir = "<%= $cmake['CMAKE_CURRENT_SOURCE_DIR'] %>"
+    buildDir = "<%= $cmake['CMAKE_CURRENT_BINARY_DIR'] %>"
     coreletDir = File.join(corelet, "Main", ARGV[i])
     coreletDir = File.directory?(coreletDir) ? coreletDir : ARGV[i]
-    srcDir = File.join(topDir, "..", "..")
-    publisher = File.join(srcDir, "build", "bpsdk_internal", 
+    publisher = File.join(buildDir, "bpsdk_internal", 
                           "bin", "ServicePublisher#{exeSuffix}")
     keyDir = File.join(srcDir, "support", "signing", "#{certType}_certs")
     privateKey= File.join(keyDir, "BrowserPlus.pvk")
