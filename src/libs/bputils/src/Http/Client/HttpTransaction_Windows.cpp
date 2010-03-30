@@ -155,6 +155,27 @@ private:
 
     // Internal Attributes
 private:
+    // A debug-only runtime consistency check to ensure that:
+    // 1. m_id is still valid
+    // 2. we're on the same thread as we were constructed on
+    void consistencyCheck() 
+    {
+#ifdef DEBUG
+        // valid ids are *even* numbers and they must be
+        // less than the current value of s_id
+        if (m_id >= s_id || m_id & 0x1 || m_id == 0xDEADBEEF) {
+            DebugBreak();
+        }
+
+        // consistencyCheck is designed to run on the same thread
+        // where the HTTP transaction was allocated
+        if (bp::thread::Thread::currentThreadID() != m_threadId) {
+            DebugBreak();
+        }
+#endif
+    }
+    
+
     // We asynchronously move thru a state machine in
     // processRequest.  This state represents the 
     // next thing to do.
@@ -233,7 +254,15 @@ private:
 
     void addToImplMap() {
         s_lock.lock();
-        m_id = s_id++;
+        m_id = s_id;
+        s_id += 2;
+#ifdef DEBUG
+        // a runtime debugging check, ensure that this id isn't
+        // currently in use!
+        if (s_activeImpls.find(m_id) != s_activeImpls.end()) {
+            DebugBreak();
+        }
+#endif
         s_activeImpls[m_id] = this;
         s_lock.unlock();
     }
@@ -241,6 +270,7 @@ private:
     void removeFromImplMap() {
         s_lock.lock();
         s_activeImpls.erase(m_id);
+        m_id = 0xDEADBEEF;
         s_lock.unlock();
     }
 
@@ -375,7 +405,10 @@ Transaction::Impl::Impl(RequestPtr ptrRequest) :
 
 Transaction::Impl::~Impl()
 {
+    consistencyCheck();
+
     removeFromImplMap();
+    m_pListener = NULL;
     BPLOG_DEBUG_STRM(m_id << ":  HTTP transaction unregistered");
 
     closeConnection();
@@ -383,8 +416,12 @@ Transaction::Impl::~Impl()
     if (m_ePostSource == eFromFile) {
         CloseHandle(m_hUploadFile);
         delete [] m_pPostBuffer;
+        m_pPostBuffer = NULL;
     }
-    delete [] m_pReceiveBuffer;
+    if (m_pReceiveBuffer) {
+        delete [] m_pReceiveBuffer;
+        m_pReceiveBuffer = NULL;
+    }
 }
 
 
@@ -416,6 +453,8 @@ Transaction::Impl::wininetCallback(HINTERNET hInternet,
 void
 Transaction::Impl::timesUp(bp::time::Timer* t)
 {
+    consistencyCheck()
+
     BPLOG_INFO_STRM(m_id << ": timer fired");
     if (t) {
         t->cancel();
@@ -428,6 +467,8 @@ Transaction::Impl::timesUp(bp::time::Timer* t)
 void
 Transaction::Impl::initiate(IListener* pListener)
 {
+    consistencyCheck();
+
     m_pListener = pListener;
     processRequest(ERROR_SUCCESS);
 }
@@ -449,6 +490,8 @@ Transaction::Impl::cancel()
 RequestPtr
 Transaction::Impl::request() const
 {
+    consistencyCheck();
+
     return m_pRequest;
 }
 
@@ -456,6 +499,8 @@ Transaction::Impl::request() const
 const std::string& 
 Transaction::Impl::userAgent() const
 {
+    consistencyCheck();
+
     return m_sUserAgent;
 }
 
@@ -463,6 +508,8 @@ Transaction::Impl::userAgent() const
 void 
 Transaction::Impl::setUserAgent(const std::string& sUserAgent)
 {
+    consistencyCheck();
+
     m_sUserAgent = sUserAgent;
 }
 
@@ -470,6 +517,8 @@ Transaction::Impl::setUserAgent(const std::string& sUserAgent)
 double
 Transaction::Impl::timeoutSec() const
 {
+    consistencyCheck();
+
     return m_fTimeoutSecs;
 }
 
@@ -477,6 +526,8 @@ Transaction::Impl::timeoutSec() const
 void
 Transaction::Impl::setTimeoutSec(double fSecs)
 {
+    consistencyCheck();
+
     m_fTimeoutSecs = fSecs;
 }
 
@@ -488,6 +539,8 @@ Transaction::Impl::setTimeoutSec(double fSecs)
 void
 Transaction::Impl::processRequest(DWORD error)
 {
+    consistencyCheck();
+
     static const char* stateNames[] = {
         "eConnect", "eOpenRequest", 
         "eSendRequest", "eSendRequestWithBody", 
@@ -661,6 +714,8 @@ Transaction::Impl::processRequest(DWORD error)
 void
 Transaction::Impl::openSession()
 {
+    consistencyCheck();
+
     BPLOG_DEBUG_STRM(m_id << ": openSession");
     // TODO: Does a UserAgent header override lpszAgent arg to this func?
     // Note: this call is synchronous.
@@ -687,6 +742,8 @@ Transaction::Impl::openSession()
 DWORD
 Transaction::Impl::openConnection()
 {
+    consistencyCheck();
+
     BPLOG_INFO_STRM(m_id << ": openConnection");
 
     // TODO: (longer term) it's possible to cache connection handles
@@ -719,6 +776,8 @@ Transaction::Impl::openConnection()
 DWORD
 Transaction::Impl::openRequest()
 {
+    consistencyCheck();
+
     BPLOG_DEBUG_STRM(m_id << ": openRequest");
     
     // Bypass the browser cache.
@@ -765,6 +824,8 @@ Transaction::Impl::openRequest()
 DWORD
 Transaction::Impl::sendRequest()
 {
+    consistencyCheck();
+
     assert(m_pRequest->method.code() != bp::http::Method::HTTP_POST);
     BPLOG_DEBUG_STRM(m_id << ": sendRequest");
    
@@ -803,6 +864,8 @@ Transaction::Impl::sendRequest()
 DWORD
 Transaction::Impl::sendRequestWithBody()
 {
+    consistencyCheck();
+
     assert(m_pRequest->method.code() == bp::http::Method::HTTP_POST);
     BPLOG_INFO_STRM(m_id << ": sendRequestWithBody");
     
@@ -870,6 +933,8 @@ Transaction::Impl::sendRequestWithBody()
 DWORD
 Transaction::Impl::getDataToPost()
 {
+    consistencyCheck();
+
     if (m_bytesSent >= m_sendTotalBytes) {
         m_bytesToPost = 0;
         return ERROR_SUCCESS;
@@ -904,6 +969,8 @@ Transaction::Impl::getDataToPost()
 DWORD
 Transaction::Impl::postData(bool& done)
 {
+    consistencyCheck();
+
     BPLOG_DEBUG_STRM(m_id << ": postData " << m_bytesToPost << " bytes");
     if (m_bytesToPost == 0) {
         done = true;
@@ -937,6 +1004,8 @@ Transaction::Impl::postData(bool& done)
 DWORD
 Transaction::Impl::completePostRequest()
 {
+    consistencyCheck();
+
     BPLOG_DEBUG_STRM(m_id << ": completePostRequest");
     DWORD rval = ERROR_SUCCESS;
     if (HttpEndRequest(m_hinetRequest, NULL, 0, 0)) {
@@ -958,6 +1027,8 @@ Transaction::Impl::completePostRequest()
 Version
 Transaction::Impl::receiveResponseVersion()
 {
+    consistencyCheck();
+
     Version rval;
     const int nBUFLEN = 256;
     char szBuf[nBUFLEN];
@@ -979,6 +1050,8 @@ Transaction::Impl::receiveResponseVersion()
 Status
 Transaction::Impl::receiveResponseStatus()
 {
+    consistencyCheck();
+
     int nStatusCode = 0;
     DWORD dwSize = sizeof(int);
     DWORD dwIndex = 0;
@@ -996,6 +1069,8 @@ Transaction::Impl::receiveResponseStatus()
 Headers
 Transaction::Impl::receiveResponseHeaders()
 {
+    consistencyCheck();
+
     Headers rval;
     ByteVec vb;
     vb.reserve(1000);
@@ -1054,6 +1129,8 @@ Transaction::Impl::receiveResponseHeaders()
 DWORD
 Transaction::Impl::receiveResponseData()
 {
+    consistencyCheck();
+
     BPLOG_DEBUG_STRM(m_id << ": receiveResponseData");    
     DWORD rval = ERROR_SUCCESS;
 
@@ -1091,6 +1168,8 @@ Transaction::Impl::receiveResponseData()
 DWORD
 Transaction::Impl::writeResponseData(bool& done)
 {
+    consistencyCheck();
+
     if (m_bytesInReceiveBuffer == 0) {
         done = true;
         return ERROR_SUCCESS;
