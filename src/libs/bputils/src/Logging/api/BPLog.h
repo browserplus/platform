@@ -112,6 +112,14 @@ namespace log {
 
 
 /**
+ * How FileAppender should treat existing log file.
+ * Useful in calls to setupLogToFile().
+ */
+const bool kTruncateExisting = true;
+const bool kAppendExisting   = false;
+
+
+/**
  * Returns the level component of a string in the (current) bp log
  * configuration syntax.
  *
