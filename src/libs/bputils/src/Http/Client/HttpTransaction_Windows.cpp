@@ -233,6 +233,7 @@ private:
 
     void addToImplMap() {
         s_lock.lock();
+        m_id = s_id++;
         s_activeImpls[m_id] = this;
         s_lock.unlock();
     }
@@ -362,8 +363,13 @@ Transaction::Impl::Impl(RequestPtr ptrRequest) :
         BP_THROW_FATAL("cannot allocate m_pReceiveBuffer");
     }
 
-    m_id = s_id++;
+    // addToImplMap will initialize m_id to a process-wide unique
+    // id used to identify this transaction and will add the
+    // instance to a static protected map.  This map is used
+    // to correlate ids to instances for events posted cross thread
+    // from WinINET worker threads.
     addToImplMap();
+
     BPLOG_DEBUG_STRM(m_id << ": create Transaction::Impl");
 }
 
