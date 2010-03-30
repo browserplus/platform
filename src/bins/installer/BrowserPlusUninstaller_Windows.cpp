@@ -28,6 +28,7 @@
 #include <string>
 #include <windows.h>
 #include "BPInstaller/BPInstaller.h"
+#include "BPUtils/bpexitcodes.h"
 #include "BPUtils/BPFile.h"
 #include "BPUtils/bplocalization.h"
 #include "BPUtils/BPLog.h"
@@ -41,7 +42,9 @@ using namespace std;
 
 
 // Forward Declarations
-void doWork( const vector<string>& vsArgs );
+int doChild( const vector<string>& vsArgs );
+int doParent( const vector<string>& vsArgs );
+int doWork( const vector<string>& vsArgs );
 void forkChild( const string& sChildName, const vector<string>& vsArgs );
 
 
@@ -58,40 +61,50 @@ void setupLogging( bool bTruncateExisting )
 
 int WINAPI WinMain( HINSTANCE, HINSTANCE, PSTR, int )
 {
-    vector<string> vsArgs = bp::process::getCommandLineArgs();
-    
-    // Parent has no command line args (currently).
-    bool bParent = vsArgs.size() == 1;
-    
-    if (bParent)
+    try
     {
-        setupLogging( true );
-        BPLOG_INFO( "Inside parent uninstaller process." );
+        vector<string> vsArgs = bp::process::getCommandLineArgs();
 
-        // Fork a temporary self-deleting child with all our args.
-        // That child will delete our exe and then do the real work.
-        forkChild( "bpuninstall.exe", vsArgs );
+        // Parent is currently distinguished by lack of command line args.
+        bool bIsParent = vsArgs.size() == 1;
 
-        // Exit normally
-        return 0;
+        return bIsParent ? doParent(vsArgs) : doChild(vsArgs);
     }
-    else
+    catch (bp::error::Exception& e)
     {
-        setupLogging( false );
-        BPLOG_INFO( "Inside child uninstaller process." );
-        
-        // We're the child, do whatever work we want to do.
-        doWork( vsArgs );
-
-        // Exit normally.
-        // Child exe will be automatically deleted due to how it was created.
-        return 0;
+        BP_REPORTCATCH(e);
+        return bp::exit::kCaughtBpException;
     }
 }	
 
 
+int doParent( const vector<string>& vsArgs )
+{
+    setupLogging( bp::log::kTruncateExisting );
+    BPLOG_FUNC_SCOPE;
+
+    // Fork a temporary self-deleting child with all our args.
+    // That child will delete our exe and then do the real work.
+    forkChild( "bpuninstall.exe", vsArgs );
+
+    return bp::exit::kOk;
+}
+
+
+int doChild( const vector<string>& vsArgs )
+{
+    setupLogging( bp::log::kAppendExisting );
+    BPLOG_FUNC_SCOPE;
+
+    // We're the child, do whatever work we want to do.
+    return doWork( vsArgs );
+}
+
+
 void forkChild( const string& sChildName, const vector<string>& vsParentArgs )
 {
+    BPLOG_FUNC_SCOPE;
+    
     // Get path to current (parent) exe.
     wchar_t wszParentPath[MAX_PATH];
     GetModuleFileNameW( NULL, wszParentPath, MAX_PATH );
@@ -148,8 +161,10 @@ void forkChild( const string& sChildName, const vector<string>& vsParentArgs )
 }
 
 
-void doWork( const vector<string>& vsArgs )
+int doWork( const vector<string>& vsArgs )
 {
+    BPLOG_FUNC_SCOPE;
+    
     // Get the strings we need now, in case we need them after deleting
     // resource files.
     const string sLocale = getUsersLocale();
@@ -170,8 +185,10 @@ void doWork( const vector<string>& vsArgs )
     int nRtn = MessageBoxW( NULL,
                             wsPrompt.c_str(), wsBP.c_str(),
                             MB_OKCANCEL|MB_DEFBUTTON2 );
-    if (nRtn == IDCANCEL)
-        return;
+    if (nRtn == IDCANCEL) {
+        BPLOG_INFO( "User cancelled uninstall" );
+        return bp::exit::kUserCancel;
+    }
 
     // Give the parent process time to exit.  We want this
     // since "unins.run()" will try to remove the parent.
@@ -183,5 +200,7 @@ void doWork( const vector<string>& vsArgs )
 
     // Inform user when done.
     MessageBoxW( NULL, wsDone.c_str() , wsBP.c_str(), MB_OK );
+
+    return bp::exit::kOk;
 }
 
