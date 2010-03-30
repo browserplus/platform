@@ -47,6 +47,8 @@ const int kCantSetupPermissionsUpdater  = -8;
 const int kDuplicateProcess             = -9;
 const int kCantRunServiceProcess        = -10;
 const int kCantGetUpToDatePerms         = -11;
+const int kCaughtBpException            = -12;
+const int kUserCancel                   = -13;
 const int kKillswitch                   = -666;
 
 }
