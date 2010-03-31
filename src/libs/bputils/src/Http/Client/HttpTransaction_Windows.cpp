@@ -905,7 +905,7 @@ Transaction::Impl::sendRequestWithBody()
             setError("unable to allocate buffer");
             return GetLastError();
         }
-        m_sendTotalBytes = bp::file::size(path);
+        m_sendTotalBytes = (size_t) bp::file::size(path);
 	} else {
         m_ePostSource = eFromBuffer;
         m_sendTotalBytes = m_pRequest->body.size();
