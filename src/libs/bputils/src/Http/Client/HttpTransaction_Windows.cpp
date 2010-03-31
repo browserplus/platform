@@ -226,6 +226,7 @@ private:
     HANDLE          m_hUploadFile;
     unsigned char*  m_pPostBuffer;
     DWORD           m_bytesToPost;
+    DWORD           m_numWritten;
     unsigned char*  m_pReceiveBuffer;
     DWORD           m_bytesInReceiveBuffer;
     INTERNET_BUFFERS m_ibuf;
@@ -979,13 +980,19 @@ Transaction::Impl::postData(bool& done)
 
     done = false;
     DWORD rval = ERROR_SUCCESS;
-    DWORD numWritten = 0;
+    // {#6} numWritten will be populated upon async completion of
+    // internet write file.  doing something like, uh, using a stack
+    // allocated DWORD will cause your dog to leave you and your wife
+    // to file for divorce.  Likewise, m_pPostBuffer must hang around
+    // till completion.  Completion is indicated by wininet throwing
+    // us a INTERNET_STATUS_REQUEST_COMPLETE.
+    m_numWritten = 0;
     if (InternetWriteFile(m_hinetRequest, m_pPostBuffer,
-                           m_bytesToPost, &numWritten)) {
+                          m_bytesToPost, &m_numWritten)) {
         clearTimer();
-        BPLOG_DEBUG_STRM(m_id << ":postData wrote " << numWritten << " bytes");
+        BPLOG_DEBUG_STRM(m_id << ":postData wrote " << m_numWritten << " bytes");
         m_bytesToPost = 0;
-        m_bytesSent += numWritten;
+        m_bytesSent += m_numWritten;
     } else {
         rval = GetLastError();
         if (rval == ERROR_IO_PENDING) {
