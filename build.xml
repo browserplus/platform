@@ -1,5 +1,14 @@
-<project name="BrowserPlusPlatform" default="build_make">
-    <target name="clean_make">
+<project name="BrowserPlusPlatform" default="build">
+    <condition property="is.windows">
+        <os family="windows"/>
+    </condition>
+    <condition property="is.mac">
+        <os family="mac"/>
+    </condition>
+    <condition property="is.unix">
+        <os family="unix"/>
+    </condition>
+    <target name="clean_make" unless="is.windows">
         <ant dir="external" target="clean_make"/>
         <ant dir="src" target="clean_make"/>
     </target>
@@ -7,11 +16,11 @@
         <ant dir="external" target="clean_xcode"/>
         <ant dir="src" target="clean_xcode"/>
     </target>
-    <target name="clean_vc08">
+    <target name="clean_vc08" if="is.windows">
         <ant dir="external" target="clean_vc08"/>
         <ant dir="src" target="clean_vc08"/>
     </target>
-    <target name="build_make">
+    <target name="build_make" unless="is.windows">
         <ant dir="external" target="build_make"/>
         <ant dir="src" target="build_make"/>
     </target>
@@ -19,8 +28,11 @@
         <ant dir="external" target="build_xcode"/>
         <ant dir="src" target="build_xcode"/>
     </target>
-    <target name="build_vc08">
+    <target name="build_vc08" if="is.windows">
         <ant dir="external" target="build_vc08"/>
         <ant dir="src" target="build_vc08"/>
     </target>
+    <target name="build" depends="build_make,build_vc08"/>
+    <target name="clean" depends="clean_make,clean_vc08"/>
+    <target name="rebuild" depends="clean,build"/>
 </project>
