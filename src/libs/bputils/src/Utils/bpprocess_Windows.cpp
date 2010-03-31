@@ -206,7 +206,7 @@ bp::process::kill(const string& name,
     killArgs.push_back("/IM");
     killArgs.push_back(name);
     bp::process::spawnStatus status;
-    return bp::process::spawn(bp::file::Path(L"taskkill"),
+    return bp::process::spawn(bp::file::Path(L"taskkill.exe"),
                               std::string(), bp::file::Path(),
                               killArgs, &status);
 }
