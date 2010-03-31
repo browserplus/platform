@@ -204,7 +204,10 @@ private:
     size_t          m_bytesSent;
     size_t          m_receiveTotalBytes;
     size_t          m_bytesReceived;
-    bool            m_zeroProgressSent;
+    bool            m_zeroSendProgressSent;
+    bool            m_zeroReceiveProgressSent;
+    bool            m_hundredSendProgressSent;
+    bool            m_hundredReceiveProgressSent;
     double          m_lastProgressSent;
 
     bp::url::Url    m_redirectUrl;
@@ -378,7 +381,10 @@ Transaction::Impl::Impl(RequestPtr ptrRequest) :
     m_bytesSent(0),
     m_receiveTotalBytes(0),
     m_bytesReceived(0),
-    m_zeroProgressSent(false),
+    m_zeroSendProgressSent(false),
+    m_zeroReceiveProgressSent(false),
+    m_hundredSendProgressSent(false),
+    m_hundredReceiveProgressSent(false),
     m_lastProgressSent(0.0),
     m_threadId(bp::thread::Thread::currentThreadID()),
     m_error(ERROR_SUCCESS),
@@ -616,15 +622,19 @@ Transaction::Impl::processRequest(DWORD error)
             double percent = ((double)m_bytesSent / m_sendTotalBytes) * 100.0;
             if (percent > 100.0) percent = 100.0;
             // honor our 0% guarantee, 100% will be sent on completion
-            if (!m_zeroProgressSent) {
+            if (!m_zeroSendProgressSent) {
                 m_pListener->onSendProgress(0, m_sendTotalBytes, 0.0);
-                m_zeroProgressSent = true;
+                m_zeroSendProgressSent = true;
                 m_lastProgressSent = 0.0;
             }
             if (percent > m_lastProgressSent) {
                 m_pListener->onSendProgress(m_bytesSent, m_sendTotalBytes,
                                             percent);
                 m_lastProgressSent = percent;
+
+                if (percent >= 100.0) {
+                    m_hundredSendProgressSent = true;
+                }
             }
             error = getDataToPost();
             break;
@@ -665,6 +675,19 @@ Transaction::Impl::processRequest(DWORD error)
             break;
 
         case eResponseWriteData: {
+            // {#139} honor 0% and 100% guarantees for send progress.
+            // at the point we're fetching the response, we've
+            // already sent the request
+            if (!m_zeroSendProgressSent) {
+                m_pListener->onSendProgress(0, m_sendTotalBytes, 0.0);
+                m_zeroSendProgressSent = true;
+            }
+            if (!m_hundredSendProgressSent) {
+                m_pListener->onSendProgress(m_sendTotalBytes, m_sendTotalBytes,
+                                            100.0);
+                m_hundredSendProgressSent = true;
+            }
+
             m_eState = eResponseReceiveData;
             bool done = false;
             error = writeResponseData(done);
@@ -675,9 +698,9 @@ Transaction::Impl::processRequest(DWORD error)
             if (percent > 100.0) percent = 100.0;
 
             // honor our 0% guarantee, 100% will be sent on completion
-            if (!m_zeroProgressSent) {
+            if (!m_zeroReceiveProgressSent) {
                 m_pListener->onReceiveProgress(0, m_receiveTotalBytes, 0.0);
-                m_zeroProgressSent = true;
+                m_zeroReceiveProgressSent = true;
                 m_lastProgressSent = 0.0;
             }
             if (percent > m_lastProgressSent) {
@@ -686,6 +709,10 @@ Transaction::Impl::processRequest(DWORD error)
                                                percent);
                 m_lastProgressSent = percent;
             }
+            if (percent >= 100.0) {
+                m_hundredReceiveProgressSent = true;
+            }
+
             m_pListener->onResponseBodyBytes(m_pReceiveBuffer, 
                                              m_bytesInReceiveBuffer);
             if (done) {
