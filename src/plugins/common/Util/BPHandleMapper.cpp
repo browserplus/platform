@@ -42,7 +42,7 @@ map<BPHandle, bpf::Path> s_handleMap;
 BPHandle 
 BPHandleMapper::pathToHandle(const bpf::Path& path)
 {
-    long size = bpf::size(path);
+    uintmax_t size = bpf::size(path);
 
     map<bpf::Path, BPHandle>::iterator it = s_pathMap.find(path);
     if (it != s_pathMap.end()) {

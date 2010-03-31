@@ -200,10 +200,10 @@ private:
 
     // progress info
     IListener*      m_pListener;
-    size_t          m_sendTotalBytes;
-    size_t          m_bytesSent;
-    size_t          m_receiveTotalBytes;
-    size_t          m_bytesReceived;
+    uintmax_t       m_sendTotalBytes;
+    uintmax_t       m_bytesSent;
+    uintmax_t       m_receiveTotalBytes;
+    uintmax_t       m_bytesReceived;
     bool            m_zeroProgressSent;
     double          m_lastProgressSent;
 

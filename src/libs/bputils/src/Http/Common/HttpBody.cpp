@@ -56,7 +56,7 @@ bp::file::Path Body::path() const
 }
 
 
-int Body::size() const
+uintmax_t Body::size() const
 {
     return bp::file::isRegularFile(m_path) ?
                bp::file::size(m_path) : m_vbBody.size();

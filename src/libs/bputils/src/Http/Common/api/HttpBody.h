@@ -78,10 +78,10 @@ public:
 // Queries
 public:
     // Returns body size (0 for URL body)
-    int     size() const;
+    uintmax_t   size() const;
 
     // Returns whether body empty (false for URL body)
-    bool    empty() const;
+    bool        empty() const;
 
     
 // Methods

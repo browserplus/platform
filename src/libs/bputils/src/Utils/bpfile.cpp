@@ -1419,7 +1419,7 @@ exists(const Path& path)
 }
 
 
-size_t
+uintmax_t
 size(const Path& path)
 {
     try {

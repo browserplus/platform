@@ -213,7 +213,7 @@ void HttpClientTest::testTextGet()
     CPPUNIT_ASSERT(ptrResp->status.code() == Status::OK);
     
     string sContentLength = ptrResp->headers.get(Headers::ksContentLength);
-    CPPUNIT_ASSERT(atoi(sContentLength.c_str()) == ptrResp->body.size());
+    CPPUNIT_ASSERT(atoi(sContentLength.c_str()) == (int) ptrResp->body.size());
     
     string sRcvdBody = ptrResp->body.toString();
     CPPUNIT_ASSERT(sRcvdBody.length() > 0);
@@ -238,7 +238,7 @@ void HttpClientTest::testRedirect()
     CPPUNIT_ASSERT(ptrResp->status.code() == Status::OK);
     
     string sContentLength = ptrResp->headers.get(Headers::ksContentLength);
-    CPPUNIT_ASSERT(atoi(sContentLength.c_str()) == ptrResp->body.size());
+    CPPUNIT_ASSERT(atoi(sContentLength.c_str()) == (int) ptrResp->body.size());
     
     string sRcvdBody = ptrResp->body.toString();
     CPPUNIT_ASSERT(sRcvdBody.length() > 0);
@@ -270,7 +270,7 @@ void HttpClientTest::testTextGetAsync()
     CPPUNIT_ASSERT(async.m_status.code() == Status::OK);
     
     string sContentLength = async.m_headers.get(Headers::ksContentLength);
-    CPPUNIT_ASSERT(atoi(sContentLength.c_str()) == async.m_body.size());
+    CPPUNIT_ASSERT(atoi(sContentLength.c_str()) == (int) async.m_body.size());
     
     string sRcvdBody = async.m_body.toString();
     CPPUNIT_ASSERT(sRcvdBody.length() > 0);
@@ -331,7 +331,7 @@ void HttpClientTest::testSlowGetAsync()
     CPPUNIT_ASSERT(async.m_status.code() == Status::OK);
 
     string sContentLength = async.m_headers.get(Headers::ksContentLength);
-    CPPUNIT_ASSERT(atoi(sContentLength.c_str()) == async.m_body.size());
+    CPPUNIT_ASSERT(atoi(sContentLength.c_str()) == (int) async.m_body.size());
     CPPUNIT_ASSERT(async.m_body.size() == kRespLenKB*1000);
 
     // make sure all of our listener callbacks were hit

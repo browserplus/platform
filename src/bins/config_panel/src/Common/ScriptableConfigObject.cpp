@@ -269,7 +269,7 @@ ScriptableConfigObject::invoke(const string & functionName,
             BPLOG_DEBUG_STRM("get(enabled) returns " << bpEnabled);
             rv = new bp::Bool(bpEnabled);
         } else if (!strcmp(key->value(), "logSize")) {
-            unsigned long totalSize = 0;
+            uintmax_t totalSize = 0;
             Path dir = bp::paths::getObfuscatedWritableDirectory();
             if (isDirectory(dir)) {
                 try {
@@ -278,10 +278,7 @@ ScriptableConfigObject::invoke(const string & functionName,
                     for (tDirIter iter(dir); iter != end; ++iter) {
                         if (isRegularFile(iter->path())) {
                             if (boost::filesystem::extension(*iter).compare(logExt) == 0) {
-                                long sz = (long) size(iter->path());
-                                if (sz > 0) {
-                                    totalSize += sz;
-                                }
+                                totalSize += size(iter->path());
                             }
                         }
                     }
@@ -494,7 +491,7 @@ ScriptableConfigObject::invoke(const string & functionName,
                              + filevar + "\"; filename=\"" + 
                              utf8FromNative(postBodyPath.filename()) + "\"");
             req->headers.add(Headers::ksContentType, "application/x-lzip");
-            int contentLength = size(postBodyPath);
+            uintmax_t contentLength = size(postBodyPath);
             req->headers.add(Headers::ksContentLength,
                              bp::conv::toString(contentLength));
             req->headers.add(Headers::ksConnection, "close");

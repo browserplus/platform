@@ -596,8 +596,9 @@ Installer::filesAreIdentical(const bpf::Path& f1,
 {
     bool rval = false;
 
-    int f1Size = bpf::size(f1);
-    int f2Size = bpf::size(f2);
+    // yes, this limits the size of what we can install to 4GB
+    int f1Size = (int) bpf::size(f1);
+    int f2Size = (int) bpf::size(f2);
     if (f1Size != f2Size) {
         return false;
     }
