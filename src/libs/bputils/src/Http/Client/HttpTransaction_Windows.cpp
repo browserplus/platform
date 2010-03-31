@@ -337,7 +337,7 @@ Transaction::Impl::redirectCB(void* ctx)
     Transaction::Impl* self = NULL;
 
     if (!findImpl((DWORD) ctx, self)) {
-        BPLOG_WARN_STRM("Dropping processRequest call, implementation has been free'd");
+        BPLOG_WARN_STRM("Dropping redirect call, implementation has been free'd");
     } else {
         self->m_pListener->onRedirect(self->m_redirectUrl);
     }
@@ -349,7 +349,7 @@ Transaction::Impl::closedCB(void* ctx)
     Transaction::Impl* self = NULL;
 
     if (!findImpl((DWORD) ctx, self)) {
-        BPLOG_WARN_STRM("Dropping processRequest call, implementation has been free'd");
+        BPLOG_WARN_STRM("Dropping closed call, implementation has been free'd");
     } else {
         self->m_pListener->onClosed();
     }
