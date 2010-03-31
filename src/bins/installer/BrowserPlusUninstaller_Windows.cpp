@@ -182,6 +182,7 @@ int doWork( const vector<string>& vsArgs )
     wstring wsDone = utf8ToWide( sDone );
 
     // Prompt user for confirmation.
+    BPLOG_INFO( "Displaying uninstall prompt." );
     int nRtn = MessageBoxW( NULL,
                             wsPrompt.c_str(), wsBP.c_str(),
                             MB_OKCANCEL|MB_DEFBUTTON2 );
@@ -195,10 +196,12 @@ int doWork( const vector<string>& vsArgs )
     Sleep( 200 );
 
     // Perform the actual uninstall.
+    BPLOG_INFO( "Invoking Uninstaller::run()." );
     bp::install::Uninstaller unins;
     unins.run();
 
     // Inform user when done.
+    BPLOG_INFO( "Displaying uninstall notification." );
     MessageBoxW( NULL, wsDone.c_str() , wsBP.c_str(), MB_OK );
 
     return bp::exit::kOk;
