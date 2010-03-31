@@ -56,10 +56,10 @@ CPPUNIT_TEST_SUITE_REGISTRATION(HttpStressTest);
 //   transactions were completed successfully
 
 // parameters of the test
-#define AMOUNT_OF_CONTENT 10
-#define SIZE_OF_CONTENT (1024 * 100)
+#define AMOUNT_OF_CONTENT 4
+#define SIZE_OF_CONTENT (1024 * 64)
 #define RUNLOOP_THREADS 5
-#define TRANS_PER_THREAD 50
+#define TRANS_PER_THREAD 40
 #define SIMUL_TRANS 5
 
 class HttpStressHandler : public bp::http::server::IHandler 
