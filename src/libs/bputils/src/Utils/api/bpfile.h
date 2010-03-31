@@ -333,7 +333,7 @@ namespace bp {
          *  \param      path [IN] - sourc path
          *  \returns    file size
          */
-        uintmax_t size(const Path& path);
+        boost::uintmax_t size(const Path& path);
 
         /** Whether the item specified by the path exists.
          *  Uses boost::filesystem::exists().

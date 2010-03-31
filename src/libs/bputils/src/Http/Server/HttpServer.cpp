@@ -250,7 +250,7 @@ Server::Impl::handlerCallback( struct mg_connection* conn,
     // TODO: support IHandler::shapePacket?
 
     // Send body.
-    int nBodySize = resp.body.size();
+    int nBodySize = (int) resp.body.size();
     if (nBodySize) {
         int nSent = mg_write( conn, resp.body.elementAddr(0), nBodySize );
         if (nSent != nBodySize) {

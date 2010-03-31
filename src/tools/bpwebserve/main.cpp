@@ -91,7 +91,7 @@ public:
                     }
                     // files size
                     {
-                        uintmax_t sz = size(pathToKid);
+                        boost::uintmax_t sz = size(pathToKid);
                         std::stringstream ss;
                         ss << sz;
                         response.body.append(ss.str());

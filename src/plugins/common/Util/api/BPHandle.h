@@ -32,6 +32,7 @@
 
 #include <set>
 #include <string>
+#include "BPUtils/bpfile.h"   // for boost::uintmax_t
 
 namespace bp {
     class Map;
@@ -66,14 +67,14 @@ public:
     BPHandle(const std::string& type,
              int id,
              const std::string& safeName,
-             long size,
+             boost::uintmax_t size,
              const std::set<std::string>& mimeTypes);
     ~BPHandle();
     
     std::string type() const;
     int id() const;
     std::string name() const;
-    long size() const;
+    boost::uintmax_t size() const;
     std::set<std::string> mimeTypes() const;    
 
     bool operator<(const BPHandle& other) const;
@@ -87,7 +88,7 @@ private:
     std::string m_type;
     int m_id;
     std::string m_name;
-    long m_size;
+    boost::uintmax_t m_size;
     std::set<std::string> m_mimeTypes;
 };
 

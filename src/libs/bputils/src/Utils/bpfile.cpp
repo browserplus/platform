@@ -1419,7 +1419,7 @@ exists(const Path& path)
 }
 
 
-uintmax_t
+boost::uintmax_t
 size(const Path& path)
 {
     try {

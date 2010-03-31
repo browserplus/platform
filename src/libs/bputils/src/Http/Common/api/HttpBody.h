@@ -78,7 +78,7 @@ public:
 // Queries
 public:
     // Returns body size (0 for URL body)
-    uintmax_t   size() const;
+    size_t      size() const;
 
     // Returns whether body empty (false for URL body)
     bool        empty() const;

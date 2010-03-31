@@ -269,7 +269,7 @@ ScriptableConfigObject::invoke(const string & functionName,
             BPLOG_DEBUG_STRM("get(enabled) returns " << bpEnabled);
             rv = new bp::Bool(bpEnabled);
         } else if (!strcmp(key->value(), "logSize")) {
-            uintmax_t totalSize = 0;
+            boost::uintmax_t totalSize = 0;
             Path dir = bp::paths::getObfuscatedWritableDirectory();
             if (isDirectory(dir)) {
                 try {
@@ -288,7 +288,7 @@ ScriptableConfigObject::invoke(const string & functionName,
                 }
                
             }
-            rv = new bp::Integer(totalSize);
+            rv = new bp::Integer((int) totalSize);
         } else {
             BPLOG_ERROR_STRM("bad key " << key->value() << " to getSync");
             rv = new bp::Bool(false);
@@ -491,7 +491,7 @@ ScriptableConfigObject::invoke(const string & functionName,
                              + filevar + "\"; filename=\"" + 
                              utf8FromNative(postBodyPath.filename()) + "\"");
             req->headers.add(Headers::ksContentType, "application/x-lzip");
-            uintmax_t contentLength = size(postBodyPath);
+            boost::uintmax_t contentLength = size(postBodyPath);
             req->headers.add(Headers::ksContentLength,
                              bp::conv::toString(contentLength));
             req->headers.add(Headers::ksConnection, "close");
