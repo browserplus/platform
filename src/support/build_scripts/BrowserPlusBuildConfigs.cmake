@@ -89,9 +89,10 @@ ELSE ()
       CMAKE_FORCE_CXX_COMPILER(gcc-4.0 GNU)
 
       # now tell cmake to tell xcode that we really, really, really,
-      # want gcc-4.0
+      # want gcc-4.0 and i386
       SET( CMAKE_XCODE_ATTRIBUTE_GCC_VERSION "4.0"
            CACHE STRING "BrowserPlus debug CXX flags" FORCE )
+      SET(CMAKE_XCODE_ATTRIBUTE_ARCHS i386)
 
       # and we want 32bit i386 for osx 10.4
       SET(CMAKE_OSX_ARCHITECTURES i386)
