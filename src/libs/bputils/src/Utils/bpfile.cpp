@@ -1229,7 +1229,10 @@ recursiveVisit(const Path& p,
                         << ", doing a visit()");
     }
     vector<DirEntry> stack;
-    Path rp = isDir ? p.filename() : "";
+    Path rp;
+    if (isDir ) {
+        rp = p.filename();
+    }
     return doVisit(p, v, stack, rp, followLinks, isDir);
 }
 
