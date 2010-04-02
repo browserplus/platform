@@ -36,6 +36,7 @@
 #include <cppunit/BriefTestProgressListener.h>
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/TextOutputter.h>
+#include <cppunit/XmlOutputter.h>
 #include <cppunit/TextTestProgressListener.h>
 
 #include "api/TestHarnessInclude.h"
@@ -55,6 +56,16 @@ static APTArgDefinition s_args[] =
         "list", APT::NO_ARG, "", APT::NOT_REQUIRED, APT::NOT_INTEGER,
         APT::MAY_NOT_RECUR,
         "List available test suites and exit"
+    },
+    {
+        "xml", APT::TAKES_ARG, "", APT::NOT_REQUIRED, APT::NOT_INTEGER,
+        APT::MAY_NOT_RECUR,
+        "Format test output in XML"
+    },
+    {
+        "xsl", APT::TAKES_ARG, "", APT::NOT_REQUIRED, APT::NOT_INTEGER,
+        APT::MAY_NOT_RECUR,
+        "XSL transform to apply to test output in XML"
     },
     {
         "logToConsole", APT::TAKES_ARG, "", APT::NOT_REQUIRED,
@@ -158,12 +169,26 @@ int main( int argc, const char ** argv )
 
         CPPUNIT_NS::TextOutputter textOutputter(&result, std::cout);
 
+        //--- Add a listener that collects results in XML
+        CPPUNIT_NS::OStream* xmlStream = &CPPUNIT_NS::stdCOut();
+        if (ap.argumentPresent("xml")) {
+            // Set up outputters
+            xmlStream = new CPPUNIT_NS::OFileStream(ap.argument("xml").c_str());
+        }
+        CPPUNIT_NS::XmlOutputter xmlOutputter(&result, *xmlStream/*, parser.getEncoding()*/);
+        if (ap.argumentPresent("xsl")) {
+            xmlOutputter.setStyleSheet(ap.argument("xsl"));
+        }
+
         //--- Add the top suite to the test runner
         CPPUNIT_NS::TestRunner runner;
         runner.addTest( suite );
         runner.run( controller );
 
         textOutputter.write();
+        if (ap.argumentPresent("xml")) {
+            xmlOutputter.write();
+        }
 
         rv = result.wasSuccessful() ? 0 : 1;
     }

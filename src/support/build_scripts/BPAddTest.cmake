@@ -20,7 +20,7 @@
 # set the test output directory
 GET_FILENAME_COMPONENT(testOutputDirectoryPath
                        "${CMAKE_CURRENT_BINARY_DIR}/tests"
-					   ABSOLUTE)
+                       ABSOLUTE)
 
 SET(testOutputDirectory "${testOutputDirectoryPath}" CACHE STRING
     "Where BrowserPlus tests live" FORCE)
@@ -42,9 +42,15 @@ MACRO (BPAddTest binName)
   MESSAGE("++ Adding Test: ${binName}")
   ADD_CUSTOM_COMMAND(TARGET ${binName} POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy "${origPath}" "${testOutputDirectory}"
-	  COMMAND ${CMAKE_COMMAND} -E echo "++ Running Test: ${baseName}"
-	  COMMAND "./${baseName}"
-	  WORKING_DIRECTORY "${testOutputDirectory}")
+      COMMAND ${CMAKE_COMMAND} -E echo "++ Running Test: ${baseName}"
+      COMMAND "./${baseName}"
+      WORKING_DIRECTORY "${testOutputDirectory}")
+# This could replace the previous line, if we want to always emit XML reports
+# for unit test execution
+#  ADD_CUSTOM_COMMAND(TARGET ${binName} POST_BUILD
+#      COMMAND ${CMAKE_COMMAND} -E copy "${origPath}" "${testOutputDirectory}"
+#      COMMAND ${CMAKE_COMMAND} -E echo "++ Running Test: ${baseName}"
+#      COMMAND ./${baseName} -xml ${baseName}.xml
+#      WORKING_DIRECTORY "${testOutputDirectory}")
 ENDMACRO ()
-
 
