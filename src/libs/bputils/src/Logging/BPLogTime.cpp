@@ -46,7 +46,7 @@ std::string timeFormatToString( const TimeFormat& tf )
 }
 
 
-
+// TODO: change default to local?
 TimeFormat timeFormatFromString( const std::string& s )
 {
     if (bp::strutil::isEqualNoCase( s, "utc" ))
