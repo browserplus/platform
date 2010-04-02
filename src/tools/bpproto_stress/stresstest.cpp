@@ -21,7 +21,6 @@
  */
 
 #include "stresstest.h"
-#include <assert.h>
 #include <iostream>
 #include "BPProtocol/BPProtocol.h"
 #include "BPUtils/BPLog.h"
@@ -29,6 +28,7 @@
 #include "BPUtils/bptime.h"
 #include "BPUtils/bptimer.h"
 #include "BPUtils/bptypeutil.h"
+#include "BPUtils/bperrorutil.h"
 
 
 bp::runloop::RunLoop s_rl;
@@ -93,7 +93,7 @@ static void startConnection(BPProtoHand * pph)
 
     *pph = BPAlloc();
     BPSetUserPromptCallback(*pph, promptCB, *pph);
-    assert(*pph != NULL);
+    BPASSERT(*pph != NULL);
 
     s_started++;
     ec = BPConnect(*pph, "bpclient://9F802D4B-1F23-42A4-9490-8FC8EE2BCCDD",

@@ -31,8 +31,8 @@
 #include "api/BPProtocolInterface.h"
 #include <string.h>
 #include <stdlib.h>
-#include <assert.h>
 #include "BPUtils/BPLog.h"
+#include "BPUtils/bperrorutil.h"
 #include "SessionCreator.h"
 #include "TransactionManager.h"
 
@@ -159,7 +159,7 @@ BPConnect(BPProtoHand hand,
 {
     CHECK_HAND_STATE(hand);
 
-    assert( hand->listener == NULL );
+    BPASSERT( hand->listener == NULL );
     hand->listener = new SessionCreatorListener(hand, connectCB, cookie);
     hand->listener->start(uri, locale, userAgent);
     
@@ -428,7 +428,7 @@ BPDeliverUserResponse(BPProtoHand hand, unsigned int tid,
 
     if (response != NULL) {
         bp::Object * responseObj = bp::Object::build(response);
-        assert(responseObj != NULL);
+        BPASSERT(responseObj != NULL);
         r.setPayload(responseObj);
     }
 

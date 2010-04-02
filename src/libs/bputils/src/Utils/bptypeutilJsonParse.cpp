@@ -21,8 +21,8 @@
  */
 
 #include "bptypeutil.h"
+#include "bperrorutil.h"
 #include "bpfile.h"
-#include <assert.h>
 #include <yajl/yajl_parse.h>
 #include <iostream>
 #include <stack>
@@ -129,7 +129,7 @@ end_map_cb(void * ctx)
     if (pc) {
         bp::Object * obj = pc->nodeStack.top();
         pc->nodeStack.pop();
-        assert(obj->type() == BPTMap);
+        BPASSERT(obj->type() == BPTMap);
     
         // See if map describes one of our BP types
         // If so, replace map with instance of BP object.
@@ -165,7 +165,7 @@ end_array_cb(void * ctx)
     if (pc) {
         bp::Object * obj = pc->nodeStack.top();
         pc->nodeStack.pop();
-        assert(obj->type() == BPTList);
+        BPASSERT(obj->type() == BPTList);
         GOT_ELEMENT(pc, obj);    
         pc->depth--;
     }
@@ -207,7 +207,7 @@ bp::Object::fromJsonString(std::string jsonText)
         return NULL;
     }
     
-    assert(pc.nodeStack.size() == 1);
+    BPASSERT(pc.nodeStack.size() == 1);
     return pc.nodeStack.top();
 }
 

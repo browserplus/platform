@@ -393,7 +393,7 @@ void
 DistQuery::onTransactionFailed(const CoreletQuery * cq)
 {
     TransactionContextPtr ctx = findTransactionByCoreletQuery(cq);
-    assert(ctx != NULL);
+    BPASSERT(ctx != NULL);
     if (m_listener) {
         m_listener->onTransactionFailed(ctx->m_tid);
     }
@@ -404,8 +404,8 @@ DistQuery::gotAvailableServices(const CoreletQuery * cq,
                                 const AvailableCoreletList & list)
 {
     TransactionContextPtr ctx = findTransactionByCoreletQuery(cq);
-    assert(ctx != NULL);
-    assert(ctx->m_type == TransactionContext::ListCorelets);
+    BPASSERT(ctx != NULL);
+    BPASSERT(ctx->m_type == TransactionContext::ListCorelets);
 
     CoreletList cl =
         CoreletQueryUtil::reformatAvailableCoreletList(list);
@@ -422,8 +422,8 @@ DistQuery::onServiceFound(const CoreletQuery * cq,
 {
 
     TransactionContextPtr ctx = findTransactionByCoreletQuery(cq);
-    assert(ctx != NULL);
-    assert(ctx->m_type == TransactionContext::FindCorelet);
+    BPASSERT(ctx != NULL);
+    BPASSERT(ctx->m_type == TransactionContext::FindCorelet);
 
     ctx->logTransactionCompletion(true);
     if (m_listener) {
@@ -437,8 +437,8 @@ DistQuery::onDownloadProgress(const CoreletQuery * cq,
 {
     TransactionContextPtr ctx = findTransactionByCoreletQuery(cq);
     m_transactions.push_front(ctx);
-    assert(ctx != NULL);
-    assert(ctx->m_type == TransactionContext::Download ||
+    BPASSERT(ctx != NULL);
+    BPASSERT(ctx->m_type == TransactionContext::Download ||
            ctx->m_type == TransactionContext::UpdateCache ||
            ctx->m_type == TransactionContext::DownloadLatestPlatform);
 
@@ -456,8 +456,8 @@ DistQuery::onDownloadComplete(const CoreletQuery * cq,
                               const std::vector<unsigned char> & buf)
 {
     TransactionContextPtr ctx = findTransactionByCoreletQuery(cq);
-    assert(ctx != NULL);
-    assert(ctx->m_type == TransactionContext::Download);
+    BPASSERT(ctx != NULL);
+    BPASSERT(ctx->m_type == TransactionContext::Download);
     ctx->logTransactionCompletion(true);
     if (m_listener) {
         m_listener->onDownloadComplete(ctx->m_tid, buf);
@@ -469,8 +469,8 @@ DistQuery::gotServiceDetails(const CoreletQuery * cq,
                              const bp::service::Description & desc)
 {
     TransactionContextPtr ctx = findTransactionByCoreletQuery(cq);
-    assert(ctx != NULL);
-    assert(ctx->m_type == TransactionContext::CoreletDetails);
+    BPASSERT(ctx != NULL);
+    BPASSERT(ctx->m_type == TransactionContext::CoreletDetails);
 
     ctx->logTransactionCompletion(true);
     m_listener->gotServiceDetails(ctx->m_tid, desc);
@@ -481,8 +481,8 @@ DistQuery::onRequirementsSatisfied(const CoreletQuery * cq,
                                    const CoreletList & clist)
 {
     TransactionContextPtr ctx = findTransactionByCoreletQuery(cq);
-    assert(ctx != NULL);
-    assert(ctx->m_type == TransactionContext::SatisfyRequirements);
+    BPASSERT(ctx != NULL);
+    BPASSERT(ctx->m_type == TransactionContext::SatisfyRequirements);
     ctx->logTransactionCompletion(true);    
 
     m_listener->onRequirementsSatisfied(ctx->m_tid, clist);
@@ -493,8 +493,8 @@ DistQuery::onCacheUpdated(const CoreletQuery * cq,
                           const CoreletList & updates)
 {
     TransactionContextPtr ctx = findTransactionByCoreletQuery(cq);
-    assert(ctx != NULL);
-    assert(ctx->m_type == TransactionContext::UpdateCache);
+    BPASSERT(ctx != NULL);
+    BPASSERT(ctx->m_type == TransactionContext::UpdateCache);
     ctx->logTransactionCompletion(true);
     if (m_listener != NULL) {
         m_listener->onCacheUpdated(ctx->m_tid, updates);
@@ -506,8 +506,8 @@ DistQuery::gotServiceSynopsis(const CoreletQuery * cq,
                               const ServiceSynopsisList & sslist)
 {
     TransactionContextPtr ctx = findTransactionByCoreletQuery(cq);
-    assert(ctx != NULL);
-    assert(ctx->m_type == TransactionContext::AttainServiceSynopses);
+    BPASSERT(ctx != NULL);
+    BPASSERT(ctx->m_type == TransactionContext::AttainServiceSynopses);
     ctx->logTransactionCompletion(true);
     m_listener->gotServiceSynopsis(ctx->m_tid, sslist);
 }
@@ -517,8 +517,8 @@ DistQuery::gotLatestPlatformVersion(const CoreletQuery * cq,
                                     const std::string & latest)
 {
     TransactionContextPtr ctx = findTransactionByCoreletQuery(cq);
-    assert(ctx != NULL);
-    assert(ctx->m_type == TransactionContext::LatestPlatformVersion);
+    BPASSERT(ctx != NULL);
+    BPASSERT(ctx->m_type == TransactionContext::LatestPlatformVersion);
     ctx->logTransactionCompletion(true);
     if (m_listener) {
         m_listener->gotLatestPlatformVersion(ctx->m_tid, latest);
@@ -531,8 +531,8 @@ DistQuery::onLatestPlatformDownloaded(
         const LatestPlatformPkgAndVersion & pkgAndVersion)
 {
     TransactionContextPtr ctx = findTransactionByCoreletQuery(cq);
-    assert(ctx != NULL);
-    assert(ctx->m_type == TransactionContext::DownloadLatestPlatform);
+    BPASSERT(ctx != NULL);
+    BPASSERT(ctx->m_type == TransactionContext::DownloadLatestPlatform);
 
     ctx->logTransactionCompletion(true);
     if (m_listener) {

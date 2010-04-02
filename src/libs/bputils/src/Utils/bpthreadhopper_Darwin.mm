@@ -80,7 +80,7 @@ bp::thread::Hopper::initializeOnCurrentThread()
     cx.info = (void *) mthd;
     cx.perform = (void (*)(void *)) ::invokeClientCallbacks;
     mthd->rlSource = CFRunLoopSourceCreate(kCFAllocatorDefault, 0, &cx);
-    assert(mthd->rlSource != NULL);
+    BPASSERT(mthd->rlSource != NULL);
     mthd->rl = rl;
     CFRunLoopAddSource(rl, mthd->rlSource, kCFRunLoopCommonModes);
 

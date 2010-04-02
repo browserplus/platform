@@ -83,7 +83,7 @@ CoreletUpdater::startup(list<string> distroServers,
                         shared_ptr<CoreletRegistry> coreletRegistry,
                         unsigned int pollPeriodSeconds)
 {
-    assert(s_updater == NULL);
+    BPASSERT(s_updater == NULL);
     s_updater = new UpdaterSingleton(pollPeriodSeconds, 
                                      coreletRegistry,
                                      distroServers);
@@ -104,7 +104,7 @@ CoreletUpdater::shutdown()
 bool
 CoreletUpdater::isBusy()
 {
-    assert(s_updater != NULL);
+    BPASSERT(s_updater != NULL);
     return s_updater->busy();
 }
 
@@ -161,7 +161,7 @@ UpdaterSingleton::start()
     }
     
     long diff = now.diffInSeconds(last);
-    assert(diff >= 0);
+    BPASSERT(diff >= 0);
     if (diff > (long) m_pollPeriod) {
         mustCheck = true;
     } else {

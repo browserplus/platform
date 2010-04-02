@@ -26,8 +26,8 @@
 #include "BPProtoUtil.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/ProductPaths.h"
+#include "BPUtils/bperrorutil.h"
 
-#include <assert.h>
 #include <string.h>
 
 void freeBPElement(BPElement * elem)
@@ -130,7 +130,7 @@ BPCoreletDefinition * objectToDefinition(const bp::Object * obj)
 
     // grab a pointer to the to level object
     const bp::Map * m = dynamic_cast<const bp::Map *>(obj);
-    assert(m != NULL);
+    BPASSERT(m != NULL);
 
     // we seem good.  allocate the top level corelet definition structure.
     def = (BPCoreletDefinition *) calloc(1, sizeof(BPCoreletDefinition));

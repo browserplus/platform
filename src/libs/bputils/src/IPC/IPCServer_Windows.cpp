@@ -33,7 +33,6 @@
 #include <Aclapi.h>
 #include <windows.h>
 #include <string>
-#include <assert.h>
 
 #ifndef LABEL_SECURITY_INFORMATION
 #define LABEL_SECURITY_INFORMATION (0x00000010L)
@@ -318,7 +317,7 @@ Server::stop()
 {
     if (m_running) {
         BOOL x = SetEvent(m_stopEvent);
-        assert(x);
+        BPASSERT(x);
         x = false;
         m_thread.join();
         m_running = false;

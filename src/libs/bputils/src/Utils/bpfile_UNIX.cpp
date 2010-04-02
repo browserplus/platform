@@ -31,7 +31,6 @@
 #include <sys/param.h>
 #include <fcntl.h>
 #include <dirent.h>
-#include <assert.h>
 #include <errno.h>
 #include <sys/time.h>
 #include <iostream>

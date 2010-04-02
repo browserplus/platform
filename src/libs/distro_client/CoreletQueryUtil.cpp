@@ -206,7 +206,7 @@ static bool findCoreletSet(
             dcp = &iacp;
         }
 
-        assert(dcp != NULL);
+        BPASSERT(dcp != NULL);
         
         // if dcp depends on something, push the dependency onto the
         // requirements list 

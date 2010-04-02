@@ -23,10 +23,10 @@
 /**
  * Code which implements the plugin EnumerateServices function
  */
-#include <assert.h>
 #include "BPSession.h"
 #include "bppluginutil.h"
 #include "BPUtils/BPLog.h"
+#include "BPUtils/bperrorutil.h"
 #include "CommonErrors.h"
 
 
@@ -46,7 +46,7 @@ BPSession::enumerateServicesCallback(BPErrorCode ec,
                                      const BPElement * corelets)
 {
     EnumerateContext * ctx = (EnumerateContext *) cookie;    
-    assert(ctx != NULL);
+    BPASSERT(ctx != NULL);
 
     if (ec == BP_EC_OK && corelets != NULL) {
         // now we should append the results of the enumerate call to
@@ -74,7 +74,7 @@ BPSession::enumerateServicesCallback(BPErrorCode ec,
         session->generateErrorReturn(BPErrorCodeToString(ec), NULL, arg);
     }
     
-    assert(ctx->callback != NULL);
+    BPASSERT(ctx->callback != NULL);
     plugin.callJsFunction(ctx->callback, &arg, 1, result);
 
     delete ctx->callback;
@@ -87,7 +87,7 @@ BPSession::enumerateServices(const plugin::Object* callback,
 {
     if (notInitialized(callback, result)) return true;
 
-    assert(callback != NULL);
+    BPASSERT(callback != NULL);
     if (callback == NULL) return false;
 
     using namespace bp;
@@ -106,7 +106,7 @@ BPSession::enumerateServices(const plugin::Object* callback,
     {
         const bp::service::Description * def;
         def = (*it)->describe();
-        assert(def != NULL);
+        BPASSERT(def != NULL);
         Map * m = new Map;
         m->add("name", new String(def->name()));
         m->add("version", new String(def->versionString()));

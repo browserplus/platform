@@ -190,7 +190,7 @@ QueryCache::listenerCompleted(MyListener* l,
                 break;
             }
         }
-        assert(it != m_listeners.end());
+        BPASSERT(it != m_listeners.end());
         m_listenersToReap.insert(it->second);
         m_listeners.erase(it);
     }
@@ -301,7 +301,7 @@ QueryCache::parsePlatformVersionResponses(LatestPlatformServerAndVersion & lates
         }
 
         std::string json = l->response()->body.toString();
-        assert(!json.empty());
+        BPASSERT(!json.empty());
 
         boost::scoped_ptr<bp::Object> pload(Object::fromPlainJsonString(json));
 
@@ -365,7 +365,7 @@ QueryCache::mergeResponses()
         }
 
         std::string json = listener->response()->body.toString();
-        assert(!json.empty());
+        BPASSERT(!json.empty());
         boost::scoped_ptr<bp::Object> pload(Object::fromPlainJsonString(json));
 
         if (pload == NULL) {

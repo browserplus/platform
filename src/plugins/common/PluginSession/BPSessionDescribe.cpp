@@ -24,10 +24,10 @@
  * Code which implements the plugin DescribeServices function
  */
 #include "BPSession.h"
-#include <assert.h>
 #include "bppluginutil.h"
 #include "BPUtils/bpdefutil.h"
 #include "BPUtils/BPLog.h"
+#include "BPUtils/bperrorutil.h"
 #include "CommonErrors.h"
 
 
@@ -75,7 +75,7 @@ void
 BPSession::describeReturn(void * cookie)
 {
     DescribeContext * ctx = (DescribeContext *) cookie;   
-	assert(ctx != NULL);
+	BPASSERT(ctx != NULL);
 
     BPSession * session = ctx->bp;
     BPPlugin& plugin = session->plugin();
@@ -104,7 +104,7 @@ BPSession::describeReturn(void * cookie)
         }
     }
 
-    assert(ctx->callback != NULL);
+    BPASSERT(ctx->callback != NULL);
 
     plugin.callJsFunction(ctx->callback, &arg, 1, result);
 
@@ -124,7 +124,7 @@ BPSession::describeServiceCallback(BPErrorCode ec,
                                    const char * verboseError)
 {
     DescribeContext * ctx = (DescribeContext *) cookie;   
-	assert(ctx != NULL);
+	BPASSERT(ctx != NULL);
 
     ctx->ec = ec;
     if (error) ctx->error.append(error);
@@ -144,7 +144,7 @@ BPSession::describeService(const plugin::Variant* args,
     
     if (notInitialized(callback, result)) return true;
 
-    assert(callback != NULL);
+    BPASSERT(callback != NULL);
     if (callback == NULL) return false;
 
     using namespace bp;
@@ -209,7 +209,7 @@ BPSession::describeService(const plugin::Variant* args,
         {
             serviceDesc = dynamic_cast<bp::Map *>(
                 pluglet->describe()->toBPObject());
-            assert(serviceDesc != NULL);
+            BPASSERT(serviceDesc != NULL);
         }
         
         // if we found a serviceDesc, we can return it

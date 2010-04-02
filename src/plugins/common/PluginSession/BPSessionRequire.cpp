@@ -24,10 +24,10 @@
  * Code which implements the plugin RequireServices function
  */
 #include "BPSession.h"
-#include <assert.h>
 #include "bppluginutil.h"
 #include "BPUtils/bpdefutil.h"
 #include "BPUtils/BPLog.h"
+#include "BPUtils/bperrorutil.h"
 #include "CommonErrors.h"
 
 #ifdef WIN32
@@ -98,7 +98,7 @@ void
 BPSession::requireReturn(void * cookie)
 {
     RequireContext * ctx = (RequireContext *) cookie;   
-	assert(ctx != NULL);
+	BPASSERT(ctx != NULL);
 
     BPSession * session = ctx->bp;
     BPPlugin& plugin = session->plugin();
@@ -155,7 +155,7 @@ BPSession::requireReturn(void * cookie)
         }
     }
 
-    assert(ctx->callback != NULL);
+    BPASSERT(ctx->callback != NULL);
     plugin.callJsFunction(ctx->callback, &arg, 1, result);
     session->removeTransaction(ctx->transaction);
 
@@ -172,7 +172,7 @@ BPSession::requireServicesCallback(BPErrorCode ec,
                                    const char * verboseError)
 {
     RequireContext * ctx = (RequireContext *) cookie;    
-    assert(ctx != NULL);
+    BPASSERT(ctx != NULL);
 
     ctx->ec = ec;
     if (error) ctx->error.append(error);
@@ -190,7 +190,7 @@ BPSession::requireServices(const plugin::Variant* args,
     if (notInitialized(callback, result)) return true;
 
     // callback argument is required
-    assert(callback != NULL);
+    BPASSERT(callback != NULL);
     if (callback == NULL) return false;
 
     using namespace bp;
@@ -228,7 +228,7 @@ BPSession::requireServices(const plugin::Variant* args,
                                  "components");
     } else {
         const List * argsList = (const bp::List *) obj->get("services");    
-        assert(argsList != NULL);
+        BPASSERT(argsList != NULL);
         
         // now attempt to extract arguments from the input args
         unsigned int i;

@@ -191,7 +191,7 @@ public:
 
     void checkThreadId() 
     {
-        assert (m_tid == bp::thread::Thread::currentThreadID() );
+        BPASSERT (m_tid == bp::thread::Thread::currentThreadID() );
     }
     
     virtual void die(bool success) 

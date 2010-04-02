@@ -21,7 +21,7 @@
  */
 
 #include "bptypeutil.h"
-#include <assert.h>
+#include "bperrorutil.h"
 #include <yajl/yajl_parse.h>
 #include <iostream>
 #include <stack>
@@ -128,7 +128,7 @@ end_map_cb(void * ctx)
     if (pc) {
         Object * obj = pc->nodeStack.top();
         pc->nodeStack.pop();
-        assert(obj->type() == BPTMap);
+        BPASSERT(obj->type() == BPTMap);
         GOT_ELEMENT(pc, obj);    
     }
     return 1;
@@ -152,7 +152,7 @@ end_array_cb(void * ctx)
     if (pc) {
         Object * obj = pc->nodeStack.top();
         pc->nodeStack.pop();
-        assert(obj->type() == BPTList);
+        BPASSERT(obj->type() == BPTList);
         GOT_ELEMENT(pc, obj);    
     }
     return 1;
@@ -206,7 +206,7 @@ Object::fromPlainJsonString(const std::string & jsonTextIn, std::string * error)
 
     yajl_free(yh);
     
-    assert(pc.nodeStack.size() == 1);
+    BPASSERT(pc.nodeStack.size() == 1);
 
     return pc.nodeStack.top();
 }

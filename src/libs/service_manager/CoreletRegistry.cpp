@@ -189,7 +189,7 @@ void
 CoreletRegistry::onHop(void * x)
 {
     CRInstanceContext * ctx = (CRInstanceContext *) x;
-    assert(ctx != NULL);
+    BPASSERT(ctx != NULL);
 
     shared_ptr<ICoreletRegistryListener> regListener;
     regListener = ctx->listener.lock();

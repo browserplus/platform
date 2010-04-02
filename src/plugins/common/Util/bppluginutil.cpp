@@ -28,12 +28,12 @@
 */
 
 #include "api/bppluginutil.h"
-#include <assert.h>
 #include "api/BPHandleMapper.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/bpconfig.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/ProductPaths.h"
+#include "BPUtils/bperrorutil.h"
 
 
 using namespace std;
@@ -49,7 +49,7 @@ bp::pluginutil::appendEnumerateResultsToList(const BPElement * corelets,
     // lets start by building on a bp object that we can interact with
     // a bit more cleanly
     bp::Object * obj = bp::Object::build(corelets);
-    assert(obj != NULL && obj->type() == BPTList);
+    BPASSERT(obj != NULL && obj->type() == BPTList);
     bp::List * l = (bp::List *) obj;        
 
     for (unsigned int i=0; i < l->size(); i++) {

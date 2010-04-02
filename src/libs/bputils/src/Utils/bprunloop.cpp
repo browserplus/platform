@@ -29,7 +29,6 @@
 #include "api/bprunloop.h"
 
 #include <stdlib.h>
-#include <assert.h>
 
 bp::runloop::Event::Event(void * payload)
     : m_payload(payload)

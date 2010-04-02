@@ -26,7 +26,6 @@
 #include "BPUtils/bpstrutil.h"
 #include "BPUtils/bpfile.h"
 
-#include <assert.h>
 #include <string>
 #include <sstream>
 #include <windows.h>
@@ -49,7 +48,7 @@ void *
 Connection::ipcConnectionThreadFunc(void * p)
 {
     struct ipcConnectionThreadContext * ctx = (ipcConnectionThreadContext *) p;
-    assert(ctx != NULL);
+    BPASSERT(ctx != NULL);
 
     // buffer for reading messages.  grows to largest message size,
     // freed at end of connection.  This does mean one large message
@@ -177,15 +176,15 @@ Connection::ipcConnectionThreadFunc(void * p)
                     // memory allocation never fails anymore, right?
                     // 4 gigs of main!  virtual memory all over!
                     // yeah, ok, embedded devices.  runaway programs.
-                    assert(buf != NULL);
+                    BPASSERT(buf != NULL);
                     buf_len = cur_msg_len;
                 }
                 // now it's time to start reading the body
                 state = State_Body;
             } else if (state == State_Body) {
                 // the handle is hot while reading the body.  
-                assert(buf_len >= cur_msg_len);
-                assert(cur_msg_read < cur_msg_len);
+                BPASSERT(buf_len >= cur_msg_len);
+                BPASSERT(cur_msg_read < cur_msg_len);
 
                 // get the results of the read
                 DWORD rd = 0;
@@ -208,7 +207,7 @@ Connection::ipcConnectionThreadFunc(void * p)
                 // now update cur_msg_read
                 cur_msg_read += rd;
 
-                assert(cur_msg_read <= cur_msg_len);
+                BPASSERT(cur_msg_read <= cur_msg_len);
                 
                 if (cur_msg_read >= cur_msg_len) {
                     // all done reading this message!
@@ -417,7 +416,7 @@ Connection::disconnect()
 {
     if (m_running) {
         BOOL x = SetEvent(m_stopEvent);
-        assert(x);
+        BPASSERT(x);
         x = false;
         m_thread.join();
         CloseHandle(m_pipeHand);
@@ -430,10 +429,10 @@ bool
 Connection::startThread(std::string * error)
 {
     // ensure the world is sane
-    assert(m_stopEvent != 0);
-    assert(m_pipeHand != 0);
-    assert(!m_running);
-    assert(m_listener != NULL);
+    BPASSERT(m_stopEvent != 0);
+    BPASSERT(m_pipeHand != 0);
+    BPASSERT(!m_running);
+    BPASSERT(m_listener != NULL);
 
     // allocate some context, and spawn a thread
     ipcConnectionThreadContext * ctx = new ipcConnectionThreadContext;

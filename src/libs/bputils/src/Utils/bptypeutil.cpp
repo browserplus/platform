@@ -28,7 +28,7 @@
  */
 
 #include "bptypeutil.h"
-#include <assert.h>
+#include "bperrorutil.h"
 #include <iostream>
 #include <sstream>
 #include <stdlib.h>
@@ -505,7 +505,7 @@ bp::Map::kill(const char * key)
 void
 bp::Map::add(const char * key, bp::Object * value)
 {
-    assert(value != NULL);
+    BPASSERT(value != NULL);
     kill(key);
     unsigned int ix = e.value.mapVal.size;
     e.value.mapVal.size++;
@@ -748,7 +748,7 @@ bp::List::size() const
 const bp::Object *
 bp::List::value(unsigned int i) const
 {
-    assert(e.value.listVal.size == values.size());
+    BPASSERT(e.value.listVal.size == values.size());
     if (i >= e.value.listVal.size) return NULL;
     return values[i];
 }
@@ -767,7 +767,7 @@ bp::List::operator[](unsigned int index) const
 void
 bp::List::append(bp::Object * object)
 {
-    assert(object != NULL);
+    BPASSERT(object != NULL);
     values.push_back(object);
     e.value.listVal.size++;
     e.value.listVal.elements = 

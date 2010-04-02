@@ -27,7 +27,8 @@
  */
 
 #include "ServiceDescription.h"
-#include <assert.h>
+#include "BPUtils/bperrorutil.h"
+
 #include <list>
 #include <set>
 #include <sstream>
@@ -492,7 +493,7 @@ service::Description::fromBPObject(const Object* bp)
     
     if (m->has("functions", BPTList)) {
         const List* l = dynamic_cast<const List*>(m->get("functions"));
-        assert(l != NULL);
+        BPASSERT(l != NULL);
 
         unsigned int i;
         

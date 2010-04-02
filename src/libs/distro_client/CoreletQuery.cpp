@@ -167,7 +167,7 @@ CoreletQuery::onClosed()
             }
             
             std::string json = response()->body.toString();
-            assert(!json.empty());
+            BPASSERT(!json.empty());
             std::string verboseError;
             bp::Object* payload =
                 bp::Object::fromPlainJsonString(json, &verboseError);

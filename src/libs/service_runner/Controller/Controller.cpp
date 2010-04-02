@@ -137,9 +137,9 @@ Controller::run(const bpf::Path & pathToHarness,
     }
 
     // now allocate a service connector to listen for incoming connection
-    assert(m_serviceConnector == NULL);
+    BPASSERT(m_serviceConnector == NULL);
     m_serviceConnector.reset(new ServiceRunner::Connector);
-    assert(m_serviceConnector != NULL);
+    BPASSERT(m_serviceConnector != NULL);
     m_serviceConnector->setListener(shared_from_this());
 
     // set up arguments for the child process, which will be an

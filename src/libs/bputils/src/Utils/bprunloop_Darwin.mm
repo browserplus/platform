@@ -21,9 +21,9 @@
  */
 
 #include "api/bprunloop.h"
+#include "api/bperrorutil.h"
 
 #include <stdlib.h>
-#include <assert.h>
 #include <iostream>
 
 #include <Carbon/Carbon.h>
@@ -84,7 +84,7 @@ bp::runloop::RunLoop::init()
     arld->cx.perform = appleGotEventCallback;
 
     arld->source = CFRunLoopSourceCreate(kCFAllocatorDefault, 0, &(arld->cx));
-    assert(arld->source != NULL);
+    BPASSERT(arld->source != NULL);
     
     CFRunLoopAddSource(arld->runLoop, arld->source, kCFRunLoopCommonModes);
 
@@ -94,7 +94,7 @@ bp::runloop::RunLoop::init()
 void
 bp::runloop::RunLoop::shutdown()
 {
-    assert(m_osSpecific != NULL);
+    BPASSERT(m_osSpecific != NULL);
     AppleRunLoopData * arld = (AppleRunLoopData *) m_osSpecific;
 
     CFRunLoopRemoveSource([[NSRunLoop currentRunLoop] getCFRunLoop],
@@ -126,7 +126,7 @@ bp::runloop::RunLoop::setCallBacks(eventCallBack onEvent, void * onEventCookie)
 void
 bp::runloop::RunLoop::run()
 {
-    assert(m_osSpecific != NULL);
+    BPASSERT(m_osSpecific != NULL);
 
     CFRunLoopRun();
 
@@ -138,7 +138,7 @@ bool
 bp::runloop::RunLoop::sendEvent(Event e)
 {
     m_lock.lock();
-    assert(m_osSpecific != NULL);
+    BPASSERT(m_osSpecific != NULL);
 
     AppleRunLoopData * arld = (AppleRunLoopData *) m_osSpecific;
 
@@ -155,6 +155,6 @@ void
 bp::runloop::RunLoop::stop()
 {
     AppleRunLoopData * arld = (AppleRunLoopData *) m_osSpecific;
-    assert(arld != NULL && arld->runLoop != NULL);
+    BPASSERT(arld != NULL && arld->runLoop != NULL);
     CFRunLoopStop(arld->runLoop);
 }

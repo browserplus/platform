@@ -32,7 +32,6 @@
 #include "bpconfig.h"
 #include "bpstrutil.h"
 
-#include <assert.h>
 #include <iostream>
 #include "BPLog.h"
 //#include "bppaths.h"

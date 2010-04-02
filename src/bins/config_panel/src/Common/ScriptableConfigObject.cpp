@@ -23,7 +23,6 @@
 #include "ScriptableConfigObject.h"
 #include <iostream>
 #include <stdlib.h>
-#include <assert.h>
 #include "ArchiveLib/ArchiveLib.h"
 #include "BPUtils/bpconfig.h"
 #include "BPUtils/bpconvert.h"
@@ -217,7 +216,7 @@ ScriptableConfigObject::invoke(const string & functionName,
         
         bool bpEnabled = isEnabled();
         const bp::String * key = dynamic_cast<const bp::String *>(args[0]);
-        assert(key != NULL);
+        BPASSERT(key != NULL);
         
         BPLOG_DEBUG_STRM("get(" << key->value() << ")");
         if (!bpEnabled) {
@@ -256,7 +255,7 @@ ScriptableConfigObject::invoke(const string & functionName,
         
         bool bpEnabled = isEnabled();
         const bp::String * key = dynamic_cast<const bp::String *>(args[0]);
-        assert(key != NULL);
+        BPASSERT(key != NULL);
         
         if (!strcmp(key->value(), "version")) {
             string s;
@@ -298,7 +297,7 @@ ScriptableConfigObject::invoke(const string & functionName,
     {
         if (args.size() != 2 || args[0]->type() != BPTString) return NULL;
         const bp::String * key = dynamic_cast<const bp::String *>(args[0]);
-        assert(key != NULL);
+        BPASSERT(key != NULL);
         
         BPLOG_DEBUG_STRM("set(" << key->value() << ")");
         for (unsigned int i = 1; i < args.size(); i++) {

@@ -21,8 +21,8 @@
  */
 
 #include "bptypeutil.h"
+#include "bperrorutil.h"
 #include <yajl/yajl_gen.h>
-#include <assert.h>
 #include <string.h>
 
 using namespace bp;
@@ -39,7 +39,7 @@ toJsonRecurse(const Object* obj,
 {
     yajl_gen_status stat = yajl_gen_status_ok;
     
-    assert(obj != NULL);
+    BPASSERT(obj != NULL);
     
     switch (obj->type()) {
         case BPTMap: {

@@ -32,7 +32,6 @@
 #include <string.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <assert.h>
 
 #include <sstream>
 
@@ -55,7 +54,7 @@ void *
 Connection::ipcConnectionThreadFunc(void * p)
 {
     struct ipcConnectionThreadContext * ctx = (ipcConnectionThreadContext *) p;
-    assert(ctx != NULL);
+    BPASSERT(ctx != NULL);
 
     // buffer for reading messages.  grows to largest message size,
     // freed at end of connection.  This does mean one large message
@@ -165,16 +164,16 @@ Connection::ipcConnectionThreadFunc(void * p)
                     // memory allocation never fails anymore, right?
                     // 4 gigs of main!  virtual memory all over!
                     // yeah, ok, embedded devices.  runaway programs.
-                    assert(buf != NULL);
+                    BPASSERT(buf != NULL);
                     buf_len = cur_msg_len;
                 }
             }
 
             // at this point, cur_msg_len must be populated, and
             // valid, and must be greater than cur_msg_read
-            assert(cur_msg_len > cur_msg_read);
+            BPASSERT(cur_msg_len > cur_msg_read);
             // and our buffer must be allocated
-            assert(buf_len >= cur_msg_len);
+            BPASSERT(buf_len >= cur_msg_len);
 
             // now let's do some message reading!
             {
@@ -197,7 +196,7 @@ Connection::ipcConnectionThreadFunc(void * p)
             // now if we've completed reading the message,
             // alert the client and re-initialize read state
             if (cur_msg_read >= cur_msg_len) {
-                assert(cur_msg_read == cur_msg_len);
+                BPASSERT(cur_msg_read == cur_msg_len);
                 ctx->listener->gotMessage(ctx->conn, buf, cur_msg_read);
                 cur_msg_len = cur_msg_read = 0;
 
@@ -381,10 +380,10 @@ bool
 Connection::startThread(std::string * error)
 {
     // ensure the world is sane
-    assert(m_control[0] == 0 && m_control[1] == 0);
-    assert(m_fd != 0);
-    assert(!m_running);
-    assert(m_listener != NULL);
+    BPASSERT(m_control[0] == 0 && m_control[1] == 0);
+    BPASSERT(m_fd != 0);
+    BPASSERT(!m_running);
+    BPASSERT(m_listener != NULL);
 
     // attain a socket pair for a control channel
     if (0 != ::pipe(m_control)) {

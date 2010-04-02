@@ -456,7 +456,7 @@ ActiveSession::doInvoke(MessageContext* ctx)
         m_pendingExecutions[make_pair(service, version)] =
             make_pair(allocationId, vector<PendingExecution>());
         i = m_pendingExecutions.find(serviceVersionPair);
-        assert(i != m_pendingExecutions.end());
+        BPASSERT(i != m_pendingExecutions.end());
     } 
 
     // folded case #1 and #2
@@ -909,7 +909,7 @@ ActiveSession::doGetState(MessageContext* ctx)
     std::string s = std::string(*pload);
 
     bp::Object * obj = SystemConfig::getState(m_locale.c_str(), s.c_str());
-    assert(obj != NULL);
+    BPASSERT(obj != NULL);
     populateSuccessResponse(r, obj);
     delete obj;
     
@@ -938,7 +938,7 @@ ActiveSession::doSetState(MessageContext* ctx)
     const bp::Object * arg = pload->get("newValue");
     
     bp::Object* obj = SystemConfig::setState(s.c_str(), arg);
-    assert(obj != NULL);
+    BPASSERT(obj != NULL);
     populateSuccessResponse(r, obj);
     delete obj;
     
@@ -1154,7 +1154,7 @@ ActiveSession::executionFailure(
 void
 ActiveSession::gotUpToDate()
 {
-    assert(m_sessionMessage != NULL);
+    BPASSERT(m_sessionMessage != NULL);
 
     bp::ipc::Response response(m_sessionMessage->id());
     std::string errStatus = checkPermissions();
@@ -1174,7 +1174,7 @@ ActiveSession::gotUpToDate()
 void
 ActiveSession::cantGetUpToDate()
 {
-    assert(m_sessionMessage != NULL);
+    BPASSERT(m_sessionMessage != NULL);
 
     BPLOG_WARN_STRM("[" << m_session << "] "
                     << "Unable to check for updated permissions");

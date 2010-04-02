@@ -29,7 +29,6 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include <assert.h>
 
 using namespace std;
 using namespace std::tr1;

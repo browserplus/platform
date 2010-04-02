@@ -28,8 +28,8 @@
  */
 
 #include "api/IPCChannel.h"
+#include "BPUtils/bperrorutil.h"
 
-#include <assert.h>
 #include <stdlib.h>
 
 using namespace bp::ipc;
@@ -46,7 +46,7 @@ void
 Channel::deliverMessageEvent(void * ctx)
 {
     ChannelEvent * ce = (ChannelEvent *) ctx;
-    assert(ce != NULL);
+    BPASSERT(ce != NULL);
     IChannelListener * l = ce->c->m_cListener;
 
     if (ce->m) {

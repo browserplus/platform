@@ -32,7 +32,6 @@
 
 #include <string>
 #include <iostream>
-#include <assert.h>
 
 #include "bpconfig.h"
 #include "bpfile.h"

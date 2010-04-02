@@ -251,7 +251,7 @@ public:
             m_skin->errorMessage(Installer::getString(Installer::kInstallerAlreadyRunning));
         }
 
-        assert(m_state == ST_Started);
+        BPASSERT(m_state == ST_Started);
         m_state = ST_WaitingToBegin;
         BPLOG_INFO_STRM("calling startUp (" << m_skin.get() << ")");
         if (m_skin != NULL) m_skin->startUp(m_width, m_height, m_title);
@@ -721,7 +721,7 @@ static void
 runLoopCallBack(void * ctx, bp::runloop::Event e)
 {
     InstallManager * im = (InstallManager *) e.payload();
-    assert(im != NULL);
+    BPASSERT(im != NULL);
     im->run();
 }
 

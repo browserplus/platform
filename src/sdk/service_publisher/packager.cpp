@@ -25,13 +25,13 @@
  * the distribution site.
  */
 
-#include <assert.h>
 #include "ArchiveLib/ArchiveLib.h"
 #include "BPUtils/APTArgParse.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bprunloop.h"
 #include "BPUtils/bpstrutil.h"
+#include "BPUtils/bperrorutil.h"
 #include "ServiceRunnerLib/ServiceRunnerLib.h"
 
 // the gunk to do the push
@@ -434,7 +434,7 @@ int main(int argc, const char ** argv)
                        new bp::Integer(coreletAPIVersion));
                 // zero never has nor never will be a valid corelet api
                 // version
-                assert(coreletAPIVersion != 0);
+                BPASSERT(coreletAPIVersion != 0);
             }
             
             buf = m->toPlainJsonString();
@@ -461,7 +461,7 @@ int main(int argc, const char ** argv)
                 
                     bool x;
                     x = summary.localization(*it, tit, sum);
-                    assert(x);
+                    BPASSERT(x);
 
                     bp::Map * entry = new bp::Map;
                     entry->add("title", new bp::String(tit.c_str()));

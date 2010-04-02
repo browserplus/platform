@@ -34,8 +34,8 @@
 #include "bpstrutil.h"
 #include "bptime.h"
 #include "bptypeutil.h"
+#include "bperrorutil.h"
 
-#include <assert.h>
 #include <sstream>
 #include <string.h>
 
@@ -270,7 +270,7 @@ service::Summary::detectCorelet(const bp::file::Path &dirName,
         }
 
         const bp::Object * uses = o->get(s_usesKey);
-        assert(uses != NULL);
+        BPASSERT(uses != NULL);
         
         // "uses" map requires at least corelet name
         if (!uses->has(s_coreletKey, BPTString))
@@ -310,7 +310,7 @@ service::Summary::detectCorelet(const bp::file::Path &dirName,
         // now let's parse up the "Arguments" map
         if (o->has(s_argumentsKey, BPTMap)) {
             const bp::Map * args = (bp::Map *) o->get(s_argumentsKey);
-            assert(args != NULL);
+            BPASSERT(args != NULL);
 
             bp::Map::Iterator i(*args);
             const char * key = NULL;

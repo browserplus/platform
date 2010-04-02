@@ -23,10 +23,10 @@
 #include "api/bprunloop.h"
 
 #include <stdlib.h>
-#include <assert.h>
 #include <iostream>
 #include <windows.h>
 #include "api/bpstrutil.h"
+#include "api/bperrorutil.h"
 #include "api/bpuuid.h"
 
 using namespace std;
@@ -141,7 +141,7 @@ bp::runloop::RunLoop::init()
 void
 bp::runloop::RunLoop::shutdown()
 {
-    assert(m_osSpecific != NULL);
+    BPASSERT(m_osSpecific != NULL);
     Win32RunLoopData * wrld = (Win32RunLoopData *) m_osSpecific;
 
 	destroyWindow(wrld->window, wrld->className, wrld->classInstance);
@@ -178,7 +178,7 @@ bool
 bp::runloop::RunLoop::sendEvent(Event e)
 {
     m_lock.lock();
-    assert(m_osSpecific != NULL);
+    BPASSERT(m_osSpecific != NULL);
 
     Win32RunLoopData * wrld = (Win32RunLoopData *) m_osSpecific;
 
@@ -198,7 +198,7 @@ void
 bp::runloop::RunLoop::stop()
 {
     Win32RunLoopData * wrld = (Win32RunLoopData *) m_osSpecific;
-    assert(wrld != NULL && wrld->window != NULL);
+    BPASSERT(wrld != NULL && wrld->window != NULL);
 
     ::PostMessage(wrld->window, BPWINQUIT_EVENT, 0, 0);
 }

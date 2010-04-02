@@ -394,8 +394,8 @@ SingleCoreletInstaller::onDownloadComplete(unsigned int,
 void
 SingleCoreletInstaller::removeSelfFromQueue()
 {
-    assert(s_context != NULL);
-    assert(s_context->m_installQueue.front().get() == this);    
+    BPASSERT(s_context != NULL);
+    BPASSERT(s_context->m_installQueue.front().get() == this);    
 
     // causes deletion of this object.  careful
     s_context->m_installQueue.pop_front();

@@ -87,7 +87,7 @@ void
 PlatformUpdater::startup(list<string> distroServers,
                          unsigned int poll)
 {
-    assert(s_updater == NULL);
+    BPASSERT(s_updater == NULL);
     s_updater = new PlatformUpdaterSingleton(distroServers, poll);
     s_updater->start();
 }
@@ -107,7 +107,7 @@ PlatformUpdater::shutdown()
 bool 
 PlatformUpdater::spawnUpdate(const string& version)
 {
-    assert(s_updater != NULL);
+    BPASSERT(s_updater != NULL);
     return s_updater->spawnUpdate(version);
 }
 
@@ -115,7 +115,7 @@ PlatformUpdater::spawnUpdate(const string& version)
 bool
 PlatformUpdater::updateSpawned(const string& version)
 {
-    assert(s_updater != NULL);
+    BPASSERT(s_updater != NULL);
     return s_updater->updateSpawned(version);
 }
 
@@ -176,7 +176,7 @@ PlatformUpdaterSingleton::start()
     
     unsigned long secsToNextCheck = m_pollPeriod;
     long diff = now.diffInSeconds(last);
-    assert(diff >= 0);
+    BPASSERT(diff >= 0);
     if (diff > (long) m_pollPeriod) {
         mustCheck = true;
     } else {

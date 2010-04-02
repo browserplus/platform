@@ -360,7 +360,7 @@ onThreadStartFunc(void * c)
             // TODO: eventually we should be getting this error back
             // to BrowserPlusCore - and a single instance allocation
             // should not bring down the whole process.
-            assert(rv == 0);
+            BPASSERT(rv == 0);
         }
     }
 }
@@ -391,7 +391,7 @@ processEventFunc(void * c, bp::runloop::Event e)
 {
     InstanceState * is = (InstanceState *) c;
     InstanceEvent * ie = (InstanceEvent *) e.payload();
-    assert(ie != NULL);
+    BPASSERT(ie != NULL);
     
     if (ie->type == InstanceEvent::T_Invoke) {
         if (is->funcTable->invokeFunc != NULL)
@@ -511,8 +511,8 @@ ServiceLibrary::load(const bpf::Path & providerPath, std::string & err)
     // meaningful when success == false;
     bool callShutdown = true;
     
-    assert(m_handle == NULL);
-    assert(m_funcTable == NULL);    
+    BPASSERT(m_handle == NULL);
+    BPASSERT(m_funcTable == NULL);    
 
     // now let's determine the path to the shared library.  For
     // dependent corelets this will be extracted from the manifest
@@ -870,7 +870,7 @@ void
 ServiceLibrary::onHop(void * context)
 {
     InstanceResponse * ir = (InstanceResponse *) context;
-    assert(ir != NULL);
+    BPASSERT(ir != NULL);
 
     // all InstanceResponses have a populated tid, all need an
     // instance id to go with it.

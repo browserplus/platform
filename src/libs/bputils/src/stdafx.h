@@ -25,7 +25,6 @@
 
 #include <windows.h>
 
-#include <assert.h>
 #include <list>
 #include <vector>
 #include <map>

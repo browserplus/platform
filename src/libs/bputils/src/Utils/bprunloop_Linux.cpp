@@ -58,7 +58,6 @@
 #include "bprunloop_Linux.h"
 
 #include <stdlib.h>
-#include <assert.h>
 #include <stdio.h>
 
 #include <map>
@@ -185,7 +184,7 @@ void
 bp::runloop::RunLoop::shutdown()
 {
     s_runloopColl.removeRunLoop();
-    assert(m_osSpecific != NULL);
+    BPASSERT(m_osSpecific != NULL);
     delete ((BasicRunLoopData *) m_osSpecific);
     m_osSpecific = NULL;
 }
@@ -201,7 +200,7 @@ bp::runloop::RunLoop::run()
     bool finalProcess = true;
 
     m_lock.lock();
-    assert(!rld->m_running);
+    BPASSERT(!rld->m_running);
     rld->m_running = true;
     do {
         if (rld->m_stopped) finalProcess = false;
@@ -218,7 +217,7 @@ bp::runloop::RunLoop::run()
                     m_lock.lock();
                 }
             } else {
-                assert(le.type == LinuxEvent::T_Hop);
+                BPASSERT(le.type == LinuxEvent::T_Hop);
                 // run hop outside of lock
                 m_lock.unlock();
                 le.func(le.argument);

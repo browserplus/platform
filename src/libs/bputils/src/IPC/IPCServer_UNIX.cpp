@@ -30,7 +30,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
-#include <assert.h>
 
 #include <sstream>
 
@@ -54,7 +53,7 @@ void *
 Server::ipcServerThreadFunc(void * p)
 {
     struct ipcServerThreadContext * ctx = (ipcServerThreadContext *) p;
-    assert(ctx != NULL);
+    BPASSERT(ctx != NULL);
 
     // english string describing error which caused premature
     // server shutdown, if any
@@ -176,7 +175,7 @@ Server::~Server()
 bool
 Server::setListener(IServerListener * listener)
 {
-    assert(!m_running);
+    BPASSERT(!m_running);
     if (!m_running) m_listener = listener;
     return !m_running;
 }

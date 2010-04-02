@@ -854,7 +854,7 @@ Transaction::Impl::sendRequest()
 {
     consistencyCheck();
 
-    assert(m_pRequest->method.code() != bp::http::Method::HTTP_POST);
+    BPASSERT(m_pRequest->method.code() != bp::http::Method::HTTP_POST);
     BPLOG_DEBUG_STRM(m_id << ": sendRequest");
    
     // If we have request headers, add them to request.
@@ -894,7 +894,7 @@ Transaction::Impl::sendRequestWithBody()
 {
     consistencyCheck();
 
-    assert(m_pRequest->method.code() == bp::http::Method::HTTP_POST);
+    BPASSERT(m_pRequest->method.code() == bp::http::Method::HTTP_POST);
     BPLOG_INFO_STRM(m_id << ": sendRequestWithBody");
     
     // If we have request headers, add them to request.
@@ -973,7 +973,7 @@ Transaction::Impl::getDataToPost()
     case eFromBuffer: {
         m_pPostBuffer = (unsigned char*) m_pRequest->body.elementAddr(m_bytesSent);
         int toPost = m_pRequest->body.size() - m_bytesSent;
-        assert(toPost >= 0);
+        BPASSERT(toPost >= 0);
         if (toPost >= 0) {
             m_bytesToPost = toPost;
         }

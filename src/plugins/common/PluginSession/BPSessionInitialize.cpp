@@ -24,9 +24,9 @@
  * Code which implements the plugin Initialize function
  */
 
-#include <assert.h>
 #include "BPSession.h"
 #include "BPUtils/BPLog.h"
+#include "BPUtils/bperrorutil.h"
 #include "PluginCommonLib/CommonErrors.h"
 
 // disable warnings about assignment within conditional expression
@@ -98,7 +98,7 @@ BPSession::connectCallback(BPErrorCode ec,
                     BPErrorCodeToString(ec));
     
     InitializeContext * ctx = (InitializeContext *) cookie;    
-    assert(ctx != NULL);
+    BPASSERT(ctx != NULL);
 
     BPSession* session = ctx->bp;
     BPPlugin& plugin = session->plugin();
@@ -113,7 +113,7 @@ BPSession::connectCallback(BPErrorCode ec,
 
     (void) generateReturn(session, ec, arg, error, verboseError);
 
-    assert(ctx->callback != NULL);
+    BPASSERT(ctx->callback != NULL);
     plugin.callJsFunction(ctx->callback, &arg, 1, result);
 
     plugin.freeVariant(arg);
@@ -145,7 +145,7 @@ BPSession::initialize(const plugin::Variant* args,
 {
     using namespace bp;
 
-    assert(callback != NULL);
+    BPASSERT(callback != NULL);
     if (callback == NULL)
         return false;
 

@@ -30,7 +30,6 @@
  */
 
 #include "SessionCreator.h"
-#include <assert.h>
 #include <fstream>
 #include "BPProtoUtil.h"
 #include "BPUtils/bpconvert.h"
@@ -38,6 +37,7 @@
 #include "BPUtils/BPLog.h"
 #include "BPUtils/ProductPaths.h"
 #include "BPUtils/bpplatformutil.h"
+#include "BPUtils/bperrorutil.h"
 
 
 const double SessionCreator::c_initialPollPeriodS = 0.020;
@@ -195,7 +195,7 @@ SessionCreator::tryConnect()
     std::string ipcName = bp::paths::getIPCName();
 
     BPLOG_DEBUG_STRM(this << ", try IPC connect to " << ipcName);
-    assert( m_channel != NULL );
+    BPASSERT( m_channel != NULL );
     std::string errBuf;
     
     if (!m_channel->connect(ipcName, &errBuf)) {

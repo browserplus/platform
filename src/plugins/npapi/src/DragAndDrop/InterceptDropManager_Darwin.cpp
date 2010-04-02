@@ -259,7 +259,7 @@ CarbonDropManager::CarbonDropManager(NPP instance,
     m_windowRef = ctx->window;
 
     CarbonDragDispatcher* disp = CarbonDragDispatcher::get(m_windowRef);
-    assert(disp != NULL);
+    BPASSERT(disp != NULL);
     disp->addDropManager(this);
 }
 
@@ -269,7 +269,7 @@ CarbonDropManager::~CarbonDropManager()
     releaseDropWindows();
     
     CarbonDragDispatcher* disp = CarbonDragDispatcher::get(m_windowRef);
-    assert(disp != NULL);
+    BPASSERT(disp != NULL);
     disp->removeDropManager(this);
 
     // now clean up all overlay drop windows allocated during interaction
@@ -456,7 +456,7 @@ void
 CarbonDropManager::drawDropWindows()
 {
     releaseDropWindows();
-    assert(m_dropWindows == NULL);
+    BPASSERT(m_dropWindows == NULL);
 
     m_numDropWindows = m_targets.size();
     m_dropWindows = (WindowRef*) calloc(m_numDropWindows, sizeof(WindowRef));

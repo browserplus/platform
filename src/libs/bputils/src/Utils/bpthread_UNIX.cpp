@@ -30,12 +30,12 @@
  */
 
 #include "bpthread.h"
+#include "bperrorutil.h"
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <signal.h>
 #include <pthread.h>
-#include <assert.h>
 
 using namespace bp::thread;
 
@@ -83,7 +83,7 @@ Thread::run(StartRoutine startFunc, void * cookie)
     struct barDat_t *bdptr;
 
     bdptr = (barDat_t *) malloc(sizeof(struct barDat_t));
-    assert(bdptr != NULL);
+    BPASSERT(bdptr != NULL);
 
     bdptr->runme = startFunc;
     bdptr->arg = cookie;

@@ -27,7 +27,6 @@
  * (c) Yahoo! 2009
  */
 
-#include <assert.h>
 #include <atlbase.h>
 #include <atlwin.h>
 #include <fstream>
@@ -37,6 +36,7 @@
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bpprocess.h"
 #include "BPUtils/bpstrutil.h"
+#include "BPUtils/bperrorutil.h"
 
 #define BS_INFO_OUTPUT( x ) BPLOG_INFO_STRM(x)
 #define BS_ERROR_OUTPUT( x ) BPLOG_ERROR_STRM(x)
@@ -99,7 +99,7 @@ int APIENTRY WinMain( HINSTANCE, HINSTANCE, LPSTR, int )
         int endOff = endOfPayloadMarker.length();
         char buf[64];
         memset(buf, 0, sizeof(buf));
-        assert(sizeof(buf) > endOfPayloadMarker.length());
+        BPASSERT(sizeof(buf) > endOfPayloadMarker.length());
         for (;;) {
             f.seekg(-endOff, std::ios_base::end);
             if (f.fail()) break;

@@ -29,7 +29,7 @@
 
 #include "easylzma/compress.h"
 
-#include <assert.h>
+#include "BPUtils/bperrorutil.h"
 
 bp::lzma::Compress::Compress() : IO()
 {
@@ -51,7 +51,7 @@ bp::lzma::Compress::run(Format format)
 
     /* allocate compression handle */
     hand = elzma_compress_alloc();
-    assert(hand != NULL);
+    BPASSERT(hand != NULL);
 
     /* calculate the uncompressed size */
     m_inputStream->seekg(0, std::ios_base::end);

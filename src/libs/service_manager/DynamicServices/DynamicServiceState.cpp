@@ -87,7 +87,7 @@ DynamicServiceState::addPendingAllocation(
                 controller,
                 std::set<shared_ptr<DynamicServiceInstance> >());
         i = m_pendingAllocations.find(instance->m_summary);        
-        assert(i != m_pendingAllocations.end());
+        BPASSERT(i != m_pendingAllocations.end());
     }
 
     i->second.second.insert(instance);
@@ -125,7 +125,7 @@ DynamicServiceState::addRunningAllocation(
         ctx.controller = controller;
         m_controllers[instance->m_summary] = ctx;
         i = m_controllers.find(instance->m_summary);        
-        assert(i != m_controllers.end());
+        BPASSERT(i != m_controllers.end());
     } else {
         // reset the idle timer
         if (i->second.idleTime.elapsedSec() > 0.0) {
@@ -136,15 +136,15 @@ DynamicServiceState::addRunningAllocation(
         }
     }
     
-    assert(i->second.instances.find(instance.get()) == 
+    BPASSERT(i->second.instances.find(instance.get()) == 
            i->second.instances.end());
     i->second.instances.insert(instance.get());
 
     // now add to the running allocations table to retain the instance
     // while it's being connected
-    assert(m_runningAllocations.find(allocationId) ==
+    BPASSERT(m_runningAllocations.find(allocationId) ==
            m_runningAllocations.end());
-    assert(instance != NULL);
+    BPASSERT(instance != NULL);
 
     m_runningAllocations[allocationId] = instance;
 }
@@ -168,7 +168,7 @@ DynamicServiceState::allocationComplete(ServiceRunner::Controller * c,
         if (im == m_instances.end()) {
             m_instances[c] = IdToInstanceMap();
             im = m_instances.find(c);
-            assert(im != m_instances.end());
+            BPASSERT(im != m_instances.end());
         }
         im->second[instanceId] = instance;
         
@@ -277,7 +277,7 @@ DynamicServiceState::removeInstance(DynamicServiceInstance * instance)
     // first, it's impossible that this instance was associated with an
     // allocation pending service initialization.  We're holding shared
     // pointers to all such instances
-    assert(m_pendingAllocations.find(instance->m_summary) == 
+    BPASSERT(m_pendingAllocations.find(instance->m_summary) == 
            m_pendingAllocations.end());
 
     // second, this instance may not be in the process of being allocated,

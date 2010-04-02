@@ -29,9 +29,9 @@
  */
 
 #include "bpstrutil.h"
+#include "bperrorutil.h"
 
 #include <algorithm>
-#include <assert.h>
 #include <ios>
 #include <iostream>
 #include <iterator>
@@ -101,7 +101,7 @@ utf8ToWide(const std::string& sIn)
         CFRelease(cfStr);
     }
 #elif defined(LINUX)
-    assert("utf8ToWide not implemented on linux" == NULL);
+    BPASSERT("utf8ToWide not implemented on linux" == NULL);
 #else
     unsupported platform;
 #endif
@@ -157,7 +157,7 @@ wideToUtf8(const std::wstring& wsIn)
     }
 #elif defined(LINUX)
 	const wchar_t * wstr = reinterpret_cast<const wchar_t*>(wsIn.data());
-    assert(sizeof(wchar_t) == 4);
+    BPASSERT(sizeof(wchar_t) == 4);
     while (*wstr) {
         wchar_t codepoint = *wstr++;
         if (codepoint < 0x80) {

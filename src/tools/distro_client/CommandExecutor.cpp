@@ -21,7 +21,6 @@
  */
 
 #include "CommandExecutor.h"
-#include <assert.h>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -30,6 +29,7 @@
 #include "BPUtils/bpfile.h"
 #include "BPUtils/OS.h"
 #include "BPUtils/ProductPaths.h"
+#include "BPUtils/bperrorutil.h"
 #include "CoreletManager/CoreletManager.h"
 #include "Permissions/Permissions.h"
 
@@ -109,7 +109,7 @@ parseJSONRequires(std::list<CoreletRequireStatement> &reqStmts,
     // iterate and build up list
     if (obj->type() == BPTList) {
         List * l = dynamic_cast<List *>(obj);
-        assert(l != NULL);
+        BPASSERT(l != NULL);
         
         for (unsigned int i = 0; i < l->size(); i++) {
             const Map * m = dynamic_cast<const Map *>(l->value(i));
@@ -161,7 +161,7 @@ parseJSONCoreletList(std::string json)
     // iterate and build up list
     if (obj->type() == BPTList) {
         List * l = dynamic_cast<List *>(obj);
-        assert(l != NULL);
+        BPASSERT(l != NULL);
         
         for (unsigned int i = 0; i < l->size(); i++) {
             const Map * m = dynamic_cast<const Map *>(l->value(i));
@@ -295,7 +295,7 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::satisfy)
             return;
         }
         Map * m = dynamic_cast<Map*>(obj);
-        assert(m != NULL);
+        BPASSERT(m != NULL);
         if (!m) {
             std::cout << "expected a map, got " << tokens[0] << std::endl;
             onFailure();

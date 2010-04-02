@@ -29,13 +29,13 @@
  */
 
 #include "TestServer.h"
-#include <assert.h>
 #include <iostream>
 #ifdef WIN32
 #include <Windows.h>
 #endif
 #include "BPUtils/bpconvert.h"
 #include "BPUtils/HttpQueryString.h"
+#include "BPUtils/bperrorutil.h"
 #include "TestImageData.h"
 
 
@@ -248,11 +248,11 @@ TestServer::TestServer() : m_port(0)
 
     // mount our handlers
     bool mounted = m_server.mount(ECHO_PATH, m_echoHandler);
-    assert(mounted);
+    BPASSERT(mounted);
     mounted = m_server.mount(SHAPING_PATH, m_shapingHandler);
-    assert(mounted);
+    BPASSERT(mounted);
     mounted = m_server.mount("*", m_handler);
-    assert(mounted);
+    BPASSERT(mounted);
     
     mounted = false; // fix compiler warning in -DNDEBUG
 }
@@ -279,12 +279,12 @@ TestServer::run()
 {
     if (!m_port) {
         bool bound = m_server.bind(m_port);
-        assert(bound);
-        assert(m_port != 0);
+        BPASSERT(bound);
+        BPASSERT(m_port != 0);
         bound = false; // fix compiler warning in -DNDEBUG
 
         bool started = m_server.start();
-        assert(started);
+        BPASSERT(started);
         started = false; // fix compiler warning in -DNDEBUG
     }
 }

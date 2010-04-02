@@ -29,11 +29,11 @@
  */
 
 #include "CommandParser.h"
-#include <assert.h>
 #include <iostream>
 #include <set>
 #include <stdexcept>
 #include "BPUtils/bpstrutil.h"
+#include "BPUtils/bperrorutil.h"
 
 using namespace std;
 using namespace std::tr1;
@@ -324,7 +324,7 @@ CommandParser::stop()
 void
 CommandParser::onHop(void * context)
 {
-    assert(context != NULL);
+    BPASSERT(context != NULL);
     
     ParserEvent * evt = (ParserEvent *) context;
 

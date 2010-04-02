@@ -252,7 +252,7 @@ private:
 
         ControllerMap::iterator i;
         i = controllers.find(c);
-        assert(i != controllers.end());
+        BPASSERT(i != controllers.end());
 
         // add to bogus summaries list
         bogusSummaries.insert(i->second.first);
@@ -265,7 +265,7 @@ private:
     {
         ControllerMap::iterator i;
         i = controllers.find(c);
-        assert(i != controllers.end());
+        BPASSERT(i != controllers.end());
         // successful acquisition of description
         descriptions[i->second.first] = desc;
         controllers.erase(i);

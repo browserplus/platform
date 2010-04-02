@@ -422,7 +422,7 @@ RequireRequest::checkPlatformUpdates()
     
     bp::ServiceVersion thisVersion;
     bool b = thisVersion.parse(bp::paths::versionString());
-    assert(b);
+    BPASSERT(b);
     if (!b) {
         BP_THROW_FATAL("couldn't parse version from bp::paths::versionString()");
     }

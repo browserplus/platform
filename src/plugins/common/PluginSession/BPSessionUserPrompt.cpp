@@ -23,9 +23,9 @@
 #include "BPSession.h"
 #include "BPProtocol/BPProtocol.h"
 #include "BPUtils/BPLog.h"
+#include "BPUtils/bperrorutil.h"
 #include "PluginCommonLib/NativeUI.h"
 
-#include <assert.h>
 
 struct PromptContext
 {
@@ -44,7 +44,7 @@ void
 BPSession::executeUserPrompt(void * cookie)
 {
     PromptContext * pc = (PromptContext *) cookie;
-    assert(pc == pc->session->m_prompts.front());
+    BPASSERT(pc == pc->session->m_prompts.front());
     bool rv = false;
     bp::Object * rez = NULL;
     std::string uagent = pc->session->m_plugin->getUserAgent();
@@ -92,7 +92,7 @@ BPSession::deliverUserPromptResults(void * cookie, const bp::Object * response)
 {
     BPLOG_INFO("delivering user prompt results");
     PromptContext * pc = (PromptContext *) cookie;
-    assert(pc->session->m_prompts.front() == cookie);
+    BPASSERT(pc->session->m_prompts.front() == cookie);
     pc->session->m_prompts.pop_front();
 
     BPDeliverUserResponse(pc->session->m_protoHand, pc->tid,

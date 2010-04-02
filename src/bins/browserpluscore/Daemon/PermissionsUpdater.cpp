@@ -61,7 +61,7 @@ static PermissionsUpdaterSingleton* s_updater = NULL;
 void
 PermissionsUpdater::startup(unsigned int pollPeriodSeconds)
 {
-    assert(s_updater == NULL);
+    BPASSERT(s_updater == NULL);
     s_updater = new PermissionsUpdaterSingleton(pollPeriodSeconds);
     s_updater->start();
 }
@@ -80,7 +80,7 @@ PermissionsUpdater::shutdown()
 bool
 PermissionsUpdater::isBusy()
 {
-    assert(s_updater != NULL);
+    BPASSERT(s_updater != NULL);
     return s_updater->busy();
 }
 

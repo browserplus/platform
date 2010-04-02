@@ -31,14 +31,13 @@
 #include "api/bperrorutil.h"
 
 #include <stdlib.h>
-#include <assert.h>
 
 void *
 bp::runloop::RunLoopThread::threadFunction(void * c)
 {
     RunLoopThread * rl = (RunLoopThread *) c;
 
-    assert(!rl->m_running);
+    BPASSERT(!rl->m_running);
 
     rl->m_rlThreadID = bp::thread::Thread::currentThreadID();
 
@@ -107,7 +106,7 @@ bp::runloop::RunLoopThread::run()
 
     bool ran = false;
 
-    assert(!m_running);
+    BPASSERT(!m_running);
     m_lock.lock();
     ran = m_thr.run(threadFunction, (void *) this);
     while (ran && !m_running) {
@@ -143,7 +142,7 @@ bp::runloop::RunLoopThread::stop()
 bool
 bp::runloop::RunLoopThread::join()
 {
-    assert(m_rlThreadID != bp::thread::Thread::currentThreadID());
+    BPASSERT(m_rlThreadID != bp::thread::Thread::currentThreadID());
     if (m_rlThreadID == bp::thread::Thread::currentThreadID()) {
         return false;
     }
@@ -158,7 +157,7 @@ bp::runloop::RunLoopThread::join()
 bool
 bp::runloop::RunLoopThread::sendEvent(Event e)
 {
-    assert(m_running);
+    BPASSERT(m_running);
     return m_rl.sendEvent(e);
 }
 

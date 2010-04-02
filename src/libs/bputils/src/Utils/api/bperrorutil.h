@@ -148,6 +148,9 @@ bp::error::ReportCatch( (e), __FILE__, __BP_FUNC__, __LINE__ );
 std::string makeCatchReportString(const std::exception& exc,
                                   const std::string& sAddlContext="" );
 
+// And now for an assert which also works in release builds
+#define BPASSERT( c ) if (!(c)) BP_THROW_FATAL( "assert failed: " #c );
+
 } // namespace error
 } // namespace bp
 

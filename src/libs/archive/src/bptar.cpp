@@ -31,10 +31,10 @@
 #include "bptar.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/bpstrutil.h"
+#include "BPUtils/bperrorutil.h"
 #include "libarchive/archive.h"
 #include "libarchive/archive_entry.h"
 
-#include <assert.h>
 #include <fstream>
 #include <string.h>
 
@@ -77,7 +77,7 @@ bool
 Extract::init()
 {
     struct archive *a = archive_read_new();
-    assert(a != NULL);
+    BPASSERT(a != NULL);
     if (archive_read_support_compression_none(a) ||
         archive_read_support_format_gnutar(a) || 
         archive_read_support_format_tar(a) || 
@@ -284,7 +284,7 @@ Create::open(const bp::file::Path& tarFile)
     }
 
     struct archive *a = archive_write_new();    
-    assert(a != NULL);
+    BPASSERT(a != NULL);
     if (archive_write_set_compression_none(a) ||
         archive_write_set_format_ustar(a) || 
         archive_write_open(a, (void *) this, writeOpenCallback,

@@ -25,8 +25,8 @@
  */
 
 #include "BPSession.h"
-#include <assert.h>
 #include "BPUtils/BPLog.h"
+#include "BPUtils/bperrorutil.h"
 #include "PluginCommonLib/bppluginutil.h"
 #include "PluginCommonLib/CommonErrors.h"
 
@@ -95,7 +95,7 @@ BPSession::executeMethodRelayResultsCB(void * cookie)
         (void) session->generateErrorReturn("internalError", NULL, arg);
     }
 
-    assert(ctx->callback != NULL);
+    BPASSERT(ctx->callback != NULL);
 
     (void) plugin.callJsFunction(ctx->callback, &arg, 1, result);
 
@@ -115,7 +115,7 @@ BPSession::pletSuccessCB(void * cookie, unsigned int /*tid*/,
                          const bp::Object * returnValue)
 {
     ExecuteContext * ctx = (ExecuteContext *) cookie;    
-    assert(ctx != NULL);
+    BPASSERT(ctx != NULL);
 
     ctx->ec = BP_EC_OK;
     if (returnValue) {
@@ -123,7 +123,7 @@ BPSession::pletSuccessCB(void * cookie, unsigned int /*tid*/,
     }
 
     // we need to call back into javascript from the correct thread
-    assert(ctx->callback != NULL);
+    BPASSERT(ctx->callback != NULL);
 
     ctx->bp->m_threadHopper.invokeOnThread(
         executeMethodRelayResultsCB, (void *) ctx);
@@ -136,7 +136,7 @@ BPSession::pletFailureCB(void * cookie, unsigned int /*tid*/,
 {
     ExecuteContext * ctx = (ExecuteContext *) cookie;    
 
-    assert(ctx != NULL);
+    BPASSERT(ctx != NULL);
 
     ctx->ec = BP_EC_EXTENDED_ERROR;
     ctx->error.append(error ? error : "unknown");
@@ -154,7 +154,7 @@ BPSession::executeMethodResultsCB(void * cookie,
 {
     ExecuteContext * ctx = (ExecuteContext *) cookie;    
 
-    assert(ctx != NULL);
+    BPASSERT(ctx != NULL);
 
     ctx->ec = ec;
     if (ctx->ec == BP_EC_OK || ctx->ec == BP_EC_EXTENDED_ERROR) {
@@ -175,7 +175,7 @@ BPSession::executeMethodResultsCB(void * cookie,
         ctx->results = NULL;
     }
     
-    assert(ctx->callback != NULL);
+    BPASSERT(ctx->callback != NULL);
 
     // call back into javascript
     executeMethodRelayResultsCB((void *) ctx);
@@ -194,7 +194,7 @@ BPSession::executeMethod(const std::string &service,
     BPLOG_INFO_STRM("executeMethod " << service <<
                     "[" << version << "]." << method);
 
-    assert(callback != NULL);
+    BPASSERT(callback != NULL);
     if (callback == NULL) return false;
     
     using namespace bp;

@@ -29,10 +29,10 @@
  */
 
 #include "RequireLock.h"
-#include <assert.h>
 #include <list>
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bpthreadhopper.h"
+#include "BPUtils/bperrorutil.h"
 
 using namespace std;
 using namespace std::tr1;
@@ -44,7 +44,7 @@ std::list<weak_ptr<RequireLock::ILockListener> > s_lockQueue;
 void
 RequireLock::initialize()
 {
-    assert(!s_initialized);
+    BPASSERT(!s_initialized);
     s_initialized = true;    
     BPLOG_DEBUG("initialized");
 }
@@ -66,7 +66,7 @@ static void invokeCallbackFunction(void * context)
     weak_ptr<RequireLock::ILockListener> * lWeak =
         (weak_ptr<RequireLock::ILockListener> *) context;
 
-    assert(lWeak != NULL);
+    BPASSERT(lWeak != NULL);
 
     shared_ptr<RequireLock::ILockListener> l = (*lWeak).lock();
 

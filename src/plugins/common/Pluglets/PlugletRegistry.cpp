@@ -21,7 +21,7 @@
  */
 
 #include "PlugletRegistry.h"
-#include <assert.h>
+#include "BPUtils/bperrorutil.h"
 // XXX
 #include "BPUtils/BPLog.h"
 
@@ -81,7 +81,7 @@ PlugletRegistry::find(std::string name, std::string wantverStr,
     for (it = m_pluglets.begin(); it != m_pluglets.end(); it++) 
     {
         const bp::service::Description * desc = (*it)->describe();
-        assert(desc != NULL);
+        BPASSERT(desc != NULL);
         
         if (name.compare(desc->name())) continue;
         

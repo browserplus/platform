@@ -30,6 +30,7 @@
  */
 
 #include "api/bptimer.h"
+#include "api/bperrorutil.h"
 #include <Cocoa/Cocoa.h>
 
 using namespace bp::time;
@@ -86,8 +87,8 @@ Timer::setMsec(unsigned int timeInMilliseconds)
 
     cancel();
 
-    assert( dtd->recipient != NULL );
-    assert( dtd->currentTimer == NULL );    
+    BPASSERT( dtd->recipient != NULL );
+    BPASSERT( dtd->currentTimer == NULL );    
 
     // convert ms to double seconds representation
     double ti = timeInMilliseconds;
@@ -101,7 +102,7 @@ Timer::setMsec(unsigned int timeInMilliseconds)
                                         repeats: NO];
     [dtd->currentTimer retain];
     
-    assert( dtd->currentTimer != nil );
+    BPASSERT( dtd->currentTimer != nil );
 }
 
 void

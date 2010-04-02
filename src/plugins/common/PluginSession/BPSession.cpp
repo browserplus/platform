@@ -30,10 +30,10 @@
 #include <boost/scoped_ptr.hpp>
 
 #include "BPSession.h"
-#include <assert.h>
 #include "BPHandleMapper.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bpstrutil.h"
+#include "BPUtils/bperrorutil.h"
 #include "CommonErrors.h"
 
 
@@ -80,7 +80,7 @@ BPSession::~BPSession()
         m_protoHand = NULL;
     }
 
-    assert(m_plugletRegistry != NULL);
+    BPASSERT(m_plugletRegistry != NULL);
     delete m_plugletRegistry;
     m_plugletRegistry = NULL;
 }

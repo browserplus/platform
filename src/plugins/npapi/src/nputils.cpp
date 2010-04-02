@@ -198,7 +198,7 @@ npu::callFunction(NPP instance, NPObject* obj, const NPVariant args[],
     NPIdentifier call =  gBrowserFuncs.getstringidentifier("call");
 	
     NPVariant * vargs = (NPVariant *) calloc(argCount+1, sizeof(NPVariant));
-    assert(vargs != NULL);
+    BPASSERT(vargs != NULL);
     vargs[0].type = NPVariantType_Object;
     vargs[0].value.objectValue = obj;
     memcpy((void *) (vargs + 1), (void *) args, sizeof(NPVariant) * argCount);
