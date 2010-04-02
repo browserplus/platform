@@ -43,7 +43,7 @@ ENDIF ()
 # now set up the build configurations
 IF(WIN32)
     SET(win32Defs "/DWINDOWS /D_WINDOWS /DWIN32 /D_WIN32 /DXP_WIN32 /DUNICODE /D_UNICODE /DWIN32_LEAN_AND_MEAN /DNOSOUND /DNOCOMM /DNOMCX /DNOSERVICE /DNOIME /DNORPC /D_CRT_RAND_S")
-    SET(disabledWarnings "/wd4100 /wd4127 /wd4201 /wd4250 /wd4251 /wd4275 /wd4800")
+    SET(disabledWarnings "/wd4100 /wd4127 /wd4201 /wd4250 /wd4251 /wd4275 /wd4800 /wd4297")
     SET(CMAKE_CXX_FLAGS
         "${win32Defs} /EHsc /Gy /MT /W4 ${disabledWarnings} /Zi"
         CACHE STRING "BrowserPlus CXX flags" FORCE)
