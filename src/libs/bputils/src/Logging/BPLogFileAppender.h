@@ -47,7 +47,7 @@ public:
     FileAppender( const bp::file::Path& path,
                   LayoutPtr layout,
                   FileMode mode,
-                  int nRolloverSizeKB,
+                  unsigned int nRolloverSizeKB,
                   bool bImmediateFlush=true );
 
     virtual ~FileAppender();
@@ -67,7 +67,7 @@ private:
     // used when mode==kSizeRollover
     // rollover check is performed at first append
     // existing file is emptied if it exceeds rollover size
-    int             m_nRolloverSizeKB;
+    unsigned int    m_nRolloverSizeKB;
     
     // whether to flush after each append
     bool            m_bImmediateFlush;

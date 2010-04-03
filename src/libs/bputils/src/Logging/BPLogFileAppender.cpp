@@ -45,7 +45,7 @@ namespace log {
 FileAppender::FileAppender( const bp::file::Path& path,
                             LayoutPtr layout,
                             FileMode mode,
-                            int nRolloverSizeKB,
+                            unsigned int nRolloverSizeKB,
                             bool bImmediateFlush ) :
     Appender( layout ),
     m_path( path ),

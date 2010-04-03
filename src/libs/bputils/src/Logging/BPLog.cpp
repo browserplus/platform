@@ -115,7 +115,7 @@ void setupLogToFile( const bp::file::Path& logFilePath,
                      const std::string& sConfig,
                      FileMode mode,
                      const std::string& sTimeFormat,
-                     int nRolloverSizeKB,
+                     unsigned int nRolloverSizeKB,
                      Logger& logger )
 {
     std::vector<std::string> vsVals = bp::strutil::splitAndTrim( sConfig, "," );
