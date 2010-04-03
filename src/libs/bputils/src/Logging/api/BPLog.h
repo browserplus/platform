@@ -33,10 +33,11 @@
 #define _LOG_H_
 
 #include <sstream>
+#include "BPUtils/bpfile.h"
+#include "BPUtils/BPLogFile.h"
 #include "BPUtils/BPLogLevel.h"
 #include "BPUtils/BPLogLocation.h"
 #include "BPUtils/BPLogLogger.h"
-#include "BPUtils/bpfile.h"
 
 
 #define BPLOG_LEVEL_LOGGER( level, logger, message ) \
@@ -109,14 +110,6 @@ bp::log::ScopeLogger sl( __FILE__, __BP_FUNC__, __LINE__ )
 
 namespace bp {
 namespace log {
-
-
-/**
- * How FileAppender should treat existing log file.
- * Useful in calls to setupLogToFile().
- */
-const bool kTruncateExisting = true;
-const bool kAppendExisting   = false;
 
 
 /**
@@ -222,6 +215,7 @@ void setupLogToDebugger( const std::string& sConfig,
                          Logger& logger=rootLogger() );
 
 
+
 /**
  * Helper to setup logging to file.
  * Adds a FileAppender to the specified logger.
@@ -236,21 +230,33 @@ void setupLogToDebugger( const std::string& sConfig,
  *          level sets the appender's threshold.
  *          If no layout is specified, "standard" will be used.
  *
- * bTruncateExisting: clear log file if it exists when this method called
+ * mode: controls truncate/append/rollover of existing log file
  * 
  * sTimeFormat: ""|"utc"|"local"|"msec"
  *              "" or "utc": report time in UTC
  *              "local":     report local time
  *              "msec":      report elapsed msec since root logger creation
  *
+ * nRolloverSizeKB: If log file exists and is greater than this size in
+ *                  KB, truncate the file at first append.
+ *                  
  * logger: logger to which appender is added
  * 
  * Note: the setupLogTo... functions may be invoked cumulatively.
+ *
+ * Note: If you are going to have multiple processes writing to the
+ *       same log file, the typical pattern is to have a "master"
+ *       process open the file in truncate/rollover mode and have one
+ *       or more "slaves" open the file in append mode.  Since the
+ *       actual truncate/rollover is performed lazily at first append,
+ *       it is probably best to ensure the master does at least one
+ *       append before any slaves do.
  */
 void setupLogToFile( const bp::file::Path& logFilePath,
                      const std::string& sConfig,
-                     bool bTruncateExisting=true,
+                     FileMode mode=kTruncate,
                      const std::string& sTimeFormat="",
+                     int nRolloverSizeKB=512,
                      Logger& logger=rootLogger() );
 
 

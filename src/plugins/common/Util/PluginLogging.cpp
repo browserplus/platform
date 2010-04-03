@@ -83,7 +83,7 @@ bool setupLogging( const bp::file::Path& logfilePath )
         // Setup the logfile path.
         bp::file::Path path = bp::paths::getObfuscatedWritableDirectory()
                               / logfilePath;
-        bp::log::setupLogToFile( path, sVal, true, sTimeFormat );
+        bp::log::setupLogToFile( path, sVal, bp::log::kTruncate, sTimeFormat );
     }
 
     return true;

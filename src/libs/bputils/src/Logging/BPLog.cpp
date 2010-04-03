@@ -113,8 +113,9 @@ void setupLogToDebugger( const std::string& sConfig,
 
 void setupLogToFile( const bp::file::Path& logFilePath,
                      const std::string& sConfig,
-                     bool bTruncateExisting,
+                     FileMode mode,
                      const std::string& sTimeFormat,
+                     int nRolloverSizeKB,
                      Logger& logger )
 {
     std::vector<std::string> vsVals = bp::strutil::splitAndTrim( sConfig, "," );
@@ -128,7 +129,7 @@ void setupLogToFile( const bp::file::Path& logFilePath,
     layout->setTimeFormat( timeFormatFromString( sTimeFormat ) );
 
     FileAppenderPtr apdr( new FileAppender( logFilePath, layout,
-                                            bTruncateExisting ) );
+                                            mode, nRolloverSizeKB ) );
     apdr->setThreshold( threshold );
     logger.addAppender( apdr ); 
 }

@@ -838,7 +838,9 @@ main(int argc, const char** argv)
         Installer::setLocalizedStringsPath(stringsPath, locale);
     
         if (!logFile.empty()) {
-            bp::log::setupLogToFile(logFile, logLevel, truncateLog);
+            bp::log::setupLogToFile(logFile, logLevel,
+                                    truncateLog ?
+                                    bp::log::kTruncate : bp::log::kAppend);
         } else if (!logLevel.empty()) {
             bp::log::setupLogToConsole(logLevel);
         }

@@ -81,8 +81,11 @@ setupLogging(const APTArgParse& argParser)
     // We could add an APTArg but seems unnecessary at the moment.
     std::string timeformat = "msec";
     
-    if (path.empty()) bp::log::setupLogToConsole(config,"",timeformat);
-    else bp::log::setupLogToFile(path,config,true,timeformat);
+	if (path.empty()) {
+		bp::log::setupLogToConsole(config,"",timeformat);
+	} else {
+		bp::log::setupLogToFile(path,config,bp::log::kTruncate,timeformat);
+	}
 }
 
 /** a class to listen for UserQuitEvents and stop the runloop upon

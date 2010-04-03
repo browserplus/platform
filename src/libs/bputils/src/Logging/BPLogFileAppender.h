@@ -32,8 +32,9 @@
 
 #include <fstream>
 #include <string>
-#include "BPLogAppender.h"
 #include "bpfile.h"
+#include "BPLogAppender.h"
+#include "BPLogFile.h"
 
 
 namespace bp {
@@ -45,21 +46,37 @@ class FileAppender : public Appender
 public:
     FileAppender( const bp::file::Path& path,
                   LayoutPtr layout,
-                  bool bTruncateExisting=true,
+                  FileMode mode,
+                  int nRolloverSizeKB,
                   bool bImmediateFlush=true );
+
     virtual ~FileAppender();
 
     virtual void append( LoggingEventPtr evt );
     
 private:
+    // path to log file
     bp::file::Path  m_path;
+
+    // file stream - stays open between appends
     std::ofstream   m_fstream;
-    bool            m_bTruncateExisting;
-    bool            m_bImmediateFlush;
+
+    // truncate/append/rollover mode
+    FileMode        m_mode;
     
+    // used when mode==kSizeRollover
+    // rollover check is performed at first append
+    // existing file is emptied if it exceeds rollover size
+    int             m_nRolloverSizeKB;
+    
+    // whether to flush after each append
+    bool            m_bImmediateFlush;
+
+private:
     FileAppender( const FileAppender& );
     FileAppender& operator=( const FileAppender& );
 };
+
 
 typedef std::tr1::shared_ptr<FileAppender> FileAppenderPtr;
 

@@ -219,7 +219,8 @@ ServiceLibrary::setupServiceLogging()
         string serviceName = s_libObjectPtr->name();
         bpf::Path p(serviceName.length() ? serviceName : "service");
         p.replace_extension(bpf::nativeFromUtf8("log"));
-        bp::log::setupLogToFile(p,sval,true,timeFormat,m_serviceLogger);
+		bp::log::setupLogToFile(p,sval,bp::log::kTruncate,timeFormat,
+			                    0,m_serviceLogger);
     }
 
     if (map->getString("LogToConsole",sval)) {

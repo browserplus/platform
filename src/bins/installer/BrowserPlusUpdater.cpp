@@ -165,13 +165,12 @@ main(int argc, const char** argv)
 
         if (loggingChanged) {
             if (!logFile.empty()) {
-                bp::log::setupLogToFile(logFile, logLevel, false);
+                bp::log::setupLogToFile(logFile, logLevel, bp::log::kAppend);
             } else {
                 bp::log::setupLogToConsole(logLevel);
             }
         } else {
-            (void) remove(logFile);
-            bp::log::setupLogToFile(logFile, logLevel, true);
+            bp::log::setupLogToFile(logFile, logLevel, bp::log::kTruncate);
         }
     
         // install out of dir

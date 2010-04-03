@@ -188,20 +188,19 @@ setupLogging(const APTArgParse& argParser,
         // Get log time format (if present) from the config file.
         // (no cmd-line support currently).  
         string timeFormat;
-        (void) reader.getStringValue("LogTimeFormat",timeFormat);
+        (void) reader.getStringValue("LogTimeFormat", timeFormat);
         
         // if "-fg", log to console, else to logfile
         if (argParser.argumentPresent("fg")) {
-            bp::log::setupLogToConsole(config,"",timeFormat);
+            bp::log::setupLogToConsole(config, "", timeFormat);
         } else {
-            file = bp::paths::getObfuscatedWritableDirectory()/"BrowserPlusCore.log";
+            file = bp::paths::getObfuscatedWritableDirectory()/
+                   "BrowserPlusCore.log";
 
-            // Delete the log file at daemon start.
-            (void) bp::file::remove(file);
-
-            // Open the logfile in append mode.
-            // Daemon and Service logging will be interleaved in same file.
-            bp::log::setupLogToFile(file,config,false,timeFormat);
+            // Note: Daemon and Service logging are interleaved in same file.
+            // We truncate any existing file, services just append.
+            bp::log::setupLogToFile(file, config, bp::log::kTruncate, 
+				                    timeFormat);
         }
     }
 }

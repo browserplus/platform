@@ -60,7 +60,7 @@ main(int argc, const char** argv)
             if (logFile.empty()) {
                 bp::log::setupLogToConsole(logLevel);
             } else {
-                bp::log::setupLogToFile(logFile, logLevel, true);        
+                bp::log::setupLogToFile(logFile, logLevel);
             }
         }
         bp::install::Uninstaller unins;

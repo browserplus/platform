@@ -68,7 +68,7 @@ setupLogging(std::string config, bp::file::Path path)
     } else {
         // Services open the daemon logfile in append mode.
         // Deleting the log file is done by BPDaemon.cpp: setupLogging().
-        bp::log::setupLogToFile(path,config,false,timeFormat);
+		bp::log::setupLogToFile(path,config,bp::log::kAppend,timeFormat);
     }
 }
 

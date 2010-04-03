@@ -44,11 +44,13 @@ namespace log {
 
 FileAppender::FileAppender( const bp::file::Path& path,
                             LayoutPtr layout,
-                            bool bTruncateExisting,
+                            FileMode mode,
+                            int nRolloverSizeKB,
                             bool bImmediateFlush ) :
     Appender( layout ),
     m_path( path ),
-    m_bTruncateExisting( bTruncateExisting ),
+    m_mode( mode ),
+    m_nRolloverSizeKB( nRolloverSizeKB ),
     m_bImmediateFlush( bImmediateFlush )
 {
 
@@ -64,22 +66,29 @@ FileAppender::~FileAppender()
 void FileAppender::append( LoggingEventPtr event )
 {
     // If we've had a failure with our fstream, go no further.
-    if (m_fstream.fail())
-    {
+    if (m_fstream.fail()) {
         return;
     }
 
     if (!m_fstream.is_open())
     {
-        if (m_bTruncateExisting) {
-            // TODO: could possibly assert here.
-            (void) bp::file::remove( m_path );
+        // Truncate/rollover existing file if appropriate.
+        if (bp::file::exists( m_path ))
+        {
+            if (m_mode == kTruncate) {
+                (void) bp::file::remove( m_path );
+            } else if (m_mode == kSizeRollover) {
+                if (bp::file::size( m_path ) > m_nRolloverSizeKB*1000) {
+                    (void) bp::file::remove( m_path );
+                }
+            } else {
+            }
         }
-        
+
+        // Open file.
         std::ios_base::openmode mode = std::ios::binary | std::ios::app;
         
-		if (!bp::file::openWritableStream( m_fstream, m_path, mode ))
-        {
+		if (!bp::file::openWritableStream( m_fstream, m_path, mode )) {
             // TODO: could possibly assert here.
             return;
         }
@@ -92,11 +101,11 @@ void FileAppender::append( LoggingEventPtr event )
     
     // Write it.
     m_fstream.write( sMsg.c_str(), static_cast<std::streamsize>(sMsg.length()));
-    if (m_bImmediateFlush)
-    {
+    if (m_bImmediateFlush) {
         m_fstream.flush();
     }
 }
+
 
 
 } // log

@@ -69,7 +69,7 @@ int APIENTRY WinMain( HINSTANCE, HINSTANCE, LPSTR, int )
             args.push_back(std::string(__argv[i]));
         }
     }
-    bp::log::setupLogToFile(logFile, "debug", true);
+	bp::log::setupLogToFile(logFile, "debug", bp::log::kTruncate);
     std::string logArg("-logfile=");
     logArg.append(logFile.utf8());
     args.push_back(logArg);

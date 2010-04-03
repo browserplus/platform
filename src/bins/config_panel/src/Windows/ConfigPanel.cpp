@@ -55,10 +55,6 @@ void setupLogging()
     bp::file::Path logPath = bp::paths::getObfuscatedWritableDirectory() /
                              "ConfigPanel.log";
     
-    // now obliterate the old log file if it exists.  This behavior
-    // should possibly be configurable in the config file.
-    (void) bp::file::remove(logPath);
-
     // now attempt to figure out logging level from config file
     string level = "info";
 
