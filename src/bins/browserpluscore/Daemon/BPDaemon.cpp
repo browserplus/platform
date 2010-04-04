@@ -194,13 +194,16 @@ setupLogging(const APTArgParse& argParser,
         if (argParser.argumentPresent("fg")) {
             bp::log::setupLogToConsole(config, "", timeFormat);
         } else {
-            file = bp::paths::getObfuscatedWritableDirectory()/
+            file = bp::paths::getObfuscatedWritableDirectory() /
                    "BrowserPlusCore.log";
 
+            long long int rolloverKB = 0;
+            (void) reader.getIntegerValue("LogFileRolloverKB", rolloverKB);
+            
             // Note: Daemon and Service logging are interleaved in same file.
-            // We truncate any existing file, services just append.
-            bp::log::setupLogToFile(file, config, bp::log::kTruncate, 
-				                    timeFormat);
+            // We'll handle any rollover, services will just append.
+            bp::log::setupLogToFile(file, config, bp::log::kSizeRollover, 
+				                    timeFormat, (unsigned int) rolloverKB);
         }
     }
 }

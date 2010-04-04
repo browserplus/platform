@@ -81,9 +81,14 @@ bool setupLogging( const bp::file::Path& logfilePath )
     if (configReader.getStringValue( "PluginLogToFile", sVal ))
     {
         // Setup the logfile path.
-        bp::file::Path path = bp::paths::getObfuscatedWritableDirectory()
-                              / logfilePath;
-        bp::log::setupLogToFile( path, sVal, bp::log::kTruncate, sTimeFormat );
+        bp::file::Path path = bp::paths::getObfuscatedWritableDirectory() /
+                              logfilePath;
+
+        long long int nRolloverKB = 0;
+        (void) configReader.getIntegerValue("LogFileRolloverKB", nRolloverKB);
+
+        bp::log::setupLogToFile( path, sVal, bp::log::kSizeRollover,
+                                 sTimeFormat, (unsigned int) nRolloverKB );
     }
 
     return true;
