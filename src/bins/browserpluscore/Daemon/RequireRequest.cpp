@@ -234,12 +234,44 @@ RequireRequest::doRun()
         }
     }
     
-    // can we satisy everything?
+    // can we satisfy everything?
     bool haveAllServices = true;
     list<CoreletRequireStatement>::const_iterator it;
+
+    // First check installed services for missing needed provider services.
+    // If any providers are missing, add them to the request.
+    list<CoreletRequireStatement> toAdd;
     for (it = m_requires.begin(); it != m_requires.end(); ++it) {
         bp::service::Summary summary;
+        if (m_registry->summary(it->m_name, it->m_version,
+                                it->m_minversion, summary)) {
+            string providerName = summary.usesCorelet();
+            if (!providerName.empty()) {
+                string providerVersion = summary.usesVersion().asString();
+                string providerMinversion = summary.usesMinversion().asString();
+                CoreletRequireStatement rs = {providerName, providerVersion,
+                                              providerMinversion};
+                bp::service::Summary providerSummary;
+                if (!m_registry->summary(providerName, providerVersion,
+                                         providerMinversion, providerSummary)) {
+                    BPLOG_INFO_STRM(m_smmTid << (it->m_name) << " - "
+                                    << (it->m_version) << " - "
+                                    << (it->m_minversion)
+                                    << " is missing provider "
+                                    << providerName << " - "
+                                    << providerVersion << " - "
+                                    << providerMinversion
+                                    << ", adding to requirements");
+                    toAdd.push_back(rs);
+                }
+            }
+        }
+    }
+    m_requires.splice(m_requires.end(), toAdd);
         
+    // now see if we can satisfy the request
+    for (it = m_requires.begin(); it != m_requires.end(); ++it) {
+        bp::service::Summary summary;
         if (m_registry->summary(it->m_name, it->m_version,
                                 it->m_minversion, summary)) {
             // do we need permissions?
@@ -260,7 +292,6 @@ RequireRequest::doRun()
                             << (it->m_name) << " - "
                             << (it->m_version) << " - "
                             << (it->m_minversion));
-            
             haveAllServices = false;
         }
     }
