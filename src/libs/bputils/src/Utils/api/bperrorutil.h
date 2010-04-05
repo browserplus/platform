@@ -148,8 +148,13 @@ bp::error::ReportCatch( (e), __FILE__, __BP_FUNC__, __LINE__ );
 std::string makeCatchReportString(const std::exception& exc,
                                   const std::string& sAddlContext="" );
 
+// XXX re-enable after 2.8 is tagged
+#if defined(DEBUG)
 // And now for an assert which also works in release builds
 #define BPASSERT( c ) if (!(c)) BP_THROW_FATAL( "assert failed: " #c );
+#else
+#define BPASSERT( c )
+#endif
 
 } // namespace error
 } // namespace bp
