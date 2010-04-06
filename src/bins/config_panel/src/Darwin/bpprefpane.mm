@@ -93,33 +93,22 @@ didFailProvisionalLoadWithError: (NSError *) error
 {
     // intialize BP logging
     bp::file::Path logPath = bp::paths::getObfuscatedWritableDirectory() / "ConfigPanel.log";
-    // now obliterate the old log file if it exists.  This behavior
-    // should possibly be configurable in the config file.
-    (void) bp::file::remove(logPath);
-    
-    // now attempt to figure out logging level from config file
-    {
-        std::string level = "info";
 
-        bp::file::Path configFilePath = bp::paths::getConfigFilePath();
-        bp::config::ConfigReader reader;
-        if (!reader.load(configFilePath)) {
-            // what else can we do?
-            std::cerr << "couldn't read config file at: "
-                      << configFilePath << ", logging at info level"
-                      << std::endl;
-        } else {
-            std::string configLevel;
-            if (reader.getStringValue("ConfigPanelLogLevel", configLevel))
-            {
-                level = configLevel;
-            }
-        }
+    bp::config::ConfigReader reader;
+    (void) reader.load(bp::paths::getConfigFilePath());
 
-        bp::log::setupLogToFile(logPath, level);
-    }
-    
+    std::string level = "info";
+    (void) reader.getStringValue("ConfigPanelLogLevel", level);
 
+    std::string timeFormat;
+    (void) reader.getStringValue("LogTimeFormat", timeFormat);
+
+    long long int rolloverKB = 0;
+    (void) reader.getIntegerValue("LogFileRolloverKB", rolloverKB);
+
+    // TODO: appender layout?
+    bp::log::setupLogToFile(logPath, level, bp::log::kSizeRollover,
+                            timeFormat, (unsigned int) rolloverKB);
 
     // (lth) on tiger and leopard pref pane width is different.  detect
     // os automatically here
