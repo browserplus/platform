@@ -310,6 +310,12 @@ if ENV.has_key? "BP_LOG_LEVEL"
   logLevel = ENV['BP_LOG_LEVEL']
 end
 
+logSizeKB = "256"
+if ENV.has_key? "BP_LOG_SIZE_KB"
+  logSizeKB = ENV['BP_LOG_SIZE_KB']
+end
+
+
 pass = "FreeYourBrowser"
 pubKey = "#{topDir}/support/signing/devel_certs/BrowserPlus.crt"
 certStore = "#{topDir}/support/signing/Combined.crt"
@@ -319,5 +325,6 @@ generateCmd = generateCmd + " -certStore=#{certStore} -pass=#{pass} -outdir=\"#{
 generateCmd = generateCmd + " -prefix=BrowserPlus -primary=#{primary}"
 secondaries.each { |s|  generateCmd = generateCmd + " -secondary=#{s}" }
 generateCmd = generateCmd + " -buildType=ephemeral -logLevel=#{logLevel}"
+generateCmd = generateCmd + " -logSizeKB=#{logSizeKB}"
 system(generateCmd)
 
