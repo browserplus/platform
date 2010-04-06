@@ -1,6 +1,6 @@
 <project name="BrowserPlusPlatform_external" default="build">
     <target name="clean">
-        <exec executable="ruby">
+        <exec executable="ruby" failonerror="true">
             <arg line="./build.rb clean" />
         </exec>
     </target>
@@ -12,7 +12,7 @@
         </exec>
     </target>
     <target name="build">
-        <exec executable="ruby">
+        <exec executable="ruby" failonerror="true">
             <arg line="./build.rb keepSource" />
         </exec>
     </target>

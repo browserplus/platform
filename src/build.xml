@@ -9,18 +9,18 @@
         <mkdir dir="build" />
     </target>
     <target name="build_make" depends="build" >
-        <exec executable="cmake" dir="build">
+        <exec executable="cmake" dir="build" failonerror="true">
             <arg line="-G &quot;Unix Makefiles&quot; .." />
         </exec>
-        <exec executable="make" dir="build">
+        <exec executable="make" dir="build" failonerror="true">
             <arg line="-j3" />
         </exec>
     </target>
     <target name="build_xcode">
-        <exec executable="cmake" dir="build">
+        <exec executable="cmake" dir="build" failonerror="true">
             <arg line="-G &quot;Xcode&quot; .." />
         </exec>
-        <exec executable="xcodebuild" dir="build">
+        <exec executable="xcodebuild" dir="build" failonerror="true">
             <arg line="-project BrowserPlus.xcodeproj -alltargets" />
         </exec>
     </target>
