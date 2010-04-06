@@ -34,13 +34,14 @@
 
 #include <iostream>
 #include "BPLog.h"
-//#include "bppaths.h"
+
 
 namespace bp
 {
 namespace config
 {
 
+    
 // Reads a config file at a place specified by bp::paths.
 // The file currently must be in JSON format.
 ConfigReader::ConfigReader()
@@ -53,7 +54,7 @@ bool
 ConfigReader::load( const bp::file::Path& path )
 {
     // allow the same object to be re-used
-    if (m_pConfigMap != NULL) delete m_pConfigMap;
+    delete m_pConfigMap;
     m_pConfigMap = NULL;
 
     std::string sConfig;
@@ -86,7 +87,7 @@ ConfigReader::load( const bp::file::Path& path )
 
 ConfigReader::~ConfigReader()
 {
-    if (m_pConfigMap != NULL) delete m_pConfigMap;
+    delete m_pConfigMap;
     m_pConfigMap = NULL;
 }
 
@@ -94,8 +95,7 @@ ConfigReader::~ConfigReader()
 bool
 ConfigReader::getStringValue(const std::string& sKey, std::string& sValue) const
 {
-    if (!m_pConfigMap)
-    {
+    if (!m_pConfigMap) {
         return false;
     }
 
@@ -109,7 +109,9 @@ ConfigReader::getArrayOfStrings(const std::string& sKey,
 {
     sValue.clear();
 
-    if (!m_pConfigMap) return false;
+    if (!m_pConfigMap) {
+        return false;
+    }
 
     const bp::List* arr;
     if (!m_pConfigMap->getList(sKey, arr)) return false;
@@ -129,8 +131,7 @@ bool
 ConfigReader::getIntegerValue(const std::string& sKey,
                               long long int & iValue) const
 {
-    if (!m_pConfigMap)
-    {
+    if (!m_pConfigMap) {
         return false;
     }
     
@@ -140,8 +141,7 @@ ConfigReader::getIntegerValue(const std::string& sKey,
 bool
 ConfigReader::getBooleanValue(const std::string& sKey, bool & iValue) const
 {
-    if (!m_pConfigMap)
-    {
+    if (!m_pConfigMap) {
         return false;
     }
     
@@ -153,8 +153,7 @@ bool
 ConfigReader::getJsonMap(const std::string& sKey,
                          const bp::Map*& pmValue) const
 {
-    if (!m_pConfigMap)
-    {
+    if (!m_pConfigMap) {
         return false;
     }
 
