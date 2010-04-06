@@ -175,9 +175,6 @@ FileUtils.install("#{$buildDir}/libs/installer/misc/strings.json",
 FileUtils.install("#{shippingBinsDir}/BrowserPlusUninstaller#{exeSuffix}",
                   "#{updateDir}/BrowserPlusUninstaller#{exeSuffix}",
                   :mode => 0755, :verbose => $beVerbose)
-FileUtils.install("#{shippingBinsDir}/BrowserPlusUpdater#{exeSuffix}",
-                  "#{updateDir}/BrowserPlusUpdater#{exeSuffix}",
-                  :mode => 0755, :verbose => $beVerbose)
 
 # windows also needs ybang.ico icon 
 if platform == "Windows"
@@ -242,9 +239,6 @@ else
     FileUtils.mkdir_p(btTgtDir, :mode => 0755, :verbose => $beVerbose)
 
     FileUtils.install("#{$buildDir}/dist/bin/#{$intDir}/bptar.exe",
-                      btTgtDir, :mode => 0644, :verbose => $beVerbose)
-
-    FileUtils.install("#{$buildDir}/dist/bin/#{$intDir}/BrowserPlusBootstrapper.exe",
                       btTgtDir, :mode => 0644, :verbose => $beVerbose)
 
     FileUtils.install("#{$buildDir}/dist/bin/#{$intDir}/BrowserPlusBootstrapper.exe",
