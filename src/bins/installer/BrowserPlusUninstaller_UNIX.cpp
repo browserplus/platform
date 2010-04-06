@@ -35,7 +35,6 @@ main(int argc, const char** argv)
     try {
         // debug logging on be default
         Path logFile = getTempDirectory() / "BrowserPlusUninstaller.log";
-        remove(logFile);
         string logLevel = "debug";
 
         vector<string> args;
@@ -60,7 +59,8 @@ main(int argc, const char** argv)
             if (logFile.empty()) {
                 bp::log::setupLogToConsole(logLevel);
             } else {
-                bp::log::setupLogToFile(logFile, logLevel);
+                bp::log::setupLogToFile(logFile, logLevel,
+                                        bp::log::kSizeRollover);
             }
         }
         bp::install::Uninstaller unins;
