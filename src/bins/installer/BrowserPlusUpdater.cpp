@@ -145,7 +145,6 @@ main(int argc, const char** argv)
         int argIndex = 1;
         string ipcName;
         string curArg(argv[argIndex]);
-        bool loggingChanged = false;
         if (curArg.find("-ipcName=") == 0) {
             ipcName = curArg.substr(strlen("-ipcName="));
             proxy = new IPCProxy(ipcName);
@@ -154,23 +153,18 @@ main(int argc, const char** argv)
         if (curArg.find("-logPath=") == 0) {
             logFile = curArg.substr(strlen("-logPath="));
             curArg = argv[++argIndex];
-            loggingChanged = true;
         }
         if (curArg.find("-logLevel=") == 0) {
             logLevel = curArg.substr(strlen("-logLevel="));
             curArg = argv[++argIndex];
-            loggingChanged = true;
         }
         Path dir(argv[argIndex++]);
 
-        if (loggingChanged) {
-            if (!logFile.empty()) {
-                bp::log::setupLogToFile(logFile, logLevel, bp::log::kAppend);
-            } else {
-                bp::log::setupLogToConsole(logLevel);
-            }
+        if (!logFile.empty()) {
+            // TODO: size, layout, time format
+            bp::log::setupLogToFile(logFile, logLevel, bp::log::kSizeRollover);
         } else {
-            bp::log::setupLogToFile(logFile, logLevel, bp::log::kTruncate);
+            bp::log::setupLogToConsole(logLevel);
         }
     
         // install out of dir
