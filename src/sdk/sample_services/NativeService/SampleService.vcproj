@@ -42,7 +42,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include;..\..\..\build\bpsdk\include"
+				AdditionalIncludeDirectories="..\..\include;..\..\..\..\build\bpsdk\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;SAMPLECORELET2_EXPORTS"
 				MinimalRebuild="false"
 				ExceptionHandling="1"

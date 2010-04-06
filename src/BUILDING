@@ -19,12 +19,13 @@ Building on OSX:
   Building the tree:    
     1. cd <path to public_platform>/external
     2. ruby build.rb keepSource (will take a while, only needs to be done once)
-    3. mkdir <some_build_dir>
-    4. cd <some_build_dir>
-    5. cmake <path to public_platform>/src 
+    3. cd <path to public_platform>
+    4. mkdir build
+    5. cd build
+    6. cmake ../src 
          or
-       cmake -G Xcode <path to public_platform>/src if you like Xcode
-    6. make -j3
+       cmake -G Xcode ../src if you like Xcode
+    7. make -j3
          or
        open BrowserPlus.xcodeproj (or xcodebuild)
 
@@ -81,13 +82,13 @@ Building on win32:
        (e.g. invoke vsvars32.bat)
     2. cd <path to public_platform>\external
     3. ruby build.rb keepSource (will take a while, only needs to be done once)
-    4. mkdir <some_build_dir>
-    5. cd <some_build_dir>
-    6. cmake <path to public_platform>\src
-    7. cd <some_build_dir>
-         devenv BrowserPlus.sln 
-           or
-         devenv BrowserPlus.sln /Build {Debug,Release}
-       or
-         Launch VS08, open <some_build_dir>\BrowserPlus.sln and build via the gui.
+    4. cd <path to public_platform>
+    5. mkdir build
+    6. cd build
+    7. cmake ..\src
+    8. devenv BrowserPlus.sln 
+         or
+       devenv BrowserPlus.sln /Build {Debug,Release}
+         or
+       Launch VS08, open build\BrowserPlus.sln and build via the gui.
            
