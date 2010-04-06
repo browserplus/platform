@@ -81,7 +81,7 @@ ServiceProtocol::channelEnded(
     bp::ipc::IConnectionListener::TerminationReason,
     const char *)
 {
-    BPLOG_ERROR("connection ended!");
+    BPLOG_INFO("connection ended!");
     m_rl->stop();
 }
 
