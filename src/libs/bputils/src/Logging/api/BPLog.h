@@ -256,7 +256,7 @@ void setupLogToFile( const bp::file::Path& logFilePath,
                      const std::string& sConfig,
                      FileMode mode=kTruncate,
                      const std::string& sTimeFormat="",
-                     unsigned int nRolloverSizeKB=512,
+                     unsigned int nRolloverSizeKB=256,
                      Logger& logger=rootLogger() );
 
 
