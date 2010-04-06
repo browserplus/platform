@@ -49,11 +49,15 @@ void forkChild( const string& sChildName, const vector<string>& vsArgs );
 
 
 
-void setupLogging( bp::log::FileMode mode )
+void setupLogging( bool bIsParent )
 {
     Path logFile = getTempDirectory() / "BrowserPlusUninstaller.log";
     string sLogLevel = "debug";
-    
+
+    // TODO: time, layout, size
+    bp::log::FileMode mode = bIsParent ?
+                             bp::log::kSizeRollover : bp::log::kAppend;
+
     bp::log::setupLogToFile( logFile, sLogLevel, mode );
 }
     
@@ -80,7 +84,7 @@ int WINAPI WinMain( HINSTANCE, HINSTANCE, PSTR, int )
 
 int doParent( const vector<string>& vsArgs )
 {
-    setupLogging( bp::log::kTruncate );
+    setupLogging( true );
     BPLOG_FUNC_SCOPE;
 
     // Fork a temporary self-deleting child with all our args.
@@ -93,7 +97,7 @@ int doParent( const vector<string>& vsArgs )
 
 int doChild( const vector<string>& vsArgs )
 {
-    setupLogging( bp::log::kAppend );
+    setupLogging( false );
     BPLOG_FUNC_SCOPE;
 
     // We're the child, do whatever work we want to do.
