@@ -205,7 +205,8 @@ DistQuery::reportPageUsage(const std::string & ysOSVersion,
                            const std::string & ysBPVersion,
                            const std::string & ysURL,
                            const std::string & ysID,
-                           const std::string & ysUA)
+                           const std::string & ysUA,
+                           const std::string & ysServices)
 {
     // Assemble the url.
     // We currently do not want "version" nor "api".
@@ -218,9 +219,10 @@ DistQuery::reportPageUsage(const std::string & ysOSVersion,
     lpsFields.push_back(std::make_pair("url", ysURL));
     lpsFields.push_back(std::make_pair("id", ysID));
     lpsFields.push_back(std::make_pair("ua", ysUA));
+    lpsFields.push_back(std::make_pair("s", ysServices));
     std::string sQuery = bp::url::makeQueryString(lpsFields);
     url.append(sQuery);
-    BPLOG_DEBUG_STRM(this << ": Reporting page usage");
+    BPLOG_DEBUG_STRM(this << ": Reporting page usage: " << url);
 
     TransactionContextPtr tc = 
         allocTransaction(TransactionContext::ReportPageUsage);

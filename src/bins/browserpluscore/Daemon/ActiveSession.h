@@ -250,6 +250,9 @@ class ActiveSession : public virtual RequireLock::ILockListener,
     bp::ipc::Channel * m_session;
     std::tr1::shared_ptr<CoreletRegistry> m_registry;
 
+    // services used by this session
+    std::set<std::pair<std::string, std::string> > m_servicesUsed;
+
     // a comparator for complex keys consisting of two
     // std::strings in a std::pair
     struct TwoStringCompare {

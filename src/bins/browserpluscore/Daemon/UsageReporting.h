@@ -37,7 +37,9 @@
 namespace bp {
 namespace usage {
 
-void reportPageUsage( const std::string& sUrl, const std::string& sUserAgent );
+void reportPageUsage( const std::string& sUrl,
+                      const std::string& sUserAgent,
+                      const std::string& sServices );
 
 } // usage
 } // bp

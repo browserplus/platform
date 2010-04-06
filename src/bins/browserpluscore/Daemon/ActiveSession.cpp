@@ -129,7 +129,17 @@ ActiveSession::~ActiveSession()
 
     // Report page usage now at session termination time so we do not add
     // any latency
-    bp::usage::reportPageUsage( m_URI, m_userAgent );
+    string services;
+    set<pair<string, string> >::const_iterator sit;
+    for (sit = m_servicesUsed.begin(); sit != m_servicesUsed.end(); ++sit) {
+        services += sit->first + "|" + sit->second + ",";
+    }
+    if (!services.empty()) {
+        // strip trailing ","
+        services = services.substr(0, services.length()-1);
+    }
+
+    bp::usage::reportPageUsage( m_URI, m_userAgent, services );
     
     // just in case, release our hold on the require lock
     // noop if we don't have it
@@ -1060,6 +1070,18 @@ ActiveSession::onComplete(unsigned int tid,
                         << "RequireCompletedEvent received with unknown tid = "
                         << tid);
     }  
+
+    // keep track of services we use
+    for (size_t i = 0; i < satisfyingServices.size(); ++i) {
+        const bp::Map* m = dynamic_cast<const bp::Map*>(satisfyingServices.value(i));
+        if (m) {
+            string name, version;
+            if (m->getString("name", name)
+                    && m->getString("versionString", version)) {
+                m_servicesUsed.insert(pair<string, string>(name, version));
+            }
+        }
+    }
 }
 
 void

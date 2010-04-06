@@ -156,7 +156,8 @@ class DistQuery : virtual public ICoreletQueryListener
                                  const std::string & sBPPlatform,
                                  const std::string & sURL,
                                  const std::string & sID,
-                                 const std::string & sUA);
+                                 const std::string & sUA,
+                                 const std::string & sServices);
     
     /**
      * Given a list of require statments, Generate a topographically
