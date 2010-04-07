@@ -253,11 +253,10 @@ DistQuery::reportInstall(const std::string & ysOSVersion,
     std::string url = m_distroServers.front() + "/" + WSProtocol::USAGE_PATH;
 
     bp::StrPairList lpsFields;
-    lpsFields.push_back(std::make_pair("t", "pv"));
+    lpsFields.push_back(std::make_pair("t", "id"));
     lpsFields.push_back(std::make_pair("os", ysOSVersion));
     lpsFields.push_back(std::make_pair("bp", ysBPVersion));
     lpsFields.push_back(std::make_pair("id", ysID));
-    lpsFields.push_back(std::make_pair("n", "1"));
     std::string sQuery = bp::url::makeQueryString(lpsFields);
     url.append(sQuery);
     BPLOG_DEBUG_STRM(this << ": Reporting new install: " << url);
