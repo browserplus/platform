@@ -160,6 +160,14 @@ class DistQuery : virtual public ICoreletQueryListener
                                  const std::string & sServices);
     
     /**
+     * report new installs
+     * return payload is currently just a string "ok"
+     **/
+    unsigned int reportInstall(const std::string & sOSVersion,
+                               const std::string & sBPPlatform,
+                               const std::string & sID);
+
+    /**
      * Given a list of require statments, Generate a topographically
      * sorted list of corelets that satisfy these requirements statements,
      * and all nested requirements expressed by dependent corelets.

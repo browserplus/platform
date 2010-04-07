@@ -167,9 +167,11 @@ main(int argc, const char** argv)
             bp::log::setupLogToConsole(logLevel);
         }
     
-        // install out of dir
+        // Install out of dir.  We delete dir at completion if we aren't
+        // being run on behalf of installer (proxy == NULL).  If we are
+        // being run on behalf of installer, it will delete dir.
         shared_ptr<IInstallerListener> p;
-        Installer inst(dir, true);
+        Installer inst(dir, proxy == NULL);
         if (proxy) {
             p.reset(proxy);
             inst.setListener(weak_ptr<IInstallerListener>(p));

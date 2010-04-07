@@ -22,6 +22,7 @@
 
 #include "DistQuery.h"
 #include "BPUtils/bpurl.h"
+#include "BPUtils/InstallID.h"
 #include "WSProtocol.h"
 #include "CoreletQuery.h"
 #include "CoreletQueryUtil.h"
@@ -216,10 +217,9 @@ DistQuery::reportPageUsage(const std::string & ysOSVersion,
     lpsFields.push_back(std::make_pair("t", "pv"));
     lpsFields.push_back(std::make_pair("os", ysOSVersion));
     lpsFields.push_back(std::make_pair("bp", ysBPVersion));
-#ifdef NOTDEF
-    // currently disabled due to privacy concerns
-    lpsFields.push_back(std::make_pair("url", ysURL));
-#endif
+    if (!ysURL.empty()) {
+        lpsFields.push_back(std::make_pair("url", ysURL));
+    }
     lpsFields.push_back(std::make_pair("id", ysID));
     lpsFields.push_back(std::make_pair("ua", ysUA));
     if (!ysServices.empty()) {
@@ -239,6 +239,39 @@ DistQuery::reportPageUsage(const std::string & ysOSVersion,
 
     m_transactions.push_back(tc);
     
+    return tc->m_tid;
+}
+
+
+unsigned int
+DistQuery::reportInstall(const std::string & ysOSVersion,
+                         const std::string & ysBPVersion,
+                         const std::string & ysID)
+{
+    // Assemble the url.
+    // We currently do not want "version" nor "api".
+    std::string url = m_distroServers.front() + "/" + WSProtocol::USAGE_PATH;
+
+    bp::StrPairList lpsFields;
+    lpsFields.push_back(std::make_pair("t", "pv"));
+    lpsFields.push_back(std::make_pair("os", ysOSVersion));
+    lpsFields.push_back(std::make_pair("bp", ysBPVersion));
+    lpsFields.push_back(std::make_pair("id", ysID));
+    lpsFields.push_back(std::make_pair("n", "1"));
+    std::string sQuery = bp::url::makeQueryString(lpsFields);
+    url.append(sQuery);
+    BPLOG_DEBUG_STRM(this << ": Reporting new install: " << url);
+
+    TransactionContextPtr tc =
+        allocTransaction(TransactionContext::ReportPageUsage);
+
+    bp::http::RequestPtr req(WSProtocol::buildRequest(url));
+    tc->m_transaction.reset(new bp::http::client::Transaction(req));
+    BPLOG_INFO_STRM(this << ": initiate GET to report new install");
+    tc->m_transaction->initiate(tc.get());
+
+    m_transactions.push_back(tc);
+
     return tc->m_tid;
 }
 

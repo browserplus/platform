@@ -30,6 +30,8 @@
 #include "BPUtils/bprunloop.h"
 #include "BPUtils/ProcessLock.h"
 #include "BPUtils/ProductPaths.h"
+#include "BPUtils/OS.h"
+#include "BPUtils/InstallID.h"
 #include "InstallerSkin.h"
 #include "InstallerSkinVerbose.h"
 #include "InstallerSkinGUI.h"
@@ -228,7 +230,7 @@ public:
           m_width(width), m_height(height), m_title(title),
           m_installerLock(NULL), m_state(ST_Started),
           m_downloadingServices(false), m_26orLater(false), m_logPath(logPath),
-          m_logLevel(logLevel)
+          m_logLevel(logLevel), m_distQuery()
           
     {
         if (m_skin != NULL) m_skin->setListener(this);
@@ -306,11 +308,16 @@ private:
     
     Path m_logPath;
     string m_logLevel;
+    shared_ptr<DistQuery> m_distQuery; // only set for new installs
 
     // do the body of the installation.  This should be broken up into
     // asynchronous steps
     void doInstall()
     {
+        if (exists(bp::paths::getInstallIDPath()) == false) {
+            m_distQuery.reset(new DistQuery(m_servers, NULL));
+        }
+
         // used to format messages for the output skin
         stringstream ss; 
        
@@ -471,9 +478,6 @@ private:
     {
         if (m_state == ST_WaitingToEnd) {
             m_state = ST_AllDone;
-            m_rl->stop();            
-            bp::file::remove(m_destDir);
-            if (m_skin) m_skin->ended();
             doExit(0);
         }
     }
@@ -481,6 +485,11 @@ private:
     void doExit(int status)
     {
         BPLOG_DEBUG_STRM("exit with status " << status);
+
+        m_rl->stop();            
+        bp::file::remove(m_destDir);
+        if (m_skin) m_skin->ended();
+
 #ifdef MACOSX
         if (m_exeDir.utf8().find("/Volumes/BrowserPlusInstaller") == 0) {
             BPLOG_DEBUG("detach /Volumes/BrowserPlusInstaller");
@@ -489,6 +498,16 @@ private:
             BPLOG_DEBUG_STRM(m_exeDir << " not mounted at /Volumes/BrowserPlusInstaller");
         }
 #endif
+        // if all went well and this is a new install (m_distQuery != NULL),
+        // report the install
+        if ((m_state == ST_AllDone) && m_distQuery) {
+            string os = bp::os::PlatformAsString() + " " + bp::os::PlatformVersion();
+            string id = bp::plat::getInstallID();
+            if (m_distQuery->reportInstall(os, m_platformVersion, id) == 0) {
+                BPLOG_ERROR("DistQuery::reportInstall returned tid==0");
+            }
+        }
+
         exit(status);
     }
 
@@ -503,9 +522,6 @@ private:
     void cancelInstallation()
     {
         m_state = ST_Canceled;
-        m_rl->stop();        
-        bp::file::remove(m_destDir);
-        if (m_skin) m_skin->ended();
         doExit(0);
     }
 
@@ -933,8 +949,6 @@ main(int argc, const char** argv)
 
     // Note, we will only get here on exceptions.  Otherwiser, 
     // InstallerManager exits
-    if (!destDir.empty()) {
-        bp::file::remove(destDir);
-    }
+    bp::file::remove(destDir);
     exit(rval);
 }
