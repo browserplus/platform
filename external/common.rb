@@ -6,6 +6,7 @@ require 'pathname'
 require 'open-uri'
 require 'digest'
 require 'digest/md5'
+require 'timeout'
 include Config
 
 topDir = File.dirname(File.expand_path(__FILE__))
@@ -182,30 +183,42 @@ def fetch(tarball, url, md5)
         lastPercent = 0
         interval = 5
         f = File.new(tarball, perms)
-        f.write(open(url,
-                     :content_length_proc => lambda {|t|
-                         if (t && t > 0)
-                             totalSize = t
-                             STDOUT.printf("expect %d bytes, percent downloaded: ",
-                                           totalSize)
-                             STDOUT.flush
-                         else 
-                             STDOUT.print("unknown size to download: ")
-                         end
-                     },
-                     :progress_proc => lambda {|s|
-                         if (totalSize > 0)
-                             percent = ((s.to_f / totalSize) * 100).to_i
-                             if (percent/interval > lastPercent/interval)
-                                 lastPercent = percent
-                                 STDOUT.printf("%d ", percent)
-                                 STDOUT.printf("\n") if (percent == 100)
-                             end
-                         else
-                             STDOUT.printf(".")
-                         end
-                         STDOUT.flush
-                     }).read)
+        # added by garymd 04/06/2010.
+        # grabbing large tarballs (boost) times out on slow net connections like build machines.
+        retries = 10
+        begin
+          f.write(open(url,
+                       :content_length_proc => lambda {|t|
+                           if (t && t > 0)
+                               totalSize = t
+                               STDOUT.printf("expect %d bytes, percent downloaded: ",
+                                             totalSize)
+                               STDOUT.flush
+                           else 
+                               STDOUT.print("unknown size to download: ")
+                           end
+                       },
+                       :progress_proc => lambda {|s|
+                           if (totalSize > 0)
+                               percent = ((s.to_f / totalSize) * 100).to_i
+                               if (percent/interval > lastPercent/interval)
+                                   lastPercent = percent
+                                   STDOUT.printf("%d ", percent)
+                                   STDOUT.printf("\n") if (percent == 100)
+                               end
+                           else
+                               STDOUT.printf(".")
+                           end
+                           STDOUT.flush
+                       }).read)
+        rescue Timeout::Error
+          retries -= 1
+          if retry > 0
+            sleep 0.42 and retry
+          else
+            raise
+          end
+        end
         f.close()
         s = File.size(tarball)
         if (s == 0 || (totalSize > 0 && s != totalSize))
