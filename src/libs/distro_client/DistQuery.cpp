@@ -216,10 +216,15 @@ DistQuery::reportPageUsage(const std::string & ysOSVersion,
     lpsFields.push_back(std::make_pair("t", "pv"));
     lpsFields.push_back(std::make_pair("os", ysOSVersion));
     lpsFields.push_back(std::make_pair("bp", ysBPVersion));
+#ifdef NOTDEF
+    // currently disabled due to privacy concerns
     lpsFields.push_back(std::make_pair("url", ysURL));
+#endif
     lpsFields.push_back(std::make_pair("id", ysID));
     lpsFields.push_back(std::make_pair("ua", ysUA));
-    lpsFields.push_back(std::make_pair("s", ysServices));
+    if (!ysServices.empty()) {
+        lpsFields.push_back(std::make_pair("s", ysServices));
+    }
     std::string sQuery = bp::url::makeQueryString(lpsFields);
     url.append(sQuery);
     BPLOG_DEBUG_STRM(this << ": Reporting page usage: " << url);
