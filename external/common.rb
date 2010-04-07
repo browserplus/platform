@@ -213,7 +213,7 @@ def fetch(tarball, url, md5)
                        }).read)
         rescue Timeout::Error
           retries -= 1
-          if retry > 0
+          if retries > 0
             sleep 0.42 and retry
           else
             raise
