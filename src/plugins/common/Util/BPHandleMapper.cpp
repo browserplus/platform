@@ -110,9 +110,6 @@ BPHandleMapper::insertHandles(const bp::Object* bpObj)
             Map* m = new Map;
             m->add(BROWSERPLUS_HANDLETYPE_KEY, new String(handle.type()));
             m->add(BROWSERPLUS_HANDLEID_KEY, new Integer(handle.id()));
-            // TODO: eventually kill this guy once everyone is platform 2.0.7
-            //      or greater
-            m->add(DEPRECATED_BROWSERPLUS_HANDLENAME_KEY, new String(handle.name()));
             m->add(BROWSERPLUS_HANDLENAME_KEY, new String(handle.name()));
             m->add(BROWSERPLUS_HANDLESIZE_KEY, new Integer(handle.size()));
             set<string> mt = handle.mimeTypes();
