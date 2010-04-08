@@ -1122,32 +1122,41 @@ Path::url() const
     vector<std::string> edges;
     boost::algorithm::split(edges, s, boost::algorithm::is_any_of("/"));
     std::string rval = kFileUrlPrefix;
-    unsigned int start = 0;
-    if (edges[0].empty()) {
-        start++;
+    vector<std::string>::const_iterator it = edges.begin();
+    if (it->empty()) {
+        ++it;
     }
 #ifdef WIN32
     // Windows hosts appear differently in pathname (//host/path)
     // and must appear in final url as file://host/path.  Also
     // want drive names, which appear as C:/foo, to appear in
     // url as file:///C:/foo
-    if (edges[start].length() == 0) {
-        // have a host, e.g. //host/path
-        rval.append(edges[++start]);
-        start++;
-    } else if (edges[start].length() == 2 && edges[start][1] == ':') {
-        // have a drive, e.g. c:/foo
-        rval.append("/" + edges[start]);
-        start++;
+    if (it != edges.end()) {
+        if (it->length() == 0) {
+            ++it;
+            if (it != edges.end()) {
+                // have a host, e.g. //host/path
+                rval.append(*it);
+                ++it;
+            } else {
+                // just have "/"
+                rval.append("/");
+            }
+        } else if (it->length() == 2 && (*it)[1] == ':') {
+            // have a drive, e.g. c:/foo
+            rval.append("/" + *it);
+            ++it;
+        }
     }
 #endif
 
     // add remaining edges
-    for (unsigned int i = start; i < edges.size(); i++) {
-        if (edges[i].length() > 0) {
+    while (it != edges.end()) {
+        if (it->length() > 0) {
             rval.append("/");
-            rval.append(urlEncode(edges[i]));
+            rval.append(urlEncode(*it));
         }
+        ++it;
     }
     return rval;
 }
