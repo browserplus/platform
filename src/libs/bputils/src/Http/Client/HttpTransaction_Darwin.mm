@@ -664,7 +664,7 @@ static void streamCB(CFReadStreamRef stream,
 
 - (void) handleError: (std::string) msg
 {
-    BPLOG_INFO_STRM(self << ": handleError " << msg);
+    BPLOG_INFO_STRM(self << ": handleError(\"" << msg << "\")");
     [m_progressTimer invalidate];
     
     // if msg contains "timed out", it's a timeout.
