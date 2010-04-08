@@ -309,17 +309,17 @@ static void streamCB(CFReadStreamRef stream,
 - (void) cancel
 {
     BPLOG_INFO_STRM(self << ": cancel");
-
     [m_progressTimer invalidate];
 
     if (m_stream) {
         CFReadStreamUnscheduleFromRunLoop(m_stream, CFRunLoopGetCurrent(),
                                           kCFRunLoopCommonModes);
-        [self cleanup];
     } else {
         [m_connection cancel];
     }
     m_listener->onCancel();
+
+    [self cleanup];
 }
 
 
@@ -341,6 +341,8 @@ static void streamCB(CFReadStreamRef stream,
 
 - (void) cleanup
 {
+    BPLOG_INFO_STRM(self << ": cleanup");
+
     if (m_pathFd >= 0) {
         ::close(m_pathFd);
         m_pathFd = -1;
@@ -440,6 +442,7 @@ static void streamCB(CFReadStreamRef stream,
 
 - (void) onOpen
 {
+    BPLOG_INFO_STRM(self << ": onOpen");
     m_listener->onConnected();
     m_listener->onRequestSent();
 }
@@ -447,7 +450,7 @@ static void streamCB(CFReadStreamRef stream,
 
 - (void) onResponse
 {
-    BPLOG_INFO_STRM(self << ": onresponse");
+    BPLOG_INFO_STRM(self << ": onResponse");
     CFHTTPMessageRef response =  (CFHTTPMessageRef) CFReadStreamCopyProperty(
         m_stream, kCFStreamPropertyHTTPResponseHeader); 
     if (response) {
@@ -487,6 +490,7 @@ static void streamCB(CFReadStreamRef stream,
 - (void) onComplete
 {
     BPLOG_INFO_STRM(self << ": onComplete");
+    [m_progressTimer invalidate];
     CFHTTPMessageRef response =  (CFHTTPMessageRef) CFReadStreamCopyProperty(
         m_stream, kCFStreamPropertyHTTPResponseHeader); 
     if (response) {
@@ -498,7 +502,6 @@ static void streamCB(CFReadStreamRef stream,
     }
     
     m_stream = NULL;
-    [m_progressTimer invalidate];
     [self handleComplete];
 }
 
@@ -571,8 +574,8 @@ static void streamCB(CFReadStreamRef stream,
     }
     
     if (m_timeoutStopwatch != NULL &&
-        m_timeoutStopwatch->elapsedSec() > m_timeoutSecs) 
-    {
+        m_timeoutStopwatch->elapsedSec() > m_timeoutSecs) {
+        BPLOG_INFO_STRM(self << ": onProgress sending timeout");
         [self handleError: std::string("timed out")];
     }
 }
@@ -651,6 +654,7 @@ static void streamCB(CFReadStreamRef stream,
 
 - (void) handleComplete
 {
+    BPLOG_INFO_STRM(self << ": handleComplete");
     m_listener->onComplete();
     m_listener->onClosed();
 
@@ -660,6 +664,9 @@ static void streamCB(CFReadStreamRef stream,
 
 - (void) handleError: (std::string) msg
 {
+    BPLOG_INFO_STRM(self << ": handleError " << msg);
+    [m_progressTimer invalidate];
+    
     // if msg contains "timed out", it's a timeout.
     // msg will be different depending on whether our
     // stopwatch triggers the timeout or NSUrl does, but
@@ -670,15 +677,14 @@ static void streamCB(CFReadStreamRef stream,
         m_listener->onError(msg);
     }
 
-    [m_progressTimer invalidate];
-    
     if (m_stream) {
         CFReadStreamUnscheduleFromRunLoop(m_stream, CFRunLoopGetCurrent(),
                                           kCFRunLoopCommonModes);
-        [self cleanup];
     } else {
         [m_connection cancel];
     }
+
+    [self cleanup];
 }
 
 @end
