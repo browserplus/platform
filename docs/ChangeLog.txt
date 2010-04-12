@@ -1,3 +1,28 @@
+04/12/2010 - Changes from 2.7.0 to 2.8.0
+  * {#9} numerous potential defects reported by coverity fixed.
+  * {#11} - prefpanel no longer crashes on windows with non-ascii username
+  * fix [YIB-3461791] - file sizes and other data were being cached and
+    hence falsely reported when a file was selected, changed, and re-selected
+    in a single session
+  * {#8} - all binaries now authenticode signed again on win32 (at build
+    generation time - offline)
+  * {#6} wild stack write and several race conditions fixed in win32 HTTP
+    stack (general system stability)
+  * {#141} increased logging in win32 uninstaller to track down some reports
+    of failures.
+  * {#56} rolling logfiles now introduced.  Logs are no longer truncated
+    every time allowing for improved diagnostics and bug reporting.  Now only
+    when logs grow to more than 256kb will they be truncated.
+  Inactive ingredients:
+  * cmake 2.8.1 now required
+  * out of tree builds in any ol' directory now supported
+  * {#5} Xcode now fully supported
+  * {#139} Always deliver 0% and 100% on both send and receive from HTTP
+    abstraction.
+  * {#143} bp::file::recursiveVisit() should protect against non-dir args 
+  * {#68} BPASSERT() macro added which emulates assert(3) assymetric behavior
+    re: opt/debug builds in 2.8, and in 2.9 checks will always be performed.
+    
 03/11/2010 - Changes from 2.6.0 to 2.7.0
   * improved troubleshooting interface in configuration panel
   * bug #8 - fix very infrequent crash when dameon is shutting down as a new
