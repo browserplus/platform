@@ -219,7 +219,7 @@ ServiceLibrary::setupServiceLogging()
         string serviceName = s_libObjectPtr->name();
         bpf::Path p(serviceName.length() ? serviceName : "service");
         p.replace_extension(bpf::nativeFromUtf8("log"));
-		bp::log::setupLogToFile(p,sval,bp::log::kTruncate,timeFormat,
+		bp::log::setupLogToFile(p,sval,bp::log::kSizeRollover,timeFormat,
 			                    0,m_serviceLogger);
     }
 
