@@ -747,7 +747,7 @@ usage()
     stringstream ss;
     ss << "usage: BrowserPlusInstaller [-nogui=<anything> [-verbose=<anything>] "
        << "[-pkg=<path>] [-log=<loglevel>] [-logfile=<filename>|console] "
-       << "[-appendToLog=<anything>] [-locale=<locale>]";
+       << "[-locale=<locale>]";
     BPLOG_ERROR(ss.str());
     cerr << ss.str() << endl;
     exit(-1);
@@ -804,7 +804,6 @@ main(int argc, const char** argv)
 
         Path updatePkg;
         string version;
-        bool truncateLog = true;
 
         vector<string> args;
         for (int i = 1; i < argc; i++) {
@@ -821,8 +820,6 @@ main(int argc, const char** argv)
                 }
             } else if (!args[0].compare("-log")) {
                 logLevel = args[1];
-            } else if (!args[0].compare("-appendToLog")) {
-                truncateLog = false;
             } else if (!args[0].compare("-verbose")) {
                 skin.reset(new InstallerSkinVerbose);
             } else if (!args[0].compare("-nogui")) {
@@ -854,9 +851,7 @@ main(int argc, const char** argv)
         Installer::setLocalizedStringsPath(stringsPath, locale);
     
         if (!logFile.empty()) {
-            bp::log::setupLogToFile(logFile, logLevel,
-                                    truncateLog ?
-                                    bp::log::kTruncate : bp::log::kAppend);
+            bp::log::setupLogToFile(logFile, logLevel, bp::log::kAppend);
         } else if (!logLevel.empty()) {
             bp::log::setupLogToConsole(logLevel);
         }

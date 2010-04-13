@@ -58,7 +58,6 @@ int APIENTRY WinMain( HINSTANCE, HINSTANCE, LPSTR, int )
     // debug logging on be default
 
     bp::file::Path logFile = bp::file::getTempDirectory()/"BrowserPlusInstaller.log";
-    (void) bp::file::remove(logFile);
 
     for (int i = 1; i < __argc; i++) {
         std::vector<std::string> arg = bp::strutil::split(__argv[i], "=");
@@ -69,11 +68,16 @@ int APIENTRY WinMain( HINSTANCE, HINSTANCE, LPSTR, int )
             args.push_back(std::string(__argv[i]));
         }
     }
-	bp::log::setupLogToFile(logFile, "debug", bp::log::kTruncate);
+
+    // Both the "bootstrap" process and the spawned "installer" process
+    // may write to the same file.
+    // bootstrap will be master and handle rollover, spawned
+    // installer will just append.
+	bp::log::setupLogToFile(logFile, "debug", bp::log::kSizeRollover);
+
     std::string logArg("-logfile=");
     logArg.append(logFile.utf8());
     args.push_back(logArg);
-    args.push_back("-appendToLog=true");
 
     wchar_t szPath[_MAX_PATH];
     GetModuleFileNameW( NULL, szPath, sizeof(szPath)/sizeof(wchar_t) );
@@ -220,10 +224,6 @@ int APIENTRY WinMain( HINSTANCE, HINSTANCE, LPSTR, int )
     }
 
     BS_INFO_OUTPUT( "Removed temporary directory: " << extractTo );
-
-    // TODO: only delete log if no errors were hit
-    // Currently we *always* leave the log.
-    // (void) bp::file::remove(logFile);
 
     return 0;
 }
