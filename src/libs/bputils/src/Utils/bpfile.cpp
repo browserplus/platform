@@ -1154,7 +1154,7 @@ Path::url() const
                 }
             }
 #else
-            rval += urlEncode(*it);
+            rval += "/" + urlEncode(*it);
 #endif
             firstEdgeAdded = true;
         } else {
