@@ -79,16 +79,26 @@ void UrlTest::setUp()
 
 #ifdef WIN32
         // posix format with host name
+        g_data.push_back( make_pair( Path(L"//a"), "file://a" ));
+        g_data.push_back( make_pair( Path(L"//a/"), "file://a/" ));
+        g_data.push_back( make_pair( Path(L"//a/b/"), "file://a/b/" ));
         g_data.push_back( make_pair( Path(L"//a/b/c.jpg"), "file://a/b/c.jpg" ));
         g_data.push_back( make_pair( Path(L"//.a/b.ext"),  "file://.a/b.ext" ));
-        g_data.push_back( make_pair( Path(L"//a:100/c d/e f.jpg"),
-                                     "file://a:100/c%20d/e%20f.jpg" ));
+
         // and now for a drive letter
+        g_data.push_back( make_pair( Path(L"c:/"),  "file:///c:/" ));
+        g_data.push_back( make_pair( Path(L"c:/a"),  "file:///c:/a" ));
+        g_data.push_back( make_pair( Path(L"c:/a/"),  "file:///c:/a/" ));
         g_data.push_back( make_pair( Path(L"c:/foo.txt"),  "file:///c:/foo.txt" ));
+        g_data.push_back( make_pair( Path(L"a:/100/c d/e f.jpg"),
+                                     "file:///a:/100/c%20d/e%20f.jpg" ));
 #endif
         // posix format 
+        g_data.push_back( make_pair( Path("/"), "file:///" ));
         g_data.push_back( make_pair( Path("/some/path"),
                                      "file:///some/path" ));
+        g_data.push_back( make_pair( Path("/some/dir/"),
+                                     "file:///some/dir/" ));
         g_data.push_back( make_pair( Path("/a/b/c.jpg"),
                                      "file:///a/b/c.jpg" ));
         g_data.push_back( make_pair( Path("/.a/b.ext"),
@@ -121,7 +131,19 @@ void UrlTest::testPathFromUrl()
     CPPUNIT_ASSERT(p.utf8().compare("/b/c.jpg") == 0);
     p = pathFromURL("file://localhost/c%20d/e%20f.jpg");
     CPPUNIT_ASSERT(p.utf8().compare("/c d/e f.jpg") == 0);
-                             
+
+    // ditto for 127.0.0.1
+    p = pathFromURL("file://127.0.0.1/b/c.jpg");
+    CPPUNIT_ASSERT(p.utf8().compare("/b/c.jpg") == 0);
+    p = pathFromURL("file://127.0.0.1/c%20d/e%20f.jpg");
+    CPPUNIT_ASSERT(p.utf8().compare("/c d/e f.jpg") == 0);
+#ifdef WIN32
+    // windows should take file://C:/foo and file:///C:/foo
+    p = pathFromURL("file://C:/foo");
+    CPPUNIT_ASSERT(p.utf8().compare("C:/foo") == 0);
+    p = pathFromURL("file:///C:/foo");
+    CPPUNIT_ASSERT(p.utf8().compare("C:/foo") == 0);
+#endif
 #ifndef WIN32
     // posix format path from url with host name should fail
     p = pathFromURL("file://a/b/c.jpg");
@@ -147,8 +169,6 @@ void UrlTest::testUrlFromPath()
     CPPUNIT_ASSERT(p.url().compare("file:///a/b/c.jpg") == 0);
     p = "//.a/b.ext";
     CPPUNIT_ASSERT(p.url().compare("file:///.a/b.ext") == 0);
-    p = "//a:100/c d/e f.jpg";
-    CPPUNIT_ASSERT(p.url().compare("file:///a%3A100/c%20d/e%20f.jpg") == 0);
 #endif
 }
 
