@@ -6,6 +6,7 @@ you to control how that installed version is configured:
 
   BP_LOG_LEVEL - one of info, debug, warn, or error.  Controls how vigorously
                  BrowserPlus logs in its logfiles.  
+  BP_LOG_SIZE_KB - size in KB above which to rollover logfiles.
   BP_DISTRO_SERVERS - a comma separated list of hostnames which are the
                  distribution servers you'd like BrowserPlus to query
                  for permissions, updates, and services.
