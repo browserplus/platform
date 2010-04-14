@@ -49,7 +49,7 @@ void
 Installer::installPlugins()
 {
     BPLOG_DEBUG_STRM("begin Installer::installPlugins()");
-    Path pluginPath = nativeFromUtf8("BrowserPlus_" + m_version.asString()  + ".plugin");
+    Path pluginPath = "BrowserPlus_" + m_version.asString()  + ".plugin";
     
     // Get path to plugins
     Path pluginDir = utils::getFolderPath(kInternetPlugInFolderType) / pluginPath;
@@ -67,7 +67,7 @@ Installer::installPlugins()
     }
 
     // copy plugin into plugins dir
-    Path src = m_dir / nativeFromUtf8("plugins") / pluginPath;
+    Path src = m_dir / "plugins" / pluginPath;
     doCopy(src, pluginDir);
     BPLOG_DEBUG_STRM("complete Installer::installPlugins()");
 }
@@ -81,7 +81,7 @@ Installer::installPrefPanel()
     BPLOG_DEBUG_STRM("begin Installer::installPrefPanel()");
     // Get path to PreferencePanels
     Path prefPaneDir = utils::getFolderPath(kPreferencePanesFolderType)
-        / nativeFromUtf8("BrowserPlusPrefs.prefPane");
+        / "BrowserPlusPrefs.prefPane";
 
     // remove existing version of our prefpane
     if (!remove(prefPaneDir)) {
@@ -96,7 +96,7 @@ Installer::installPrefPanel()
     }
 
     // copy prefpane
-    Path src= m_dir / nativeFromUtf8("prefPane") / nativeFromUtf8("BrowserPlusPrefs.prefPane");
+    Path src= m_dir / "prefPane" / "BrowserPlusPrefs.prefPane";
     doCopy(src, prefPaneDir);
     BPLOG_DEBUG_STRM("complete Installer::installPrefPanel()");
 }

@@ -77,27 +77,27 @@ namespace bp {
 
             // Remove preference panel
             dir = utils::getFolderPath(kPreferencePanesFolderType);
-            Path path = dir / nativeFromUtf8("BrowserPlusPrefs.prefPane");
+            Path path = dir / "BrowserPlusPrefs.prefPane";
             BPLOG_DEBUG_STRM("remove " << path);
             (void) remove(path);
 
             // Remove platform
             dir = utils::getFolderPath(kApplicationSupportFolderType);
-            path = dir / nativeFromUtf8("Yahoo!") / nativeFromUtf8("BrowserPlus");
+            path = dir / "Yahoo!" / "BrowserPlus";
             BPLOG_DEBUG_STRM("remove " << path);
             (void) remove(path);
             removeDirIfEmpty(path.parent_path());
 
             // remove uninstaller
             dir = utils::getFolderPath(kApplicationsFolderType);
-            path = dir / nativeFromUtf8("Yahoo!") / nativeFromUtf8("BrowserPlus");
+            path = dir / "Yahoo!" / "BrowserPlus";
             BPLOG_DEBUG_STRM("remove " << path);
             (void) remove(path);
             removeDirIfEmpty(path.parent_path());
 
             // remove receipts from old packagemaker installer
             dir = utils::getFolderPath(kInstallerReceiptsFolderType);
-            path = dir / nativeFromUtf8("BrowserPlus.pkg");
+            path = dir / "BrowserPlus.pkg";
             BPLOG_DEBUG_STRM("remove " << path);
             (void) remove(path);
 
