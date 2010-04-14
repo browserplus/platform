@@ -291,8 +291,8 @@ BPDaemon::run()
     // daemons which shutdown due to DaemonLock
     // to cream logs.  for release builds,
     // logging isn't setup until after we've 
-    // checked the killswith (in case there's 
-    // a vulnerability in logging)
+    // checked the killswitch (in case there's 
+    // a vulnerability in logging).
     setupLogging(m_argParser, m_logLevel, m_logFile, m_configReader);
 #endif
     
