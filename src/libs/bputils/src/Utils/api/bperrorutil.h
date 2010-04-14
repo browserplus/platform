@@ -33,6 +33,7 @@
 
 #include <exception>
 #include <string>
+#include <assert.h>
 
 namespace bp {
 namespace error {
@@ -148,12 +149,12 @@ bp::error::ReportCatch( (e), __FILE__, __BP_FUNC__, __LINE__ );
 std::string makeCatchReportString(const std::exception& exc,
                                   const std::string& sAddlContext="" );
 
-// XXX re-enable after 2.8 is tagged
+// Now for an assert which causes flaming death in release builds
+// and a plain old assert in debug builds
 #if defined(DEBUG)
-// And now for an assert which also works in release builds
-#define BPASSERT( c ) if (!(c)) BP_THROW_FATAL( "assert failed: " #c );
+#define BPASSERT( c ) assert( c )
 #else
-#define BPASSERT( c )
+#define BPASSERT( c ) if (!(c)) BP_THROW_FATAL( "assert failed: " #c );
 #endif
 
 } // namespace error
