@@ -27,7 +27,8 @@
     <target name="build_vc08">
         <mkdir dir="build" />
         <exec executable="cmd" dir="build" failonerror="true">
-            <arg line="/C &quot;C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat&quot; &amp;&amp; set &amp;&amp; cmake -G &quot;Visual Studio 9 2008&quot; .." />
+            <arg line="/C &quot;C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat&quot; &amp;&amp; set" />
+            <!--<arg line="/C &quot;C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat&quot; &amp;&amp; set &amp;&amp; cmake -G &quot;Visual Studio 9 2008&quot; .." />-->
         </exec>
         <exec executable="cmd" dir="build" failonerror="true">
             <arg line="/C &quot;C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat&quot; &amp;&amp; set" />
