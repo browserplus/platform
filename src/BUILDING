@@ -52,7 +52,7 @@ Building on win32:
     6. (optional) Add %WindowsSdkDir%Bin to your path.
        This will allow you to easily invoke tools such as mt.exe from your
        command line.
-    7. install cmake version 2.6.2 or greater from:
+    7. install cmake version 2.8.0 or greater from:
        http://www.cmake.org/cmake/resources/software.html
        during install, select "add cmake to PATH for this user (or all users)"
     8. install ruby from: http://www.ruby-lang.org 
