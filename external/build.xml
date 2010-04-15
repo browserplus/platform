@@ -7,12 +7,12 @@
     <target name="clean_make" depends="clean" />
     <target name="clean_xcode" depends="clean" />
     <target name="clean_vc08" >
-        <delete file="build/x1.bat" />
-        <echo message="&quot;C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat&quot; &amp;&amp; ruby .\build.rb clean" file="build/x1.bat" />
+        <delete file="x1.bat" />
+        <echo message="&quot;C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat&quot; &amp;&amp; ruby .\build.rb clean" file="x1.bat" />
         <exec executable="cmd" failonerror="true">
             <arg line="/C x1.bat" />
         </exec>
-        <delete file="build/x1.bat" />
+        <delete file="x1.bat" />
     </target>
     <target name="build">
         <exec executable="ruby" failonerror="true">
@@ -22,11 +22,11 @@
     <target name="build_make" depends="build" />
     <target name="build_xcode" depends="build" />
     <target name="build_vc08">
-        <delete file="build/x1.bat" />
-        <echo message="&quot;C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat&quot; &amp;&amp; ruby .\build.rb keepSource" file="build/x1.bat" />
+        <delete file="x1.bat" />
+        <echo message="&quot;C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat&quot; &amp;&amp; ruby .\build.rb keepSource" file="x1.bat" />
         <exec executable="cmd" failonerror="true">
             <arg line="/C x1.bat" />
         </exec>
-        <delete file="build/x1.bat" />
+        <delete file="x1.bat" />
     </target>
 </project>
