@@ -104,6 +104,7 @@ main(int argc, const char** argv)
             [alert addButtonWithTitle: [NSString stringWithUTF8String: no.c_str()]];
 
             // show the alert, making sure that it's topmost
+            BPLOG_INFO( "Displaying uninstall prompt." );
             [[alert window] setFloatingPanel: YES];
             int ret = [alert runModal];
             [alert release];
@@ -125,6 +126,7 @@ main(int argc, const char** argv)
             [alert setMessageText: [NSString stringWithUTF8String: done.c_str()]];
             [alert addButtonWithTitle: [NSString stringWithUTF8String: ok.c_str()]];
             [[alert window] setFloatingPanel: YES];
+	    BPLOG_INFO( "Displaying uninstall notification." );
             (void) [alert runModal];
             [alert release];
             [pool release];

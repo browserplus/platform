@@ -68,11 +68,19 @@ int WINAPI WinMain( HINSTANCE, HINSTANCE, PSTR, int )
     try
     {
         vector<string> vsArgs = bp::process::getCommandLineArgs();
+        // strip argv[0]
+        vsArgs.erase(vsArgs.begin());
 
-        // Parent is currently distinguished by lack of command line args.
-        bool bIsParent = vsArgs.size() == 1;
-
-        return bIsParent ? doParent(vsArgs) : doChild(vsArgs);
+        // child has /child argument
+        bool bIsChild = false;
+        for (vector<string>::const_iterator it = vsArgs.begin();
+             it != vsArgs.end(); ++it) {
+            if (it->compare( "/child" ) == 0) {
+                bIsChild = true;
+                break;
+            }
+        }
+        return bIsChild ? doChild( vsArgs ) : doParent( vsArgs );
     }
     catch (bp::error::Exception& e)
     {
@@ -125,17 +133,14 @@ void forkChild( const string& sChildName, const vector<string>& vsParentArgs )
 
     // Setup the child's command line.
     vector<string> vsChildArgs;
-    vsChildArgs.push_back( childPath.utf8() ); 
+    vsChildArgs.push_back( childPath.externalUtf8() ); 
+    vsChildArgs.push_back("/child");
 
     // Add all the parent's args.
-//  for (vector<string>::const_iterator it = vsParentArgs.begin();
-//       it != vsParentArgs.end(); ++it) {
-//        vwChildArgs.push_back( bp::strutil::utf8ToWide( *it ) );
-//  }                               
-    
-    // Add quoted path to parent exe so child can delete it.
-    Path parentPath(wszParentPath);
-    vsChildArgs.push_back( "\"" + parentPath.utf8() + "\"" );
+    for (vector<string>::const_iterator it = vsParentArgs.begin();
+         it != vsParentArgs.end(); ++it) {
+        vsChildArgs.push_back( *it );
+    }
 
     // Convert arg vec to wide string.
     stringstream ss;
@@ -144,8 +149,9 @@ void forkChild( const string& sChildName, const vector<string>& vsParentArgs )
     wstring wsChildArgs = utf8ToWide( ss.str() );
     
     // CreateProcess demands a mutable cmd line.
-    wchar_t wszChildCmd[MAX_PATH];
-    wcsncpy_s( wszChildCmd, wsChildArgs.c_str(), MAX_PATH );
+    size_t len = wsChildArgs.length()+1;
+    wchar_t* wszChildCmd = new wchar_t[len];
+    wcsncpy_s( wszChildCmd, len, wsChildArgs.c_str(), len-1 );
 
     STARTUPINFOW si;
     ZeroMemory(&si, sizeof(STARTUPINFOW));
@@ -154,6 +160,7 @@ void forkChild( const string& sChildName, const vector<string>& vsParentArgs )
     ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));
     CreateProcessW( 0, wszChildCmd, 0, 0, FALSE, NORMAL_PRIORITY_CLASS,
                     0, 0, &si, &pi );
+    delete[] wszChildCmd;
 
     // Give the child a chance to run.
     Sleep( 100 );
@@ -169,30 +176,43 @@ int doWork( const vector<string>& vsArgs )
 {
     BPLOG_FUNC_SCOPE;
     
-    // Get the strings we need now, in case we need them after deleting
-    // resource files.
-    const string sLocale = getUsersLocale();
+    // if we have a /quiet or -quiet arg, no dialogs
+    bool bQuiet = false;
+    for (vector<string>::const_iterator it = vsArgs.begin();
+         it != vsArgs.end(); ++it) {
+        if (it->compare( "/quiet" ) == 0 || it->compare( "-quiet" ) == 0) {
+            bQuiet = true;
+            break;
+        }
+    }
 
-    string sBP;
-    getLocalizedString( "productNameShort", sLocale, sBP );
-    wstring wsBP = utf8ToWide( sBP );
+    wstring wsBP, wsPrompt, wsDone;
+    if (!bQuiet) {
+        // Get the strings we need now, in case we need them after deleting
+        // resource files.
+        const string sLocale = getUsersLocale();
 
-    string sPrompt;
-    getLocalizedString( "uninstallPrompt", sLocale, sPrompt );
-    wstring wsPrompt = utf8ToWide( sPrompt );
+        string sBP;
+        getLocalizedString( "productNameShort", sLocale, sBP );
+        wsBP = utf8ToWide( sBP );
 
-    string sDone;
-    getLocalizedString( "uninstallNotification", sLocale, sDone );
-    wstring wsDone = utf8ToWide( sDone );
+        string sPrompt;
+        getLocalizedString( "uninstallPrompt", sLocale, sPrompt );
+        wsPrompt = utf8ToWide( sPrompt );
 
-    // Prompt user for confirmation.
-    BPLOG_INFO( "Displaying uninstall prompt." );
-    int nRtn = MessageBoxW( NULL,
-                            wsPrompt.c_str(), wsBP.c_str(),
-                            MB_OKCANCEL|MB_DEFBUTTON2 );
-    if (nRtn == IDCANCEL) {
-        BPLOG_INFO( "User cancelled uninstall" );
-        return bp::exit::kUserCancel;
+        string sDone;
+        getLocalizedString( "uninstallNotification", sLocale, sDone );
+        wsDone = utf8ToWide( sDone );
+
+        // Prompt user for confirmation.
+        BPLOG_INFO( "Displaying uninstall prompt." );
+        int nRtn = MessageBoxW( NULL,
+                                wsPrompt.c_str(), wsBP.c_str(),
+                                MB_OKCANCEL|MB_DEFBUTTON2 );
+        if (nRtn == IDCANCEL) {
+            BPLOG_INFO( "User cancelled uninstall" );
+            return bp::exit::kUserCancel;
+        }
     }
 
     // Give the parent process time to exit.  We want this
@@ -204,9 +224,11 @@ int doWork( const vector<string>& vsArgs )
     bp::install::Uninstaller unins;
     unins.run();
 
-    // Inform user when done.
-    BPLOG_INFO( "Displaying uninstall notification." );
-    MessageBoxW( NULL, wsDone.c_str() , wsBP.c_str(), MB_OK );
+    if (!bQuiet) {
+        // Inform user when done.
+        BPLOG_INFO( "Displaying uninstall notification." );
+        MessageBoxW( NULL, wsDone.c_str() , wsBP.c_str(), MB_OK );
+    }
 
     return bp::exit::kOk;
 }
