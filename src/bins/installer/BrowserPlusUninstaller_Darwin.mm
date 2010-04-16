@@ -96,12 +96,15 @@ main(int argc, const char** argv)
             getLocalizedString("no", locale, no);
             getLocalizedString("ok", locale, ok);
 
+            // build the alert
             NSAlert* alert = [[NSAlert alloc] init];
             [alert setAlertStyle: NSCriticalAlertStyle];
             [alert setMessageText: [NSString stringWithUTF8String: prompt.c_str()]];
             [alert addButtonWithTitle: [NSString stringWithUTF8String: yes.c_str()]];
             [alert addButtonWithTitle: [NSString stringWithUTF8String: no.c_str()]];
 
+            // show the alert, making sure that it's topmost
+            [[alert window] setFloatingPanel: YES];
             int ret = [alert runModal];
             [alert release];
             if (ret == NSAlertSecondButtonReturn) {
