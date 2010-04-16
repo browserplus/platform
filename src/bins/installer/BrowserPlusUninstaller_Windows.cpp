@@ -133,7 +133,7 @@ void forkChild( const string& sChildName, const vector<string>& vsParentArgs )
 
     // Setup the child's command line.
     vector<string> vsChildArgs;
-    vsChildArgs.push_back( childPath.externalUtf8() ); 
+    vsChildArgs.push_back( "\"" + childPath.externalUtf8() + "\""); 
     vsChildArgs.push_back("/child");
 
     // Add all the parent's args.
@@ -148,8 +148,8 @@ void forkChild( const string& sChildName, const vector<string>& vsParentArgs )
           std::ostream_iterator<string>( ss, " " ) );
     wstring wsChildArgs = utf8ToWide( ss.str() );
     
-    // CreateProcess demands a mutable cmd line.
-    size_t len = wsChildArgs.length()+1;
+    // CreateProcess demands a mutable cmd line. 
+    size_t len = wsChildArgs.length() + 1;
     wchar_t* wszChildCmd = new wchar_t[len];
     wcsncpy_s( wszChildCmd, len, wsChildArgs.c_str(), len-1 );
 
