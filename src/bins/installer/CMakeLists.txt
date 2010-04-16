@@ -54,7 +54,7 @@ ELSEIF (APPLE)
         ${CMAKE_SYSTEM_NAME}/InstallerSkinGUI_Darwin.mm)
 
     SET(BrowserPlusUninstaller_SOURCES 
-        BrowserPlusUninstaller_UNIX.cpp)
+        BrowserPlusUninstaller_Darwin.mm)
 ELSE ()
     SET(BrowserPlusInstaller_SOURCES 
         ${installerXplatSources} 
