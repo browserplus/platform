@@ -68,8 +68,7 @@ int WINAPI WinMain( HINSTANCE, HINSTANCE, PSTR, int )
     try
     {
         vector<string> vsArgs = bp::process::getCommandLineArgs();
-        // strip argv[0]
-        vsArgs.erase(vsArgs.begin());
+        vsArgs.erase( vsArgs.begin() );  // strip command name
 
         // child has /child argument
         bool bIsChild = false;
@@ -158,12 +157,23 @@ void forkChild( const string& sChildName, const vector<string>& vsParentArgs )
     si.cb = sizeof(STARTUPINFOW);
     PROCESS_INFORMATION pi;
     ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));
-    CreateProcessW( 0, wszChildCmd, 0, 0, FALSE, NORMAL_PRIORITY_CLASS,
-                    0, 0, &si, &pi );
-    delete[] wszChildCmd;
+    BOOL bRet = CreateProcessW( 0, wszChildCmd, 0, 0, FALSE, 
+                                NORMAL_PRIORITY_CLASS, 0, 0, &si, &pi );
+    if (!bRet) {
+        // hrm, couldn't run child.  We'll do the uninstall ourselves.  
+        // This may leave cruft, especially BrowserPlusUninstaller.exe, 
+        // but it's the best we can do.
+        BPLOG_ERROR( bp::error::lastErrorString( "failed to launch: " 
+                                                 + wideToUtf8( wszChildCmd )));
+        remove( childPath );
+        doWork( vsChildArgs );
+    } else {
+        // Give the child a chance to run.
+        BPLOG_INFO_STRM( "launched: " << wideToUtf8( wszChildCmd ));
+        Sleep( 100 );
+    }
 
-    // Give the child a chance to run.
-    Sleep( 100 );
+    delete[] wszChildCmd;
 
     // Close our handle to the new process. Because the process is
     // memory-mapped, there will still be a handle held by the O/S, so
