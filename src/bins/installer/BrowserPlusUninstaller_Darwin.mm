@@ -124,6 +124,7 @@ main(int argc, const char** argv)
             [alert setAlertStyle: NSInformationalAlertStyle];
             [alert setMessageText: [NSString stringWithUTF8String: done.c_str()]];
             [alert addButtonWithTitle: [NSString stringWithUTF8String: ok.c_str()]];
+            [[alert window] setFloatingPanel: YES];
             (void) [alert runModal];
             [alert release];
             [pool release];
