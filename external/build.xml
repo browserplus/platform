@@ -8,11 +8,12 @@
     <target name="clean_xcode" depends="clean" />
     <target name="clean_vc08" >
         <delete file="x1.bat" />
-        <echo message="call &quot;C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat&quot;" file="x1.bat" append="true" />
-        <echo message="set TEMP=%WINTEMP%" file="x1.bat" append="true" />
-        <echo message="set TMP=%WINTMP%" file="x1.bat" append="true" />
-        <echo message="set" file="x1.bat" append="true" />
-        <echo message="ruby .\build.rb clean" file="x1.bat" append="true" />
+        <echo file="x1.bat">call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+set TEMP=%WINTEMP%
+set TMP=%WINTMP%
+set
+ruby .\build.rb clean
+        </echo>
         <exec executable="cmd" failonerror="true">
             <arg line="/C x1.bat" />
         </exec>
@@ -27,11 +28,12 @@
     <target name="build_xcode" depends="build" />
     <target name="build_vc08">
         <delete file="x1.bat" />
-        <echo message="call &quot;C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat&quot;" file="x1.bat" append="true" />
-        <echo message="set TEMP=%WINTEMP%" file="x1.bat" append="true" />
-        <echo message="set TMP=%WINTMP%" file="x1.bat" append="true" />
-        <echo message="set" file="x1.bat" append="true" />
-        <echo message="ruby .\build.rb keepSource" file="x1.bat" append="true" />
+        <echo file="x1.bat">call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+set TEMP=%WINTEMP%
+set TMP=%WINTMP%
+set
+ruby .\build.rb keepSource
+        </echo>
         <exec executable="cmd" failonerror="true">
             <arg line="/C x1.bat" />
         </exec>
