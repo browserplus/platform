@@ -27,17 +27,17 @@
     <target name="build_vc08">
         <mkdir dir="build" />
         <delete file="build/x1.bat" />
-        <echo message="call &quot;C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat&quot; &amp;&amp; set TEMP=%WINTEMP% &amp;&amp; set TMP=%WINTMP% &amp;&amp; cmake -G &quot;Visual Studio 9 2008&quot; .." file="build/x1.bat" />
+        <echo message="call &quot;C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat&quot; &amp;&amp; set TEMP=&quot;%WINTEMP%&quot; &amp;&amp; set TMP=&quot;%WINTMP%&quot; &amp;&amp; set &amp;&amp; cmake -G &quot;Visual Studio 9 2008&quot; .." file="build/x1.bat" />
         <exec executable="cmd" dir="build" failonerror="true">
             <arg line="/C x1.bat" />
         </exec>
         <delete file="build/x1.bat" />
-        <echo message="call &quot;C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat&quot; &amp;&amp; set TEMP=%WINTEMP% &amp;&amp; set TMP=%WINTMP% &amp;&amp; devenv BrowserPlus.sln /Build Release" file="build/x1.bat" />
+        <echo message="call &quot;C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat&quot; &amp;&amp; set TEMP=&quot;%WINTEMP%&quot; &amp;&amp; set TMP=&quot;%WINTMP%&quot; &amp;&amp; set &amp;&amp; devenv BrowserPlus.sln /Build Release" file="build/x1.bat" />
         <exec executable="cmd" dir="build" failonerror="true">
             <arg line="/C x1.bat" />
         </exec>
         <delete file="build/x1.bat" />
-        <echo message="call &quot;C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat&quot; &amp;&amp; set TEMP=%WINTEMP% &amp;&amp; set TMP=%WINTMP% &amp;&amp; devenv BrowserPlus.sln /Build Debug" file="build/x1.bat" />
+        <echo message="call &quot;C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat&quot; &amp;&amp; set TEMP=&quot;%WINTEMP%&quot; &amp;&amp; set TMP=&quot;%WINTMP%&quot; &amp;&amp; set &amp;&amp; devenv BrowserPlus.sln /Build Debug" file="build/x1.bat" />
         <exec executable="cmd" dir="build" failonerror="true">
             <arg line="/C x1.bat" />
         </exec>
