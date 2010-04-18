@@ -27,7 +27,7 @@
     <target name="build_vc08">
         <mkdir dir="build" />
         <delete file="build/x1.bat" />
-        <echo file="x1.bat">call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+        <echo file="build/x1.bat">call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
 set TEMP=%WINTEMP%
 set TMP=%WINTMP%
 set
@@ -37,7 +37,7 @@ cmake -G "Visual Studio 9 2008" ..
             <arg line="/C x1.bat" />
         </exec>
         <delete file="build/x1.bat" />
-        <echo file="x1.bat">call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+        <echo file="build/x1.bat">call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
 set TEMP=%WINTEMP%
 set TMP=%WINTMP%
 set
@@ -47,7 +47,7 @@ devenv BrowserPlus.sln /Build Release
             <arg line="/C x1.bat" />
         </exec>
         <delete file="build/x1.bat" />
-        <echo file="x1.bat">call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+        <echo file="build/x1.bat">call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
 set TEMP=%WINTEMP%
 set TMP=%WINTMP%
 set
