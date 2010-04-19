@@ -1,63 +1,61 @@
 <project name="BrowserPlusPlatform_src" default="build_make">
     <target name="clean">
-        <delete dir="build" />
+        <delete dir="../build" />
     </target>
     <target name="clean_make" depends="clean" />
     <target name="clean_xcode" depends="clean" />
     <target name="clean_vc08" depends="clean" />
     <target name="build">
-        <mkdir dir="build" />
+        <mkdir dir="../build" />
     </target>
     <target name="build_make" depends="build" >
-        <exec executable="cmake" dir="build" failonerror="true">
+        <exec executable="cmake" dir="../build" failonerror="true">
             <arg line="-G &quot;Unix Makefiles&quot; .." />
         </exec>
-        <exec executable="make" dir="build" failonerror="true">
+	<exec executable="make" dir="../build" failonerror="true">
             <arg line="-j3" />
         </exec>
     </target>
-    <target name="build_xcode">
-        <exec executable="cmake" dir="build" failonerror="true">
+    <target name="build_xcode" depends="build">
+	    <exec executable="cmake" dir="../build" failonerror="true">
             <arg line="-G &quot;Xcode&quot; .." />
         </exec>
-        <exec executable="xcodebuild" dir="build" failonerror="true">
+	<exec executable="xcodebuild" dir="../build" failonerror="true">
             <arg line="-project BrowserPlus.xcodeproj -alltargets" />
         </exec>
     </target>
-    <target name="build_vc08">
-        <mkdir dir="build" />
-        <delete file="build/x1.bat" />
-        <echo file="build/x1.bat">call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+    <target name="build_vc08" depends="build">
+	    <delete file="../build/x1.bat" />
+	    <echo file="../build/x1.bat">call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
 set TEMP=%WINTEMP%
 set TMP=%WINTMP%
 set
-cmake -G "Visual Studio 9 2008" ..
+cmake -G "Visual Studio 9 2008" ..\src
         </echo>
-        <exec executable="cmd" dir="build" failonerror="true">
+	<exec executable="cmd" dir="../build" failonerror="true">
             <arg line="/C x1.bat" />
         </exec>
-        <delete file="build/x1.bat" />
-        <echo file="build/x1.bat">call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+	<delete file="../build/x1.bat" />
+	<echo file="../build/x1.bat">call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
 set TEMP=%WINTEMP%
 set TMP=%WINTMP%
 set
 devenv BrowserPlus.sln /Build Release
         </echo>
-        <exec executable="cmd" dir="build" failonerror="true">
+	<exec executable="cmd" dir="../build" failonerror="true">
             <arg line="/C x1.bat" />
         </exec>
-        <delete file="build/x1.bat" />
-        <echo file="build/x1.bat">call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+	<delete file="../build/x1.bat" />
+	<echo file="../build/x1.bat">call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
 set TEMP=%WINTEMP%
 set TMP=%WINTMP%
 set
-ruby .\build.rb clean
 devenv BrowserPlus.sln /Build Debug
         </echo>
-        <exec executable="cmd" dir="build" failonerror="true">
+	<exec executable="cmd" dir="../build" failonerror="true">
             <arg line="/C x1.bat" />
         </exec>
-        <delete file="build/x1.bat" />
+	<delete file="../build/x1.bat" />
     </target>
 </project>
 
