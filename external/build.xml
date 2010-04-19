@@ -9,8 +9,8 @@
     <target name="clean_vc08" >
         <delete file="x1.bat" />
         <echo file="x1.bat">call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
-if not %WINTEMP%*==* then set TEMP=%WINTEMP%
-if not %WINTMP%*==* then set TMP=%WINTMP%
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
 ruby .\build.rb clean
         </echo>
         <exec executable="cmd" failonerror="true">
@@ -28,8 +28,8 @@ ruby .\build.rb clean
     <target name="build_vc08">
         <delete file="x1.bat" />
         <echo file="x1.bat">call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
-if not %WINTEMP%*==* then set TEMP=%WINTEMP%
-if not %WINTMP%*==* then set TMP=%WINTMP%
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
 ruby .\build.rb keepSource
         </echo>
         <exec executable="cmd" failonerror="true">
