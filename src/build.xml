@@ -27,9 +27,8 @@
     <target name="build_vc08" depends="build">
 	    <delete file="../build/x1.bat" />
 	    <echo file="../build/x1.bat">call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
-set TEMP=%WINTEMP%
-set TMP=%WINTMP%
-set
+if not %WINTEMP%*==* then set TEMP=%WINTEMP%
+if not %WINTMP%*==* then set TMP=%WINTMP%
 cmake -G "Visual Studio 9 2008" ..\src
         </echo>
 	<exec executable="cmd" dir="../build" failonerror="true">
@@ -37,9 +36,8 @@ cmake -G "Visual Studio 9 2008" ..\src
         </exec>
 	<delete file="../build/x1.bat" />
 	<echo file="../build/x1.bat">call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
-set TEMP=%WINTEMP%
-set TMP=%WINTMP%
-set
+if not %WINTEMP%*==* then set TEMP=%WINTEMP%
+if not %WINTMP%*==* then set TMP=%WINTMP%
 devenv BrowserPlus.sln /Build Release
         </echo>
 	<exec executable="cmd" dir="../build" failonerror="true">
@@ -47,9 +45,8 @@ devenv BrowserPlus.sln /Build Release
         </exec>
 	<delete file="../build/x1.bat" />
 	<echo file="../build/x1.bat">call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
-set TEMP=%WINTEMP%
-set TMP=%WINTMP%
-set
+if not %WINTEMP%*==* then set TEMP=%WINTEMP%
+if not %WINTMP%*==* then set TMP=%WINTMP%
 devenv BrowserPlus.sln /Build Debug
         </echo>
 	<exec executable="cmd" dir="../build" failonerror="true">
