@@ -294,6 +294,10 @@ permissionsFunc(const char * locale,
     
     for (unsigned int i = 0; i < allPerms.size(); i++) 
     {
+        if (allPerms[i].allowed == PermissionsManager::eUnknown) {
+            // skip permissions which are unset
+            continue;
+        }
         string domain = allPerms[i].domain;
         string perm = allPerms[i].type;
         string localization;
@@ -323,7 +327,7 @@ permissionsFunc(const char * locale,
         m->add("whenStr", new bp::String(whenStr));
         m->add("permissionKey", new bp::String(perm));
         m->add("permission", new bp::String(localization));
-        m->add("allow", new bp::Bool(allPerms[i].allowed));
+        m->add("allow", new bp::Bool(allPerms[i].allowed == PermissionsManager::eAllowed));
         rval->append(m);
     }
     BPLOG_DEBUG_STRM("return " << rval->toJsonString());

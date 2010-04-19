@@ -57,6 +57,9 @@ const char* PermissionsManager::kAllowDomain = "AllowBrowserPlus";
 // autoUpdate key
 const char* PermissionsManager::kAutoUpdate = "AutoUpdate";
 
+const char* kSilentPlatformUpdate = "SilentPlatformUpdate";
+const char* kSilentServiceUpdate = "SilentServiceUpdate";
+
 PermissionsManager* PermissionsManager::m_singleton = NULL;
 
 using namespace std;
@@ -249,8 +252,24 @@ PermissionsManager::addDomainPermission(const string& domain,
                                         const string& permission)
 {
     string resolvedDomain = normalizeDomain(domain);
-    PermissionInfo p(true);
-    m_domainPermissions[resolvedDomain].insert(make_pair(permission, p));
+    if (permission == kSilentPlatformUpdate) {
+        setAutoUpdatePlatform(resolvedDomain, eAllowed);
+    } else if (permission == kSilentServiceUpdate) {
+        // all existing silentserviceupdate perms for domain get allowed
+        map<string, AutoUpdateInfo> m = queryAutoUpdate();
+        map<string, Permission> servicesCopy;
+        map<string, AutoUpdateInfo>::iterator it = m.find(resolvedDomain);
+        if (it != m.end()) {
+            servicesCopy = it->second.m_services;
+        }
+        for (map<string, Permission>::const_iterator sit = servicesCopy.begin();
+             sit != servicesCopy.end(); ++sit) {
+            setAutoUpdateService(resolvedDomain, sit->first, eAllowed);
+        }
+    } else {
+        PermissionInfo p(true);
+        m_domainPermissions[resolvedDomain].insert(make_pair(permission, p));
+    }
     saveDomainPermissions();
 }
 
@@ -260,8 +279,23 @@ PermissionsManager::revokeDomainPermission(const string& domain,
                                            const string& permission)
 {
     string resolvedDomain = normalizeDomain(domain);
-    PermissionInfo p(false);
-    m_domainPermissions[resolvedDomain].insert(make_pair(permission, p));
+    if (permission == kSilentPlatformUpdate) {
+        setAutoUpdatePlatform(resolvedDomain, eNotAllowed);
+    } else if (permission == kSilentServiceUpdate) {
+        map<string, AutoUpdateInfo> m = queryAutoUpdate();
+        map<string, Permission> servicesCopy;
+        map<string, AutoUpdateInfo>::iterator it = m.find(resolvedDomain);
+        if (it != m.end()) {
+            servicesCopy = it->second.m_services;
+        }
+        for (map<string, Permission>::const_iterator sit = servicesCopy.begin();
+             sit != servicesCopy.end(); ++sit) {
+            setAutoUpdateService(resolvedDomain, sit->first, eNotAllowed);
+        }
+    } else {
+        PermissionInfo p(false);
+        m_domainPermissions[resolvedDomain].insert(make_pair(permission, p));
+    }
     saveDomainPermissions();
 }
 
@@ -271,9 +305,23 @@ PermissionsManager::resetDomainPermission(const string& domain,
                                           const string& permission)
 {
     string resolvedDomain = normalizeDomain(domain);
-    if (m_domainPermissions[resolvedDomain].erase(permission) > 0) {
-        saveDomainPermissions();
+    if (permission == kSilentPlatformUpdate) {
+        setAutoUpdatePlatform(resolvedDomain, eUnknown);
+    } else if (permission == kSilentServiceUpdate) {
+        map<string, AutoUpdateInfo> m = queryAutoUpdate();
+        map<string, Permission> servicesCopy;
+        map<string, AutoUpdateInfo>::iterator it = m.find(resolvedDomain);
+        if (it != m.end()) {
+            servicesCopy = it->second.m_services;
+        }
+        for (map<string, Permission>::const_iterator sit = servicesCopy.begin();
+             sit != servicesCopy.end(); ++sit) {
+            setAutoUpdateService(resolvedDomain, sit->first, eUnknown);
+        }
+    } else {
+        m_domainPermissions[resolvedDomain].erase(permission);
     }
+    saveDomainPermissions();
 }
 
 
@@ -1031,7 +1079,7 @@ PermissionsManager::queryAllPermissions() const
             PermissionsManager::PermissionDesc pd;
             pd.type = permit->first;
             pd.domain = dpi->first;
-            pd.allowed = permit->second.m_allowed == eAllowed;
+            pd.allowed = permit->second.m_allowed ? eAllowed : eNotAllowed;
             pd.time = permit->second.m_time;
             allPerms.push_back(pd);
         }
@@ -1043,9 +1091,9 @@ PermissionsManager::queryAllPermissions() const
         // first add the "SlentPlatformUpdate" perm if appropriate
         if (aupi->second.m_platform != eUnknown) {
             PermissionsManager::PermissionDesc pd;
-            pd.type.append("SilentPlatformUpdate");
+            pd.type.append(kSilentPlatformUpdate);
             pd.domain = aupi->first;
-            pd.allowed = aupi->second.m_platform == eAllowed;
+            pd.allowed = aupi->second.m_platform;
             pd.time = aupi->second.m_time;
             allPerms.push_back(pd);
         }
@@ -1058,25 +1106,40 @@ PermissionsManager::queryAllPermissions() const
             std::set<std::string> allowed;
             std::set<std::string> denied;
             
-            for (sit = aupi->second.m_services.begin(); sit != aupi->second.m_services.end(); sit++) {
-                if (sit->second == eAllowed) allowed.insert(sit->first);
-                else denied.insert(sit->first);
+            for (sit = aupi->second.m_services.begin(); 
+                 sit != aupi->second.m_services.end(); sit++) {
+                switch (sit->second) {
+                    case eAllowed:
+                        allowed.insert(sit->first);
+                        break;
+                    case eNotAllowed:
+                        denied.insert(sit->first);
+                        break;
+                    case eUnknown:
+                        // empty
+                        break;
+                    default:
+                        BPLOG_ERROR_STRM("unknown perm(" << sit->second
+                                         << ") for domain/service "
+                                         << aupi->first << "/" << sit->first);
+                        break;
+                }
             }
 
             PermissionsManager::PermissionDesc pd;
-            pd.type.append("SilentServiceUpdate");
+            pd.type.append(kSilentServiceUpdate);
             pd.domain = aupi->first;
-            pd.allowed = true;
+            pd.allowed = eUnknown;
             pd.time = aupi->second.m_time;
 
             if (allowed.size()) {
-                pd.allowed = true;
+                pd.allowed = eAllowed;
                 pd.extra = allowed;
                 allPerms.push_back(pd);
             }
 
             if (denied.size()) {
-                pd.allowed = false;
+                pd.allowed = eNotAllowed;
                 pd.extra = denied;
                 allPerms.push_back(pd);
             }
