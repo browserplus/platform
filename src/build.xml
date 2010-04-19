@@ -10,7 +10,7 @@
     </target>
     <target name="build_make" depends="build" >
         <exec executable="cmake" dir="../build" failonerror="true">
-            <arg line="-G &quot;Unix Makefiles&quot; .." />
+            <arg line="-G &quot;Unix Makefiles&quot; ../src" />
         </exec>
 	<exec executable="make" dir="../build" failonerror="true">
             <arg line="-j3" />
@@ -18,7 +18,7 @@
     </target>
     <target name="build_xcode" depends="build">
 	    <exec executable="cmake" dir="../build" failonerror="true">
-            <arg line="-G &quot;Xcode&quot; .." />
+            <arg line="-G &quot;Xcode&quot; ../src" />
         </exec>
 	<exec executable="xcodebuild" dir="../build" failonerror="true">
             <arg line="-project BrowserPlus.xcodeproj -alltargets" />
