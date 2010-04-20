@@ -27,7 +27,7 @@ include Config
 
 def usage()
     puts "Usage: #{File.basename($0)} makeCerts -certType=devel|prod -outDir=<dir> [-password=<pwd>]"
-    puts "       #{File.basename($0)} sign -certType=devel|prod [-password=<pwd>] [-authenticodePassword=<pwd2>] <files>"
+    puts "       #{File.basename($0)} sign -certType=devel|prod [-password=<pwd>] [-authKey=<pfxPath>] [-authenticodePassword=<pwd2>] <files>"
     puts "       #{File.basename($0)} verify [-certStore=<path>] <files>"
     exit 1
 end
@@ -58,6 +58,7 @@ timeurl = "http://timestamp.verisign.com/scripts/timstamp.dll"
 
 certType = nil
 password = nil
+authKey = nil
 authenticodePassword = nil
 passIn = nil
 passOut = nil
@@ -79,6 +80,9 @@ ARGV[1..ARGV.length].each do |arg|
             certType = v[1]
         when '-password':
             password = v[1]
+            fileStart = fileStart + 1
+        when '-authKey':
+            authKey = v[1]
             fileStart = fileStart + 1
         when '-authenticodePassword':
             authenticodePassword = v[1]
@@ -138,7 +142,7 @@ Dir.chdir(topDir) do
                     STDOUT.print("Authenticode signing password: ")
                     authenticodePassword = STDIN.gets.chomp
                 end
-                if !runCmd("signtool sign /p #{authenticodePassword} /f authenticode/yahoo.pfx /t #{timeurl} /v #{thisFile}")
+                if !runCmd("signtool sign /p #{authenticodePassword} /f \"#{authKey}\" /t #{timeurl} /v #{thisFile}")
                     puts "Signing #{thisFile} failed."
                     exit(-1)
                 end
