@@ -201,9 +201,17 @@ public:
     
     /**
      * Reset a domain permission to eUnknown
+     * The currentState arg is only used if 'permission' == kSilentServiceUpdate.
+     * It is interpreted as follows:
+     *  eAllowed:     only those permissions whose current
+     *                value is eAllowed will be modified
+     *  eNotAllowed:  only those permissions whose current
+     *                value is eNotAllowed will be modified
+     *  eUnknown:     all permissions will be modified
      */
     void resetDomainPermission(const std::string& domain,
-                               const std::string& permission);
+                               const std::string& permission,
+                               Permission currentState = eUnknown);
     
     /**
      * Revoke all permissions from a domain.

@@ -302,7 +302,8 @@ PermissionsManager::revokeDomainPermission(const string& domain,
 
 void 
 PermissionsManager::resetDomainPermission(const string& domain,
-                                          const string& permission)
+                                          const string& permission,
+                                          Permission currentState)
 {
     string resolvedDomain = normalizeDomain(domain);
     if (permission == kSilentPlatformUpdate) {
@@ -316,7 +317,9 @@ PermissionsManager::resetDomainPermission(const string& domain,
         }
         for (map<string, Permission>::const_iterator sit = servicesCopy.begin();
              sit != servicesCopy.end(); ++sit) {
-            setAutoUpdateService(resolvedDomain, sit->first, eUnknown);
+            if (currentState == eUnknown || sit->second == currentState) {
+                setAutoUpdateService(resolvedDomain, sit->first, eUnknown);
+            }
         }
     } else {
         m_domainPermissions[resolvedDomain].erase(permission);
