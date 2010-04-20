@@ -21,6 +21,11 @@
 #   -secondary hostname of secondary distribution server (may be repeated)
 #   -buildType a short buildtype tag, i.e. ymail, prod, dev, or beta.
 #   -logLevel  platform log-level: debug, info, warn, or error
+#   -config    a general mechanism which allows for overriding top level
+#              keys in generated installer.config.  for instance, to
+#              override 'permissions': -config=permissions=permissions.json
+#              permissions.json will be parsed, toplevel keys overwritten,
+#              and it will be written.
 #   
 # Potentially Helpful Hints
 #
@@ -35,9 +40,26 @@ require 'fileutils'
 require 'rbconfig'
 include Config
 
+# json parsing library this works for 1.9 (builtin) or 1.8 
+$:.push(File.join(File.dirname(__FILE__), "tools"))
+begin
+  require 'json'
+rescue LoadError
+  require "json/json.rb"
+end
+
 exeSuffix = ""
 if CONFIG['arch'] =~ /mswin/
   exeSuffix = ".exe"
+end
+
+# a function that takes a Hash and the name of a file which contains
+# json.  it loads the file, adds keys (at the top level) and writes
+# the file back out
+def addKeysToJsonFile(keys, file)
+  contents = JSON.parse(File.read(file))
+  keys.each { |k,v| contents[k] = v }
+  File.open(file, "w+") { |f| f.write JSON.generate(contents) }
 end
 
 ## step 0: determine and output configuration
@@ -47,12 +69,21 @@ $workDir = File.join($topDir, "work")
 $secondary = Array.new if !$secondary
 $buildType = "unknown"
 $logLevel = "info"
+$instCfgKeys = Hash.new
 
 ARGV.each { |arg|
-  k,v = arg.sub(/^-/, "").split '='
+  k,v,a = arg.sub(/^-/, "").split '='
   # -secondary is special, it may be multiply provided
   if k == "secondary"
     $secondary.push(v)
+  elsif k == "config"
+    # 'a' refers to a file that contains json
+    raise "cannot find file: #{a}" if !File.exist? a
+    begin
+      $instCfgKeys[v] = JSON.parse("[" + File.read(a) + "]")[0]
+    rescue JSON::ParserError
+      raise "cannot parse file: #{a}"
+    end
   else 
     eval "$#{k} = '#{v}'"
   end
@@ -65,15 +96,23 @@ $outdir = Dir.getwd.to_s if !$outdir
 $certStore = $pubKey if !$certStore
 
 # verify and output command configuration
+puts
 puts "Verifying configuration:"
 [ "prefix", "buildType", "logLevel", "primary", "secondary",
   "certStore", "pubKey", "privKey", "pass", "outdir"
 ].each {|k|
   raise "missing required cmdline param: -#{k}" if (!eval("$#{k}"))
-  v = eval("$#{k}")
-  v = v.join(", ") if v.is_a? Array
+  v = JSON.generate(eval("$#{k}"))
   puts "  $#{k}:\t#{v}"
 }
+
+if $instCfgKeys.length
+  puts
+  puts "Additional top level keys to override installer.config:"
+  $instCfgKeys.each { |k,v| puts "  #{k}:\t#{JSON.generate(v)}" }
+end
+
+puts
 
 # perform some argument validation
 raise "cannot find file: #{$pubKey}" if !File.exist? $pubKey
@@ -150,6 +189,8 @@ raise "error generating bpkg" if !rv
 puts "Created #{bpkgName}"    
 
 # step 5: generate "net" installer
+instCfgPath = File.join($workDir, "install", "installer.config")
+addKeysToJsonFile($instCfgKeys, instCfgPath) if $instCfgKeys.length > 0
 buildInstallerScript = File.join($workDir, "install", "buildInstaller.rb")
 system("ruby -s \"#{buildInstallerScript}\" -fname=\"#{$prefix}_#{$version}#{exeSuffix}\" -outDir=\"#{$outdir}\"")
 
@@ -159,15 +200,8 @@ system("ruby -s \"#{buildInstallerScript}\" -fname=\"#{$prefix}_#{$version}#{exe
 FileUtils.cp(bpkgPath, File.join($workDir, "install"))
 
 # now let's sub in the name of the bpkg
-instCfgContents = ""
-instCfgPath = File.join($workDir, "install", "installer.config")
-File.open(instCfgPath, "r") { |f|
-  while (l = f.gets)
-    l = "  ,\"package\": \"#{bpkgName}\"" if l =~ /"package":/
-    instCfgContents = instCfgContents + l
-  end
-}
-File.open(instCfgPath, "w+") { |f| f.write instCfgContents }
+$instCfgKeys['package'] = bpkgName
+addKeysToJsonFile($instCfgKeys, instCfgPath)
 
 # build it!
 system("ruby -s \"#{buildInstallerScript}\" -fname=\"#{$prefix}_#{$version}_full#{exeSuffix}\" -outDir=\"#{$outdir}\"")
