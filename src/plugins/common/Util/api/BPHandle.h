@@ -52,6 +52,11 @@ namespace bp {
 
 #define BROWSERPLUS_HANDLETYPE_KEY "BrowserPlusType"
 #define BROWSERPLUS_HANDLEID_KEY "BrowserPlusHandleID"
+
+// deprecated (overly verbose)
+#define DEPRECATED_BROWSERPLUS_HANDLENAME_KEY "BrowserPlusHandleName"
+
+// moving forward
 #define BROWSERPLUS_HANDLENAME_KEY "name"
 #define BROWSERPLUS_HANDLESIZE_KEY "size"
 #define BROWSERPLUS_HANDLEMIMETYPE_KEY "mimeType"

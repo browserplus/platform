@@ -85,6 +85,11 @@ BPHandle::toBPMap() const
     Map* m = new Map;
     m->add(BROWSERPLUS_HANDLETYPE_KEY, new String(type().c_str()));
     m->add(BROWSERPLUS_HANDLEID_KEY, new Integer(id()));
+
+    // deprecated old style 
+    m->add(DEPRECATED_BROWSERPLUS_HANDLENAME_KEY, new String(name().c_str()));
+
+    // new style
     m->add(BROWSERPLUS_HANDLENAME_KEY, new String(name().c_str()));
     m->add(BROWSERPLUS_HANDLESIZE_KEY, new Integer(size()));
     std::set<std::string> mt = mimeTypes();
