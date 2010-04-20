@@ -378,7 +378,12 @@ setPermissionsFunc(const char *,
             } else if (!value.compare("deny")) {
                 pmgr->revokeDomainPermission(site, permissionKey);
             } else if (!value.compare("reset")) {
-                pmgr->resetDomainPermission(site, permissionKey);
+                const bp::Bool * b = dynamic_cast<const bp::Bool *>(m->get("allow"));
+                if (!b) BP_THROW("argument missing 'allow'");
+                PermissionsManager::Permission p = b->value() 
+                    ? PermissionsManager::eAllowed : 
+                      PermissionsManager::eNotAllowed;
+                pmgr->resetDomainPermission(site, permissionKey, p);
             } else {
                 BP_THROW("bad value of " + value + " for " 
                          + site + "/" + permissionKey);
