@@ -243,10 +243,38 @@ public:
     std::set<std::string> queryPermissionDomains(const std::string& permission) const;
     
     /**
-     * Get raw permissions map, key is domain, value is set of permissions.
+     * Get a map of all domain permissions, key is domain, value is set of permissions.
      */
     std::map<std::string, std::map<std::string, PermissionInfo> > 
-        queryAllPermissions() const;
+        queryAllDomainPermissions() const;
+
+    /**
+     * A generic structure capable of representing all different types of permissions
+     * currently in the system
+     */
+    struct PermissionDesc {
+        /** May be 'ServiceSilentUpdate', 'PlatformSilentUpdate', or any of the
+         *  other permissions in the system */
+        std::string type;
+        /** the domain pattern for which the permission applies */
+        std::string domain;
+        /** certain permissions may be *negative*, that is disallowed in a sticky
+         *  fashion (i.e. never let this site use my webcam) */
+        bool allowed;
+        /** the time when the permission was set */
+        BPTime time;        
+        /** certain permissions may contain extra information/qualifiers.  The only
+         *  current example is 'ServiceSilentUpdate' in which case 'extra' is set
+         *  to the name of the services */
+        std::set<std::string> extra;
+
+        /* unneccesary details */
+        PermissionDesc() : allowed(false) { };
+    };
+    
+    /** get descriptions of all the permissions in the system.  A vector of
+     *  PermissionDescs is return, contents described inline above. */
+    std::vector<PermissionDesc> queryAllPermissions() const;
     
     /**
      * Get localized string for a permission.  If no localization found,

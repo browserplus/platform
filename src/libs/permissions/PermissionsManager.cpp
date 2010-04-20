@@ -397,7 +397,7 @@ PermissionsManager::queryPermissionDomains(const string& permission) const
 
 
 map<string, map<string, PermissionsManager::PermissionInfo> > 
-PermissionsManager::queryAllPermissions() const
+PermissionsManager::queryAllDomainPermissions() const
 {
     return m_domainPermissions;
 }
@@ -1015,3 +1015,74 @@ PermissionsManager::onHop(void * context)
     IPermissionsManagerListener * l = (IPermissionsManagerListener *) context;
     l->cantGetUpToDate();
 }
+
+std::vector<PermissionsManager::PermissionDesc>
+PermissionsManager::queryAllPermissions() const
+{
+    std::vector<PermissionsManager::PermissionDesc> allPerms;
+
+    // first merge all domain permissions into the allperms vector
+    std::map<std::string, std::map<std::string, PermissionInfo> >::const_iterator dpi;
+    for (dpi = m_domainPermissions.begin(); dpi != m_domainPermissions.end(); dpi++) {
+        std::map<std::string, PermissionInfo>::const_iterator permit;
+        for (permit = dpi->second.begin();
+             permit != dpi->second.end();
+             permit++) {
+            PermissionsManager::PermissionDesc pd;
+            pd.type = permit->first;
+            pd.domain = dpi->first;
+            pd.allowed = permit->second.m_allowed == eAllowed;
+            pd.time = permit->second.m_time;
+            allPerms.push_back(pd);
+        }
+    }
+
+    // now merge all autoupdate permissions into the allperms vector         
+    std::map<std::string, AutoUpdateInfo>::const_iterator aupi;
+    for (aupi = m_autoUpdatePermissions.begin(); aupi != m_autoUpdatePermissions.end(); aupi++) {
+        // first add the "SlentPlatformUpdate" perm if appropriate
+        if (aupi->second.m_platform != eUnknown) {
+            PermissionsManager::PermissionDesc pd;
+            pd.type.append("SilentPlatformUpdate");
+            pd.domain = aupi->first;
+            pd.allowed = aupi->second.m_platform == eAllowed;
+            pd.time = aupi->second.m_time;
+            allPerms.push_back(pd);
+        }
+
+
+        // now the "SilentServiceUpdate" perm if appropriate
+        if (aupi->second.m_services.size() > 0) {
+            std::map<std::string, Permission>::const_iterator sit;
+
+            std::set<std::string> allowed;
+            std::set<std::string> denied;
+            
+            for (sit = aupi->second.m_services.begin(); sit != aupi->second.m_services.end(); sit++) {
+                if (sit->second == eAllowed) allowed.insert(sit->first);
+                else denied.insert(sit->first);
+            }
+
+            PermissionsManager::PermissionDesc pd;
+            pd.type.append("SilentServiceUpdate");
+            pd.domain = aupi->first;
+            pd.allowed = true;
+            pd.time = aupi->second.m_time;
+
+            if (allowed.size()) {
+                pd.allowed = true;
+                pd.extra = allowed;
+                allPerms.push_back(pd);
+            }
+
+            if (denied.size()) {
+                pd.allowed = false;
+                pd.extra = denied;
+                allPerms.push_back(pd);
+            }
+        }
+    }
+
+    return allPerms;
+}
+

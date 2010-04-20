@@ -289,28 +289,42 @@ permissionsFunc(const char * locale,
     
     PermissionsManager * pmgr = PermissionsManager::get();
     bp::List * rval = new bp::List;
-    map<string, map<string, PermissionsManager::PermissionInfo> > allMap =
+    vector<PermissionsManager::PermissionDesc> allPerms =
         pmgr->queryAllPermissions();
-    map<string, map<string, PermissionsManager::PermissionInfo> >::iterator di;
-    for (di = allMap.begin(); di != allMap.end(); ++di) 
+    
+    for (unsigned int i = 0; i < allPerms.size(); i++) 
     {
-        string domain = di->first;
-        map<string, PermissionsManager::PermissionInfo>::iterator pi;
-        for (pi = di->second.begin(); pi != di->second.end(); ++pi) 
-        {
-            string perm = pi->first;
-            string localization = pmgr->getLocalizedPermission(perm, locale);
-            BPTime permTime = pi->second.m_time;
-            string whenStr = bp::i18n::formatRelativeTime(permTime,locale);
-            bp::Map * m = new bp::Map;
-            m->add("site", new bp::String(bp::i18n::idnaToUnicode(domain)));
-            m->add("when", new bp::Integer(permTime.get()));
-            m->add("whenStr", new bp::String(whenStr));
-            m->add("permissionKey", new bp::String(perm));
-            m->add("permission", new bp::String(localization));
-            m->add("allow", new bp::Bool(pi->second.m_allowed));
-            rval->append(m);
+        string domain = allPerms[i].domain;
+        string perm = allPerms[i].type;
+        string localization;
+        if (!perm.compare("SilentServiceUpdate")) {
+            // Special handling for service silent updates.  We bundle it all
+            // into one string.
+            localization = pmgr->getLocalizedPermission(perm, locale);
+            localization += " ";
+            std::set<std::string>::const_iterator sit;
+            bool first = true;
+            for (sit = allPerms[i].extra.begin(); sit != allPerms[i].extra.end() ; sit++ )
+            {
+                if (!first) localization += ", ";
+                first = false;
+                localization += *sit;
+            }
+        } else {
+            localization = pmgr->getLocalizedPermission(perm, locale);
         }
+        
+        BPTime permTime = allPerms[i].time;
+        string whenStr = bp::i18n::formatRelativeTime(permTime,locale);
+
+        bp::Map * m = new bp::Map;
+        m->add("site", new bp::String(bp::i18n::idnaToUnicode(domain)));
+        m->add("when", new bp::Integer(permTime.get()));
+        m->add("whenStr", new bp::String(whenStr));
+        m->add("permissionKey", new bp::String(perm));
+        m->add("permission", new bp::String(localization));
+        m->add("allow", new bp::Bool(allPerms[i].allowed));
+        rval->append(m);
     }
     BPLOG_DEBUG_STRM("return " << rval->toJsonString());
     return rval;
