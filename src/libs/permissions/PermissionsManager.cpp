@@ -858,7 +858,7 @@ PermissionsManager::saveDomainPermissions()
                             sm->add(svcIter->first, new bp::Bool(true));
                             break;
                         case eNotAllowed:
-                            dm->add(svcIter->first, new bp::Bool(false));
+                            sm->add(svcIter->first, new bp::Bool(false));
                             break;
                         case eUnknown:
                             break;
