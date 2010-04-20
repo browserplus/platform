@@ -260,7 +260,7 @@ public:
         std::string domain;
         /** certain permissions may be *negative*, that is disallowed in a sticky
          *  fashion (i.e. never let this site use my webcam) */
-        bool allowed;
+        Permission allowed;
         /** the time when the permission was set */
         BPTime time;        
         /** certain permissions may contain extra information/qualifiers.  The only
@@ -269,7 +269,7 @@ public:
         std::set<std::string> extra;
 
         /* unneccesary details */
-        PermissionDesc() : allowed(false) { };
+        PermissionDesc() : allowed(eUnknown) { };
     };
     
     /** get descriptions of all the permissions in the system.  A vector of
