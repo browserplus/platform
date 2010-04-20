@@ -48,10 +48,10 @@ rescue LoadError
   require "json/json.rb"
 end
 
-exeSuffix = ""
-if CONFIG['arch'] =~ /mswin/
-  exeSuffix = ".exe"
-end
+platform = CONFIG['arch'] =~ /mswin/ ? "Windows" : "Darwin"
+
+exeSuffix = platform == "Windows" ? ".exe" : ""
+
 
 # a function that takes a Hash and the name of a file which contains
 # json.  it loads the file, adds keys (at the top level) and writes
@@ -127,7 +127,7 @@ if !File.executable? $bpkg
   raise "can't find bpkg executable" if !File.executable? $bpkg
 end
 
-# prepent http:// to server names if needed
+# prepend http:// to server names if needed
 $secondary = $secondary.collect { |x| x =~ /^http/ ? x : "http://" + x }
 $primary = "http://" + $primary if $primary !~ /^http/
 
@@ -177,7 +177,15 @@ subs = {
 }
 
 # step 3: authenticode sign binaries if required
-# XXX
+if platform=="Windows" && $buildType=="prod"
+  Dir.chdir($workDir) do
+    signScript = File.join($topDir, "tools", "sign.rb")
+    filesToSign = Dir.glob("**/*.{cab,dll,exe}").join(" ")
+    signCmd = "ruby -s \"#{signScript}\" sign -certType=prod #{filesToSign}"
+    puts signCmd
+    system(signCmd)
+  end
+end
 
 # step 4: generate bpkg
 puts "Making platform update bpkg"
