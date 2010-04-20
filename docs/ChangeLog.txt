@@ -1,3 +1,7 @@
+04/20/2010 - Changes from 2.8.0 to 2.8.1
+  * Forward port changes in 2.7.1 (authenticode signing {#8} and silent update
+    perm visibility {#25})
+
 04/12/2010 - Changes from 2.7.0 to 2.8.0
   * {#9} numerous potential defects reported by coverity fixed.
   * {#11} - prefpanel no longer crashes on windows with non-ascii username
