@@ -182,13 +182,19 @@ subs = {
   FileUtils.cp($certStore, f)
 }
 
+apass = ""
+
 # step 3: authenticode sign binaries if required
 if platform=="Windows" && $buildType=="prod"
+  # get the pass
+  STDOUT.print("Authenticode signing password: ")
+  apass = STDIN.gets.chomp
+
   Dir.chdir($workDir) do
     signScript = File.join($topDirAbs, "tools", "sign.rb")
-    filesToSign = Dir.glob("**/*.{cab,dll,exe}").join(" ")
-    signCmd = "ruby -s \"#{signScript}\" sign -certType=prod -authKey=\"#{$authKey}\" #{filesToSign}"
-    puts signCmd
+    filesToSign = Dir.glob("install/*.{cab,dll,exe}").join(" ")
+    filesToSign += " " + Dir.glob("update/**/*.{cab,dll,exe}").join(" ")
+    signCmd = "ruby -s \"#{signScript}\" sign -certType=prod -authenticodePassword=#{apass} -authKey=\"#{$authKey}\" #{filesToSign}"
     rv = system(signCmd)
     raise "Signing failed! Aborting!" if !rv
   end
@@ -220,3 +226,12 @@ addKeysToJsonFile($instCfgKeys, instCfgPath)
 
 # build it!
 system("ruby -s \"#{buildInstallerScript}\" -fname=\"#{$prefix}_#{$version}_full#{exeSuffix}\" -outDir=\"#{$outdir}\"")
+
+# step 7: now authenticode sign resulting installers
+if platform=="Windows" && $buildType=="prod"
+  filesToSign = Dir.glob("#{$outdir}/*.exe").join(" ")
+  signScript = File.join($topDirAbs, "tools", "sign.rb")
+  signCmd = "ruby -s \"#{signScript}\" sign -authenticodePassword=#{apass} -certType=prod -authKey=\"#{$authKey}\" #{filesToSign}"
+  rv = system(signCmd)
+  raise "Signing failed! Aborting!" if !rv
+end
