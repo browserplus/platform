@@ -269,6 +269,9 @@ FileUtils.mkdir_p("#{artifactsDir}/tools")
 FileUtils.install("#{$buildDir}/dist/bin/#{$intDir}/bpkg#{exeSuffix}",
                   "#{artifactsDir}/tools",
                   :mode => 0755, :verbose => $verbose)
+FileUtils.install("#{$buildDir}/../support/signing/sign.rb",
+                  "#{artifactsDir}/tools",
+                  :mode => 0755, :verbose => $verbose)
 
 # finally let's drop our friend browserplus.js in the PAB so that it
 # truly is a standalone package of all interesting parameterizable build
