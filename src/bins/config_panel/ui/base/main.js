@@ -37,14 +37,16 @@ var ViewMan = (function() {
         var p, args = [], els;
         if (id) {
             p = PermMap[id];
-            args.push({site: p.site, permissionKey: p.permissionKey, value: "reset"});
+            args.push({site: p.site, permissionKey: p.permissionKey, 
+                       allow: p.allow, value: "reset"});
         } else {
             // find rows that are displayed (unfiltered)            
             els = YD.getElementsBy(getVisiblePerms, "SPAN", "permsList");
 
             for (i = 0; i < els.length; i++) {
                 p = PermMap[els[i].className];
-                args.push({site: p.site, permissionKey: p.permissionKey, value: "reset"});
+                args.push({site: p.site, permissionKey: p.permissionKey,
+                           allow: p.allow, value: "reset"});
             }
         }
 
@@ -257,7 +259,7 @@ var ViewMan = (function() {
                     for (i = 0; i < numPerms; i++)
                     {
                         id = "permid_" + i;
-                        PermMap[id] = {site: perms[i].site, permissionKey: perms[i].permissionKey };
+                        PermMap[id] = {site: perms[i].site, permissionKey: perms[i].permissionKey, allow: perms[i].allow };
 
                           str += YAHOO.lang.substitute(EntryRemoveTmpl, {
                                 name:  "<span class=\"" + id + "\">" + wbr(perms[i].site) + " (" +  perms[i].whenStr + ")</span>",
