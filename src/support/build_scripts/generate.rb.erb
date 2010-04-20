@@ -189,7 +189,8 @@ if platform=="Windows" && $buildType=="prod"
     filesToSign = Dir.glob("**/*.{cab,dll,exe}").join(" ")
     signCmd = "ruby -s \"#{signScript}\" sign -certType=prod -authKey=\"#{$authKey}\" #{filesToSign}"
     puts signCmd
-    system(signCmd)
+    rv = system(signCmd)
+    raise "Signing failed! Aborting!" if !rv
   end
 end
 
