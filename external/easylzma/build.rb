@@ -44,7 +44,7 @@ unpack(tarball)
 
 # since tarball came from github, it unpacks into a whacky name
 whackyName = Dir.glob("lloyd-easylzma-*")[0]
-if File.exists?(whackyName)
+if whackyName && File.exists?(whackyName)
     FileUtils.rm_rf(pkgDir)
     FileUtils.mv(whackyName, pkgDir)
 end
