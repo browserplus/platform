@@ -15,7 +15,6 @@ tarball = "#{pkg}.tar.gz"
 md5 = "78b4d067c58208748f07c4b142db9bb2"
 url = "http://github.com/downloads/lloyd/easylzma/#{tarball}"
 
-
 # Make a stab at determining if we need to build.
 if !buildNeeded?("#{$headerInstallDir}/easylzma/common.h")
     puts "easylzma doesn't need to be built"
@@ -58,8 +57,8 @@ applyPatches(pkgDir)
 FileUtils.mkdir_p(buildDir)
 Dir.chdir(buildDir) do
     $buildTypes.each() do |buildType|
-    system("cmake #{$cmakeArgs} #{$cmakeGenerator} -DCMAKE_BUILD_TYPE:STRING=#{buildType} #{pkgDir}")
-
+        cmLine = "cmake #{$cmakeArgs} #{$cmakeGenerator} -DCMAKE_BUILD_TYPE:STRING=#{buildType} \"#{pkgDir}\""
+        system(cmLine)
         if $platform == "Windows"
             system("devenv easylzma.sln /Build #{buildType}")
         else

@@ -72,10 +72,8 @@ Dir.chdir(buildDir) do
         else
             libName = File.join(buildDir, pkg, "lib", "libyajl_s.a")
         end
-        FileUtils.mkdir_p("#{$libInstallDir}/#{buildType}",
-                          :verbose => $verbose)
-        FileUtils.cp(libName, "#{$libInstallDir}/#{buildType}",
-                     :verbose => $verbose)
+        FileUtils.mkdir_p("#{$libInstallDir}/#{buildType}", :verbose => $verbose)
+        FileUtils.cp(libName, "#{$libInstallDir}/#{buildType}", :verbose => $verbose)
     end
 end
 
