@@ -12,8 +12,9 @@ version = "0.0.7"
 pkg = "easylzma-#{version}"
 pkgDir = File.join(topDir, pkg)
 tarball = "#{pkg}.tar.gz"
-md5 = "3e42cbf52a398ccb0535e4b428686707"
-url = "http://github.com/lloyd/easylzma/tarball/#{version}"
+md5 = "78b4d067c58208748f07c4b142db9bb2"
+url = "http://github.com/downloads/lloyd/easylzma/#{tarball}"
+
 
 # Make a stab at determining if we need to build.
 if !buildNeeded?("#{$headerInstallDir}/easylzma/common.h")

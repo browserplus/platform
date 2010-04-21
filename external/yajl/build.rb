@@ -12,8 +12,8 @@ version = "1.0.4"
 pkg = "yajl-#{version}"
 pkgDir = File.join(topDir, pkg)
 tarball = "#{pkg}.tar.gz"
-md5 = "5c955747bab9f70fd922aef9d54a5590"
-url = "http://github.com/lloyd/yajl/tarball/#{version}"
+md5 = "3d7897500f1acaa78d3d2e2f9cafd5f1"
+url = "http://github.com/downloads/lloyd/yajl/#{tarball}"
 
 # Make a stab at determining if we need to build.
 if !buildNeeded?("#{$headerInstallDir}/yajl/yajl_common.h")
