@@ -35,7 +35,7 @@ namespace log {
 
 
 Logger::Logger() :
-    m_level( LEVEL_INFO ),
+    m_level( LEVEL_DEBUG ),
     m_appenders(),
     m_stopwatch(),
     m_mutex(),
