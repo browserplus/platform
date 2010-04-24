@@ -22,10 +22,10 @@
 SET(JSOutputDir "${CMAKE_CURRENT_BINARY_DIR}/../ShippingResources")
 FILE(MAKE_DIRECTORY ${JSOutputDir})
 
-SET(extPath "${CMAKE_CURRENT_SOURCE_DIR}/../../external")
+SET(extPath "${CMAKE_CURRENT_SOURCE_DIR}/../../external/${CMAKE_SYSTEM_NAME}")
 
 FILE(TO_NATIVE_PATH 
-     "${extPath}/yui-compressor/jar/yuicompressor-2.4.jar"
+     "${extPath}/share/jars/yuicompressor-2.4.jar"
      yuiCompressorJarPath)
 
 SET(outputDir "${JSOutputDir}/${VersionString}") 

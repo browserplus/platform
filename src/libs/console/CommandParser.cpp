@@ -46,8 +46,8 @@ using namespace std::tr1;
 
 // use libedit where available for history and command line editing.
 #ifndef WIN32
-#include "editline/readline.h"
-#include "editline/histedit.h"
+#include "libedit/readline.h"
+#include "libedit/histedit.h"
 
 static EditLine *s_el;
 static History *s_history;
