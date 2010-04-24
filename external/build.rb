@@ -63,11 +63,10 @@ def runRecipe
                   "mongoose",
                   "npapi",
                   "openssl", 
-                  "libarchive", # libarchive myst be after openssl
+                  "libarchive", # libarchive must be after openssl
                   "yajl",
                   "wtl",
                   "yui-compressor",
-                  # not working yet!
                   "icu"
                  ],
     :use_recipe => {
