@@ -42,6 +42,9 @@ url = "http://github.com/lloyd/bakery/tarball/#{bakery_commit}"
 bakeryVersionFile = File.join(TOPDIR, "bakery_version.txt")
 bakeryUnpackPath = File.join(TOPDIR, "bakery")
 
+# throughout we'll now we're in external/ dir
+Dir.chdir(TOPDIR)
+
 # once the bakery is attained, here's the "recipe" file
 def runRecipe
   require File.join(TOPDIR, "bakery/ports/bakery")

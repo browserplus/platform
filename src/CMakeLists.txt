@@ -71,8 +71,18 @@ ADD_SUBDIRECTORY(bins)
 ADD_SUBDIRECTORY(sdk)
 ADD_SUBDIRECTORY(javascript)
 
+# a custom step to build latest externals
+SET (pathToExtBuildRb "${CMAKE_CURRENT_SOURCE_DIR}/../external/build.rb")
+ADD_CUSTOM_TARGET(
+    BuildExternals ALL
+    COMMAND ruby ${pathToExtBuildRb}
+    COMMENT "Build 3rd party dependencies")
+
 # PerformSubstitutions should run anytime we build anything else
 ADD_DEPENDENCIES( BPUtils_s PerformSubstitution )
+
+# And externals build check should run absolutely first
+ADD_DEPENDENCIES( PerformSubstitution BuildExternals )
 
 INCLUDE(support/build_scripts/BuildSDK.cmake)
 
