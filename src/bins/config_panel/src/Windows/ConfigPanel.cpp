@@ -33,9 +33,8 @@
 #include <atlwin.h>
 #include <comutil.h>
 #include "BPUtils/bplocalization.h"
-#include "BPUtils/bpconfig.h"
 #include "BPUtils/bpfile.h"
-#include "BPUtils/BPLog.h"
+#include "BPUtils/LogConfigurator.h"
 #include "BPUtils/ProductPaths.h"
 #include "HTMLRender/HTMLDialog_Windows.h"
 #include "HTMLRender/ScriptGateway_Windows.h"
@@ -52,25 +51,10 @@ CAppModule _Module;
 
 void setupLogging()
 {
-    bp::file::Path logPath = bp::paths::getObfuscatedWritableDirectory() /
-                             "ConfigPanel.log";
-    
-    bp::config::ConfigReader reader;
-    (void) reader.load(bp::paths::getConfigFilePath());
-    
-    string level = "info";
-    (void) reader.getStringValue("ConfigPanelLogLevel", level);
-
-    string timeFormat;
-    (void) reader.getStringValue("LogTimeFormat", timeFormat);
-    
-    long long int rolloverKB = 0;
-    (void) reader.getIntegerValue("LogFileRolloverKB", rolloverKB);
-
-    // TODO: layout?
-    
-    bp::log::setupLogToFile(logPath, level, bp::log::kSizeRollover,
-                            timeFormat, (unsigned int) rolloverKB);
+    bp::log::Configurator cfg;
+    cfg.loadConfigFile();
+    cfg.setPath(bp::paths::getObfuscatedWritableDirectory()/"ConfigPanel.log");
+    cfg.configure();
 }
 
 

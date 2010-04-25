@@ -34,9 +34,10 @@
 #include "AutoShutdown.h"
 #include "BPUtils/bpexitcodes.h"
 #include "BPUtils/bpfile.h"
+#include "BPUtils/bpplatformutil.h"
+#include "BPUtils/LogConfigurator.h"
 #include "BPUtils/ProcessLock.h"
 #include "BPUtils/ProductPaths.h"
-#include "BPUtils/bpplatformutil.h"
 #include "CoreletManager/CoreletManager.h"
 #include "Permissions/Permissions.h"
 #include "PlatformUpdater.h"
@@ -145,7 +146,7 @@ processCommandLine(APTArgParse& argParser, int argc, const char ** argv)
     {
         { "l", APT::TAKES_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
         APT::NOT_INTEGER, APT::MAY_RECUR,
-        "enable logging, argument like \"info,ThrdLvlFuncMsg\""
+        "enable logging, argument: off|debug|info|warn|error|fatal"
         },
         { "fg", APT::NO_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
         APT::NOT_INTEGER, APT::MAY_RECUR,
@@ -173,39 +174,37 @@ processCommandLine(APTArgParse& argParser, int argc, const char ** argv)
 
 static void 
 setupLogging(const APTArgParse& argParser,
-             std::string& config,
-             bp::file::Path& file,
+             std::string& logLevel,
+             bp::file::Path& logFile,
              const bp::config::ConfigReader& reader)
 {
-    // Clear out any existing appenders.
-    bp::log::removeAllAppenders();
+    bp::log::Configurator cfg;
+    cfg.loadConfigFile();
     
+    // Handle command-line args.
     if (argParser.argumentPresent("l")) { 
-        // Setup the system-wide minimum log level.
-        config = argParser.argument("l");
-        bp::log::setLogLevel(bp::log::levelFromConfig(config));
-
-        // Get log time format (if present) from the config file.
-        // (no cmd-line support currently).  
-        string timeFormat;
-        (void) reader.getStringValue("LogTimeFormat", timeFormat);
-        
-        // if "-fg", log to console, else to logfile
-        if (argParser.argumentPresent("fg")) {
-            bp::log::setupLogToConsole(config, "", timeFormat);
-        } else {
-            file = bp::paths::getObfuscatedWritableDirectory() /
-                   "BrowserPlusCore.log";
-
-            long long int rolloverKB = 0;
-            (void) reader.getIntegerValue("LogFileRolloverKB", rolloverKB);
-            
-            // Note: Daemon and Service logging are interleaved in same file.
-            // We'll handle any rollover, services will just append.
-            bp::log::setupLogToFile(file, config, bp::log::kSizeRollover, 
-				                    timeFormat, (unsigned int) rolloverKB);
-        }
+        cfg.setLevel(bp::log::levelFromString(argParser.argument("l")));
     }
+
+    // if "-fg", log to console (override any config file setting).
+    if (argParser.argumentPresent("fg")) {
+        cfg.setDestination(bp::log::kDestConsole);
+    }
+
+    // Note we only set the path if we're in file mode, because it
+    // will be loaded into logFile below and then sent as a
+    // cmd-line arg to other subsystems.
+    if (cfg.getDestination() == bp::log::kDestFile) {
+        cfg.setPath(bp::paths::getObfuscatedWritableDirectory() /
+                    "BrowserPlusCore.log");
+    }
+    
+    // Now configure the logging system.
+    cfg.configure();
+    
+    // Setup caller's args.
+	logLevel = bp::log::levelToString(cfg.getLevel());
+    logFile = cfg.getPath();
 }
 
 
@@ -227,7 +226,8 @@ BPDaemon::BPDaemon(int argc, const char** argv)
     // If options present in config, grab them
     std::string configOptions;
     std::vector<std::string> options;
-    if (m_configReader.getStringValue("Options", configOptions)) {
+    if (m_configReader.getStringValue("Options", configOptions) &&
+        configOptions.length()) {
         options = bp::strutil::split(configOptions, " ");
     }
     

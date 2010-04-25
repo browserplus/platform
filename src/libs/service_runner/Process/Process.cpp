@@ -41,37 +41,43 @@
 #include "ServiceLibrary.h"
 #include "ServiceProtocol.h"
 
+using namespace std;
+
 
 static void 
-setupLogging(std::string config, bp::file::Path path)
+setupLogging(std::string levelArg, bp::file::Path pathArg)
 {
-    if (config.empty()) {
-        config = "info";
-    }
-    
-    // Setup the system-wide minimum log level.
-    bp::log::setLogLevel(bp::log::levelFromConfig(config));
-    
-    // Clear out any existing appenders.
-    bp::log::removeAllAppenders();
+    bp::log::Configurator cfg;
+    cfg.loadConfigFile();
 
-    // Get log time format from bp.config file.
-    // If we can't get it for any reason, default (empty str) is fine.
-    std::string timeFormat;
-    bp::config::ConfigReader reader;
-    if (reader.load(bp::paths::getConfigFilePath())) {
-        (void) reader.getStringValue("LogTimeFormat",timeFormat);
+    // Set the default log file.
+    // One case we'll need this is when daemon is in -fg mode but
+    // configured logging destination is "file".
+    cfg.setPath(bp::paths::getObfuscatedWritableDirectory() /
+                "BrowserPlusCore.log");
+
+    // Currently there is no policy for service harness processes to
+    // log to any other file than BrowserPlusCore.log.
+    // Let's take the tack for now that harnesses never rollover that file.
+    cfg.setFileMode( bp::log::kAppend );
+    
+    ////
+    // Handle any command line arguments.
+    //
+    if (!levelArg.empty()) {
+        cfg.setLevel( bp::log::levelFromString( levelArg ) );
     }
 
-    if (path.empty()) {
-        bp::log::setupLogToConsole(config,"",timeFormat);
-    } else {
-        // Services open the daemon logfile in append mode.
-        // Deleting the log file is done by BPDaemon.cpp: setupLogging().
-		bp::log::setupLogToFile(path,config,bp::log::kAppend,timeFormat);
+    if (!pathArg.empty()) {
+        cfg.setDestination( bp::log::kDestFile );
+        cfg.setPath( pathArg );
     }
+
+    // Configure.
+    cfg.configure();
 }
 
+    
 bool
 ServiceRunner::runServiceProcess(int argc, const char ** argv)
 {

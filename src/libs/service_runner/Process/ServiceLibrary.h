@@ -210,10 +210,10 @@ namespace ServiceRunner
 
         void setupServiceLogging();
         void logServiceEvent(unsigned int level, const std::string& msg);
-        bp::log::Level m_levelForwardToHarness;
+        bp::log::ServiceLogMode m_serviceLogMode;
         bp::log::Logger m_serviceLogger;
         
     };
-};
+}
 
 #endif

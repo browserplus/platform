@@ -30,7 +30,7 @@
 #include "PluginLogging.h"
 #include <iostream>
 #include "BPUtils/bpconfig.h"
-#include "BPUtils/BPLog.h"
+#include "BPUtils/LogConfigurator.h"
 #include "BPUtils/ProductPaths.h"
 
 using namespace std;
@@ -42,55 +42,11 @@ namespace plugin {
 
 bool setupLogging( const bp::file::Path& logfilePath )
 {
-    // Setup a config file reader.
-    bp::config::ConfigReader configReader;
-    bp::file::Path configFilePath = bp::paths::getConfigFilePath();
-    if (!configReader.load(configFilePath)) 
-    {
-        cerr << "couldn't read config file at: " << configFilePath << endl;
-        return false;
-    }
-
-    // Clear out any existing appenders.
-    bp::log::removeAllAppenders();
+    bp::log::Configurator cfg;
+    cfg.loadConfigFile();
+    cfg.setPath( bp::paths::getObfuscatedWritableDirectory() / logfilePath );
+    cfg.configure();
     
-    // Setup the system-wide minimum log level.
-    string sVal;
-    if (configReader.getStringValue( "PluginLogLevel", sVal ))
-    {
-        bp::log::setLogLevel( sVal );
-    }
-
-    // Get log time format (if present) from the config file.
-    string sTimeFormat;
-    (void) configReader.getStringValue("LogTimeFormat",sTimeFormat);
-    
-    // Setup log to console.
-    if (configReader.getStringValue( "PluginLogToConsole", sVal ))
-    {
-        bp::log::setupLogToConsole( sVal, "", sTimeFormat );
-    }
-
-    // Setup log to debugger.
-    if (configReader.getStringValue( "PluginLogToDebugger", sVal ))
-    {
-        bp::log::setupLogToDebugger( sVal, sTimeFormat );
-    }
-
-    // Setup log to file.
-    if (configReader.getStringValue( "PluginLogToFile", sVal ))
-    {
-        // Setup the logfile path.
-        bp::file::Path path = bp::paths::getObfuscatedWritableDirectory() /
-                              logfilePath;
-
-        long long int nRolloverKB = 0;
-        (void) configReader.getIntegerValue("LogFileRolloverKB", nRolloverKB);
-
-        bp::log::setupLogToFile( path, sVal, bp::log::kSizeRollover,
-                                 sTimeFormat, (unsigned int) nRolloverKB );
-    }
-
     return true;
 }
 

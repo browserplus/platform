@@ -184,66 +184,55 @@ static bp::log::Level BPLevelFromServiceLevel(unsigned int level)
     }
 }
 
+
+///////////////////////////////////////////////////////////////////////////
+// Setup logging done by the service proper.  That is, logging done by
+// the actual service dll through the service api, as oppposed to logging done
+// by the "harness" exe.  Note this also distinguishes code written by
+// service authors from platform code written by the browserplus team.
+// 
+// If the serviceLogMode setting is "combined" (default) this method
+// will take no action and logging from the harness and the dll will
+// both go to the destination setup by Process.cpp: setupLogging().
+// 
+// If the serviceLogMode setting is "separate", this method will setup
+// a separate destination for logging from the dll.
+//
 void
 ServiceLibrary::setupServiceLogging()
 {
-    // Load the bp config file.
-    bp::config::ConfigReader config;
-    bpf::Path sConfigPath = bp::paths::getConfigFilePath();
-    if (!config.load( sConfigPath ))  {
-        BPLOG_ERROR_STRM( "couldn't read config file at " << sConfigPath );
+    bp::log::Configurator cfg;
+    cfg.loadConfigFile();
+
+    // If "combined" mode, nothing for us to do.
+    m_serviceLogMode = cfg.getServiceLogMode();
+    if (m_serviceLogMode == bp::log::kServiceLogCombined) {
         return;
     }
 
-    const bp::Map* map;
-    if (!config.getJsonMap("ServiceLogging",map)) {
-        BPLOG_WARN( "did not find ServiceLogging map" );
-        return;
-    }
-
-    // Get log time format (if present) from the config file.
-    string timeFormat;
-    (void) config.getStringValue("LogTimeFormat",timeFormat);
-    
-    string sval;
-    if (map->getString("ForwardToHarnessLog",sval)) {
-        m_levelForwardToHarness = bp::log::levelFromString(
-                                      bp::log::levelFromConfig(sval));
-    }
-    
-    if (map->getString("ServiceLogLevel",sval)) {
-        bp::log::setLogLevel(bp::log::levelFromConfig(sval),m_serviceLogger);
-    }
-    
-    if (map->getString("LogToFile",sval)) {
-        string serviceName = s_libObjectPtr->name();
-        bpf::Path p(serviceName.length() ? serviceName : "service");
+    bp::log::Destination dest = cfg.getDestination();
+    if (dest == bp::log::kDestFile) {
+        string fileName = name().empty() ? "service" : name();
+        bpf::Path p(fileName);
         p.replace_extension(bpf::nativeFromUtf8("log"));
-		bp::log::setupLogToFile(p,sval,bp::log::kSizeRollover,timeFormat,
-			                    0,m_serviceLogger);
+        cfg.setPath(p);
     }
-
-    if (map->getString("LogToConsole",sval)) {
-        string consoleTitle;
-        string serviceName = s_libObjectPtr->name();
-        if (serviceName.length()) {
-            stringstream ss;
-            ss << s_libObjectPtr->name() << ' ' << s_libObjectPtr->version()
-                    << " Service";
-            consoleTitle = ss.str();
-        } else {
-            consoleTitle = "BrowserPlus Service";
-        }
-
-        bp::log::setupLogToConsole(sval,consoleTitle,
-                                   timeFormat,m_serviceLogger);
+	else if (dest == bp::log::kDestConsole) {
+        string nameVer = description().nameVersionString();
+        string consoleTitle = nameVer.empty() ? "BrowserPlus Service"
+                                              : nameVer + " Service";
+        cfg.setConsoleTitle(consoleTitle);
     }
-
-    if (map->getString("LogToDebugger",sval)) {
-        bp::log::setupLogToDebugger(sval,timeFormat,m_serviceLogger);
+    else {
     }
+    
+    // Configure the logging system.
+    cfg.configure(m_serviceLogger);
 }
 
+
+//////////////////
+// Log events from the dll over the Service API come in here.
 void
 ServiceLibrary::logServiceEvent(unsigned int level, const std::string& msg)
 {
@@ -254,25 +243,26 @@ ServiceLibrary::logServiceEvent(unsigned int level, const std::string& msg)
         s_firstTime = false;
     }
 
+    // Convert the level.
     bp::log::Level bpLevel = BPLevelFromServiceLevel(level);
-    BPLOG_LEVEL_LOGGER(bpLevel, m_serviceLogger, msg);
     
-    // Prepend service name/version to the log message, if we know it.
-    // Check name length to handle case where we get called before
-    // m_desc has been setup (can happen if service logs from its
-    // BPPInitialize).
-    string daemonMsg = msg;
-    if (s_libObjectPtr->name().length()) {
-        std::stringstream ss;
-        ss << '(' << s_libObjectPtr->name() << ' ' << s_libObjectPtr->version()
-                << ") ";
-        daemonMsg = ss.str() + msg;
+    if (m_serviceLogMode == bp::log::kServiceLogSeparate)
+    {
+        // Send event to "separate" destination.
+        BPLOG_LEVEL_LOGGER(bpLevel, m_serviceLogger, msg);
     }
+    else
+    {
+        // Prepend service name/version to the log message, if we know it.
+        string nameVer = description().nameVersionString();
+        string logMsg = nameVer.length() ? string("(") + nameVer + ") " + msg
+                                         : msg;
 
-    if (bpLevel >= m_levelForwardToHarness) {
-        BPLOG_LEVEL(bpLevel, daemonMsg);
+        // Send event to "combined" destination.
+        BPLOG_LEVEL(bpLevel, logMsg);
     }
 }
+
 
 void
 ServiceLibrary::invokeCallbackFunction(unsigned int tid,
@@ -449,7 +439,7 @@ ServiceLibrary::ServiceLibrary() :
     m_currentId(1), m_attachId(0), m_handle(NULL), m_funcTable(NULL),
     m_desc(), m_coreletAPIVersion(0), m_instances(), m_listener(NULL),
     m_promptToTransaction(), 
-    m_levelForwardToHarness( bp::log::LEVEL_DEBUG ), m_serviceLogger()
+    m_serviceLogMode( bp::log::kServiceLogCombined ), m_serviceLogger()
 {
     s_libObjectPtr = this;
 }
