@@ -36,14 +36,11 @@
 static void 
 setupLogging(const APTArgParse& argParser)
 {
-    // Clear out any existing appenders.
     bp::log::removeAllAppenders();
     if (argParser.argumentPresent("l")) {
-        // Setup the system-wide minimum log level.
-        std::string config(argParser.argument("l"));
-        bp::log::setLogLevel(bp::log::levelFromConfig(config));
-        
-        bp::log::setupLogToConsole(config);
+        bp::log::Level level = bp::log::levelFromString(argParser.argument("l"));
+        bp::log::setLogLevel(level);
+        bp::log::setupLogToConsole(level);
     }
 }
 
@@ -60,7 +57,7 @@ processCommandLine(APTArgParse& argParser, int argc, const char ** argv)
     {
         { "l", APT::TAKES_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
         APT::NOT_INTEGER, APT::MAY_RECUR,
-        "enable console logging, argument like \"info,ThrdLvlFuncMsg\""
+        "enable console logging, argument is level (info, debug, etc.)"
         },
         { "s", APT::TAKES_ARG, "10", APT::REQUIRED,
         APT::IS_INTEGER, APT::MAY_NOT_RECUR,

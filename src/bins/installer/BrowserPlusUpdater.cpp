@@ -132,7 +132,7 @@ main(int argc, const char** argv)
 
         // setup logging, may be overridden by -logPath=<path> and/or -logLevel=<level>
         Path logFile = getTempDirectory() / "BrowserPlusUpdater.log";
-        string logLevel = bp::log::levelToString(bp::log::LEVEL_ALL);
+        bp::log::Level logLevel = bp::log::LEVEL_ALL;
 
         // crack argv
         // usage is: BrowserPlusUpdater [-ipcName=<ipcName>] [-logPath=<logPath>] 
@@ -155,7 +155,8 @@ main(int argc, const char** argv)
             curArg = argv[++argIndex];
         }
         if (curArg.find("-logLevel=") == 0) {
-            logLevel = curArg.substr(strlen("-logLevel="));
+            logLevel = bp::log::levelFromString(
+                           curArg.substr(strlen("-logLevel=")));
             curArg = argv[++argIndex];
         }
         Path dir(argv[argIndex++]);

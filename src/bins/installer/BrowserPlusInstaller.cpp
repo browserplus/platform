@@ -849,11 +849,12 @@ main(int argc, const char** argv)
         // set the appropriate locale for strings generated from the Installer
         Path stringsPath = exeDir / "strings.json";
         Installer::setLocalizedStringsPath(stringsPath, locale);
-    
+
+        bp::log::Level bpLogLevel = bp::log::levelFromString(logLevel);
         if (!logFile.empty()) {
-            bp::log::setupLogToFile(logFile, logLevel, bp::log::kAppend);
+            bp::log::setupLogToFile(logFile, bpLogLevel, bp::log::kAppend);
         } else if (!logLevel.empty()) {
-            bp::log::setupLogToConsole(logLevel);
+            bp::log::setupLogToConsole(bpLogLevel);
         }
 
         BPLOG_INFO_STRM("exeDir = " << exeDir);

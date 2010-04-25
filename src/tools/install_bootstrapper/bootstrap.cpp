@@ -73,7 +73,8 @@ int APIENTRY WinMain( HINSTANCE, HINSTANCE, LPSTR, int )
     // may write to the same file.
     // bootstrap will be master and handle rollover, spawned
     // installer will just append.
-	bp::log::setupLogToFile(logFile, "debug", bp::log::kSizeRollover);
+    bp::log::setupLogToFile(logFile, bp::log::LEVEL_DEBUG, 
+                            bp::log::kSizeRollover);
 
     std::string logArg("-logfile=");
     logArg.append(logFile.utf8());

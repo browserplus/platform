@@ -41,7 +41,7 @@ bp::runloop::RunLoop s_rl;
 static APTArgDefinition g_args[] = {
     { "log", APT::TAKES_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
       APT::NOT_INTEGER, APT::MAY_RECUR,
-      "enable console logging, argument like \"info,raw\" or \"debug\""
+      "enable console logging, argument like \"info\" or \"debug\""
     },
     { "logfile", APT::TAKES_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
       APT::NOT_INTEGER, APT::MAY_RECUR,
@@ -75,16 +75,18 @@ setupLogging(const APTArgParse& argParser)
     if (config.empty()) config = "info";
     
     // Setup the system-wide minimum log level.
-    bp::log::setLogLevel(bp::log::levelFromConfig(config));
+	bp::log::Level logLevel = bp::log::levelFromString(config);
+    bp::log::setLogLevel(logLevel);
 
     // For now always use "msec" time format.
     // We could add an APTArg but seems unnecessary at the moment.
-    std::string timeformat = "msec";
+	bp::log::TimeFormat timeFormat = bp::log::TIME_MSEC;
     
 	if (path.empty()) {
-		bp::log::setupLogToConsole(config,"",timeformat);
+        bp::log::setupLogToConsole(logLevel,"BrowserPlus Service Runner",
+                                   timeFormat);
 	} else {
-		bp::log::setupLogToFile(path,config,bp::log::kTruncate,timeformat);
+        bp::log::setupLogToFile(path,logLevel,bp::log::kTruncate,timeFormat);
 	}
 }
 

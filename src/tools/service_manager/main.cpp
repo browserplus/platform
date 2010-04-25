@@ -38,7 +38,7 @@ bp::runloop::RunLoop s_rl;
 static APTArgDefinition g_args[] = {
     { "log", APT::TAKES_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
       APT::NOT_INTEGER, APT::MAY_RECUR,
-      "enable console logging, argument like \"info,ThrdLvlFuncMsg\""
+      "enable console logging, argument is level (info, debug, etc.)"
     },
     { "logfile", APT::TAKES_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
       APT::NOT_INTEGER, APT::MAY_RECUR,
@@ -60,8 +60,9 @@ setupLogging(const APTArgParse& argParser)
     
     if (level.empty()) level = "info";
 
-    if (path.empty()) bp::log::setupLogToConsole(level);
-    else bp::log::setupLogToFile(path, level);
+    bp::log::Level logLevel = bp::log::levelFromString(level);
+    if (path.empty()) bp::log::setupLogToConsole(logLevel);
+    else bp::log::setupLogToFile(path, logLevel);
 }
 
 /** a class to listen for UserQuitEvents and stop the runloop upon

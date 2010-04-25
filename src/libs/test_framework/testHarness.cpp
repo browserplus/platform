@@ -144,16 +144,22 @@ int main( int argc, const char ** argv )
         }
 
         if (ap.argumentPresent("logToConsole")) {
-            bp::log::setupLogToConsole(ap.argument("logToConsole"));
+            bp::log::Level level = bp::log::levelFromString(
+                                    ap.argument("logToConsole"));
+            bp::log::setupLogToConsole(level);
         }
 
         if (ap.argumentPresent("logToDebugger")) {
-            bp::log::setupLogToDebugger(ap.argument("logToDebugger"));
+            bp::log::Level level = bp::log::levelFromString(
+                                    ap.argument("logToDebugger"));
+            bp::log::setupLogToDebugger(level);
         }
 
         if (ap.argumentPresent("logToFile")) {
             bp::file::Path logPath("TestHarness.log");
-            bp::log::setupLogToFile(logPath,ap.argument("logToFile"));
+            bp::log::Level level = bp::log::levelFromString(
+                                    ap.argument("logToFile"));
+            bp::log::setupLogToFile(logPath,level);
         }
     
         //--- Create the event manager and test controller

@@ -43,7 +43,7 @@ static APTArgDefinition s_args[] =
 {
     {
         "async", false, "", false, false, false,
-        "Asynchronously execute outputting progress to std::err"
+        "Asynchronously execute outputting progress to stderr"
     },
     {
         "headers", false, "", false, false, false,
@@ -59,7 +59,7 @@ static APTArgDefinition s_args[] =
     },
     { "log", APT::TAKES_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
       APT::NOT_INTEGER, APT::MAY_RECUR,
-      "enable console logging, argument like \"info,ThrdLvlFuncMsg\""
+      "enable console logging, argument is level (debug, info, etc)"
     },
     { "logfile", APT::TAKES_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
       APT::NOT_INTEGER, APT::MAY_RECUR,
@@ -71,20 +71,23 @@ static APTArgDefinition s_args[] =
 static void 
 setupLogging(const APTArgParse& argParser)
 {
-    // Clear out any existing appenders.
     bp::log::removeAllAppenders();
-
-    std::string config = argParser.argument("log");
+    
+    string level = argParser.argument("log");
     bp::file::Path path(argParser.argument("logfile"));
 
-    if (config.empty() && path.empty()) return;
-    if (config.empty()) config = "info";
+    if (level.empty() && path.empty())
+        return;
+    if (level.empty())
+        level = "info";
+
+    bp::log::Level logLevel = bp::log::levelFromString(level);
+    bp::log::setLogLevel(logLevel);
     
-    // Setup the system-wide minimum log level.
-    bp::log::setLogLevel(bp::log::levelFromConfig(config));
-    
-    if (path.empty()) bp::log::setupLogToConsole(config);
-    else bp::log::setupLogToFile(path, config);
+    if (path.empty())
+        bp::log::setupLogToConsole(logLevel);
+    else
+        bp::log::setupLogToFile(path, logLevel);
 }
 
 
@@ -94,16 +97,15 @@ dumpHeaders(const bp::http::Version & version,
             const bp::http::Status& status,
             const bp::http::Headers & headers)
 {
-    std::cout << version.toString() << " " 
-              << status.toString() << std::endl;
+    cout << version.toString() << " " << status.toString() << endl;
 
     bp::http::Headers::const_iterator i;
     
     for (i = headers.begin(); i != headers.end(); i++)
     {
-        std::cout << i->first << ": " << i->second << std::endl;
+        cout << i->first << ": " << i->second << endl;
     }
-    std::cout << std::endl;
+    cout << endl;
 }
 
 
@@ -143,24 +145,24 @@ public:
     void onResponseBodyBytes(const unsigned char* pBytes, 
                              unsigned int size) {
         bp::http::client::Listener::onResponseBodyBytes(pBytes, size);
-        std::cout.write((const char*)pBytes, size);
+        cout.write((const char*)pBytes, size);
     }
     
     void onSendProgress( size_t bytesProcessed,
                          size_t totalBytes,
                          double percent ) {
-        std::cerr << "sendProgress: " << bytesProcessed
-                  << " of " << totalBytes << " (" << percent 
-                  << "%)" << std::endl;
+        cerr << "sendProgress: " << bytesProcessed
+             << " of " << totalBytes << " (" << percent 
+             << "%)" << endl;
         bp::http::client::Listener::onSendProgress(bytesProcessed, totalBytes, percent);
     }
     
     void onReceiveProgress( size_t bytesProcessed,
                             size_t totalBytes,
                             double percent ) {
-        std::cerr << "receiveProgress: " << bytesProcessed
-                  << " of " << totalBytes << " (" << percent << "%)" 
-                  << std::endl;
+        cerr << "receiveProgress: " << bytesProcessed
+             << " of " << totalBytes << " (" << percent << "%)" 
+             << endl;
         bp::http::client::Listener::onReceiveProgress(bytesProcessed, totalBytes, percent);
     }
     
@@ -169,17 +171,17 @@ public:
         m_rl->stop();
     }
     void onTimeout() {
-        std::cerr << "timeout" << std::endl;
+        cerr << "timeout" << endl;
         bp::http::client::Listener::onTimeout();
         m_rl->stop();
     }
-    void onError(const std::string& msg) {
-        std::cerr << "error: " << msg << std::endl;
+    void onError(const string& msg) {
+        cerr << "error: " << msg << endl;
         bp::http::client::Listener::onError(msg);
         m_rl->stop();
     }
     void onCancel() {
-        std::cerr << "cancelled" << std::endl;
+        cerr << "cancelled" << endl;
         bp::http::client::Listener::onCancel();
         m_rl->stop();
     }
@@ -190,7 +192,7 @@ public:
 
     bool m_timedOut;
     bool m_cancelled;
-    std::string m_errorMsg;
+    string m_errorMsg;
     bool ok() const {
         return !m_timedOut && !m_cancelled && m_errorMsg.empty();
     }
@@ -204,22 +206,22 @@ public:
 int
 main(int argc, const char ** argv)
 {
-    bp::log::setupLogToFile(bp::file::Path("bpwget.log"), "debug");
+    bp::log::setupLogToFile(bp::file::Path("bpwget.log"), bp::log::LEVEL_DEBUG);
 
     // process command line arguments
     APTArgParse ap(" <options> <url>\n  execute HTTP requests from the command line");
     int nargs;
     nargs = ap.parse(sizeof(s_args) / sizeof(s_args[0]), s_args, argc, argv);
     if (nargs < 0) {
-        std::cerr << ap.error();
+        cerr << ap.error();
         return 1;
     }
     if (nargs != (argc - 1)) {
-        std::cerr << argv[0] << ": " << "missing required url argument"
-                  << std::endl;
+        cerr << argv[0] << ": " << "missing required url argument"
+                  << endl;
         return 1;
     }
-    std::string url(argv[nargs]);
+    string url(argv[nargs]);
     bool async = ap.argumentPresent("async");
 
     double timeout = 30.0;
@@ -231,7 +233,7 @@ main(int argc, const char ** argv)
     
     shared_ptr<bp::http::Request> req(new bp::http::Request);
     if (!req->url.parse(url)) {
-        std::cerr << "invalid url: " << url << std::endl;
+        cerr << "invalid url: " << url << endl;
         return 1;
     }
 
@@ -239,13 +241,13 @@ main(int argc, const char ** argv)
     if (ap.argumentPresent("post")) {
         bp::file::Path path(ap.argument("post"));
         if (!bp::file::exists(path)) {
-            std::cerr << "no such file: " << path << std::endl;
+            cerr << "no such file: " << path << endl;
             return 1;
         }
-        std::string body;
+        string body;
 
         if (!bp::strutil::loadFromFile(path, body)) {
-            std::cerr << "couldn't read file: " << path << std::endl;
+            cerr << "couldn't read file: " << path << endl;
             return 1;
         }
         
@@ -285,18 +287,18 @@ main(int argc, const char ** argv)
                 }
                 
                 if (!resp->body.empty()) {
-                    std::cout.write((const char *) resp->body.elementAddr(0),
-                                    resp->body.size());
+                    cout.write((const char *) resp->body.elementAddr(0),
+                               resp->body.size());
                 }
                 break;
             case SyncTransaction::FinalStatus::eError:
-                std::cout << "error: " << results.message << std::endl;
+                cout << "error: " << results.message << endl;
                 break;
             case SyncTransaction::FinalStatus::eTimedOut:
-                std::cout << "timed out" << std::endl;
+                cout << "timed out" << endl;
                 break;
             case SyncTransaction::FinalStatus::eCancelled:
-                std::cout << "cancelled" << std::endl;
+                cout << "cancelled" << endl;
                 break;
         }
     }

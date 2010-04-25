@@ -52,13 +52,13 @@ void forkChild( const string& sChildName, const vector<string>& vsArgs );
 void setupLogging( bool bIsParent )
 {
     Path logFile = getTempDirectory() / "BrowserPlusUninstaller.log";
-    string sLogLevel = "debug";
+    bp::log::Level level = bp::log::LEVEL_DEBUG;
 
-    // TODO: time, layout, size
     bp::log::FileMode mode = bIsParent ?
                              bp::log::kSizeRollover : bp::log::kAppend;
 
-    bp::log::setupLogToFile( logFile, sLogLevel, mode );
+    bp::log::setLogLevel( level );
+    bp::log::setupLogToFile( logFile, level, mode );
 }
     
 
