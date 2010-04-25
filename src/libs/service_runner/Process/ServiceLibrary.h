@@ -39,6 +39,7 @@
 #include "BPUtils/bpthreadhopper.h"
 #include "BPUtils/bptr1.h"
 #include "BPUtils/bptypeutil.h"
+#include "BPUtils/LogConfigurator.h"
 #include "BPUtils/ServiceDescription.h"
 #include "BPUtils/ServiceSummary.h"
 #include "ServiceAPI/bppfunctions.h"
