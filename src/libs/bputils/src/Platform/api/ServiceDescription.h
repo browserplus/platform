@@ -140,6 +140,9 @@ public:
      *  micro joined with '.' */
     std::string versionString() const;
 
+    /** get a string of the form: "name major.minor.version" */
+    std::string nameVersionString() const;
+    
     bp::ServiceVersion version() const;
 
     /** get corelet major version */
