@@ -361,6 +361,12 @@ service::Description::versionString() const
     return ss.str();
 }
 
+std::string
+service::Description::nameVersionString() const
+{
+    return name() + " " + versionString();
+}
+
 unsigned int
 service::Description::majorVersion() const
 {
