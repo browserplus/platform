@@ -42,6 +42,8 @@ enum FileMode
     kSizeRollover
 };
 
+const int kDefaultRolloverKB = 256;
+
 
 } // log
 } // bp
