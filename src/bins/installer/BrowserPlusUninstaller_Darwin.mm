@@ -67,12 +67,14 @@ main(int argc, const char** argv)
                 logLevel = args[1];
             }
         }
-    
+
+        bp::log::Level bpLogLevel = bp::log::levelFromString(logLevel);
+        
         if (!logLevel.empty()) {
             if (logFile.empty()) {
-                bp::log::setupLogToConsole(logLevel);
+                bp::log::setupLogToConsole(bpLogLevel);
             } else {
-                bp::log::setupLogToFile(logFile, logLevel,
+                bp::log::setupLogToFile(logFile, bpLogLevel,
                                         bp::log::kSizeRollover);
             }
         }
