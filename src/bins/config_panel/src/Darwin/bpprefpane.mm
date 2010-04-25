@@ -92,24 +92,11 @@ didFailProvisionalLoadWithError: (NSError *) error
 - (NSView *) loadMainView
 {
     // intialize BP logging
-    bp::file::Path logPath = bp::paths::getObfuscatedWritableDirectory() / "ConfigPanel.log";
-
-    bp::config::ConfigReader reader;
-    (void) reader.load(bp::paths::getConfigFilePath());
-
-    std::string level = "info";
-    (void) reader.getStringValue("ConfigPanelLogLevel", level);
-
-    std::string timeFormat;
-    (void) reader.getStringValue("LogTimeFormat", timeFormat);
-
-    long long int rolloverKB = 0;
-    (void) reader.getIntegerValue("LogFileRolloverKB", rolloverKB);
-
-    // TODO: appender layout?
-    bp::log::setupLogToFile(logPath, level, bp::log::kSizeRollover,
-                            timeFormat, (unsigned int) rolloverKB);
-
+    bp::log::Configurator cfg;
+    cfg.loadConfigFile();
+    cfg.setPath(bp::paths::getObfuscatedWritableDirectory()/"ConfigPanel.log");
+    cfg.configure();
+    
     // (lth) on tiger and leopard pref pane width is different.  detect
     // os automatically here
 	// thanks to: http://www.codehackers.net/blog/?p=40  
