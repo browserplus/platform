@@ -12,7 +12,7 @@
 
 # if you want to update to a newer version of the bakery, fiddle this
 # sha256 to point to the commit you want
-bakery_commit = "8613cc6b9b60dd0f2be36315a2aa139cc296db50"
+bakery_commit = "b6dae7e73b3213c2cc8f2aed2dd387af75266880"
 # END user serviceable parts
 
 require 'rbconfig'
@@ -84,6 +84,16 @@ def runRecipe
   }
 
   b = Bakery.new $order
+  # let's check the bakery state quickly
+  s = b.check
+  issues = s[:info].length + s[:warn].length +  s[:error].length
+  puts "Bakery consistency check complete (#{issues} interesting issues found)"
+  s.each { |k,v|
+    v.each { |msg|
+      puts "#{k.to_s.upcase}: #{msg}"
+    }
+  }
+  raise "refusing to build bakery, in an inconsistent state" if s[:error].length > 0
   b.build
 
   exit 0
