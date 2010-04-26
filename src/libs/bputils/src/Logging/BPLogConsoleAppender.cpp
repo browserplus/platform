@@ -59,6 +59,10 @@ ConsoleAppender::ConsoleAppender( LayoutPtr layout,
     m_sConsoleTitle( sConsoleTitle )
 {
 #ifdef WIN32
+    // This is for scenario 3 above (gui app).
+    // It should fail benignly for the other scenarios.
+    (void) AllocConsole();
+
     // For Scenario 2 above (console app spawns windowless console app
     // (using CREATE_NO_WINDOW)), the child process will have an
     // invisible console that cannot be made visible (because no window).
