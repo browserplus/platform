@@ -20,7 +20,7 @@ ruby .\build.rb clean
     </target>
     <target name="build">
         <exec executable="ruby" failonerror="true">
-            <arg line="./build.rb keepSource" />
+            <arg line="./build.rb" />
         </exec>
     </target>
     <target name="build_make" depends="build" />
@@ -30,7 +30,7 @@ ruby .\build.rb clean
         <echo file="x1.bat">call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
 if not %WINTEMP%*==* set TEMP=%WINTEMP%
 if not %WINTMP%*==* set TMP=%WINTMP%
-ruby .\build.rb keepSource
+ruby .\build.rb
         </echo>
         <exec executable="cmd" failonerror="true">
             <arg line="/C x1.bat" />
