@@ -74,6 +74,7 @@ int APIENTRY WinMain( HINSTANCE hInst, HINSTANCE /*hinstPrev*/,
     try
     {
         setupLogging();
+        BPLOG_INFO( "Startup." );
 
         string sLocale = getUsersLocale();
         
