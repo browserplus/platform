@@ -12,7 +12,7 @@
 
 # if you want to update to a newer version of the bakery, fiddle this
 # sha256 to point to the commit you want
-bakery_commit = "4823506ae86b40128bdc27e5d613d4a9f2ee30ea"
+bakery_commit = "bd742fc5795a4ab17b697de8f6808f0653b5a19a"
 # END user serviceable parts
 
 require 'rbconfig'
@@ -52,22 +52,21 @@ def runRecipe
   $order = {
     :output_dir => File.join(TOPDIR, $platform),
     :packages => [
-                  # seem to build clean
                   "boost",
+                  "bzip2",
                   "cppunit",
                   "easylzma",
+                  "icu",
                   "jsmin",
-                  "zlib",
-                  "bzip2",
+                  "libarchive",
                   "libedit",
                   "mongoose",
                   "npapi",
                   "openssl", 
-                  "libarchive", # libarchive must be after openssl
-                  "yajl",
                   "wtl",
+                  "yajl",
                   "yui-compressor",
-                  "icu"
+                  "zlib"
                  ],
     :use_recipe => {
       "npapi" => "npapi/recipe.rb",
