@@ -63,11 +63,6 @@ static APTArgDefinition s_args[] =
         "Format test output in XML"
     },
     {
-        "xsl", APT::TAKES_ARG, "", APT::NOT_REQUIRED, APT::NOT_INTEGER,
-        APT::MAY_NOT_RECUR,
-        "XSL transform to apply to test output in XML"
-    },
-    {
         "logToConsole", APT::TAKES_ARG, "", APT::NOT_REQUIRED,
         APT::NOT_INTEGER, APT::MAY_NOT_RECUR,
         "log to console, specify a logging level"
@@ -176,14 +171,12 @@ int main( int argc, const char ** argv )
         CPPUNIT_NS::TextOutputter textOutputter(&result, std::cout);
 
         //--- Add a listener that collects results in XML
-        CPPUNIT_NS::OStream* xmlStream = &CPPUNIT_NS::stdCOut();
+        CPPUNIT_NS::OStream* xmlStream = NULL;
+        CPPUNIT_NS::XmlOutputter* xmlOutputter = NULL;
         if (ap.argumentPresent("xml")) {
             // Set up outputters
-            xmlStream = new CPPUNIT_NS::OFileStream(ap.argument("xml").c_str());
-        }
-        CPPUNIT_NS::XmlOutputter xmlOutputter(&result, *xmlStream/*, parser.getEncoding()*/);
-        if (ap.argumentPresent("xsl")) {
-            xmlOutputter.setStyleSheet(ap.argument("xsl"));
+            xmlStream = new CPPUNIT_NS::OFileStream( ap.argument("xml").c_str() );
+            xmlOutputter = new CPPUNIT_NS::XmlOutputter( &result, *xmlStream );
         }
 
         //--- Add the top suite to the test runner
@@ -191,10 +184,12 @@ int main( int argc, const char ** argv )
         runner.addTest( suite );
         runner.run( controller );
 
-        textOutputter.write();
         if (ap.argumentPresent("xml")) {
-            xmlOutputter.write();
+            xmlOutputter->write();
+            delete xmlStream;
+            delete xmlOutputter;
         }
+        textOutputter.write();
 
         rv = result.wasSuccessful() ? 0 : 1;
     }

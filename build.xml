@@ -32,7 +32,22 @@
         <ant dir="external" target="build_vc08"/>
         <ant dir="src" target="build_vc08"/>
     </target>
-    <target name="build" depends="build_make,build_vc08"/>
+    <target name="test_make" unless="is.windows">
+        <ant dir="external" target="test_make"/>
+        <ant dir="src" target="test_make"/>
+    </target>
+    <target name="test_xcode">
+        <ant dir="external" target="test_xcode"/>
+        <ant dir="src" target="test_xcode"/>
+    </target>
+    <target name="test_vc08" if="is.windows">
+        <ant dir="external" target="test_vc08"/>
+        <ant dir="src" target="test_vc08"/>
+    </target>
     <target name="clean" depends="clean_make,clean_vc08"/>
+    <target name="build" depends="build_make,build_vc08"/>
+    <target name="test" depends="test_make,test_vc08"/>
     <target name="rebuild" depends="clean,build"/>
+    <target name="all" depends="build,test"/>
+    <target name="reall" depends="rebuild,test"/>
 </project>

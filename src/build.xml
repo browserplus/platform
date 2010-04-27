@@ -1,4 +1,4 @@
-<project name="BrowserPlusPlatform_src" default="build_make">
+<project name="BrowserPlusPlatform_src" default="build">
     <target name="clean">
         <delete dir="../build" />
     </target>
@@ -12,47 +12,83 @@
         <exec executable="cmake" dir="../build" failonerror="true">
             <arg line="-G &quot;Unix Makefiles&quot; ../src" />
         </exec>
-	<exec executable="make" dir="../build" failonerror="true">
+        <exec executable="make" dir="../build" failonerror="true">
             <arg line="-j3" />
         </exec>
     </target>
     <target name="build_xcode" depends="build">
-	    <exec executable="cmake" dir="../build" failonerror="true">
+        <exec executable="cmake" dir="../build" failonerror="true">
             <arg line="-G &quot;Xcode&quot; ../src" />
         </exec>
-	<exec executable="xcodebuild" dir="../build" failonerror="true">
+        <exec executable="xcodebuild" dir="../build" failonerror="true">
             <arg line="-project BrowserPlus.xcodeproj -alltargets" />
         </exec>
     </target>
     <target name="build_vc08" depends="build">
-	    <delete file="../build/x1.bat" />
-	    <echo file="../build/x1.bat">call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
 if not %WINTEMP%*==* set TEMP=%WINTEMP%
 if not %WINTMP%*==* set TMP=%WINTMP%
 cmake -G "Visual Studio 9 2008" ..\src
         </echo>
-	<exec executable="cmd" dir="../build" failonerror="true">
+        <exec executable="cmd" dir="../build" failonerror="true">
             <arg line="/C x1.bat" />
         </exec>
-	<delete file="../build/x1.bat" />
-	<echo file="../build/x1.bat">call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
 if not %WINTEMP%*==* set TEMP=%WINTEMP%
 if not %WINTMP%*==* set TMP=%WINTMP%
-devenv BrowserPlus.sln /Build Release
+devenv BrowserPlus.sln /Build Release /Project ALL_BUILD
         </echo>
-	<exec executable="cmd" dir="../build" failonerror="true">
+        <exec executable="cmd" dir="../build" failonerror="true">
             <arg line="/C x1.bat" />
         </exec>
-	<delete file="../build/x1.bat" />
-	<echo file="../build/x1.bat">call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
 if not %WINTEMP%*==* set TEMP=%WINTEMP%
 if not %WINTMP%*==* set TMP=%WINTMP%
-devenv BrowserPlus.sln /Build Debug
+devenv BrowserPlus.sln /Build Debug /Project ALL_BUILD
         </echo>
-	<exec executable="cmd" dir="../build" failonerror="true">
+        <exec executable="cmd" dir="../build" failonerror="true">
             <arg line="/C x1.bat" />
         </exec>
-	<delete file="../build/x1.bat" />
+        <delete file="../build/x1.bat" />
+    </target>
+    <target name="test">
+        <!-- NO-OP -->
+    </target>
+    <target name="test_make" depends="test" >
+    <exec executable="make" dir="../build" failonerror="true">
+        <arg line="test" />
+    </exec>
+    </target>
+    <target name="test_xcode" depends="test">
+        <!-- NEEDSWORK!! -->
+    </target>
+    <target name="test_vc08" depends="test">
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+devenv BrowserPlus.sln /Build Release /Project test
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+devenv BrowserPlus.sln /Build Debug /Project test
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
     </target>
 </project>
-
