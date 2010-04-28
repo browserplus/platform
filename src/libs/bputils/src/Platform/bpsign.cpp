@@ -109,7 +109,8 @@ Signer::getSignature(const Path& privateKeyPath,
         }
         (void) BIO_set_close(outBio, BIO_CLOSE);
 
-        if (doSign(privateKeyPath, publicKeyPath, password, inFile, outBio, true)) {
+        if (doSign(privateKeyPath, publicKeyPath, password,
+                   inFile, outBio, true)) {
             // put signature into return string
             char* buf;
             long len = BIO_get_mem_data(outBio, &buf);
@@ -252,7 +253,8 @@ Signer::doSign(const Path& privateKeyPath,
                                                  password.empty() ?
                                                  NULL : (void*)password.c_str());
         if (pkey == NULL) {
-            string s = "Error reading signer private key " + privateKeyPath.externalUtf8();
+            string s = "Error reading signer private key "
+                       + privateKeyPath.externalUtf8();
             throw SSLException(s);
         }
         
@@ -267,7 +269,8 @@ Signer::doSign(const Path& privateKeyPath,
         
         X509* cert = PEM_read_bio_X509(certBio, NULL, NULL, NULL);
         if (cert == NULL) {
-            string s = "Error reading signer certificate in " + publicKeyPath.externalUtf8();
+            string s = "Error reading signer certificate in "
+                       + publicKeyPath.externalUtf8();
             throw SSLException(s);
         }
         
@@ -280,14 +283,36 @@ Signer::doSign(const Path& privateKeyPath,
         }
         (void) BIO_set_close(in, BIO_CLOSE);
         
+        // setup signing structures
         int flags = PKCS7_BINARY;
         if (detached) flags |= (PKCS7_NOCERTS | PKCS7_DETACHED);
-        PKCS7* pkcs7 = PKCS7_sign(cert, pkey, NULL, in, flags);
-        if (pkcs7 == NULL) {
+
+        PKCS7* p7 = PKCS7_new();
+        if (p7 == NULL) {
             throw SSLException("Error making the PKCS#7 object");
         }
+        PKCS7_set_type(p7, NID_pkcs7_signed);
+        PKCS7_content_new(p7, NID_pkcs7_data);
+        PKCS7_SIGNER_INFO* si = PKCS7_add_signature(p7, cert, pkey,
+                                                    EVP_sha1());
+        if (!si) {
+            throw SSLException("Error adding signer");
+        }
+
+        // this give us timestamps
+        PKCS7_add_signed_attribute(si, NID_pkcs9_contentType, V_ASN1_OBJECT,
+                                   OBJ_nid2obj(NID_pkcs7_data));
+
+        if (detached) {
+            PKCS7_set_detached(p7, 1);
+        }
+
+        if (!PKCS7_final(p7, in, flags)) {
+            throw SSLException("Error finalizing");
+        }
+        
         int outFlags = detached ? PKCS7_DETACHED : 0;
-        if (SMIME_write_PKCS7(outBio, pkcs7, in, outFlags) != 1) {
+        if (SMIME_write_PKCS7(outBio, p7, NULL, outFlags) != 1) {
             throw SSLException("Error writing output");
         }
         rval = true;

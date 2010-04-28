@@ -39,6 +39,7 @@
 #include "BPUtils/bpsign.h"
 #include "BPUtils/bpstrutil.h"
 #include "BPUtils/bpfile.h"
+#include "BPUtils/BPLog.h"
 
 using namespace std;
 using namespace bp::file;
@@ -92,6 +93,8 @@ main(int argc, const char* argv[])
         }
     }
     
+    bp::log::setupLogToConsole(bp::log::levelFromString("debug"));
+
     bp::sign::Signer* signer = bp::sign::Signer::get(certStore);
     if (!signer) {
         fprintf(stderr, "unable to get Signer!\n");
