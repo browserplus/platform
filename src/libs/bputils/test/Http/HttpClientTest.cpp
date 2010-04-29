@@ -487,7 +487,7 @@ void HttpClientTest::testPostAsync()
     
     AsyncHttp async(request, &rl);
     async.startTransaction();
-    CPPUNIT_ASSERT(async.m_errorMsg.empty());
+    CPPUNIT_ASSERT_MESSAGE(async.m_errorMsg.c_str(), async.m_errorMsg.empty());
     
     rl.run();
     CPPUNIT_ASSERT(async.ok());
@@ -628,10 +628,10 @@ void HttpClientTest::testTimeoutAsync()
     
     sw.start();
     async.startTransaction();
-    CPPUNIT_ASSERT(async.m_errorMsg.empty());
+    CPPUNIT_ASSERT_MESSAGE(async.m_errorMsg.c_str(), async.m_errorMsg.empty());
     
     rl.run();
-    CPPUNIT_ASSERT(async.m_errorMsg.empty());
+    CPPUNIT_ASSERT_MESSAGE(async.m_errorMsg.c_str(), async.m_errorMsg.empty());
     CPPUNIT_ASSERT(async.m_timedOut);
     
     // Verify timeout was about what we expected.
@@ -670,10 +670,10 @@ void HttpClientTest::testCancelAsync()
     RequestPtr request(new Request(Method::HTTP_GET, url));
     MyAsync async(request, &rl);
     async.startTransaction();
-    CPPUNIT_ASSERT(async.m_errorMsg.empty());
+    CPPUNIT_ASSERT_MESSAGE(async.m_errorMsg.c_str(), async.m_errorMsg.empty());
     
     rl.run();
-    CPPUNIT_ASSERT(async.m_errorMsg.empty());
+    CPPUNIT_ASSERT_MESSAGE(async.m_errorMsg.c_str(), async.m_errorMsg.empty());
     CPPUNIT_ASSERT(async.m_cancelled);
 }
 

@@ -147,11 +147,11 @@ void UrlTest::testPathFromUrl()
 #ifndef WIN32
     // posix format path from url with host name should fail
     p = pathFromURL("file://a/b/c.jpg");
-    CPPUNIT_ASSERT(p.empty());
+    CPPUNIT_ASSERT_MESSAGE(p.utf8().c_str(), p.empty());
     p = pathFromURL("file://.a/b.ext");
-    CPPUNIT_ASSERT(p.empty());
+    CPPUNIT_ASSERT_MESSAGE(p.utf8().c_str(), p.empty());
     p = pathFromURL("file://a:100/c d/e f.jpg");
-    CPPUNIT_ASSERT(p.empty());
+    CPPUNIT_ASSERT_MESSAGE(p.utf8().c_str(), p.empty());
 #endif
 }
 

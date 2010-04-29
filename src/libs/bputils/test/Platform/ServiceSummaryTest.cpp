@@ -76,8 +76,8 @@ ServiceSummaryTest::standaloneTest()
 
     // instantiated from a non name/version dir.  they should be left
     // empty
-    CPPUNIT_ASSERT( s.name().empty() );
-    CPPUNIT_ASSERT( s.version().empty() );
+    CPPUNIT_ASSERT_MESSAGE( s.name().c_str(), s.name().empty() );
+    CPPUNIT_ASSERT_MESSAGE( s.version().c_str(), s.version().empty() );
 
     // should NOT be out of date
     CPPUNIT_ASSERT( !s.outOfDate() );
@@ -98,7 +98,7 @@ ServiceSummaryTest::standaloneTest()
     CPPUNIT_ASSERT( !title.compare("Image Manipulation Plugin") );    
 
     // empty dependent corelet stuff
-    CPPUNIT_ASSERT( s.usesCorelet().empty() );
+    CPPUNIT_ASSERT_MESSAGE( s.usesCorelet().c_str(), s.usesCorelet().empty() );
 
     CPPUNIT_ASSERT( s.isInitialized() );
 

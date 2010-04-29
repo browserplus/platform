@@ -59,7 +59,7 @@ FileLinkTest::brokenLink()
     bp::file::createLink(src, target);
     Path resolved;
     bool exists = resolveLink(src, resolved);
-    CPPUNIT_ASSERT(!exists && resolved.empty());
+    CPPUNIT_ASSERT_MESSAGE(resolved.utf8().c_str(), !exists && resolved.empty());
 }
 
 
