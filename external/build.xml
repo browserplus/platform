@@ -8,10 +8,6 @@ NEEDSWORK!!!  Bakery doesn't support a clean target currently
 -->
     </target>
     <target name="clean_make" depends="clean" />
-<!--
-NEEDSWORK!!!  XCODE not support yet
-    <target name="clean_xcode" depends="clean" />
--->
     <target name="clean_vc08" >
 <!--
 NEEDSWORK!!!  Bakery doesn't support a clean target currently
@@ -34,10 +30,6 @@ ruby .\build.rb clean
         </exec>
     </target>
     <target name="build_make" depends="build" />
-<!--
-NEEDSWORK!!!  XCODE not support yet
-    <target name="build_xcode" depends="build" />
--->
     <target name="build_vc08">
         <delete file="x1.bat" />
         <echo file="x1.bat">@echo off
@@ -55,9 +47,5 @@ ruby .\build.rb
         <!-- NO-OP -->
     </target>
     <target name="test_make" depends="test" />
-<!--
-NEEDSWORK!!!  XCODE not support yet
-    <target name="test_xcode" depends="test" />
--->
     <target name="test_vc08" depends="test" />
 </project>
