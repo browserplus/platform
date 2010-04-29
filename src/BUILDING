@@ -18,6 +18,12 @@ you to control how that installed version is configured:
                  distribution servers you'd like BrowserPlus to query
                  for permissions, updates, and services.
 
+***************************************************************************
+* NOTE:  Due to limitations with several of the 3rd party packages used   *
+*        by BrowserPlus, the path to the BrowserPlus source (referred to  *
+*        as <path to public_platform> below) cannot contain spaces.       *
+***************************************************************************
+
 Building on OSX:
   Setting up your environment:
     1. install the latest version of XCode (at time of writing 2.5 or 3.0 for tiger/leopard)
