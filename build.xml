@@ -12,10 +12,13 @@
         <ant dir="external" target="clean_make"/>
         <ant dir="src" target="clean_make"/>
     </target>
+<!--
+NEEDSWORK!!!  XCODE not support yet
     <target name="clean_xcode">
         <ant dir="external" target="clean_xcode"/>
         <ant dir="src" target="clean_xcode"/>
     </target>
+-->
     <target name="clean_vc08" if="is.windows">
         <ant dir="external" target="clean_vc08"/>
         <ant dir="src" target="clean_vc08"/>
@@ -24,10 +27,13 @@
         <ant dir="external" target="build_make"/>
         <ant dir="src" target="build_make"/>
     </target>
+<!--
+NEEDSWORK!!!  XCODE not support yet
     <target name="build_xcode">
         <ant dir="external" target="build_xcode"/>
         <ant dir="src" target="build_xcode"/>
     </target>
+-->
     <target name="build_vc08" if="is.windows">
         <ant dir="external" target="build_vc08"/>
         <ant dir="src" target="build_vc08"/>
@@ -36,10 +42,13 @@
         <ant dir="external" target="test_make"/>
         <ant dir="src" target="test_make"/>
     </target>
+<!--
+NEEDSWORK!!!  XCODE not support yet
     <target name="test_xcode">
         <ant dir="external" target="test_xcode"/>
         <ant dir="src" target="test_xcode"/>
     </target>
+-->
     <target name="test_vc08" if="is.windows">
         <ant dir="external" target="test_vc08"/>
         <ant dir="src" target="test_vc08"/>

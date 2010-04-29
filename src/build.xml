@@ -3,7 +3,10 @@
         <delete dir="../build" />
     </target>
     <target name="clean_make" depends="clean" />
+<!--
+NEEDSWORK!!!  XCODE not support yet
     <target name="clean_xcode" depends="clean" />
+-->
     <target name="clean_vc08" depends="clean" />
     <target name="build">
         <mkdir dir="../build" />
@@ -16,6 +19,8 @@
             <arg line="-j3" />
         </exec>
     </target>
+<!--
+NEEDSWORK!!!  XCODE not support yet
     <target name="build_xcode" depends="build">
         <exec executable="cmake" dir="../build" failonerror="true">
             <arg line="-G &quot;Xcode&quot; ../src" />
@@ -24,6 +29,7 @@
             <arg line="-project BrowserPlus.xcodeproj -alltargets" />
         </exec>
     </target>
+-->
     <target name="build_vc08" depends="build">
         <delete file="../build/x1.bat" />
         <echo file="../build/x1.bat">@echo off
@@ -65,9 +71,12 @@ devenv BrowserPlus.sln /Build Debug /Project ALL_BUILD
         <arg line="test" />
     </exec>
     </target>
+<!--
+NEEDSWORK!!!  XCODE not support yet
     <target name="test_xcode" depends="test">
         <!-- NEEDSWORK!! -->
     </target>
+-->
     <target name="test_vc08" depends="test">
         <delete file="../build/x1.bat" />
         <echo file="../build/x1.bat">@echo off
