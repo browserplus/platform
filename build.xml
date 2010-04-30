@@ -1,4 +1,4 @@
-<project name="BrowserPlusPlatform" default="all">
+<project name="BrowserPlusPlatform" default="build_release">
     <condition property="is.windows">
         <os family="windows" />
     </condition>
@@ -8,57 +8,58 @@
     <condition property="is.unix">
         <os family="unix" />
     </condition>
-    <target name="clean_make" unless="is.windows">
-        <ant dir="external" target="clean_make" />
-        <ant dir="src" target="clean_make" />
+    <target name="clean_make_debug" unless="is.windows">
+        <ant dir="external" target="clean_make_debug" />
+        <ant dir="src" target="clean_make_debug" />
     </target>
-    <target name="clean_vc08" if="is.windows">
-        <ant dir="external" target="clean_vc08" />
-        <ant dir="src" target="clean_vc08" />
+    <target name="clean_make_release" unless="is.windows">
+        <ant dir="external" target="clean_make_release" />
+        <ant dir="src" target="clean_make_release" />
+    </target>
+    <target name="clean_vc08_debug" if="is.windows">
+        <ant dir="external" target="clean_vc08_debug" />
+        <ant dir="src" target="clean_vc08_debug" />
+    </target>
+    <target name="clean_vc08_release" if="is.windows">
+        <ant dir="external" target="clean_vc08_release" />
+        <ant dir="src" target="clean_vc08_release" />
     </target>
     <target name="build_make_debug" unless="is.windows">
-        <ant dir="external" target="build_make" />
+        <ant dir="external" target="build_make_debug" />
         <ant dir="src" target="build_make_debug" />
     </target>
     <target name="build_make_release" unless="is.windows">
-        <ant dir="external" target="build_make" />
+        <ant dir="external" target="build_make_release" />
         <ant dir="src" target="build_make_release" />
     </target>
     <target name="build_vc08_debug" if="is.windows">
-        <ant dir="external" target="build_vc08" />
+        <ant dir="external" target="build_vc08_debug" />
         <ant dir="src" target="build_vc08_debug" />
     </target>
     <target name="build_vc08_release" if="is.windows">
-        <ant dir="external" target="build_vc08" />
+        <ant dir="external" target="build_vc08_release" />
         <ant dir="src" target="build_vc08_release" />
     </target>
     <target name="test_make_debug" unless="is.windows">
-        <ant dir="external" target="test_make" />
+        <ant dir="external" target="test_make_debug" />
         <ant dir="src" target="test_make_debug" />
     </target>
     <target name="test_make_release" unless="is.windows">
-        <ant dir="external" target="test_make" />
+        <ant dir="external" target="test_make_release" />
         <ant dir="src" target="test_make_release" />
     </target>
     <target name="test_vc08_debug" if="is.windows">
-        <ant dir="external" target="test_vc08" />
+        <ant dir="external" target="test_vc08_debug" />
         <ant dir="src" target="test_vc08_debug" />
     </target>
     <target name="test_vc08_release" if="is.windows">
-        <ant dir="external" target="test_vc08" />
+        <ant dir="external" target="test_vc08_release" />
         <ant dir="src" target="test_vc08_release" />
     </target>
-    <target name="clean" depends="clean_make,clean_vc08" />
+    <target name="clean_debug" depends="clean_make_debug,clean_vc08_debug" />
+    <target name="clean_release" depends="clean_make_release,clean_vc08_release" />
     <target name="build_debug" depends="build_make_debug,build_vc08_debug" />
     <target name="build_release" depends="build_make_release,build_vc08_release" />
     <target name="test_debug" depends="test_make_debug,test_vc08_debug" />
     <target name="test_release" depends="test_make_release,test_vc08_release" />
-    <target name="rebuild_debug" depends="clean,build_debug" />
-    <target name="rebuild_release" depends="clean,build_release" />
-    <target name="all_debug" depends="build_debug,test_debug" />
-    <target name="all_release" depends="build_release,test_release" />
-    <target name="all" depends="all_release" />
-    <target name="reall_debug" depends="rebuild_debug,test_debug" />
-    <target name="reall_release" depends="rebuild_release,test_release" />
-    <target name="reall" depends="reall_release" />
 </project>
