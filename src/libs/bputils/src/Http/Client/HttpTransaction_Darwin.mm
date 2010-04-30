@@ -315,6 +315,7 @@ static void streamCB(CFReadStreamRef stream,
 //
 - (void) cancel
 {
+    m_active = false;
     BPLOG_INFO_STRM(self << ": cancel, m_active = " << m_active);
     [m_progressTimer invalidate];
 
@@ -358,8 +359,6 @@ static void streamCB(CFReadStreamRef stream,
 - (void) cleanup
 {
     BPLOG_INFO_STRM(self << ": cleanup");
-
-    m_active = false;
 
     if (m_pathFd >= 0) {
         ::close(m_pathFd);
@@ -676,6 +675,7 @@ static void streamCB(CFReadStreamRef stream,
 
 - (void) handleComplete
 {
+    m_active = false;
     BPLOG_INFO_STRM(self << ": handleComplete");
     m_listener->onComplete();
     m_listener->onClosed();
@@ -686,6 +686,7 @@ static void streamCB(CFReadStreamRef stream,
 
 - (void) handleError: (std::string) msg
 {
+    m_active = false;
     BPLOG_INFO_STRM(self << ": handleError(\"" << msg << "\")");
     [m_progressTimer invalidate];
     
