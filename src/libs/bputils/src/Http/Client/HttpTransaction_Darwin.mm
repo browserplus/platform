@@ -89,12 +89,15 @@ static void streamCB(CFReadStreamRef stream,
     // To prevent it from being deleted out from under us, 
     // we open it and close it when we're done.
     int m_pathFd; 
+
+    bool m_active;  // is request active?
 }
 
 - (id) init;
 - (void) initiate: (bp::http::RequestPtr) request
          listener: (bp::http::client::IListener*) listener;
 - (void) cancel;
+- (void) cancelIfActive;
 - (double) timeoutSec;
 - (void) setTimeoutSec: (double) secs;
 - (void) cleanup;
@@ -158,7 +161,9 @@ static void streamCB(CFReadStreamRef stream,
         m_hundredSendProgressSent = false;
         m_zeroReceiveProgressSent = false;
         m_timeoutStopwatch = new bp::time::Stopwatch;
+        m_active = false;
     }
+    BPLOG_DEBUG_STRM(self << ": helper init");
     return self;
 }
 
@@ -168,6 +173,8 @@ static void streamCB(CFReadStreamRef stream,
 - (void) initiate: (bp::http::RequestPtr) request 
          listener: (bp::http::client::IListener*) listener
 {
+    BPLOG_DEBUG_STRM(self << ": helper initiate, listener = " << listener);
+    m_active = true;
     m_listener = listener;
 
     NS_DURING
@@ -308,7 +315,7 @@ static void streamCB(CFReadStreamRef stream,
 //
 - (void) cancel
 {
-    BPLOG_INFO_STRM(self << ": cancel");
+    BPLOG_INFO_STRM(self << ": cancel, m_active = " << m_active);
     [m_progressTimer invalidate];
 
     if (m_stream) {
@@ -320,6 +327,15 @@ static void streamCB(CFReadStreamRef stream,
     m_listener->onCancel();
 
     [self cleanup];
+}
+
+
+- (void) cancelIfActive
+{
+    BPLOG_INFO_STRM(self << ": cancelIfActive, m_active = " << m_active);
+    if (m_active) {
+        [self cancel];
+    }
 }
 
 
@@ -342,6 +358,8 @@ static void streamCB(CFReadStreamRef stream,
 - (void) cleanup
 {
     BPLOG_INFO_STRM(self << ": cleanup");
+
+    m_active = false;
 
     if (m_pathFd >= 0) {
         ::close(m_pathFd);
@@ -583,6 +601,7 @@ static void streamCB(CFReadStreamRef stream,
 
 - (void) handleResponseStatus: (NSDictionary*) headers status: (int) status
 {
+    BPLOG_DEBUG_STRM(self << ": handleResponseStatus");
     if (m_headers && [m_headers isEqualToDictionary: headers]
         && m_status == status) {
         // we've seen this before...
@@ -609,12 +628,14 @@ static void streamCB(CFReadStreamRef stream,
         BPLOG_DEBUG_STRM([keyStr UTF8String] << ": " << [valStr UTF8String]);
         httpHeaders.add([keyStr UTF8String], [valStr UTF8String]);
     }
+    BPLOG_DEBUG_STRM(self << ": m_listener = " << m_listener);
     m_listener->onResponseStatus(httpStatus, httpHeaders);
 }
 
 
 - (void) handleResponseData: (const unsigned char*) buf length: (size_t) length
 {
+    BPLOG_DEBUG_STRM(self << ": handleResponseData");
     // honor 0% and 100% guarantees for send progress
     if (!m_zeroSendProgressSent) {
         m_zeroSendProgressSent = true;
@@ -648,6 +669,7 @@ static void streamCB(CFReadStreamRef stream,
     m_timeoutStopwatch->reset();
     m_timeoutStopwatch->start();            
 
+    BPLOG_DEBUG_STRM(self << ": m_listener = " << m_listener);
     m_listener->onResponseBodyBytes(buf, length);
 }
 
@@ -733,6 +755,8 @@ public:
     }
     
     ~Impl() {
+        BPLOG_DEBUG_STRM(this << ": Impl dtor");
+        [m_helper cancelIfActive];
         [m_helper release];
     }
     
@@ -780,6 +804,7 @@ Transaction::Transaction(RequestPtr request) :
 
 Transaction::~Transaction()
 {
+    BPLOG_DEBUG_STRM(this << ": Transaction dtor");
     BPLOG_INFO_STRM(m_pImpl->m_helper << ": transaction destroyed");
     // m_pImpl is a boost scoped ptr, no need to delete
 }

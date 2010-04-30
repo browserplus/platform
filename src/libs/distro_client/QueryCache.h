@@ -86,13 +86,14 @@ class QueryCache : public bp::thread::HoppingClass
         MyListener(QueryCache& owner,
                    bp::http::client::Transaction* transaction)
         : bp::http::client::Listener(), 
-          m_owner(owner), m_transaction(transaction)
+          m_owner(owner), m_transaction(transaction), m_listening(true)
         {
             BPLOG_DEBUG_STRM("create MyListener, this = " << this);
         }
 
         virtual ~MyListener() 
         {
+            m_listening = false;
             BPLOG_DEBUG_STRM("delete MyListener, this = " << this);
             delete m_transaction;
         }
@@ -110,6 +111,8 @@ class QueryCache : public bp::thread::HoppingClass
         // no copy/assignment semantics
         MyListener(const Listener&);
         MyListener& operator=(const Listener&);
+
+        bool m_listening;
     };
 
     void listenerCompleted(MyListener* l,

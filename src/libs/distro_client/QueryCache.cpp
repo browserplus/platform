@@ -531,28 +531,36 @@ QueryCache::latestPlatformVersion(std::string plat)
 void
 QueryCache::MyListener::onTimeout()
 {
-    m_owner.listenerCompleted(this, "timeout");
+    if (m_listening) {
+        m_owner.listenerCompleted(this, "timeout");
+    }
 }
 
 
 void
 QueryCache::MyListener::onClosed()
 {
-    m_owner.listenerCompleted(this, "");
+    if (m_listening) {
+        m_owner.listenerCompleted(this, "");
+    }
 }
 
 
 void 
 QueryCache::MyListener::onCancel()
 {
-    m_owner.listenerCompleted(this, "cancelled");
+    if (m_listening) {
+        m_owner.listenerCompleted(this, "cancelled");
+    }
 }
 
 
 void
 QueryCache::MyListener::onError(const std::string& msg)
 {
-    m_owner.listenerCompleted(this, msg);
+    if (m_listening) {
+        m_owner.listenerCompleted(this, msg);
+    }
 }
 
                                                 
