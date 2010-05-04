@@ -58,22 +58,6 @@ QueryCache::QueryCache(std::list<std::string> serverURLs,
 
 QueryCache::~QueryCache()
 {
-    {
-        std::map<std::string, MyListener*>::iterator it;
-        for (it = m_listeners.begin(); it != m_listeners.end(); ++it) {
-            delete it->second;
-        }
-    }
-    
-    {
-        std::set<MyListener*>::iterator it;
-        for (it = m_listenersToReap.begin(); it != m_listenersToReap.end();
-             ++it)
-        {
-            delete *it;
-        }
-    }
-
     BPLOG_DEBUG_STRM("delete QueryCache, this = " << this);
 }
 
@@ -150,8 +134,8 @@ QueryCache::coreletList(std::string plat)
         if (plat.compare("none") != 0) url += "/" + plat;
 
         bp::http::RequestPtr myReq = WSProtocol::buildRequest(url);    
-        MyListener* l = 
-            new MyListener(*this, new bp::http::client::Transaction(myReq));
+        MyListenerPtr l = MyListener::alloc(*this,
+                                            bp::http::client::Transaction::alloc(myReq));;
         m_listeners[*it] = l;
         BPLOG_INFO_STRM(l << ": initiate GET of available services for "
                         << plat);
@@ -168,7 +152,7 @@ QueryCache::coreletList(std::string plat)
 }
 
 void
-QueryCache::listenerCompleted(MyListener* l,
+QueryCache::listenerCompleted(MyListenerPtr l,
                               const std::string& error)
 {
     std::string prError;
@@ -184,7 +168,7 @@ QueryCache::listenerCompleted(MyListener* l,
     if (!error.empty()) {
         BPLOG_ERROR_STRM("HTTP error (" << error << ")");
         // remove from m_listeners
-        std::map<std::string, MyListener*>::iterator it;
+        std::map<std::string, MyListenerPtr>::iterator it;
         for (it = m_listeners.begin(); it != m_listeners.end(); it++) {
             if (it->second == l) {
                 break;
@@ -198,9 +182,9 @@ QueryCache::listenerCompleted(MyListener* l,
     // are we done yet?
     if (m_numComplete == m_serverURLs.size()) {
         // now let's prune any queries that failed
-        std::map<std::string, MyListener*>::iterator it = m_listeners.begin();
+        std::map<std::string, MyListenerPtr>::iterator it = m_listeners.begin();
         while (it != m_listeners.end()) {
-            MyListener* l2 = it->second;
+            MyListenerPtr l2 = it->second;
             if (l2->response()->status.code() != bp::http::Status::OK) {
                 BPLOG_ERROR_STRM("HTTP error " << l2->response()->status.code() 
                                  << "(" << l2->response()->status.toString()
@@ -288,12 +272,12 @@ QueryCache::parsePlatformVersionResponses(LatestPlatformServerAndVersion & lates
          url_it++) 
     {
         using namespace bp;
-        std::map<std::string, MyListener*>::iterator it;
+        std::map<std::string, MyListenerPtr>::iterator it;
 
         it = m_listeners.find(*url_it);
         if (it == m_listeners.end()) continue;
 
-        MyListener* l = it->second;
+        MyListenerPtr l = it->second;
         if (l->response()->body.size() == 0) 
         {
             BPLOG_WARN_STRM("missing response body for HTTP request");
@@ -351,16 +335,15 @@ QueryCache::mergeResponses()
          url_it++)
     {
         using namespace bp;
-        std::map<std::string, MyListener*>::iterator it;
+        std::map<std::string, MyListenerPtr>::iterator it;
 
         it = m_listeners.find(*url_it);
         if (it == m_listeners.end()) continue;
 
-        MyListener* listener = it->second;
+        MyListenerPtr listener = it->second;
         if (listener->response()->body.size() == 0) 
         {
             BPLOG_WARN_STRM("missing response body for HTTP request");
-
             continue;
         }
 
@@ -512,8 +495,8 @@ QueryCache::latestPlatformVersion(std::string plat)
         url += "/" + m_plat;
 
         bp::http::RequestPtr myReq = WSProtocol::buildRequest(url);    
-        MyListener* l = 
-            new MyListener(*this, new bp::http::client::Transaction(myReq));
+        MyListenerPtr l = MyListener::alloc(*this,
+                                            bp::http::client::Transaction::alloc(myReq));
         m_listeners[*it] = l;
         BPLOG_INFO_STRM(l << ": initiate GET of latest platform for  " << m_plat);
         l->m_transaction->initiate(l);
@@ -532,7 +515,7 @@ void
 QueryCache::MyListener::onTimeout()
 {
     if (m_listening) {
-        m_owner.listenerCompleted(this, "timeout");
+        m_owner.listenerCompleted(shared_from_this(), "timeout");
     }
 }
 
@@ -541,7 +524,7 @@ void
 QueryCache::MyListener::onClosed()
 {
     if (m_listening) {
-        m_owner.listenerCompleted(this, "");
+        m_owner.listenerCompleted(shared_from_this(), "");
     }
 }
 
@@ -550,7 +533,7 @@ void
 QueryCache::MyListener::onCancel()
 {
     if (m_listening) {
-        m_owner.listenerCompleted(this, "cancelled");
+        m_owner.listenerCompleted(shared_from_this(), "cancelled");
     }
 }
 
@@ -559,7 +542,7 @@ void
 QueryCache::MyListener::onError(const std::string& msg)
 {
     if (m_listening) {
-        m_owner.listenerCompleted(this, msg);
+        m_owner.listenerCompleted(shared_from_this(), msg);
     }
 }
 

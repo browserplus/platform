@@ -80,22 +80,22 @@ class QueryCache : public bp::thread::HoppingClass
 
     enum { T_None, T_CoreletList, T_PlatformVersion } m_qType;
 
-    class MyListener : public bp::http::client::Listener
+    class MyListener : public bp::http::client::Listener,
+                       public std::tr1::enable_shared_from_this<MyListener>
     {
       public:
-        MyListener(QueryCache& owner,
-                   bp::http::client::Transaction* transaction)
-        : bp::http::client::Listener(), 
-          m_owner(owner), m_transaction(transaction), m_listening(true)
+        static std::tr1::shared_ptr<MyListener> alloc(
+                QueryCache& owner,
+                bp::http::client::TransactionPtr transaction)
         {
-            BPLOG_DEBUG_STRM("create MyListener, this = " << this);
+            std::tr1::shared_ptr<MyListener> rval(new MyListener(owner,
+                                                                 transaction));
+            return rval;
         }
-
         virtual ~MyListener() 
         {
             m_listening = false;
             BPLOG_DEBUG_STRM("delete MyListener, this = " << this);
-            delete m_transaction;
         }
             
         // overrides from Listener
@@ -105,22 +105,31 @@ class QueryCache : public bp::thread::HoppingClass
         virtual void onError(const std::string& msg);
 
         QueryCache& m_owner;
-        bp::http::client::Transaction* m_transaction;
+        bp::http::client::TransactionPtr m_transaction;
 
       private:
+        MyListener(QueryCache& owner,
+                   bp::http::client::TransactionPtr transaction)
+        : bp::http::client::Listener(),
+          m_owner(owner), m_transaction(transaction), m_listening(true)
+        {
+            BPLOG_DEBUG_STRM("create MyListener, this = " << this);
+        }
+
         // no copy/assignment semantics
         MyListener(const Listener&);
         MyListener& operator=(const Listener&);
 
         bool m_listening;
     };
+    typedef std::tr1::shared_ptr<MyListener> MyListenerPtr;
 
-    void listenerCompleted(MyListener* l,
+    void listenerCompleted(MyListenerPtr l,
                            const std::string& error);
     
     std::list<std::string> m_serverURLs;
-    std::map<std::string, MyListener*> m_listeners;
-    std::set<MyListener*> m_listenersToReap;
+    std::map<std::string, MyListenerPtr> m_listeners;
+    std::set<MyListenerPtr> m_listenersToReap;
     unsigned int m_numComplete;
 
     // used in T_CoreletList case

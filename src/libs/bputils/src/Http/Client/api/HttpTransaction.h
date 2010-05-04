@@ -44,9 +44,9 @@ namespace client {
 
 class Transaction
 {
-// Construction/destruction
+// Allocation/destruction
 public:
-    Transaction( RequestPtr ptrRequest );
+    static std::tr1::shared_ptr<Transaction> alloc( RequestPtr ptrRequest );
     ~Transaction();
 
 // Class-scope Items
@@ -59,7 +59,7 @@ public:
     // This call will start the transaction and return immediately.
     // Specifying a NULL listener will cause a fatal exception.
     // Caller should not modify request body until request completes.
-    void initiate( IListener* pListener );
+    void initiate( IListenerWeakPtr pListener );
     
     // Cancel a transaction.  For an asynchronous request, the
     // the listener's onCancel() will be invoked.  For a 
@@ -86,6 +86,9 @@ public:
     // request, the returned FinalStatus will
     // have a code of eTimedOut
     void setTimeoutSec( double fSecs );
+
+protected:
+    Transaction( RequestPtr ptrRequest );
     
 // State
 private:    
@@ -97,6 +100,8 @@ private:
     Transaction( const Transaction& );
     Transaction& operator=( const Transaction& );
 };
+
+typedef std::tr1::shared_ptr<Transaction> TransactionPtr;
 
 
 } // namespace client

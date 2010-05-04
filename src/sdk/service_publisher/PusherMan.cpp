@@ -57,14 +57,14 @@ pushFile(bp::file::Path file, string baseurl,
     // now let's populate the request body
     req->body.fromPath(file);
 
-    SyncTransaction tran( req );
+    SyncTransactionPtr tran = SyncTransaction::alloc( req );
     SyncTransaction::FinalStatus results;
 
     cout << "publishing service: "
          << "(" << bp::file::size(file) << " bytes) "
          << "to " << baseurl << "..." << endl;
 
-    ResponsePtr resp = tran.execute( results );
+    ResponsePtr resp = tran->execute( results );
 
     bool succeeded = false;
     switch (results.code)

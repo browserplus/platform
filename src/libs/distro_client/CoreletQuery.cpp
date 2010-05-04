@@ -535,10 +535,10 @@ CoreletQuery::fetchDetails(const AvailableCorelet & acp)
     url += "/" + m_name + "/" + m_version + "/" + m_platform;
 
     bp::http::RequestPtr req(WSProtocol::buildRequest(url));
-    m_httpTransaction.reset(new bp::http::client::Transaction(req));
+    m_httpTransaction = bp::http::client::Transaction::alloc(req);
     BPLOG_INFO_STRM(this << ": initiate GET to fetch service details for " 
                     << m_name << "/" << m_version << "/" << m_platform);
-    m_httpTransaction->initiate(this);
+    m_httpTransaction->initiate(shared_from_this());
 }
 
 
@@ -552,11 +552,11 @@ CoreletQuery::fetchLocalization(const AvailableCorelet & acp)
         + m_platform;
 
     bp::http::RequestPtr req(WSProtocol::buildRequest(url));
-    m_httpTransaction.reset(new bp::http::client::Transaction(req));
+    m_httpTransaction = bp::http::client::Transaction::alloc(req);
     BPLOG_INFO_STRM(this << ": initiate GET to fetch service localization for " 
                     << acp.name << "/" << acp.version.asString()
                     << "/" << m_platform);
-    m_httpTransaction->initiate(this);
+    m_httpTransaction->initiate(shared_from_this());
 }
 
 
@@ -573,11 +573,11 @@ CoreletQuery::startDownload(const AvailableCorelet & acp)
 
     bp::http::RequestPtr req(WSProtocol::buildRequest(url));
     req->headers.add("Accept", "application/octet-stream");
-    m_httpTransaction.reset(new bp::http::client::Transaction(req));
+    m_httpTransaction = bp::http::client::Transaction::alloc(req);
     BPLOG_INFO_STRM(this << ": initiate GET to start download of  " 
                     << acp.name << "/" << acp.version.asString()
                     << "/" << m_platform);
-    m_httpTransaction->initiate(this);
+    m_httpTransaction->initiate(shared_from_this());
 }
 
 
@@ -780,10 +780,10 @@ CoreletQuery::onLatestPlatform(const LatestPlatformServerAndVersion & latest)
         url += "/" + m_platform;
 
         bp::http::RequestPtr req(WSProtocol::buildRequest(url));
-        m_httpTransaction.reset(new bp::http::client::Transaction(req));
+        m_httpTransaction = bp::http::client::Transaction::alloc(req);
         BPLOG_INFO_STRM(this << ": initiate GET of latest platform version for "
                         << m_platform);
-        m_httpTransaction->initiate(this);
+        m_httpTransaction->initiate(shared_from_this());
     } else {
         BPLOG_ERROR_STRM(this << ": Internal error, uexpected m_type for "
                          << "LatestPlatformVersion event!?");

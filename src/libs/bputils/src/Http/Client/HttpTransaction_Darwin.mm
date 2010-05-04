@@ -49,6 +49,107 @@ static void streamCB(CFReadStreamRef stream,
                      CFStreamEventType eventType,
                      void* cbInfo);
 
+// Need a wrapper around weak_ptr since Obj-C can't do templates
+class WeakListener : virtual public bp::http::client::IListener
+{
+public:
+    WeakListener() : m_listener() {
+    }
+    virtual ~WeakListener() {
+    }
+    void set(std::tr1::weak_ptr<IListener> l) {
+        m_listener = l;
+    }
+    void onConnecting() {
+        bp::http::client::IListenerPtr p = m_listener.lock();
+        if (p) {
+            p->onConnecting();
+        }
+    }
+    void onConnected() {
+        bp::http::client::IListenerPtr p = m_listener.lock();
+        if (p) {
+            p->onConnected();
+        }
+    }
+    void onRedirect(const bp::url::Url& newUrl) {
+        bp::http::client::IListenerPtr p = m_listener.lock();
+        if (p) {
+            p->onRedirect(newUrl);
+        }
+    }
+    void onRequestSent() {
+        bp::http::client::IListenerPtr p = m_listener.lock();
+        if (p) {
+            p->onRequestSent();
+        }
+    }
+    void onResponseStatus(const bp::http::Status& status,
+                          const bp::http::Headers& headers) {
+        bp::http::client::IListenerPtr p = m_listener.lock();
+        if (p) {
+            p->onResponseStatus(status, headers);
+        }
+    }
+    void onResponseBodyBytes(const unsigned char* pBytes,
+                             unsigned int size) {
+        bp::http::client::IListenerPtr p = m_listener.lock();
+        if (p) {
+            p->onResponseBodyBytes(pBytes, size);
+        }
+    }
+    void onSendProgress(size_t bytesProcessed,
+                        size_t totalBytes,
+                        double percent) {
+        bp::http::client::IListenerPtr p = m_listener.lock();
+        if (p) {
+            p->onSendProgress(bytesProcessed, totalBytes, percent);
+        }
+    }
+    void onReceiveProgress(size_t bytesProcessed,
+                           size_t totalBytes,
+                           double percent) {
+        bp::http::client::IListenerPtr p = m_listener.lock();
+        if (p) {
+            p->onReceiveProgress(bytesProcessed, totalBytes, percent);
+        }
+    }
+    void onComplete() {
+        bp::http::client::IListenerPtr p = m_listener.lock();
+        if (p) {
+            p->onComplete();
+        }
+    }
+    void onClosed() {
+        bp::http::client::IListenerPtr p = m_listener.lock();
+        if (p) {
+            p->onClosed();
+        }
+    }
+    void onTimeout() {
+        bp::http::client::IListenerPtr p = m_listener.lock();
+        if (p) {
+            p->onTimeout();
+        }
+    }
+    void onCancel() {
+        bp::http::client::IListenerPtr p = m_listener.lock();
+        if (p) {
+            p->onCancel();
+        }
+    }
+    void onError(const std::string& msg) {
+        bp::http::client::IListenerPtr p = m_listener.lock();
+        if (p) {
+            p->onError(msg);
+        }
+    }
+
+private:
+    std::tr1::weak_ptr<bp::http::client::IListener> m_listener;
+};
+
+
 // This implementation occurs in three levels.  First, there's 
 // bp::http::client::Transaction, which contains a opaque pointer
 // to a bp::http::client::TransactionImpl.  The TransactionImpl then
@@ -65,7 +166,7 @@ static void streamCB(CFReadStreamRef stream,
     NSURLConnection* m_connection;
     NSMutableURLRequest* m_request;
     double m_timeoutSecs;
-    bp::http::client::IListener* m_listener;
+    WeakListener* m_listener;
     
     // async post stuff (needed for progress)
     NSDictionary* m_headers;
@@ -76,7 +177,7 @@ static void streamCB(CFReadStreamRef stream,
     size_t m_bytesReceived;
     CFReadStreamRef m_stream;  // only set for async POST
     NSTimer* m_progressTimer;
-    bp::time::Stopwatch * m_timeoutStopwatch;
+    bp::time::Stopwatch* m_timeoutStopwatch;
     double m_lastProgressSent;
     bool m_zeroSendProgressSent;
     bool m_hundredSendProgressSent;
@@ -95,7 +196,7 @@ static void streamCB(CFReadStreamRef stream,
 
 - (id) init;
 - (void) initiate: (bp::http::RequestPtr) request
-         listener: (bp::http::client::IListener*) listener;
+         listener: (WeakListener*) listener;
 - (void) cancel;
 - (void) cancelIfActive;
 - (double) timeoutSec;
@@ -171,7 +272,7 @@ static void streamCB(CFReadStreamRef stream,
 // Execute an asynchronous request, notifying a listener of progress
 //
 - (void) initiate: (bp::http::RequestPtr) request 
-         listener: (bp::http::client::IListener*) listener
+         listener: (WeakListener*) listener
 {
     BPLOG_DEBUG_STRM(self << ": helper initiate, listener = " << listener);
     m_active = true;
@@ -751,18 +852,19 @@ class Transaction::Impl
 public:
     Impl(RequestPtr request) 
         : m_request(request), m_userAgent(kDefaultUserAgent), m_helper(nil),
-          m_listener(nil) {
+          m_listener(new WeakListener) {
         m_helper = [[[HTTP_TRANS_HELPER alloc] init] retain];
     }
     
     ~Impl() {
         BPLOG_DEBUG_STRM(this << ": Impl dtor");
+        delete m_listener;
         [m_helper cancelIfActive];
         [m_helper release];
     }
     
-    void initiate(IListener* pListener) { 
-        m_listener = pListener;
+    void initiate(std::tr1::weak_ptr<IListener> pListener) {
+        m_listener->set(pListener);
         [m_helper initiate: m_request
                   listener: m_listener];
     }
@@ -789,11 +891,19 @@ public:
     RequestPtr m_request;
     string m_userAgent;
     HTTP_TRANS_HELPER* m_helper;
-    IListener* m_listener;
+    WeakListener* m_listener;
 };
 
 
 // ---------------- Finally, Transaction delegates to TransactionImpl
+
+TransactionPtr
+Transaction::alloc(RequestPtr request)
+{
+    TransactionPtr rval(new Transaction(request));
+    return rval;
+}
+
 
 Transaction::Transaction(RequestPtr request) :
     m_pImpl(new Impl(request))
@@ -818,10 +928,11 @@ double Transaction::defaultTimeoutSecs()
 
 
 void
-Transaction::initiate(IListener* listener)
+Transaction::initiate(IListenerWeakPtr listener)
 
 {
-    if (listener == NULL) {
+    IListenerPtr p = listener.lock();
+    if (p && p.get() == NULL) {
         BP_THROW_FATAL("null listener");
     }
     m_pImpl->initiate(listener);

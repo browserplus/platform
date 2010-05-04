@@ -47,12 +47,14 @@ namespace client {
 // SyncTransaction
 // 
 // Represents a synchronous http transaction
-class SyncTransaction : public http::client::Listener
+class SyncTransaction : public http::client::Listener,
+                        public std::tr1::enable_shared_from_this<SyncTransaction>
 {
-// Construction/Destruction
-public:    
-    SyncTransaction( RequestPtr ptrRequest );
-    ~SyncTransaction();
+public:
+    // Since a SyncTransaction is also a Listener, it must be managed
+    // with a shared_ptr
+    static std::tr1::shared_ptr<SyncTransaction> alloc( RequestPtr ptrRequest );
+    virtual ~SyncTransaction();
 
 // Classes
 public:
@@ -92,10 +94,13 @@ private:
 // State    
 private:
     runloop::RunLoopThread  m_thrd;
-    Transaction*            m_pTran;
+    TransactionPtr          m_pTran;
     double                  m_fTimeoutSecs;
     RequestPtr              m_ptrRequest;
     FinalStatus             m_results;
+
+protected:
+    SyncTransaction( RequestPtr ptrRequest );
     
 // Prevent copying
 private:
@@ -103,6 +108,7 @@ private:
     SyncTransaction& operator=( const SyncTransaction& );
 };
 
+typedef std::tr1::shared_ptr<SyncTransaction> SyncTransactionPtr;
 
 } // namespace client
 } // namespace http

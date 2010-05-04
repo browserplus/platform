@@ -42,6 +42,7 @@
 #include "BPUtils/OS.h"
 
 using namespace std;
+using namespace std::tr1;
 using namespace bp::conv;
 using namespace bp::http;
 using namespace bp::http::client;
@@ -73,31 +74,21 @@ void HttpClientTest::tearDown()
 
 // A helper class for async operations.  Runs in a separate RunLoopThread
 //
-class AsyncHttp : virtual public IListener
+class AsyncHttp : virtual public IListener,
+                  virtual public enable_shared_from_this<AsyncHttp>
 {
 public:
-    
-    void startTransaction() {
-        m_transaction->initiate(this);
+    static std::tr1::shared_ptr<AsyncHttp> alloc(RequestPtr request,
+                                                 bp::runloop::RunLoop* rl) {
+        std::tr1::shared_ptr<AsyncHttp> rval(new AsyncHttp(request, rl));
+        return rval;
     }
     
-    AsyncHttp(RequestPtr request, bp::runloop::RunLoop *rl) :
-        m_request(request), m_connecting(false), m_connected(false),
-        m_redirectUrl(), m_requestSent(false), m_status(), m_headers(), 
-        m_body(), m_complete(false), m_closed(false),
-        m_percentSent(0.0), m_percentReceived(0.0), m_timedOut(false),
-        m_cancelled(false), m_errorMsg(),
-        m_zeroSendProgressReported(false),
-        m_hundredSendProgressReported(false),
-        m_zeroRecvProgressReported(false),
-        m_hundredRecvProgressReported(false),
-        m_rl(rl)
-    {
-        m_transaction = new Transaction(m_request);
+    void startTransaction() {
+        m_transaction->initiate(shared_from_this());
     }
     
     virtual ~AsyncHttp() {
-        delete m_transaction;
     }
 
     void setTimeoutSec(double fSecs) {
@@ -185,7 +176,7 @@ public:
         m_rl->stop();
     }
     
-    Transaction* m_transaction;
+    TransactionPtr m_transaction;
     RequestPtr m_request;
     bool m_connecting;
     bool m_connected;
@@ -213,7 +204,20 @@ public:
     // when the test is complete, this class will stop the runloop,
     // returning control to the testcase
     bp::runloop::RunLoop * m_rl;
+
+protected:
+    AsyncHttp(RequestPtr request, bp::runloop::RunLoop *rl)
+        : m_request(request), m_connecting(false), m_connected(false),
+          m_redirectUrl(), m_requestSent(false), m_status(), m_headers(),
+          m_body(), m_complete(false), m_closed(false),
+          m_percentSent(0.0), m_percentReceived(0.0), m_timedOut(false),
+          m_cancelled(false), m_errorMsg(), m_rl(rl)
+    {
+        m_transaction = Transaction::alloc(m_request);
+    }
 };
+
+typedef std::tr1::shared_ptr<AsyncHttp> AsyncHttpPtr;
 
 
 void HttpClientTest::testTextGet()
@@ -226,9 +230,10 @@ void HttpClientTest::testTextGet()
     string sUrl = m_testServer.simpleTransaction(prespExpected);
     string sExpBody = prespExpected->body.toString();
     
-    SyncTransaction tran(RequestPtr(new Request(Method::HTTP_GET, sUrl)));
+    RequestPtr req(new Request(Method::HTTP_GET, sUrl));
+    SyncTransactionPtr tran = SyncTransaction::alloc(req);
     SyncTransaction::FinalStatus results;
-    ResponsePtr ptrResp = tran.execute(results);
+    ResponsePtr ptrResp = tran->execute(results);
     
     CPPUNIT_ASSERT(results.code == SyncTransaction::FinalStatus::eOk);
     CPPUNIT_ASSERT(ptrResp->version.isHttp10() || ptrResp->version.isHttp11());
@@ -252,9 +257,10 @@ void HttpClientTest::testRedirect()
     string sUrl = m_testServer.redirectTransaction(prespExpected);
     string sExpBody = prespExpected->body.toString();
     
-    SyncTransaction tran(RequestPtr(new Request(Method::HTTP_GET, sUrl)));
+    RequestPtr req(new Request(Method::HTTP_GET, sUrl));
+    SyncTransactionPtr tran = SyncTransaction::alloc(req);
     SyncTransaction::FinalStatus results;
-    ResponsePtr ptrResp = tran.execute(results);
+    ResponsePtr ptrResp = tran->execute(results);
     
     CPPUNIT_ASSERT(results.code == SyncTransaction::FinalStatus::eOk);
     CPPUNIT_ASSERT(ptrResp->version.isHttp10() || ptrResp->version.isHttp11());
@@ -285,34 +291,34 @@ void HttpClientTest::testTextGetAsync()
     rl.init();
     
     RequestPtr request(new Request(Method::HTTP_GET, sUrl));
-    AsyncHttp async(request, &rl);
-    async.startTransaction();
-    CPPUNIT_ASSERT(async.ok());
+    AsyncHttpPtr async = AsyncHttp::alloc(request, &rl);
+    async->startTransaction();
+    CPPUNIT_ASSERT(async->ok());
     
     rl.run();
-    CPPUNIT_ASSERT(async.ok());
-    CPPUNIT_ASSERT(async.m_status.code() == Status::OK);
+    CPPUNIT_ASSERT(async->ok());
+    CPPUNIT_ASSERT(async->m_status.code() == Status::OK);
     
-    string sContentLength = async.m_headers.get(Headers::ksContentLength);
-    CPPUNIT_ASSERT(atoi(sContentLength.c_str()) == (int) async.m_body.size());
+    string sContentLength = async->m_headers.get(Headers::ksContentLength);
+    CPPUNIT_ASSERT(atoi(sContentLength.c_str()) == (int) async->m_body.size());
     
-    string sRcvdBody = async.m_body.toString();
+    string sRcvdBody = async->m_body.toString();
     CPPUNIT_ASSERT(sRcvdBody.length() > 0);
     CPPUNIT_ASSERT(sRcvdBody == sExpBody);
     
     // make sure all of our listener callbacks were hit
-    CPPUNIT_ASSERT(async.m_connecting);
-    CPPUNIT_ASSERT(async.m_connected);
-    CPPUNIT_ASSERT(async.m_requestSent);
-    CPPUNIT_ASSERT(async.m_complete);
-    CPPUNIT_ASSERT(async.m_closed);
-    CPPUNIT_ASSERT(async.m_percentReceived == 100.0);
+    CPPUNIT_ASSERT(async->m_connecting);
+    CPPUNIT_ASSERT(async->m_connected);
+    CPPUNIT_ASSERT(async->m_requestSent);
+    CPPUNIT_ASSERT(async->m_complete);
+    CPPUNIT_ASSERT(async->m_closed);
+    CPPUNIT_ASSERT(async->m_percentReceived == 100.0);
 
     // Make sure all our progress callbacks occurred.
-    CPPUNIT_ASSERT(async.m_zeroSendProgressReported);
-    CPPUNIT_ASSERT(async.m_hundredSendProgressReported);
-    CPPUNIT_ASSERT(async.m_zeroRecvProgressReported);
-    CPPUNIT_ASSERT(async.m_hundredRecvProgressReported);
+    CPPUNIT_ASSERT(async->m_zeroSendProgressReported);
+    CPPUNIT_ASSERT(async->m_hundredSendProgressReported);
+    CPPUNIT_ASSERT(async->m_zeroRecvProgressReported);
+    CPPUNIT_ASSERT(async->m_hundredRecvProgressReported);
 }
 
 
@@ -403,31 +409,31 @@ void HttpClientTest::testSlowGetAsync()
                   bp::url::makeQueryString(lpsFields);
     
     RequestPtr request(new Request(Method::HTTP_GET, sUrl));
-    AsyncHttp async(request, &rl);
-    async.setTimeoutSec(kTimeoutSec);
+    AsyncHttpPtr async = AsyncHttp::alloc(request, &rl);
+    async->setTimeoutSec(kTimeoutSec);
 
     bp::time::Stopwatch sw;
     sw.start();
-    async.startTransaction();
-    CPPUNIT_ASSERT(async.ok());
+    async->startTransaction();
+    CPPUNIT_ASSERT(async->ok());
 
     rl.run();
     
     BPLOG_INFO_STRM( "transaction time (sec): " << sw.elapsedSec() );
-    CPPUNIT_ASSERT(async.ok());
-    CPPUNIT_ASSERT(async.m_status.code() == Status::OK);
+    CPPUNIT_ASSERT(async->ok());
+    CPPUNIT_ASSERT(async->m_status.code() == Status::OK);
 
-    string sContentLength = async.m_headers.get(Headers::ksContentLength);
-    CPPUNIT_ASSERT(atoi(sContentLength.c_str()) == (int) async.m_body.size());
-    CPPUNIT_ASSERT(async.m_body.size() == kRespLenKB*1000);
+    string sContentLength = async->m_headers.get(Headers::ksContentLength);
+    CPPUNIT_ASSERT(atoi(sContentLength.c_str()) == (int) async->m_body.size());
+    CPPUNIT_ASSERT(async->m_body.size() == kRespLenKB*1000);
 
     // make sure all of our listener callbacks were hit
-    CPPUNIT_ASSERT(async.m_connecting);
-    CPPUNIT_ASSERT(async.m_connected);
-    CPPUNIT_ASSERT(async.m_requestSent);
-    CPPUNIT_ASSERT(async.m_complete);
-    CPPUNIT_ASSERT(async.m_closed);
-    CPPUNIT_ASSERT(async.m_percentReceived == 100.0);
+    CPPUNIT_ASSERT(async->m_connecting);
+    CPPUNIT_ASSERT(async->m_connected);
+    CPPUNIT_ASSERT(async->m_requestSent);
+    CPPUNIT_ASSERT(async->m_complete);
+    CPPUNIT_ASSERT(async->m_closed);
+    CPPUNIT_ASSERT(async->m_percentReceived == 100.0);
 
     BPLOG_INFO( "Unit test passed." );
 }
@@ -443,9 +449,10 @@ void HttpClientTest::testNotFound()
     string sUrl = m_testServer.notFoundTransaction(prespExpected);
     string sExpBody = prespExpected->body.toString();
     
-    SyncTransaction tran(RequestPtr(new Request(Method::HTTP_GET, sUrl)));
+    RequestPtr req(new Request(Method::HTTP_GET, sUrl));
+    SyncTransactionPtr tran = SyncTransaction::alloc(req);
     SyncTransaction::FinalStatus results;
-    ResponsePtr ptrResp = tran.execute(results);
+    ResponsePtr ptrResp = tran->execute(results);
     
     CPPUNIT_ASSERT(results.code == SyncTransaction::FinalStatus::eOk);
     CPPUNIT_ASSERT(ptrResp->status.code() == Status::NOT_FOUND);
@@ -478,9 +485,10 @@ void HttpClientTest::testBinaryGet()
     string sUrl = m_testServer.binaryTransaction(prespExpected);
     
     // TODO: set accept headers?
-    SyncTransaction tran(RequestPtr(new Request(Method::HTTP_GET, sUrl)));
+    RequestPtr req(new Request(Method::HTTP_GET, sUrl));
+    SyncTransactionPtr tran = SyncTransaction::alloc(req);
     SyncTransaction::FinalStatus results;
-    ResponsePtr ptrResp = tran.execute(results);
+    ResponsePtr ptrResp = tran->execute(results);
     
     CPPUNIT_ASSERT(results.code == SyncTransaction::FinalStatus::eOk);
     CPPUNIT_ASSERT(ptrResp->status.code() == Status::OK);
@@ -511,24 +519,24 @@ void HttpClientTest::testBinaryGetAsync()
     rl.init();
     
     RequestPtr request(new Request(Method::HTTP_GET, sUrl));
-    AsyncHttp async(request, &rl);
-    async.startTransaction();
-    CPPUNIT_ASSERT(async.ok());
+    AsyncHttpPtr async = AsyncHttp::alloc(request, &rl);
+    async->startTransaction();
+    CPPUNIT_ASSERT(async->ok());
     
     rl.run();
-    CPPUNIT_ASSERT(async.ok());
-    CPPUNIT_ASSERT(async.m_status.code() == Status::OK);
-    CPPUNIT_ASSERT(async.m_body.size() > 0);
-    CPPUNIT_ASSERT(async.m_body.size() == prespExpected->body.size());
+    CPPUNIT_ASSERT(async->ok());
+    CPPUNIT_ASSERT(async->m_status.code() == Status::OK);
+    CPPUNIT_ASSERT(async->m_body.size() > 0);
+    CPPUNIT_ASSERT(async->m_body.size() == prespExpected->body.size());
     CPPUNIT_ASSERT(equal(prespExpected->body.begin(),
                          prespExpected->body.end(),
-                         async.m_body.begin()));
+                         async->m_body.begin()));
 
     // Make sure all our progress callbacks occurred.
-    CPPUNIT_ASSERT(async.m_zeroSendProgressReported);
-    CPPUNIT_ASSERT(async.m_hundredSendProgressReported);
-    CPPUNIT_ASSERT(async.m_zeroRecvProgressReported);
-    CPPUNIT_ASSERT(async.m_hundredRecvProgressReported);
+    CPPUNIT_ASSERT(async->m_zeroSendProgressReported);
+    CPPUNIT_ASSERT(async->.m_hundredSendProgressReported);
+    CPPUNIT_ASSERT(async->m_zeroRecvProgressReported);
+    CPPUNIT_ASSERT(async->m_hundredRecvProgressReported);
     
     // Save to an output file for fun.
     //  saveBodyToBinaryFile("sophie.jpg", ptrResp->body);
@@ -547,9 +555,9 @@ void HttpClientTest::testPost()
     
     RequestPtr ptrReq(new Request(Method::HTTP_POST, url));
     ptrReq->body.assign(ksBody);
-    SyncTransaction tran(ptrReq);
+    SyncTransactionPtr tran = SyncTransaction::alloc(ptrReq);
     SyncTransaction::FinalStatus results;
-    ResponsePtr ptrResp = tran.execute(results);
+    ResponsePtr ptrResp = tran->execute(results);
     
     CPPUNIT_ASSERT(results.code == SyncTransaction::FinalStatus::eOk);
     CPPUNIT_ASSERT(ptrResp->status.code() == Status::OK);
@@ -575,22 +583,22 @@ void HttpClientTest::testPostAsync()
     bp::runloop::RunLoop rl;
     rl.init();
     
-    AsyncHttp async(request, &rl);
-    async.startTransaction();
-    CPPUNIT_ASSERT_MESSAGE(async.m_errorMsg.c_str(), async.m_errorMsg.empty());
+    AsyncHttpPtr async = AsyncHttp::alloc(request, &rl);
+    async->startTransaction();
+    CPPUNIT_ASSERT_MESSAGE(async->m_errorMsg.c_str(), async->m_errorMsg.empty());
     
     rl.run();
-    CPPUNIT_ASSERT(async.ok());
-    CPPUNIT_ASSERT(async.m_status.code() == Status::OK);
-    CPPUNIT_ASSERT(async.m_body.toString() == ksBody);
+    CPPUNIT_ASSERT(async->ok());
+    CPPUNIT_ASSERT(async->m_status.code() == Status::OK);
+    CPPUNIT_ASSERT(async->m_body.toString() == ksBody);
     
     // make sure all of our listener callbacks were hit
-    CPPUNIT_ASSERT(async.m_connecting);
-    CPPUNIT_ASSERT(async.m_connected);
-    CPPUNIT_ASSERT(async.m_requestSent);
-    CPPUNIT_ASSERT(async.m_complete);
-    CPPUNIT_ASSERT(async.m_closed);
-    CPPUNIT_ASSERT(async.m_percentSent == 100.0);
+    CPPUNIT_ASSERT(async->m_connecting);
+    CPPUNIT_ASSERT(async->m_connected);
+    CPPUNIT_ASSERT(async->m_requestSent);
+    CPPUNIT_ASSERT(async->m_complete);
+    CPPUNIT_ASSERT(async->m_closed);
+    CPPUNIT_ASSERT(async->m_percentSent == 100.0);
 }
 
 
@@ -606,9 +614,9 @@ void HttpClientTest::testPostCRLF()
     
     RequestPtr ptrReq(new Request(Method::HTTP_POST, url));
     ptrReq->body.assign(ksBody);
-    SyncTransaction tran(ptrReq);
+    SyncTransactionPtr tran = SyncTransaction::alloc(ptrReq);
     SyncTransaction::FinalStatus results;
-    ResponsePtr ptrResp = tran.execute(results);
+    ResponsePtr ptrResp = tran->execute(results);
     
     CPPUNIT_ASSERT(results.code == SyncTransaction::FinalStatus::eOk);
     CPPUNIT_ASSERT(ptrResp->status.code() == Status::OK);
@@ -629,11 +637,11 @@ void HttpClientTest::testServerDelay()
     ptrReq->body.assign(ksBody);
     
     // Do a normal transaction.
-    SyncTransaction tran(ptrReq);
+    SyncTransactionPtr tran = SyncTransaction::alloc(ptrReq);
     bp::time::Stopwatch sw;
     sw.start();
     SyncTransaction::FinalStatus results;
-    ResponsePtr ptrResp = tran.execute(results);
+    ResponsePtr ptrResp = tran->execute(results);
     CPPUNIT_ASSERT(results.code == SyncTransaction::FinalStatus::eOk);
     
     double fTime1 = sw.elapsedSec();
@@ -646,10 +654,10 @@ void HttpClientTest::testServerDelay()
     qs.add("DelaySec", bp::conv::toString(kfDelaySec));
     ptrReq->url.setQuery(qs.toString());
     
-    SyncTransaction tran2(ptrReq);
+    SyncTransactionPtr tran2 = SyncTransaction::alloc(ptrReq);
     sw.reset();
     sw.start();
-    ptrResp = tran2.execute(results);
+    ptrResp = tran2->execute(results);
     CPPUNIT_ASSERT(results.code == SyncTransaction::FinalStatus::eOk);
     double fTime2 = sw.elapsedSec();
     CPPUNIT_ASSERT(ptrResp->status.code() == Status::OK);
@@ -677,13 +685,13 @@ void HttpClientTest::testTimeout()
     // Set our timeout to something less than our requested delay.
     double fTimeout = 2;
     RequestPtr ptrReq(new Request(Method::HTTP_GET, url));
-    SyncTransaction tran(ptrReq);
-    tran.setTimeoutSec(fTimeout);
+    SyncTransactionPtr tran = SyncTransaction::alloc(ptrReq);
+    tran->setTimeoutSec(fTimeout);
     
     sw.start();
     
     SyncTransaction::FinalStatus results;
-    ResponsePtr ptrResp = tran.execute(results);
+    ResponsePtr ptrResp = tran->execute(results);
     CPPUNIT_ASSERT(results.code == SyncTransaction::FinalStatus::eTimedOut);
     
     // Verify timeout was about what we expected.
@@ -713,16 +721,16 @@ void HttpClientTest::testTimeoutAsync()
     bp::runloop::RunLoop rl;
     rl.init();
     
-    AsyncHttp async(ptrReq, &rl);
-    async.m_transaction->setTimeoutSec(fTimeout);
+    AsyncHttpPtr async = AsyncHttp::alloc(ptrReq, &rl);
+    async->m_transaction->setTimeoutSec(fTimeout);
     
     sw.start();
-    async.startTransaction();
-    CPPUNIT_ASSERT_MESSAGE(async.m_errorMsg.c_str(), async.m_errorMsg.empty());
+    async->startTransaction();
+    CPPUNIT_ASSERT_MESSAGE(async->m_errorMsg.c_str(), async->m_errorMsg.empty());
     
     rl.run();
-    CPPUNIT_ASSERT_MESSAGE(async.m_errorMsg.c_str(), async.m_errorMsg.empty());
-    CPPUNIT_ASSERT(async.m_timedOut);
+    CPPUNIT_ASSERT_MESSAGE(async->m_errorMsg.c_str(), async->m_errorMsg.empty());
+    CPPUNIT_ASSERT(async->m_timedOut);
     
     // Verify timeout was about what we expected.
     double fTolerance = 0.5;
@@ -731,24 +739,32 @@ void HttpClientTest::testTimeoutAsync()
 }
 
 
+// an async helper who cancels the transaction at the
+// first sign of progress
+class MyAsync : public virtual AsyncHttp {
+public:
+    static std::tr1::shared_ptr<MyAsync> alloc(RequestPtr request,
+                                               bp::runloop::RunLoop *rl) {
+        std::tr1::shared_ptr<MyAsync> rval(new MyAsync(request, rl));
+        return rval;
+    }
+    virtual void onResponseStatus(const Status&, const Headers&) {
+        m_transaction->cancel();
+    }
+private:
+    MyAsync(RequestPtr request, bp::runloop::RunLoop *rl)
+    : AsyncHttp(request, rl) {
+    }
+};
+
+typedef std::tr1::shared_ptr<MyAsync> MyAsyncPtr;
+
 void HttpClientTest::testCancelAsync()
 {
     bp::log::removeAllAppenders();
     bp::log::setupLogToFile(bp::file::Path("cancelAsync.log"),
                         bp::log::LEVEL_DEBUG, bp::log::kTruncate, bp::log::TIME_MSEC);
 
-    // an async helper who cancels the transaction at the
-    // first sign of progress
-    class MyAsync : public virtual AsyncHttp {
-    public:
-        MyAsync(RequestPtr request, bp::runloop::RunLoop *rl) 
-        : AsyncHttp(request, rl) {
-        }
-        virtual void onResponseStatus(const Status&, const Headers&) {
-            m_transaction->cancel();
-        }
-    };
-    
     const Response* prespExpected;
     bp::url::Url url(m_testServer.binaryTransaction(prespExpected));
     
@@ -758,13 +774,13 @@ void HttpClientTest::testCancelAsync()
     rl.init();
     
     RequestPtr request(new Request(Method::HTTP_GET, url));
-    MyAsync async(request, &rl);
-    async.startTransaction();
-    CPPUNIT_ASSERT_MESSAGE(async.m_errorMsg.c_str(), async.m_errorMsg.empty());
+    MyAsyncPtr async = MyAsync::alloc(request, &rl);
+    async->startTransaction();
+    CPPUNIT_ASSERT_MESSAGE(async->m_errorMsg.c_str(), async->m_errorMsg.empty());
     
     rl.run();
-    CPPUNIT_ASSERT_MESSAGE(async.m_errorMsg.c_str(), async.m_errorMsg.empty());
-    CPPUNIT_ASSERT(async.m_cancelled);
+    CPPUNIT_ASSERT_MESSAGE(async->m_errorMsg.c_str(), async->m_errorMsg.empty());
+    CPPUNIT_ASSERT(async->m_cancelled);
 }
 
 
@@ -794,9 +810,9 @@ void HttpClientTest::testCookies()
     ptrReq->body.assign(ksBody);
 
     // Execute the transaction.
-    SyncTransaction tran(ptrReq);
+    SyncTransactionPtr tran = SyncTransaction::alloc(ptrReq);
     SyncTransaction::FinalStatus results;
-    ResponsePtr ptrResp = tran.execute(results);
+    ResponsePtr ptrResp = tran->execute(results);
     CPPUNIT_ASSERT(results.code == SyncTransaction::FinalStatus::eOk);
     CPPUNIT_ASSERT(ptrResp->status.code() == Status::OK);
 

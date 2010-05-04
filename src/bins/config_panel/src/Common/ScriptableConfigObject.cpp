@@ -496,9 +496,9 @@ ScriptableConfigObject::invoke(const string & functionName,
             req->headers.add(Headers::ksConnection, "close");
             req->body.fromPath(postBodyPath);
             
-            client::SyncTransaction tran(req);
+            client::SyncTransactionPtr tran = client::SyncTransaction::alloc(req);
             client::SyncTransaction::FinalStatus results;
-            ResponsePtr ptrResp = tran.execute(results);
+            ResponsePtr ptrResp = tran->execute(results);
             if (results.code == client::SyncTransaction::FinalStatus::eOk) {
                 rv = new bp::Bool(true);
             } else {

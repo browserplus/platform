@@ -45,6 +45,8 @@ namespace client {
 
 // Interface for listener to Transaction::initiate().  All callbacks will
 // be invoked on the thread which called Transaction::initiate().
+// Listeners are passed to Transactions as weak_ptrs, so they must be
+// managed by a shared_ptr (no stack instances!).
 //
 class IListener
 {
@@ -128,14 +130,16 @@ public:
     virtual ~IListener() {};
 };
 
+typedef std::tr1::shared_ptr<IListener> IListenerPtr;
+typedef std::tr1::weak_ptr<IListener> IListenerWeakPtr;
+
 
 // A default implementation of IListener which builds up a response object
 //
 class Listener : public virtual IListener
 {
  public:
-    Listener() : m_pResponse(new Response) {
-    }
+    static std::tr1::shared_ptr<Listener> alloc();
     virtual ~Listener() {
     }
 
@@ -181,6 +185,9 @@ class Listener : public virtual IListener
     }
 
  protected:
+    Listener() : m_pResponse(new Response) {
+    }
+
     ResponsePtr m_pResponse;
 
  private:
@@ -188,6 +195,9 @@ class Listener : public virtual IListener
     Listener(const Listener&);
     Listener& operator=(const Listener&);
 };
+
+typedef std::tr1::shared_ptr<Listener> ListenerPtr;
+typedef std::tr1::weak_ptr<Listener> ListenerWeakPtr;
 
 } // namespace client
 } // namespace http

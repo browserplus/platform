@@ -111,27 +111,25 @@ dumpHeaders(const bp::http::Version & version,
 
 // A helper class for async operations.  Runs in a separate RunLoopThread
 //
-class AsyncHttp : virtual public bp::http::client::Listener
+class AsyncHttp : virtual public bp::http::client::Listener,
+                  virtual public std::tr1::enable_shared_from_this<AsyncHttp>
 {
 public:
-
-    AsyncHttp(shared_ptr<bp::http::Request> request,
-              bp::runloop::RunLoop *rl,
-              bool dumpHeaders) 
-        : bp::http::client::Listener(),
-          m_dumpHeaders(dumpHeaders), m_timedOut(false),
-          m_cancelled(false), m_errorMsg(), m_rl(rl)
-    {
-        m_transaction = new bp::http::client::Transaction(request);
+    static std::tr1::shared_ptr<AsyncHttp> alloc(shared_ptr<bp::http::Request> request,
+                                                 bp::runloop::RunLoop *rl,
+                                                 bool dumpHeaders)
+        {
+        std::tr1::shared_ptr<AsyncHttp> rval(new AsyncHttp(request, rl,
+                                                           dumpHeaders));
+        return rval;
     }
-    
+
     virtual ~AsyncHttp() {
-        delete m_transaction;
     }
 
     void startTransaction(double timeo) {
         m_transaction->setTimeoutSec(timeo);
-        m_transaction->initiate(this);
+        m_transaction->initiate(shared_from_this());
     }
     
     
@@ -186,7 +184,7 @@ public:
         m_rl->stop();
     }
     
-    bp::http::client::Transaction* m_transaction;
+    bp::http::client::TransactionPtr m_transaction;
     
     bool m_dumpHeaders;
 
@@ -200,6 +198,18 @@ public:
     // when complete, this class will stop the runloop,
     // returning control to main
     bp::runloop::RunLoop * m_rl;
+
+private:
+    AsyncHttp(shared_ptr<bp::http::Request> request,
+              bp::runloop::RunLoop *rl,
+              bool dumpHeaders)
+    : bp::http::client::Listener(),
+          m_dumpHeaders(dumpHeaders), m_timedOut(false),
+          m_cancelled(false), m_errorMsg(), m_rl(rl)
+    {
+        m_transaction = bp::http::client::Transaction::alloc(request);
+    }
+
 };
 
 
@@ -263,23 +273,24 @@ main(int argc, const char ** argv)
         bp::runloop::RunLoop rl;
         rl.init();
 
-        AsyncHttp async(req, &rl, ap.argumentPresent("headers"));
-        async.startTransaction(timeout);
-        if (async.ok()) {
+        shared_ptr<AsyncHttp> async = AsyncHttp::alloc(
+                req, &rl, ap.argumentPresent("headers"));
+        async->startTransaction(timeout);
+        if (async->ok()) {
             rl.run();
         } 
 
-        if (!async.ok()) {
+        if (!async->ok()) {
             exit(1);
         } 
        
     } else {
         using bp::http::client::SyncTransaction;
         
-        SyncTransaction t(req);
-        t.setTimeoutSec(timeout);
+        shared_ptr<SyncTransaction> t = SyncTransaction::alloc(req);
+        t->setTimeoutSec(timeout);
         SyncTransaction::FinalStatus results;
-        bp::http::ResponsePtr resp = t.execute(results);
+        bp::http::ResponsePtr resp = t->execute(results);
         switch (results.code) {
             case SyncTransaction::FinalStatus::eOk:
                 if (ap.argumentPresent("headers")) {

@@ -131,7 +131,7 @@ class CoreletQuery : public bp::http::client::Listener,
     void getNextLocalization();
     void parseLocalization(const unsigned char* buf, size_t len);
 
-    std::tr1::shared_ptr<bp::http::client::Transaction> m_httpTransaction;
+    bp::http::client::TransactionPtr m_httpTransaction;
 
     // used for downloads
     std::vector<unsigned char> m_cletBuf;
