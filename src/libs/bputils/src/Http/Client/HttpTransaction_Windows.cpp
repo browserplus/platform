@@ -153,6 +153,18 @@ private:
     // shutdown the connection
     void        closeConnection();
 
+    void        reportSendProgress();
+    void        reportReceiveProgress();
+    void        finalizeSendProgress();
+    void        finalizeReceiveProgress();
+    void        doSendProgressReport(size_t bytesProcessed,
+                                     size_t totalBytes,
+                                     double percent);
+    void        doReceiveProgressReport(size_t bytesProcessed,
+                                         size_t totalBytes,
+                                         double percent);
+
+    
     // Internal Attributes
 private:
     // A debug-only runtime consistency check to ensure that:
@@ -208,7 +220,8 @@ private:
     bool            m_zeroReceiveProgressSent;
     bool            m_hundredSendProgressSent;
     bool            m_hundredReceiveProgressSent;
-    double          m_lastProgressSent;
+    double          m_lastSendProgressSent;
+    double          m_lastReceiveProgressSent;
 
     bp::url::Url    m_redirectUrl;
     
@@ -385,7 +398,8 @@ Transaction::Impl::Impl(RequestPtr ptrRequest) :
     m_zeroReceiveProgressSent(false),
     m_hundredSendProgressSent(false),
     m_hundredReceiveProgressSent(false),
-    m_lastProgressSent(0.0),
+    m_lastSendProgressSent(0),
+    m_lastReceiveProgressSent(0),
     m_threadId(bp::thread::Thread::currentThreadID()),
     m_error(ERROR_SUCCESS),
     m_bCancel(false),
@@ -619,23 +633,7 @@ Transaction::Impl::processRequest(DWORD error)
         case ePostGetData: {
             m_eState = ePostSendData;
             m_bytesSent += m_bytesToPost;  // catch delayed writes
-            double percent = ((double)m_bytesSent / m_sendTotalBytes) * 100.0;
-            if (percent > 100.0) percent = 100.0;
-            // honor our 0% guarantee, 100% will be sent on completion
-            if (!m_zeroSendProgressSent) {
-                m_pListener->onSendProgress(0, m_sendTotalBytes, 0.0);
-                m_zeroSendProgressSent = true;
-                m_lastProgressSent = 0.0;
-            }
-            if (percent > m_lastProgressSent) {
-                m_pListener->onSendProgress(m_bytesSent, m_sendTotalBytes,
-                                            percent);
-                m_lastProgressSent = percent;
-
-                if (percent >= 100.0) {
-                    m_hundredSendProgressSent = true;
-                }
-            }
+            reportSendProgress();
             error = getDataToPost();
             break;
         }
@@ -678,46 +676,21 @@ Transaction::Impl::processRequest(DWORD error)
             // {#139} honor 0% and 100% guarantees for send progress.
             // at the point we're fetching the response, we've
             // already sent the request
-            if (!m_zeroSendProgressSent) {
-                m_pListener->onSendProgress(0, m_sendTotalBytes, 0.0);
-                m_zeroSendProgressSent = true;
-            }
-            if (!m_hundredSendProgressSent) {
-                m_pListener->onSendProgress(m_sendTotalBytes, m_sendTotalBytes,
-                                            100.0);
-                m_hundredSendProgressSent = true;
-            }
+            finalizeSendProgress();
 
             m_eState = eResponseReceiveData;
             bool done = false;
             error = writeResponseData(done);
-            double percent = 0.0;
-            if (m_receiveTotalBytes != 0) {
-                percent = ((double)m_bytesReceived/m_receiveTotalBytes)*100.0;
-            }
-            if (percent > 100.0) percent = 100.0;
 
-            // honor our 0% guarantee, 100% will be sent on completion
-            if (!m_zeroReceiveProgressSent) {
-                m_pListener->onReceiveProgress(0, m_receiveTotalBytes, 0.0);
-                m_zeroReceiveProgressSent = true;
-                m_lastProgressSent = 0.0;
-            }
-            if (percent > m_lastProgressSent) {
-                m_pListener->onReceiveProgress(m_bytesReceived,
-                                               m_receiveTotalBytes,
-                                               percent);
-                m_lastProgressSent = percent;
-            }
-            if (percent >= 100.0) {
-                m_hundredReceiveProgressSent = true;
-            }
-
+            reportReceiveProgress();
+            
             m_pListener->onResponseBodyBytes(m_pReceiveBuffer, 
                                              m_bytesInReceiveBuffer);
             if (done) {
                 m_eState = eDone;
+                finalizeReceiveProgress();
                 m_pListener->onComplete();
+                
                 // now we'll invoke closed after an async break so that
                 // if we're deleted on the onClosed call, we don't
                 // go and try to romp around in our memory later.
@@ -1375,10 +1348,116 @@ Transaction::Impl::onWininetCallback(HINTERNET /* hInternet */,
 }
 
 
+static double
+calcPercent( double numerator, double denominator )
+{
+    // Two policy choices: return 0 if denom = 0
+    //                     0 <= return val <= 100
+    double percent = denominator ? (numerator/denominator)*100 : 0;
+    return min(max(percent, 0.), 100.);
+}
+
+
+void
+Transaction::Impl::reportSendProgress()
+{
+    if (!m_zeroSendProgressSent) {
+        doSendProgressReport( 0, m_sendTotalBytes, 0 );
+    }
+
+    double percent = calcPercent( m_bytesSent, m_sendTotalBytes );
+    if (percent > m_lastSendProgressSent) {
+        doSendProgressReport( m_bytesSent, m_sendTotalBytes, percent );
+    }
+}
+
+
+void
+Transaction::Impl::reportReceiveProgress()
+{
+    if (!m_zeroReceiveProgressSent) {
+        doReceiveProgressReport( 0, m_receiveTotalBytes, 0 );
+    }
+
+    // TODO: there's a weirdness here in the chunked encoding case.
+    //       m_receiveTotalBytes will be zero in that case.
+    double percent = calcPercent( m_bytesReceived, m_receiveTotalBytes );
+    if (percent > m_lastReceiveProgressSent) {
+        doReceiveProgressReport( m_bytesReceived, m_receiveTotalBytes,
+                                 percent );
+    }
+}
+
+
+void
+Transaction::Impl::finalizeSendProgress()
+{
+    if (!m_zeroSendProgressSent) {
+        doSendProgressReport( 0, m_sendTotalBytes, 0 );
+    }
+    if (!m_hundredSendProgressSent) {
+        doSendProgressReport( m_sendTotalBytes, m_sendTotalBytes, 100 );
+    }
+}
+
+
+void
+Transaction::Impl::finalizeReceiveProgress()
+{
+    // m_receiveTotalBytes will be zero when Content-Length header is
+    // absent, e.g. for response with chunked encoding.
+    // TODO: normalize this with reportReceiveProgress.
+    size_t totalBytes = (m_receiveTotalBytes > 0) ? m_receiveTotalBytes
+                                                  : m_bytesReceived;
+
+    if (!m_zeroReceiveProgressSent) {
+        doReceiveProgressReport( 0, totalBytes, 0 );
+    }
+    if (!m_hundredReceiveProgressSent) {
+        doReceiveProgressReport( totalBytes, totalBytes, 100 );
+    }
+}
+
+
+void
+Transaction::Impl::doSendProgressReport( size_t bytesProcessed,
+                                         size_t totalBytes,
+                                         double percent )
+{
+    m_pListener->onSendProgress( bytesProcessed, totalBytes, percent );
+
+    m_lastSendProgressSent = percent;
+    
+    if (percent == 0) {
+        m_zeroSendProgressSent = true;
+    } else if (percent == 100) {
+        m_hundredSendProgressSent = true;
+    }
+}
+
+
+void
+Transaction::Impl::doReceiveProgressReport( size_t bytesProcessed,
+                                            size_t totalBytes,
+                                            double percent )
+{
+    m_pListener->onReceiveProgress( bytesProcessed, totalBytes, percent );
+
+    m_lastReceiveProgressSent = percent;
+
+    if (percent == 0) {
+        m_zeroReceiveProgressSent = true;
+    } else if (percent == 100) {
+        m_hundredReceiveProgressSent = true;
+    }
+}
+
+
+
 ///////////////////////////////////////////////////////////////////////////
 // Transaction methods
 //
-// Note here were using the "pImpl" or "Handle-body" idiom to keep
+// Note here we're using the "pImpl" or "Handle-body" idiom to keep
 // os-specific members out of our .h file and instead declare an opaque pointer
 // to impl.
 
