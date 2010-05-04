@@ -224,7 +224,8 @@ void HttpClientTest::testTextGet()
 {
     bp::log::removeAllAppenders();
     bp::log::setupLogToFile(bp::file::Path("textGet.log"),
-                        bp::log::LEVEL_DEBUG, bp::log::kTruncate, bp::log::TIME_MSEC);
+                            bp::log::LEVEL_DEBUG, bp::log::kTruncate,
+                            bp::log::TIME_MSEC);
     
     const Response* prespExpected;
     string sUrl = m_testServer.simpleTransaction(prespExpected);
@@ -251,7 +252,8 @@ void HttpClientTest::testRedirect()
 {
     bp::log::removeAllAppenders();
     bp::log::setupLogToFile(bp::file::Path("redirect.log"),
-                        bp::log::LEVEL_DEBUG, bp::log::kTruncate, bp::log::TIME_MSEC);
+                            bp::log::LEVEL_DEBUG, bp::log::kTruncate,
+                            bp::log::TIME_MSEC);
     
     const Response* prespExpected;
     string sUrl = m_testServer.redirectTransaction(prespExpected);
@@ -279,7 +281,8 @@ void HttpClientTest::testTextGetAsync()
 {
     bp::log::removeAllAppenders();
     bp::log::setupLogToFile(bp::file::Path("textGetAsync.log"),
-                        bp::log::LEVEL_DEBUG, bp::log::kTruncate, bp::log::TIME_MSEC);
+                            bp::log::LEVEL_DEBUG, bp::log::kTruncate,
+                            bp::log::TIME_MSEC);
 
     const Response* prespExpected;
     string sUrl = m_testServer.simpleTransaction(prespExpected);
@@ -383,7 +386,8 @@ void HttpClientTest::testSlowGetAsync()
 {
     bp::log::removeAllAppenders();
     bp::log::setupLogToFile(bp::file::Path("slowGetAsync.log"),
-                        bp::log::LEVEL_DEBUG, bp::log::kTruncate, bp::log::TIME_MSEC);
+                            bp::log::LEVEL_DEBUG, bp::log::kTruncate,
+                            bp::log::TIME_MSEC);
 
     // allocate a runloop thread and initialize it on this thread of
     // execution
@@ -443,7 +447,8 @@ void HttpClientTest::testNotFound()
 {
     bp::log::removeAllAppenders();
     bp::log::setupLogToFile(bp::file::Path("notFound.log"),
-                        bp::log::LEVEL_DEBUG, bp::log::kTruncate, bp::log::TIME_MSEC);
+                            bp::log::LEVEL_DEBUG, bp::log::kTruncate,
+                            bp::log::TIME_MSEC);
 
     const Response* prespExpected;
     string sUrl = m_testServer.notFoundTransaction(prespExpected);
@@ -479,7 +484,8 @@ void HttpClientTest::testBinaryGet()
 {
     bp::log::removeAllAppenders();
     bp::log::setupLogToFile(bp::file::Path("binaryGet.log"),
-                        bp::log::LEVEL_DEBUG, bp::log::kTruncate, bp::log::TIME_MSEC);
+                            bp::log::LEVEL_DEBUG, bp::log::kTruncate,
+                            bp::log::TIME_MSEC);
 
     const Response* prespExpected;
     string sUrl = m_testServer.binaryTransaction(prespExpected);
@@ -508,7 +514,8 @@ void HttpClientTest::testBinaryGetAsync()
 {
     bp::log::removeAllAppenders();
     bp::log::setupLogToFile(bp::file::Path("binaryGetAsync.log"),
-                        bp::log::LEVEL_DEBUG, bp::log::kTruncate, bp::log::TIME_MSEC);
+                            bp::log::LEVEL_DEBUG, bp::log::kTruncate,
+                            bp::log::TIME_MSEC);
 
     const Response* prespExpected;
     string sUrl = m_testServer.binaryTransaction(prespExpected);
@@ -534,7 +541,7 @@ void HttpClientTest::testBinaryGetAsync()
 
     // Make sure all our progress callbacks occurred.
     CPPUNIT_ASSERT(async->m_zeroSendProgressReported);
-    CPPUNIT_ASSERT(async->.m_hundredSendProgressReported);
+    CPPUNIT_ASSERT(async->m_hundredSendProgressReported);
     CPPUNIT_ASSERT(async->m_zeroRecvProgressReported);
     CPPUNIT_ASSERT(async->m_hundredRecvProgressReported);
     
@@ -547,7 +554,8 @@ void HttpClientTest::testPost()
 {
     bp::log::removeAllAppenders();
     bp::log::setupLogToFile(bp::file::Path("post.log"),
-                        bp::log::LEVEL_DEBUG, bp::log::kTruncate, bp::log::TIME_MSEC);
+                            bp::log::LEVEL_DEBUG, bp::log::kTruncate,
+                            bp::log::TIME_MSEC);
 
     const string ksBody = "A, B, C, it's easy as 1, 2, 3";
     
@@ -569,7 +577,8 @@ void HttpClientTest::testPostAsync()
 {
     bp::log::removeAllAppenders();
     bp::log::setupLogToFile(bp::file::Path("postAsync.log"),
-                        bp::log::LEVEL_DEBUG, bp::log::kTruncate, bp::log::TIME_MSEC);
+                            bp::log::LEVEL_DEBUG, bp::log::kTruncate,
+                            bp::log::TIME_MSEC);
 
     const string ksBody = "A, B, C, it's easy as 1, 2, 3";
     
@@ -606,7 +615,8 @@ void HttpClientTest::testPostCRLF()
 {
     bp::log::removeAllAppenders();
     bp::log::setupLogToFile(bp::file::Path("postCRLF.log"),
-                        bp::log::LEVEL_DEBUG, bp::log::kTruncate, bp::log::TIME_MSEC);
+                            bp::log::LEVEL_DEBUG, bp::log::kTruncate,
+                            bp::log::TIME_MSEC);
 
     const string ksBody = "abc\r\nabc";
     
@@ -628,7 +638,8 @@ void HttpClientTest::testServerDelay()
 {    
     bp::log::removeAllAppenders();
     bp::log::setupLogToFile(bp::file::Path("serverDelay.log"),
-                        bp::log::LEVEL_DEBUG, bp::log::kTruncate, bp::log::TIME_MSEC);
+                            bp::log::LEVEL_DEBUG, bp::log::kTruncate,
+                            bp::log::TIME_MSEC);
 
     bp::url::Url url(m_testServer.getEchoUrl());
     RequestPtr ptrReq(new Request(Method::HTTP_POST, url));
@@ -675,7 +686,8 @@ void HttpClientTest::testTimeout()
 {
     bp::log::removeAllAppenders();
     bp::log::setupLogToFile(bp::file::Path("timeout.log"),
-                        bp::log::LEVEL_DEBUG, bp::log::kTruncate, bp::log::TIME_MSEC);
+                            bp::log::LEVEL_DEBUG, bp::log::kTruncate,
+                            bp::log::TIME_MSEC);
 
     bp::time::Stopwatch sw;
     
@@ -705,7 +717,8 @@ void HttpClientTest::testTimeoutAsync()
 {
     bp::log::removeAllAppenders();
     bp::log::setupLogToFile(bp::file::Path("timeoutAsync.log"),
-                        bp::log::LEVEL_DEBUG, bp::log::kTruncate, bp::log::TIME_MSEC);
+                            bp::log::LEVEL_DEBUG, bp::log::kTruncate,
+                            bp::log::TIME_MSEC);
 
     bp::time::Stopwatch sw;
     
@@ -763,7 +776,8 @@ void HttpClientTest::testCancelAsync()
 {
     bp::log::removeAllAppenders();
     bp::log::setupLogToFile(bp::file::Path("cancelAsync.log"),
-                        bp::log::LEVEL_DEBUG, bp::log::kTruncate, bp::log::TIME_MSEC);
+                            bp::log::LEVEL_DEBUG, bp::log::kTruncate,
+                            bp::log::TIME_MSEC);
 
     const Response* prespExpected;
     bp::url::Url url(m_testServer.binaryTransaction(prespExpected));
@@ -789,7 +803,8 @@ void HttpClientTest::testCookies()
 {
     bp::log::removeAllAppenders();
     bp::log::setupLogToFile(bp::file::Path("cookies.log"),
-                        bp::log::LEVEL_DEBUG, bp::log::kTruncate, bp::log::TIME_MSEC);
+                            bp::log::LEVEL_DEBUG, bp::log::kTruncate,
+                            bp::log::TIME_MSEC);
 
     bp::url::Url url(m_testServer.getEchoUrl());
     RequestPtr ptrReq(new Request(Method::HTTP_POST, url));
