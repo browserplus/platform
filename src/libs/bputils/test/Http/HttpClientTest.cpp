@@ -316,6 +316,63 @@ void HttpClientTest::testTextGetAsync()
 }
 
 
+// When http response uses chunked encoding, there will be no
+// Content-Length header.  This has an impact on our receive progress
+// reporting.
+// This test currently hits browserplus.org to test our progress
+// reporting in chunked case.  browserplus.org currently returns
+// chunked responses to windows clients.
+// As it only works on windows and requires the machine to be online,
+// the test is normally disabled.
+// We could improve this test if our test server was able to deliver
+// chunked responses.
+void HttpClientTest::testChunkedResponseProgress()
+{
+#if 0    
+    bp::log::removeAllAppenders();
+    bp::log::setupLogToFile(bp::file::Path("chunkedResponseProgress.log"),
+                            bp::log::LEVEL_DEBUG, bp::log::kTruncate, bp::log::TIME_MSEC);
+
+    string sUrl = "http://browserplus.org";
+
+    // allocate a runloop thread and initialize it on this thread of
+    // execution
+    bp::runloop::RunLoop rl;
+    rl.init();
+
+    RequestPtr request(new Request(Method::HTTP_GET, sUrl));
+    AsyncHttp async(request, &rl);
+    async.startTransaction();
+    CPPUNIT_ASSERT(async.ok());
+
+    rl.run();
+    CPPUNIT_ASSERT(async.ok());
+    CPPUNIT_ASSERT(async.m_status.code() == Status::OK);
+
+    // We're expecting Content-Length header to be absent.
+    string sContentLength = async.m_headers.get(Headers::ksContentLength);
+    CPPUNIT_ASSERT(atoi(sContentLength.c_str()) == 0);
+
+    string sRcvdBody = async.m_body.toString();
+    CPPUNIT_ASSERT(sRcvdBody.length() > 0);
+
+    // make sure all of our listener callbacks were hit
+    CPPUNIT_ASSERT(async.m_connecting);
+    CPPUNIT_ASSERT(async.m_connected);
+    CPPUNIT_ASSERT(async.m_requestSent);
+    CPPUNIT_ASSERT(async.m_complete);
+    CPPUNIT_ASSERT(async.m_closed);
+    CPPUNIT_ASSERT(async.m_percentReceived == 100.0);
+
+    // Make sure all our progress callbacks occurred.
+    CPPUNIT_ASSERT(async.m_zeroSendProgressReported);
+    CPPUNIT_ASSERT(async.m_hundredSendProgressReported);
+    CPPUNIT_ASSERT(async.m_zeroRecvProgressReported);
+    CPPUNIT_ASSERT(async.m_hundredRecvProgressReported);
+#endif    
+}
+
+
 void HttpClientTest::testSlowGetAsync()
 {
     bp::log::removeAllAppenders();

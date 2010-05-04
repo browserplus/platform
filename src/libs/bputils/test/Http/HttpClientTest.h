@@ -40,6 +40,7 @@ class HttpClientTest : public CPPUNIT_NS::TestCase
     CPPUNIT_TEST_SUITE(HttpClientTest);
     CPPUNIT_TEST(testTextGet);
     CPPUNIT_TEST(testTextGetAsync);
+    CPPUNIT_TEST(testChunkedResponseProgress);
     CPPUNIT_TEST(testSlowGetAsync);
     CPPUNIT_TEST(testNotFound);
     CPPUNIT_TEST(testBinaryGet);
@@ -66,7 +67,10 @@ private:
     
     // Test an asynchronous http text get.
     void testTextGetAsync();
-      
+
+    // Test our progress reporting when response uses chunked encoding.
+    void testChunkedResponseProgress();
+    
     // Test an asynchronous http get where the response packets are delayed.
     void testSlowGetAsync();
 
