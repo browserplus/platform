@@ -123,6 +123,11 @@ void SyncTransaction::onError(const std::string& msg)
 
 void SyncTransaction::stopThread( FinalStatus::Code code, std::string sMsg )
 {
+    // Make sure to reset transaction here, so that it
+    // gets destroyed on our thread.  All juicy http
+    // goodness must occur on same thread.
+    m_pTran.reset();
+
     m_results.code = code;
     m_results.message = sMsg;
     m_thrd.stop();
