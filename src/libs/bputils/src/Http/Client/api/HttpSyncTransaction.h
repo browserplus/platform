@@ -51,9 +51,9 @@ class SyncTransaction : public http::client::Listener,
                         public std::tr1::enable_shared_from_this<SyncTransaction>
 {
 public:
-    // Since a SyncTransaction is also a Listener, it must be managed
-    // with a shared_ptr
+    // A SyncTransaction must be managed with a shared_ptr, enforce that
     static std::tr1::shared_ptr<SyncTransaction> alloc( RequestPtr ptrRequest );
+
     virtual ~SyncTransaction();
 
 // Classes

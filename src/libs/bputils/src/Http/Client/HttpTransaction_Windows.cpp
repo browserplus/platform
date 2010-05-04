@@ -1468,14 +1468,6 @@ Transaction::Impl::doReceiveProgressReport( size_t bytesProcessed,
 // os-specific members out of our .h file and instead declare an opaque pointer
 // to impl.
 
-TransactionPtr
-Transaction::alloc(RequestPtr ptrRequest) 
-{
-    TransactionPtr rval(new Transaction(ptrRequest));
-    return rval;
-}
-
-
 Transaction::Transaction(RequestPtr ptrRequest) :
     m_pImpl(new Impl(ptrRequest))
 {

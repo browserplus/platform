@@ -134,8 +134,8 @@ QueryCache::coreletList(std::string plat)
         if (plat.compare("none") != 0) url += "/" + plat;
 
         bp::http::RequestPtr myReq = WSProtocol::buildRequest(url);    
-        MyListenerPtr l = MyListener::alloc(*this,
-                                            bp::http::client::Transaction::alloc(myReq));;
+        bp::http::client::TransactionPtr tran(new bp::http::client::Transaction(myReq));
+        MyListenerPtr l = MyListener::alloc(*this, tran);
         m_listeners[*it] = l;
         BPLOG_INFO_STRM(l << ": initiate GET of available services for "
                         << plat);
@@ -495,8 +495,8 @@ QueryCache::latestPlatformVersion(std::string plat)
         url += "/" + m_plat;
 
         bp::http::RequestPtr myReq = WSProtocol::buildRequest(url);    
-        MyListenerPtr l = MyListener::alloc(*this,
-                                            bp::http::client::Transaction::alloc(myReq));
+        bp::http::client::TransactionPtr tran(new bp::http::client::Transaction(myReq));
+        MyListenerPtr l = MyListener::alloc(*this, tran);
         m_listeners[*it] = l;
         BPLOG_INFO_STRM(l << ": initiate GET of latest platform for  " << m_plat);
         l->m_transaction->initiate(l);

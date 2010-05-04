@@ -162,7 +162,7 @@ DistQuery::permissions()
     std::string url = WSProtocol::buildURL(m_distroServers.front(),
                                            WSProtocol::PERMISSIONS_PATH);
     bp::http::RequestPtr req(WSProtocol::buildRequest(url));
-    tc->m_transaction = bp::http::client::Transaction::alloc(req);
+    tc->m_transaction.reset(new bp::http::client::Transaction(req));
     BPLOG_INFO_STRM(this << ": initiate GET for permissions");
     tc->m_transaction->initiate(tc);
 
@@ -233,7 +233,7 @@ DistQuery::reportPageUsage(const std::string & ysOSVersion,
         allocTransaction(TransactionContext::ReportPageUsage);
 
     bp::http::RequestPtr req(WSProtocol::buildRequest(url));
-    tc->m_transaction = bp::http::client::Transaction::alloc(req);
+    tc->m_transaction.reset(new bp::http::client::Transaction(req));
     BPLOG_INFO_STRM(this << ": initiate GET to report page usage");
     tc->m_transaction->initiate(tc);
 
@@ -265,7 +265,7 @@ DistQuery::reportInstall(const std::string & ysOSVersion,
         allocTransaction(TransactionContext::ReportPageUsage);
 
     bp::http::RequestPtr req(WSProtocol::buildRequest(url));
-    tc->m_transaction = bp::http::client::Transaction::alloc(req);
+    tc->m_transaction.reset(new bp::http::client::Transaction(req));
     BPLOG_INFO_STRM(this << ": initiate GET to report new install");
     tc->m_transaction->initiate(tc);
 

@@ -139,7 +139,9 @@ typedef std::tr1::weak_ptr<IListener> IListenerWeakPtr;
 class Listener : public virtual IListener
 {
  public:
+    // A Listener must be managed by a shared_ptr, enforce that
     static std::tr1::shared_ptr<Listener> alloc();
+
     virtual ~Listener() {
     }
 

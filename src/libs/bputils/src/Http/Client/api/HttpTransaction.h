@@ -44,9 +44,9 @@ namespace client {
 
 class Transaction
 {
-// Allocation/destruction
+// Construction/destruction
 public:
-    static std::tr1::shared_ptr<Transaction> alloc( RequestPtr ptrRequest );
+    Transaction( RequestPtr ptrRequest );
     ~Transaction();
 
 // Class-scope Items
@@ -87,9 +87,6 @@ public:
     // have a code of eTimedOut
     void setTimeoutSec( double fSecs );
 
-protected:
-    Transaction( RequestPtr ptrRequest );
-    
 // State
 private:    
     class Impl;

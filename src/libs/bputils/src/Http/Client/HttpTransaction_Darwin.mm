@@ -897,14 +897,6 @@ public:
 
 // ---------------- Finally, Transaction delegates to TransactionImpl
 
-TransactionPtr
-Transaction::alloc(RequestPtr request)
-{
-    TransactionPtr rval(new Transaction(request));
-    return rval;
-}
-
-
 Transaction::Transaction(RequestPtr request) :
     m_pImpl(new Impl(request))
 {

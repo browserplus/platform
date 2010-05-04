@@ -150,12 +150,12 @@ public:
 
         if (m_isget) {
             m_request.reset(new bp::http::Request(bp::http::Method::HTTP_GET, urlss.str()));
-            m_transaction = bp::http::client::Transaction::alloc(m_request);
+            m_transaction.reset(new bp::http::client::Transaction(m_request));
             m_transaction->setTimeoutSec(5.0);
         } else {
             m_request.reset(new bp::http::Request(bp::http::Method::HTTP_POST, urlss.str()));
             m_request->body.append(m_chosenBody);
-            m_transaction = bp::http::client::Transaction::alloc(m_request);
+            m_transaction.reset(new bp::http::client::Transaction(m_request));
             m_transaction->setTimeoutSec(5.0);
         }
     }

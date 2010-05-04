@@ -213,7 +213,7 @@ protected:
           m_percentSent(0.0), m_percentReceived(0.0), m_timedOut(false),
           m_cancelled(false), m_errorMsg(), m_rl(rl)
     {
-        m_transaction = Transaction::alloc(m_request);
+        m_transaction.reset(new Transaction(m_request));
     }
 };
 

@@ -86,7 +86,7 @@ SyncTransaction::execute( FinalStatus& results )
 void SyncTransaction::startFunc( void* ctx )
 {
     SyncTransaction* self = (SyncTransaction*) ctx;
-    self->m_pTran = Transaction::alloc( self->m_ptrRequest );
+    self->m_pTran.reset(new Transaction( self->m_ptrRequest ));
     self->m_pTran->setTimeoutSec( self->m_fTimeoutSecs );
 
     self->m_pTran->initiate( self->shared_from_this() );

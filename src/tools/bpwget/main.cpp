@@ -207,7 +207,7 @@ private:
           m_dumpHeaders(dumpHeaders), m_timedOut(false),
           m_cancelled(false), m_errorMsg(), m_rl(rl)
     {
-        m_transaction = bp::http::client::Transaction::alloc(request);
+        m_transaction.reset(new bp::http::client::Transaction(request));
     }
 
 };
