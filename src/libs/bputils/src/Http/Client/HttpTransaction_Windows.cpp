@@ -690,8 +690,8 @@ Transaction::Impl::processRequest(DWORD error)
 
             reportReceiveProgress();
             
-            m_pListener->onResponseBodyBytes(m_pReceiveBuffer, 
-                                             m_bytesInReceiveBuffer);
+            if (listener) listener->onResponseBodyBytes(m_pReceiveBuffer, 
+                                                        m_bytesInReceiveBuffer);
             if (done) {
                 m_eState = eDone;
                 finalizeReceiveProgress();
@@ -1429,7 +1429,8 @@ Transaction::Impl::doSendProgressReport( size_t bytesProcessed,
                                          size_t totalBytes,
                                          double percent )
 {
-    m_pListener->onSendProgress( bytesProcessed, totalBytes, percent );
+    IListenerPtr l = m_pListener.lock();
+    if (l) l->onSendProgress( bytesProcessed, totalBytes, percent );
 
     m_lastSendProgressSent = percent;
     
@@ -1446,7 +1447,8 @@ Transaction::Impl::doReceiveProgressReport( size_t bytesProcessed,
                                             size_t totalBytes,
                                             double percent )
 {
-    m_pListener->onReceiveProgress( bytesProcessed, totalBytes, percent );
+    IListenerPtr l = m_pListener.lock();
+    if (l) l->onReceiveProgress( bytesProcessed, totalBytes, percent );
 
     m_lastReceiveProgressSent = percent;
 
