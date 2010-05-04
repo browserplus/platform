@@ -81,12 +81,17 @@ public:
         m_transaction->initiate(this);
     }
     
-    AsyncHttp(RequestPtr request, bp::runloop::RunLoop *rl) 
-        : m_request(request), m_connecting(false), m_connected(false),
-          m_redirectUrl(), m_requestSent(false), m_status(), m_headers(), 
-          m_body(), m_complete(false), m_closed(false),
-          m_percentSent(0.0), m_percentReceived(0.0), m_timedOut(false),
-          m_cancelled(false), m_errorMsg(), m_rl(rl)
+    AsyncHttp(RequestPtr request, bp::runloop::RunLoop *rl) :
+        m_request(request), m_connecting(false), m_connected(false),
+        m_redirectUrl(), m_requestSent(false), m_status(), m_headers(), 
+        m_body(), m_complete(false), m_closed(false),
+        m_percentSent(0.0), m_percentReceived(0.0), m_timedOut(false),
+        m_cancelled(false), m_errorMsg(),
+        m_zeroSendProgressReported(false),
+        m_hundredSendProgressReported(false),
+        m_zeroRecvProgressReported(false),
+        m_hundredRecvProgressReported(false),
+        m_rl(rl)
     {
         m_transaction = new Transaction(m_request);
     }
@@ -132,12 +137,24 @@ public:
                                 size_t /*totalBytes*/,
                                 double percent) {
         m_percentSent = percent;
+
+        if (percent==0) {
+            m_zeroSendProgressReported = true;
+        } else if (percent==100) {
+            m_hundredSendProgressReported = true;
+        }
     }
     
     virtual void onReceiveProgress(size_t /*bytesReceived*/,
                                    size_t /*totalBytes*/,
                                    double percent) {
         m_percentReceived = percent;
+
+        if (percent==0) {
+            m_zeroRecvProgressReported = true;
+        } else if (percent==100) {
+            m_hundredRecvProgressReported = true;
+        }
     }
     
     virtual void onComplete() {
@@ -184,6 +201,10 @@ public:
     bool m_timedOut;
     bool m_cancelled;
     std::string m_errorMsg;
+    bool m_zeroSendProgressReported;
+    bool m_hundredSendProgressReported;
+    bool m_zeroRecvProgressReported;
+    bool m_hundredRecvProgressReported;
     
     bool ok() const {
         return !m_timedOut && !m_cancelled && m_errorMsg.empty();
@@ -286,6 +307,12 @@ void HttpClientTest::testTextGetAsync()
     CPPUNIT_ASSERT(async.m_complete);
     CPPUNIT_ASSERT(async.m_closed);
     CPPUNIT_ASSERT(async.m_percentReceived == 100.0);
+
+    // Make sure all our progress callbacks occurred.
+    CPPUNIT_ASSERT(async.m_zeroSendProgressReported);
+    CPPUNIT_ASSERT(async.m_hundredSendProgressReported);
+    CPPUNIT_ASSERT(async.m_zeroRecvProgressReported);
+    CPPUNIT_ASSERT(async.m_hundredRecvProgressReported);
 }
 
 
@@ -439,6 +466,12 @@ void HttpClientTest::testBinaryGetAsync()
     CPPUNIT_ASSERT(equal(prespExpected->body.begin(),
                          prespExpected->body.end(),
                          async.m_body.begin()));
+
+    // Make sure all our progress callbacks occurred.
+    CPPUNIT_ASSERT(async.m_zeroSendProgressReported);
+    CPPUNIT_ASSERT(async.m_hundredSendProgressReported);
+    CPPUNIT_ASSERT(async.m_zeroRecvProgressReported);
+    CPPUNIT_ASSERT(async.m_hundredRecvProgressReported);
     
     // Save to an output file for fun.
     //  saveBodyToBinaryFile("sophie.jpg", ptrResp->body);
