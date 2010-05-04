@@ -104,7 +104,7 @@ public:
     virtual void timesUp(bp::time::Timer* t);
 
     // Asynchronously execute the transaction
-    void        initiate(IListener* pListener);
+    void        initiate(IListenerWeakPtr pListener);
 
     // Cancel a transaction.
     void        cancel();
@@ -211,7 +211,7 @@ private:
     }
 
     // progress info
-    IListener*      m_pListener;
+    IListenerWeakPtr m_pListener;
     size_t          m_sendTotalBytes;
     size_t          m_bytesSent;
     size_t          m_receiveTotalBytes;
@@ -306,7 +306,8 @@ private:
 
     void setError(const std::string& msg) {
         m_eState = eError;
-        m_pListener->onError(msg);
+        IListenerPtr p = m_pListener.lock();
+        if (p) p->onError(msg);
     }
 
     // Prevent copying
@@ -356,7 +357,8 @@ Transaction::Impl::redirectCB(void* ctx)
     if (!findImpl((DWORD) ctx, self)) {
         BPLOG_WARN_STRM("Dropping redirect call, implementation has been free'd");
     } else {
-        self->m_pListener->onRedirect(self->m_redirectUrl);
+        IListenerPtr p = self->m_pListener.lock();
+        if (p) p->onRedirect(self->m_redirectUrl);
     }
 }
 
@@ -368,7 +370,8 @@ Transaction::Impl::closedCB(void* ctx)
     if (!findImpl((DWORD) ctx, self)) {
         BPLOG_WARN_STRM("Dropping closed call, implementation has been free'd");
     } else {
-        self->m_pListener->onClosed();
+        IListenerPtr p = self->m_pListener.lock();
+        if (p) p->onClosed();
     }
 }
 
@@ -389,7 +392,7 @@ Transaction::Impl::Impl(RequestPtr ptrRequest) :
     m_hUploadFile(INVALID_HANDLE_VALUE),
     m_pPostBuffer(NULL),
     m_bytesToPost(0),
-    m_pListener(NULL),
+    m_pListener(),
     m_sendTotalBytes(0),
     m_bytesSent(0),
     m_receiveTotalBytes(0),
@@ -429,7 +432,7 @@ Transaction::Impl::~Impl()
     consistencyCheck();
 
     removeFromImplMap();
-    m_pListener = NULL;
+    m_pListener.reset();
     BPLOG_DEBUG_STRM(m_id << ":  HTTP transaction unregistered");
 
     closeConnection();
@@ -486,7 +489,7 @@ Transaction::Impl::timesUp(bp::time::Timer* t)
 
 
 void
-Transaction::Impl::initiate(IListener* pListener)
+Transaction::Impl::initiate(IListenerWeakPtr pListener)
 {
     consistencyCheck();
 
@@ -594,6 +597,7 @@ Transaction::Impl::processRequest(DWORD error)
         return;
     }
 
+    IListenerPtr listener = m_pListener.lock();
     while (!m_bCancel                    // not cancelled
            && m_eState != eTimedOut      // haven't timed out
            && m_eState != eError         // no error
@@ -604,7 +608,7 @@ Transaction::Impl::processRequest(DWORD error)
 
         case eConnect:
             m_eState = eOpenRequest;
-            m_pListener->onConnecting();
+            if (listener) listener->onConnecting();
             openSession();
             error = openConnection();
             break;
@@ -620,13 +624,13 @@ Transaction::Impl::processRequest(DWORD error)
 
         case eSendRequest:
             m_eState = eResponseGetHeaders;
-            m_pListener->onConnected();
+            if (listener) listener->onConnected();
             error = sendRequest();
             break;
 
         case eSendRequestWithBody:
             m_eState = ePostGetData;
-            m_pListener->onConnected();
+            if (listener) listener->onConnected();
             error = sendRequestWithBody();
             break;
             
@@ -658,8 +662,10 @@ Transaction::Impl::processRequest(DWORD error)
             Version version = receiveResponseVersion();
             Status status = receiveResponseStatus();
             Headers headers = receiveResponseHeaders();
-            m_pListener->onRequestSent();
-            m_pListener->onResponseStatus(status, headers);
+            if (listener) {
+                listener->onRequestSent();
+                listener->onResponseStatus(status, headers);
+            }
             break;
         }
 
@@ -689,8 +695,7 @@ Transaction::Impl::processRequest(DWORD error)
             if (done) {
                 m_eState = eDone;
                 finalizeReceiveProgress();
-                m_pListener->onComplete();
-                
+                if (listener) listener->onComplete();
                 // now we'll invoke closed after an async break so that
                 // if we're deleted on the onClosed call, we don't
                 // go and try to romp around in our memory later.
@@ -704,10 +709,10 @@ Transaction::Impl::processRequest(DWORD error)
     // deal with the terminal stuff
     if (m_bCancel) {
         closeConnection();
-        m_pListener->onCancel();
+        if (listener) listener->onCancel();
     } else if (m_eState == eTimedOut) {
         closeConnection();
-        m_pListener->onTimeout();
+        if (listener) listener->onTimeout();
     }
 }
 
@@ -1461,6 +1466,14 @@ Transaction::Impl::doReceiveProgressReport( size_t bytesProcessed,
 // os-specific members out of our .h file and instead declare an opaque pointer
 // to impl.
 
+TransactionPtr
+Transaction::alloc(RequestPtr ptrRequest) 
+{
+    TransactionPtr rval(new Transaction(ptrRequest));
+    return rval;
+}
+
+
 Transaction::Transaction(RequestPtr ptrRequest) :
     m_pImpl(new Impl(ptrRequest))
 {
@@ -1479,9 +1492,10 @@ double Transaction::defaultTimeoutSecs()
 }
 
         
-void Transaction::initiate(IListener* pListener)
+void Transaction::initiate(IListenerWeakPtr pListener)
 {
-    if (pListener == NULL) {
+    IListenerPtr p = pListener.lock();
+    if (p && p == NULL) {
         BP_THROW_FATAL("null listener");
     }
     m_pImpl->initiate(pListener);
