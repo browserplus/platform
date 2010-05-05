@@ -211,7 +211,10 @@ protected:
           m_redirectUrl(), m_requestSent(false), m_status(), m_headers(),
           m_body(), m_complete(false), m_closed(false),
           m_percentSent(0.0), m_percentReceived(0.0), m_timedOut(false),
-          m_cancelled(false), m_errorMsg(), m_rl(rl)
+          m_cancelled(false), m_errorMsg(), m_zeroSendProgressReported(false),
+          m_hundredSendProgressReported(false),
+          m_zeroRecvProgressReported(false),
+          m_hundredRecvProgressReported(false), m_rl(rl)
     {
         m_transaction.reset(new Transaction(m_request));
     }
