@@ -118,6 +118,7 @@ ELSE ()
 
     SET(CMAKE_CXX_FLAGS "-Wall ${isysrootFlag} ${minVersionFlag} ${FPICFlag}")
     SET(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -g")
+    #SET(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -g -fprofile-arcs -ftest-coverage")
     SET(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -Os")
     SET(CMAKE_MODULE_LINKER_FLAGS_RELEASE "-Wl,-x")
     SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "-Wl,-x")
