@@ -111,14 +111,14 @@ public:
     double elapsedSec();
     
     /**
-     * Fire an event without checking level
+     * Fire an event if level is enabled.
      * This method is primarily for internal use but needs to be public.
      */
     void _conditionalLog( const Level& level,
                           const std::string& message,
                           const LocationInfo& location );
     /**
-     * Fire an event without checking level
+     * Fire an event without checking level.
      * This method is primarily for internal use but needs to be public.
      */
     void _forcedLog( const Level& level,
