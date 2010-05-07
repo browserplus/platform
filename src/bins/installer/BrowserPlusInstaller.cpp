@@ -931,19 +931,16 @@ main(int argc, const char** argv)
         rl.run();
         rl.shutdown();
 
-        // Note, we won't get here, InstallerManager will call exit() 
-    } catch (const bp::error::Exception& e) {
-        BPLOG_ERROR(e.what());
+        // Note, we won't normally get here, InstallerManager will call exit() 
+    } catch (const std::exception& e) {
+        BP_REPORTCATCH(e);
         rval = -1;
-    } catch (const bp::error::FatalException& e) {
-        BPLOG_ERROR(e.what());
-        rval = -1;
-    } catch (const bp::file::tFileSystemError& e) {
-        BPLOG_ERROR(e.what());
+    } catch (...) {
+        BP_REPORTCATCH_UNKNOWN;
         rval = -1;
     }
 
-    // Note, we will only get here on exceptions.  Otherwiser, 
+    // Note, we will only get here on exceptions.  Otherwise, 
     // InstallerManager exits
     bp::file::remove(destDir);
     exit(rval);
