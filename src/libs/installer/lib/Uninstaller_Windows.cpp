@@ -118,6 +118,11 @@ Uninstaller::run(bool fromRunonce)
         }
     }
 
+    // Just in case we have cruft from earlier installs/updates
+    if (unregisterCruftControls(true) != 0) {
+        m_error = true;
+    }
+
     // NPAPI may be in a non-standard place due to firefox and 
     // non-ascii usernames.  The registry knows all...
     string mozKey = "HKCU\\SOFTWARE\\MozillaPlugins";

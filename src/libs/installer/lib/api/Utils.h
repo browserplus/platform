@@ -84,6 +84,14 @@ namespace utils {
                           const std::string& sViProgid,
                           const std::string& sProgid);
 
+    // Unregister "cruft" YBPAddon_xxx.dll controls, meaning
+    // controls found in the registry but not on the filesystem.
+    // Alas, this can happen because of a bug we had.  If "force"
+    // is true, removal will happen even if control is found
+    // on the filesystem (used during uninstall).
+    // Returns 0 on success, non-zero otherwise
+    int unregisterCruftControls(bool force);
+
     // Delete a registry key and all of it's subkeys.
     //
     // BE VERY, VERY CAREFUL USING THIS METHOD, IT CAN DESTROY A SYSTEM.

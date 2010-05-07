@@ -230,6 +230,10 @@ Installer::postflight()
     // some files are open and ntfs can't handle that.
     (void) remove(m_dir);
 
+    // Alas, due to a previous bug ({#180}), we may have left registry cruft
+    // on previous updates.  We must now atone for our sins and clean it up.
+    (void) unregisterCruftControls(false);
+
     // Re-register our activex control (it could have 
     // been unregistered by above code if guid hadn't changed)
     bpf::Path thisIEPluginPath = prodDir / "Plugins" / bpf::Path("YBPAddon_"
@@ -279,34 +283,33 @@ Installer::disablePlugins(const bp::ServiceVersion& version)
                         << " NPAPI plugin: " << e.what());
     }
 
-    // Disable IE plugin by zapping the registry, not fatal if it fails
+    // Disable IE plugin by zapping the registry, not fatal if it fails.
+    // Also note that the plugin path doesn't need to exist for the 
+    // registry zapping to work.
     try {
         bpf::Path path =  getProductDirectory(version.majorVer(),
                                               version.minorVer(),
                                               version.microVer()) 
-                          / "Plugins" / bpf::Path("YBPAddon__" + versionStr + ".dll");
-        if (bfs::is_regular(path)) { 
-            // unregister control
-            string vers, typeLibGuid, activeXGuid;
-            vector<string> mtypes;
-            if (getControlInfo(path, vers, typeLibGuid, activeXGuid, mtypes)) {
-                if (unRegisterControl(mtypes, typeLibGuid, 
-                                      path, activeXGuid,
-                                      "CBPCtl Object", "Yahoo.BPCtl",
-                                      "Yahoo.BPCtl." + vers) != 0) {
-                    BPLOG_WARN_STRM("unable to unregister " << path);
-                }
+                          / "Plugins" / bpf::Path("YBPAddon_" + versionStr + ".dll");
+        // unregister control
+        string vers, typeLibGuid, activeXGuid;
+        vector<string> mtypes;
+        if (getControlInfo(path, vers, typeLibGuid, activeXGuid, mtypes)) {
+            if (unRegisterControl(mtypes, typeLibGuid, path, activeXGuid,
+                                  "CBPCtl Object", "Yahoo.BPCtl",
+                                  "Yahoo.BPCtl." + vers) != 0) {
+                BPLOG_WARN_STRM("unable to unregister " << path);
             }
+        }
 
-            // Remove "supress activex nattergram" entry and vista daemon elevation gunk if
-            // this plugin has a different activex guid
-            if (activeXGuid.compare(utils::activeXGuid()) != 0) {
-                recursiveDeleteKey("HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Ext\\Stats\\"
+        // Remove "supress activex nattergram" entry and vista daemon elevation gunk if
+        // this plugin has a different activex guid
+        if (activeXGuid.compare(utils::activeXGuid()) != 0) {
+            recursiveDeleteKey("HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Ext\\Stats\\"
+                               + activeXGuid);
+            if (isVistaOrLater) {
+                recursiveDeleteKey("HKCU\\SOFTWARE\\Microsoft\\Internet Explorer\\Low Rights\\ElevationPolicy\\"
                                    + activeXGuid);
-                if (isVistaOrLater) {
-                    recursiveDeleteKey("HKCU\\SOFTWARE\\Microsoft\\Internet Explorer\\Low Rights\\ElevationPolicy\\"
-                                       + activeXGuid);
-                }
             }
         }
     } catch (const bp::error::Exception& e) {
