@@ -198,7 +198,7 @@ reportExceptionEvent( const string sAction,
 }
 
 
-void ReportThrow( const exception& e,
+void reportThrow( const exception& e,
                   const string& sFile,
                   const string& sFunc,
                   int nLine,
@@ -208,13 +208,36 @@ void ReportThrow( const exception& e,
 }
 
 
-void ReportCatch( const exception& e,
+void reportCatch( const exception& e,
                   const string& sFile,
                   const string& sFunc,
                   int nLine,
                   const string& sAddlContext ) throw()
 {
     reportExceptionEvent( "Caught", e, sFile, sFunc, nLine, sAddlContext );
+}
+
+
+void reportCatchUnknown( const string& sFile,
+                         const string& sFunc,
+                         int nLine,
+                         const string& sAddlContext ) throw()
+{
+    using namespace bp::log;
+
+    const Level kExcLogLevel = LEVEL_ERROR;
+
+    if (rootLogger().isLevelEnabled( kExcLogLevel ))
+    {
+        stringstream ssReport;
+        ssReport << "Caught an unknown exception.";
+        if (!sAddlContext.empty()) {
+            ssReport << " (" << sAddlContext << ")";
+        }
+
+        LocationInfo loc( sFile, sFunc, nLine );
+        rootLogger()._forcedLog( kExcLogLevel, ssReport.str(), loc );
+    }
 }
 
 
