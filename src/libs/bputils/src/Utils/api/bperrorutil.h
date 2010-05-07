@@ -145,6 +145,10 @@ void ReportCatch( const std::exception& e,
 bp::error::ReportCatch( (e), __FILE__, __BP_FUNC__, __LINE__ );  
 
 
+// Returns a string describing thrown exception.
+std::string makeThrowReportString(const std::exception& exc,
+                                  const std::string& sAddlContext="" );
+
 // Returns a string describing caught exception.
 std::string makeCatchReportString(const std::exception& exc,
                                   const std::string& sAddlContext="" );
