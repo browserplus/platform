@@ -44,35 +44,45 @@ using namespace std::tr1;
 
 int main(int argc, const char ** argv)
 {
+    try {
 #ifndef WIN32
-    // on unix we should ignore SIGPIPE so we don't go down when an
-    // IPC client goes down abruptly (YIB-2568266)
-    signal(SIGPIPE, SIG_IGN);
+        // on unix we should ignore SIGPIPE so we don't go down when an
+        // IPC client goes down abruptly (YIB-2568266)
+        signal(SIGPIPE, SIG_IGN);
 #endif
 
-    // handle non-ascii args on win32
-    APT::ARGVConverter conv;
-    conv.convert(argc, argv);
+        // handle non-ascii args on win32
+        APT::ARGVConverter conv;
+        conv.convert(argc, argv);
 
-    // create needed directories
-    bp::paths::createDirectories();
+        // create needed directories
+        bp::paths::createDirectories();
 
-    // the presence of only 2 command line arguments and the -runService
-    // flag causes us to run a service, rather than running the Daemon
-    if (argc > 1 && !std::string(argv[1]).compare("-runService"))
-    {
-        if (!ServiceRunner::runServiceProcess(argc, argv)) {
-            return bp::exit::kCantRunServiceProcess;
+        // the presence of only 2 command line arguments and the -runService
+        // flag causes us to run a service, rather than running the Daemon
+        if (argc > 1 && !std::string(argv[1]).compare("-runService"))
+        {
+            if (!ServiceRunner::runServiceProcess(argc, argv)) {
+                return bp::exit::kCantRunServiceProcess;
+            }
         }
-    }
-    else
-    {
-        // BPDaemon does the heavy lifting...
-        shared_ptr<BPDaemon> daemon(
-            new BPDaemon(argc, (const char **) argv));
-        daemon->run();
-    }
+        else
+        {
+            // BPDaemon does the heavy lifting...
+            shared_ptr<BPDaemon> daemon(
+                new BPDaemon(argc, (const char **) argv));
+            daemon->run();
+        }
 
-    return bp::exit::kOk;
+        return bp::exit::kOk;
+    }
+    catch (const std::exception& exc) {
+        BP_REPORTCATCH(exc);
+        throw;
+    }
+    catch (...) {
+        BP_REPORTCATCH_UNKNOWN;
+        throw;
+    }
 }
 
