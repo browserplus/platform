@@ -81,10 +81,13 @@ int WINAPI WinMain( HINSTANCE, HINSTANCE, PSTR, int )
         }
         return bIsChild ? doChild( vsArgs ) : doParent( vsArgs );
     }
-    catch (bp::error::Exception& e)
-    {
-        BP_REPORTCATCH(e);
-        return bp::exit::kCaughtBpException;
+    catch (const std::exception& exc) {
+        BP_REPORTCATCH(exc);
+        return bp::exit::kCaughtException;
+    }
+    catch (...) {
+        BP_REPORTCATCH_UNKNOWN;
+        return bp::exit::kCaughtException;
     }
 }	
 
