@@ -1,4 +1,4 @@
-/**
+ /**
  * ***** BEGIN LICENSE BLOCK *****
  * The contents of this file are subject to the Mozilla Public License
  * Version 1.1 (the "License"); you may not use this file except in
@@ -40,6 +40,7 @@
 #import "bpconvert.h"
 
 #import <Foundation/Foundation.h>
+#import <Security/SecureTransport.h>
 #include <SystemConfiguration/SystemConfiguration.h>
 
 static const char* kDefaultUserAgent = "Yahoo! BrowserPlus (osx)";
@@ -48,6 +49,59 @@ static const double kDefaultTimeoutSecs = 30.0;
 static void streamCB(CFReadStreamRef stream,
                      CFStreamEventType eventType,
                      void* cbInfo);
+
+// SSL error codes for which we may want to prompt user for trust.
+static bool
+isSSLError(int code)
+{
+    return (code == errSSLUnknownRootCert
+            || code == errSSLNoRootCert
+            || code == errSSLCertExpired
+            || code == errSSLCertNotYetValid
+            || code == errSSLPeerCertRevoked
+            || code == errSSLPeerCertExpired
+            || code == errSSLPeerCertUnknown
+            || code == errSSLPeerUnknownCA);
+}
+
+
+// strings for the above codes.
+static std::string
+sslErrorString(int code)
+{
+    std::string rval = "SSL error: ";
+    switch (code) {
+    case errSSLUnknownRootCert:
+        rval += "valid certificate chain, untrusted root";
+        break;
+    case errSSLNoRootCert:
+        rval += "certificate chain not verified by root";
+        break;
+    case errSSLCertExpired:
+        rval += "chain had an expired certificate";
+        break;
+    case errSSLCertNotYetValid:
+        rval += "chain had a certificate not yet valid";
+        break;
+    case errSSLPeerCertRevoked:
+        rval += "certificate revoked";
+        break;
+    case errSSLPeerCertExpired:
+        rval += "certificate expired";
+        break;
+    case errSSLPeerCertUnknown:
+        rval += "unknown certificate";
+        break;
+    case errSSLPeerUnknownCA:
+        rval += "unknown certificate authority";
+        break;
+    default:
+        rval.clear();
+        break;
+    }
+    return rval;
+}
+
 
 // Need a wrapper around weak_ptr since Obj-C can't do templates
 class WeakListener : virtual public bp::http::client::IListener
@@ -547,7 +601,8 @@ private:
 }
 
 
-- (void) connection: (NSURLConnection*) connection didFailWithError: (NSError*) error
+- (void) connection: (NSURLConnection*) connection
+   didFailWithError: (NSError*) error
 {
     NSString* s = [error localizedDescription];
     std::string msg([s UTF8String]);
@@ -599,6 +654,16 @@ private:
             msg = strerror(err.error);
         } else if (err.domain == kCFStreamErrorDomainMacOSStatus) {
             msg = "Mac error: " + bp::conv::lexical_cast<std::string>(err.error);
+        } else if (err.domain == kCFStreamErrorDomainSSL) {
+            if (isSSLError(err.error)) {
+                msg = sslErrorString(err.error);
+            } else {
+                NSError* error = [NSError errorWithDomain: @"kCFStreamErrorDomainSSL"
+                                          code: err.error
+                                          userInfo: nil];
+                NSString* desc = [error localizedDescription];
+                msg = [desc UTF8String];
+            }
         }
     }
     [self handleError: msg];
@@ -699,7 +764,8 @@ private:
 }
 
 
-- (void) handleResponseStatus: (NSDictionary*) headers status: (int) status
+- (void) handleResponseStatus: (NSDictionary*) headers 
+                       status: (int) status
 {
     BPLOG_DEBUG_STRM(self << ": handleResponseStatus");
     if (m_headers && [m_headers isEqualToDictionary: headers]
@@ -733,7 +799,8 @@ private:
 }
 
 
-- (void) handleResponseData: (const unsigned char*) buf length: (size_t) length
+- (void) handleResponseData: (const unsigned char*) buf 
+                     length: (size_t) length
 {
     BPLOG_DEBUG_STRM(self << ": handleResponseData");
     // honor 0% and 100% guarantees for send progress

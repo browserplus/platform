@@ -45,7 +45,6 @@
 
 using namespace std;
 
-
 // Threading usage:  Everything except wininetCallback and onWininetCallback 
 // occurs on the thread which invoked execute() or initiate().  
 // wininet callbacks can occur on any thread, so onWininetCallback uses 
@@ -163,7 +162,6 @@ private:
     void        doReceiveProgressReport(size_t bytesProcessed,
                                          size_t totalBytes,
                                          double percent);
-
     
     // Internal Attributes
 private:
@@ -309,6 +307,50 @@ private:
         IListenerPtr p = m_pListener.lock();
         if (p) p->onError(msg);
     }
+
+    bool isSSLError(DWORD error) {
+        return error == ERROR_INTERNET_INVALID_CA
+               || error == ERROR_INTERNET_SEC_CERT_CN_INVALID
+               || error == ERROR_INTERNET_SEC_CERT_DATE_INVALID
+               || error == ERROR_INTERNET_SEC_CERT_REVOKED;
+    }
+
+    std::string sslErrorString(DWORD error) {
+        std::string rval = "SSL error: ";
+        switch (error) {
+        case ERROR_INTERNET_INVALID_CA:
+            rval += "valid certificate chain, untrusted root";
+            break;
+        case ERROR_INTERNET_SEC_CERT_CN_INVALID:
+            rval += "the certificate common name is incorrect";
+            break;
+        case ERROR_INTERNET_SEC_CERT_DATE_INVALID:
+            rval += "certificate expired";
+            break;
+        case ERROR_INTERNET_SEC_CERT_REVOKED:
+            rval += "certificate revoked";
+            break;
+        default:
+            rval.clear();
+            break;
+        }
+        return rval;
+    }
+
+#ifdef NOTDEF
+    void ignoreSSLCertErrors() {
+        DWORD dwFlags = 0;
+        DWORD dwBufLen = 0;
+        InternetQueryOption(m_hinetRequest, INTERNET_OPTION_SECURITY_FLAGS,
+                            (LPVOID)&dwFlags, &dwBufLen);
+        dwFlags |= SECURITY_FLAG_IGNORE_UNKNOWN_CA
+                   | SECURITY_FLAG_IGNORE_CERT_CN_INVALID
+                   | SECURITY_FLAG_IGNORE_CERT_DATE_INVALID
+                   | SECURITY_FLAG_IGNORE_REVOCATION;
+        InternetSetOption(m_hinetRequest, INTERNET_OPTION_SECURITY_FLAGS,
+                          &dwFlags, sizeof(dwFlags));
+    }
+#endif
 
     // Prevent copying
 private:    
@@ -589,6 +631,9 @@ Transaction::Impl::processRequest(DWORD error)
         closeConnection();        
         setError("cannot connect");
         return;
+    } else if (isSSLError(error)) {
+        setError(sslErrorString(error));
+        return;
     } else if (error != ERROR_SUCCESS && error != ERROR_IO_PENDING) {
         std::stringstream ss;
         ss << "unknown wininet error: (" << error << ")";
@@ -790,6 +835,9 @@ Transaction::Impl::openRequest()
     DWORD dwRequestFlags = INTERNET_FLAG_RELOAD | 
                            INTERNET_FLAG_NO_CACHE_WRITE |
                            INTERNET_FLAG_NO_COOKIES;
+    if (m_pRequest->url.scheme() == "https") {
+        dwRequestFlags |= INTERNET_FLAG_SECURE;
+    }
 
     wstring wsMethod = bp::strutil::utf8ToWide(m_pRequest->method.toString());
     wstring wsResource = bp::strutil::utf8ToWide(
