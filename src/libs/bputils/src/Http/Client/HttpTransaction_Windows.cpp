@@ -337,21 +337,6 @@ private:
         return rval;
     }
 
-#ifdef NOTDEF
-    void ignoreSSLCertErrors() {
-        DWORD dwFlags = 0;
-        DWORD dwBufLen = 0;
-        InternetQueryOption(m_hinetRequest, INTERNET_OPTION_SECURITY_FLAGS,
-                            (LPVOID)&dwFlags, &dwBufLen);
-        dwFlags |= SECURITY_FLAG_IGNORE_UNKNOWN_CA
-                   | SECURITY_FLAG_IGNORE_CERT_CN_INVALID
-                   | SECURITY_FLAG_IGNORE_CERT_DATE_INVALID
-                   | SECURITY_FLAG_IGNORE_REVOCATION;
-        InternetSetOption(m_hinetRequest, INTERNET_OPTION_SECURITY_FLAGS,
-                          &dwFlags, sizeof(dwFlags));
-    }
-#endif
-
     // Prevent copying
 private:    
     Impl(const Impl&);
