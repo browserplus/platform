@@ -134,9 +134,13 @@ main(int argc, const char** argv)
             [pool release];
         }
 
-    } catch (const bp::error::Exception& e) {
-        BPLOG_ERROR_STRM("Uninstall failed: " << e.what());
-    } catch (const bp::error::FatalException& e) {
-        BPLOG_ERROR_STRM("Uninstall failed: " << e.what());
+        return bp::exit::kOk;
+    } catch (const std::exception& exc) {
+        BP_REPORTCATCH(exc);
+        return bp::exit::kCaughtException;
+    } catch (...) {
+        BP_REPORTCATCH_UNKNOWN;
+        return bp::exit::kCaughtException;
     }
+    
 }
