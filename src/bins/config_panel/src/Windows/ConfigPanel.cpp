@@ -111,9 +111,11 @@ int APIENTRY WinMain( HINSTANCE hInst, HINSTANCE /*hinstPrev*/,
 
         BPLOG_INFO( "Normal exit." );
     }
-    catch (bp::error::Exception& e)
-    {
-        BP_REPORTCATCH(e);
+    catch (const std::exception& exc) {
+        BP_REPORTCATCH(exc);
+    }
+    catch (...) {
+        BP_REPORTCATCH_UNKNOWN;
     }
 
     _Module.Term();
