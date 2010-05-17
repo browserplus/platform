@@ -114,6 +114,9 @@ public:
     void set(std::tr1::weak_ptr<IListener> l) {
         m_listener = l;
     }
+    void reset() {
+        m_listener.reset();
+    }
     void onConnecting() {
         bp::http::client::IListenerPtr p = m_listener.lock();
         if (p) {
@@ -925,9 +928,10 @@ public:
     
     ~Impl() {
         BPLOG_DEBUG_STRM(this << ": Impl dtor");
-        delete m_listener;
+        m_listener->reset();
         [m_helper cancelIfActive];
         [m_helper release];
+        delete m_listener;
     }
     
     void initiate(std::tr1::weak_ptr<IListener> pListener) {
