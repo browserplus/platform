@@ -178,14 +178,11 @@ main(int argc, const char** argv)
             inst.setListener(weak_ptr<IInstallerListener>(p));
         }
         inst.run();
-    } catch (const bp::error::Exception& e) {
-        BPLOG_ERROR(e.what());
+    } catch (const std::exception& e) {
+        BP_REPORTCATCH(e);
         rval = -1;
-    } catch (const bp::error::FatalException& e) {
-        BPLOG_ERROR(e.what());
-        rval = -1;
-    } catch (const tFileSystemError& e) {
-        BPLOG_ERROR(e.what());
+    } catch (...) {
+        BP_REPORTCATCH_UNKNOWN;
         rval = -1;
     }
     exit(rval);
