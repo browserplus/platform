@@ -67,6 +67,9 @@ DnDPluglet::execute(unsigned int tid,
 
     if (m_dropMgr == NULL) {
         BPLOG_WARN_STRM("DnDPluglet::execute " << function << " with NULL m_dropMgr");
+        failureCB(callbackArgument, tid, "DnD.unsupported",
+                  "DragDrop unsupported on this platform/browser combination");
+        return;
     }
 
     if (!strcmp("AddDropTarget", function) ||

@@ -45,7 +45,7 @@ DropManagerFactory::create(NPP instance,
                            IDropListener* listener)
 {
     // Currently, Safari 4.0.3 or greater on OSX uses Html5, everybody
-    // else uses Intercept
+    // else uses Intercept.  Chrome on OSX doesn't support DnD.
 
     // access user agent
     NPAPIPlugin* plugin = (NPAPIPlugin*)instance->pdata;
@@ -53,10 +53,17 @@ DropManagerFactory::create(NPP instance,
     BPLOG_DEBUG_STRM("DropManagerFactory userAgent: '" << userAgent << "'");
 
     // A sample OSX Safari 4.0.3 userAgent that we're snorting thru
-    //'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6; en-us) AppleWebKit/531.9 (KHTML, like Gecko) Version/4.0.3 Safari/531.9'
+    // 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6; en-us) AppleWebKit/531.9 (KHTML, like Gecko) Version/4.0.3 Safari/531.9'
+    // A sample OSX Chrome userAgent string
+    // 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; en-US) AppleWebKit/533.4 (KHTML, like Gecko) Chrome/5.0.375.38 Safari/533.4'
     bool useIntercept = true;
+    bool unsupported = false;
     do {
         if (userAgent.find("Mac OS X") == string::npos) break;
+        if (userAgent.find("Chrome") != string::npos) {
+            unsupported = true;
+            break;
+        }
         if (userAgent.find("Safari") == string::npos) break;
         size_t start = userAgent.find("Version/");
         if (start == string::npos) break;
@@ -73,6 +80,10 @@ DropManagerFactory::create(NPP instance,
         useIntercept = thisVersion.compare(baseVersion) < 0;
     } while (false);
 
+    if (unsupported) {
+        BPLOG_WARN("DnD unsupported on platform/browser");
+        return NULL;
+    }
     if (useIntercept) {
         return InterceptDropManager::allocate(instance, window, listener);
     }
