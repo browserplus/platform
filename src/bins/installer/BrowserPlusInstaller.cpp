@@ -745,7 +745,7 @@ static void
 usage()
 {
     stringstream ss;
-    ss << "usage: BrowserPlusInstaller [-nogui=<anything> [-verbose=<anything>] "
+    ss << "usage: BrowserPlusInstaller [-nogui=<anything>] [-verbose=<anything>] "
        << "[-pkg=<path>] [-log=<loglevel>] [-logfile=<filename>|console] "
        << "[-locale=<locale>]";
     BPLOG_ERROR(ss.str());
