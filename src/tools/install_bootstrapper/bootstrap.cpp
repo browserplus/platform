@@ -42,8 +42,6 @@
 #define BS_ERROR_OUTPUT( x ) BPLOG_ERROR_STRM(x)
 
 bp::file::Path g_exePath;
-std::wstring g_sCmdLine;
-bool        g_bVerbose = false;
 const static std::string endOfPayloadMarker(
     "Yahoo!BrowserPlusEndOfInstallerPayloadMarker");
 
@@ -83,14 +81,10 @@ int APIENTRY WinMain( HINSTANCE, HINSTANCE, LPSTR, int )
     wchar_t szPath[_MAX_PATH];
     GetModuleFileNameW( NULL, szPath, sizeof(szPath)/sizeof(wchar_t) );
     g_exePath = szPath;
-
-    g_sCmdLine = GetCommandLineW();
-
     BS_INFO_OUTPUT( "Path to binary:" << g_exePath );
 
     // now let's find the embedded payload
     std::ifstream f;
-
     if (!bp::file::openReadableStream(f, g_exePath,
                                       std::ios_base::binary |
                                       std::ios_base::in))
