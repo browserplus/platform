@@ -98,7 +98,7 @@ typedef void (*BPPShutdownPtr)(void);
  */
 typedef int (*BPPAllocatePtr)(
     void ** instance, const BPString uri, const BPPath serviceDir,
-    const BPPath dataDir, const BPPath tempDir, const BPString locale,,
+    const BPPath dataDir, const BPPath tempDir, const BPString locale,
     const BPString userAgent, int clientPid);
     
 /**
@@ -171,7 +171,7 @@ typedef struct BPPFunctionTable_t
     BPPInvokePtr invokeFunc;
     BPPCancelPtr cancelFunc;
     BPPInstallPtr installFunc;
-    BPPUninstallPtr installFunc;
+    BPPUninstallPtr uninstallFunc;
 } BPPFunctionTable;
 
 /**
