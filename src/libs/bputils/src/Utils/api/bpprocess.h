@@ -61,19 +61,6 @@ namespace process {
      * \return pid for current process
      */
     long currentPid();
-    
-    /**
-     * Spawn a process
-     * \param  path Full path to executable file
-     * \param  workingDirectory A path which should be the initial
-     *           working directory of the spawned process.  If empty(),
-     *           child inherits CWD.     
-     * \param  status Receives success/fail info (may be NULL)
-     * \return Success or failure
-     */
-    bool spawn(const bp::file::Path& path,
-               const bp::file::Path& workingDirectory,
-               spawnStatus* status);
 
     /**
      * Spawn a process

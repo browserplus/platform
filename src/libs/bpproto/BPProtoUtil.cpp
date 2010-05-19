@@ -224,7 +224,8 @@ bool startupDaemon(bp::process::spawnStatus& spawnStatus)
     BPLOG_INFO_STRM("path to binary: " << binaryPath);
 
     // execute the process
-    if (!bp::process::spawn(binaryPath, bp::file::Path(), &spawnStatus)) {
+    if (!bp::process::spawn(binaryPath, "", bp::file::Path(), 
+                            std::vector<std::string>(), &spawnStatus)) {
         return false;
     }
 

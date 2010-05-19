@@ -89,18 +89,6 @@ bp::process::currentPid()
 
 bool
 bp::process::spawn(const bp::file::Path& path,
-                   const bp::file::Path& workingDirectory,
-                   spawnStatus* status)
-{
-    // TODO: set working directory
-    vector<string> vsArgs;
-    return invokeCreateProcess(path, std::string(), workingDirectory,
-                               vsArgs, status);
-}
-
-
-bool
-bp::process::spawn(const bp::file::Path& path,
                    const std::string& sTitle,
                    const bp::file::Path& workingDirectory,
                    const vector<string>& vsArgs,
