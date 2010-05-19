@@ -12,12 +12,11 @@
 # The Original Code is BrowserPlus (tm).
 # 
 # The Initial Developer of the Original Code is Yahoo!.
-# Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+# Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
 # All rights reserved.
 # 
 # Contributor(s): 
 # ***** END LICENSE BLOCK *****
-
 #############################################################
 # Library CMakeLists for the YStockQuote library
 #
