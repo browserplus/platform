@@ -23,7 +23,7 @@
 /**
  *  ServiceInterfaceCache - wrappers around lower level bputils facilities
  *                          to give a high level API for caching serialized
- *                          corelet descriptions.
+ *                          service descriptions.
  *                          
  * (c) 2008 Yahoo!
  */
@@ -40,7 +40,7 @@
 static bp::file::Path buildPath(const std::string & name,
                                 const std::string & version)
 {
-    bp::file::Path cachePath = bp::paths::getCoreletInterfaceCachePath();
+    bp::file::Path cachePath = bp::paths::getServiceInterfaceCachePath();
     cachePath /= bp::file::Path(name + "_" + version + ".json");
     return cachePath;
 }

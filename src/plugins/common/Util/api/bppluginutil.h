@@ -44,11 +44,11 @@ namespace bp {
 namespace pluginutil {
 
     /**
-     * append the corelet name/version pairs returned from BPEnumerate
+     * append the service name/version pairs returned from BPEnumerate
      * onto a list
      * \returns false if the list is malformed.  true on success.
      */
-    bool appendEnumerateResultsToList(const BPElement * corelets,
+    bool appendEnumerateResultsToList(const BPElement * services,
                                       bp::List &serviceList);
 
     // traverse a return value from BPCore.  perform handle obfuscation

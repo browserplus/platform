@@ -24,7 +24,7 @@
 #define __COMMANDEXECUTOR_H__
 
 #include "ConsoleLib/ConsoleLib.h"
-#include "CoreletManager/CoreletManager.h"
+#include "ServiceManager/ServiceManager.h"
 #include "BPUtils/bpfile.h"
 #include "InstanceManager.h"
 

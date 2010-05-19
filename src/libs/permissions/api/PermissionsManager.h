@@ -349,7 +349,7 @@ private:
     // we must fetch from server
     bool m_badPermissionsOnDisk;
     
-    // key is corelet name, value is vector of
+    // key is service name, value is vector of
     // blacklisted versions x.y.z.  pattern
     // matching of version via bp::ServiceVersion::match() 
     std::map<std::string, std::vector<std::string> > m_blacklist; 

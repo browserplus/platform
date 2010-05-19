@@ -61,7 +61,7 @@ Controller::Controller(const std::string & service,
 {
     // TODO: set m_service & m_version?
     
-    m_path = bp::paths::getCoreletDirectory() / service / version;
+    m_path = bp::paths::getServiceDirectory() / service / version;
 }
 
 Controller::Controller(const bpf::Path & path) :

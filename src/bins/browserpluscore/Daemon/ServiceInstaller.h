@@ -21,23 +21,23 @@
  */
 
 /**
- * CoreletInstaller, singleton responsible for all corelet installation
+ * ServiceInstaller, singleton responsible for all service installation
  *
  * Created by Lloyd Hilaiel on Fri July 29th 2007.
  * Copyright (c) 2007 Yahoo!, Inc. All rights reserved.
  */
 
-#ifndef __CORELETINSTALLER_H__
-#define __CORELETINSTALLER_H__
+#ifndef __SERVICEINSTALLER_H__
+#define __SERVICEINSTALLER_H__
 
 #include "BPUtils/bpfile.h"
-#include "CoreletManager/CoreletManager.h"
+#include "ServiceManager/ServiceManager.h"
 #include "DistributionClient/DistributionClient.h"
 
 
-namespace CoreletInstaller
+namespace ServiceInstaller
 {
-    // a listener for corelet installation events
+    // a listener for service installation events
     class IListener 
     {
       public:
@@ -60,28 +60,28 @@ namespace CoreletInstaller
     };
 
     /**
-     * Start up the corelet installer.  should occur once per process
+     * Start up the service installer.  should occur once per process
      * \param distroServers - a list of urls of available BrowserPlus
      *        distribution web services (i.e http://browserplus.yahoo.com/api). 
      */
     void startup(std::list<std::string> distroServers,
-                 std::tr1::shared_ptr<CoreletRegistry> registry);
+                 std::tr1::shared_ptr<ServiceRegistry> registry);
 
     /**
      * Shut down the installer.  Should be called once per process.  By
      * the time this function returns, it should be safe to
-     * shut down the process without leaving the corelet database in an
+     * shut down the process without leaving the service database in an
      * inconsistent state
      */
     void shutdown();
 
     /**
-     * Enqueue a corelet for installation.  Returns false if that corelet
+     * Enqueue a service for installation.  Returns false if that service
      * may not be installed (the same version is already installed)
      *
-     * \param name - the name of the corelet
-     * \param version - string representation of full corelet version
-     * \param dir - directory into which to install corelet
+     * \param name - the name of the service
+     * \param version - string representation of full service version
+     * \param dir - directory into which to install service
      * \param listener - who to tell when the work is done
      *
      * \returns zero on failure, otherwise a transaction id that will be
@@ -89,21 +89,21 @@ namespace CoreletInstaller
      *          the transaction id allows one listener to disambiguate
      *          multiple installation actions.
      *
-     * \note if the corelet is on the installation queue, attempting to
+     * \note if the service is on the installation queue, attempting to
      *       requeue it will succeed you will recieve an event when it is
      *       done.
      */
-    unsigned int installCorelet(const std::string & name,
+    unsigned int installService(const std::string & name,
                                 const std::string & version,
                                 const bp::file::Path & dir,
                                 std::tr1::weak_ptr<IListener> listener);
     
     /**
-     * Install a corelet from an bpkg buffer.  
-     * Corelet is installed into corelet cache.
+     * Install a service from an bpkg buffer.  
+     * Service is installed into service cache.
      *
-     * \param name - the name of the corelet
-     * \param version - string representation of full corelet version
+     * \param name - the name of the service
+     * \param version - string representation of full service version
      * \param buffer - bpkg buffer
      * \param dir - directory in which to install
      * \param listener - who to tell when the work is done
@@ -113,7 +113,7 @@ namespace CoreletInstaller
      *          the transaction id allows one listener to disambiguate
      *          multiple installation actions.
      */
-    unsigned int installCorelet(const std::string & name,
+    unsigned int installService(const std::string & name,
                                 const std::string & version,
                                 const std::vector<unsigned char> & buffer,
                                 const bp::file::Path & dir,

@@ -21,12 +21,12 @@
  */
 
 /**
- * CoreletQuery - A class capable of querying multiple distribution servers
- *                to find and attain corelets.
+ * ServiceQuery - A class capable of querying multiple distribution servers
+ *                to find and attain services.
  */
 
-#ifndef __CORELETQUERY_H__
-#define __CORELETQUERY_H__
+#ifndef __SERVICEQUERY_H__
+#define __SERVICEQUERY_H__
 
 #include "BPUtils/ServiceSummary.h"
 #include "DistQueryTypes.h"
@@ -34,17 +34,17 @@
 #include "DistQueryInternal.h"
 
 
-class CoreletQuery : public bp::http::client::Listener,
+class ServiceQuery : public bp::http::client::Listener,
                      public IQueryCacheListener,
-                     public std::tr1::enable_shared_from_this<CoreletQuery>,
+                     public std::tr1::enable_shared_from_this<ServiceQuery>,
                      public bp::thread::HoppingClass
 {
   public:
-    CoreletQuery(std::list<std::string> serverURLs,
+    ServiceQuery(std::list<std::string> serverURLs,
                  const IServiceFilter * serviceFilter);
-    ~CoreletQuery();
+    ~ServiceQuery();
 
-    void setListener(ICoreletQueryListener * listener);
+    void setListener(IServiceQueryListener * listener);
 
     /** override from bp::http::client::Listener
     */
@@ -57,33 +57,33 @@ class CoreletQuery : public bp::http::client::Listener,
     virtual void onCancel();
     virtual void onError(const std::string& msg);
 
-    /** query available corelets, optionally for a specific platform,
-     *  event data is an AvailableCoreletList object */
+    /** query available services, optionally for a specific platform,
+     *  event data is an AvailableServiceList object */
     void availableServices(std::string platform);
 
-    void findCorelet(std::string name, std::string version,
+    void findService(std::string name, std::string version,
                      std::string minversion, std::string platform);
 
-    void downloadCorelet(std::string name, std::string version,
+    void downloadService(std::string name, std::string version,
                          std::string platform);
 
-    void coreletDetails(std::string name, std::string version,
+    void serviceDetails(std::string name, std::string version,
                         std::string platform);
 
     void satisfyRequirements(
         std::string platform,
-        const std::list<CoreletRequireStatement> & requirements,
+        const std::list<ServiceRequireStatement> & requirements,
         const std::list<bp::service::Summary> & installed);
 
     void updateCache(
         std::string platform,
-        const std::list<CoreletRequireStatement> & requirements,
-        const std::list<bp::service::Summary> & installedCorelets);
+        const std::list<ServiceRequireStatement> & requirements,
+        const std::list<bp::service::Summary> & installedServices);
 
     void serviceSynopses(
         const std::string & platform,
         const std::string & locale,
-        const CoreletList & services);
+        const ServiceList & services);
 
     void latestPlatformVersion(std::string platform);
 
@@ -94,9 +94,9 @@ class CoreletQuery : public bp::http::client::Listener,
     enum {
         None,
         AvailableServices,
-        CoreletDetails,
+        ServiceDetails,
         Download,
-        FindCorelet,
+        FindService,
         SatisfyRequirements,
         UpdateCache,
         AttainServiceSynopses,
@@ -109,25 +109,25 @@ class CoreletQuery : public bp::http::client::Listener,
     std::string m_version;
     std::string m_minversion;
     std::string m_platform;
-    std::list<CoreletRequireStatement> m_requirements;
+    std::list<ServiceRequireStatement> m_requirements;
     std::list<bp::service::Summary> m_installed;
     bool m_wantNewest;
 
     // updates to install, only pertinent in UpdateCache
-    AvailableCoreletList m_updates;
+    AvailableServiceList m_updates;
     // current update to install
-    std::list<AvailableCorelet>::iterator m_currentUpdate;
+    std::list<AvailableService>::iterator m_currentUpdate;
 
     // pertinent for for LocalizeDescriptions, we move items off the
-    // m_coreletList and onto the m_locDescs list.
-    std::list<std::pair<std::string, std::string> > m_coreletList;
+    // m_serviceList and onto the m_locDescs list.
+    std::list<std::pair<std::string, std::string> > m_serviceList;
     std::list<ServiceSynopsis> m_locDescs;
     // < used to figure out which server to query for localized descriptions
-    AvailableCoreletList m_corelets; 
+    AvailableServiceList m_services; 
 
-    void fetchLocalization(const AvailableCorelet & acp);
-    void fetchDetails(const AvailableCorelet & acp);
-    void startDownload(const AvailableCorelet & acp);
+    void fetchLocalization(const AvailableService & acp);
+    void fetchDetails(const AvailableService & acp);
+    void startDownload(const AvailableService & acp);
     void getNextLocalization();
     void parseLocalization(const unsigned char* buf, size_t len);
 
@@ -140,14 +140,14 @@ class CoreletQuery : public bp::http::client::Listener,
     bool m_zeroPctSent;
 
     // implementation of IQueryCacheListener
-    void onCoreletList(const AvailableCoreletList & list);
-    void onCoreletListFailure();    
+    void onServiceList(const AvailableServiceList & list);
+    void onServiceListFailure();    
     void onLatestPlatform(const LatestPlatformServerAndVersion & latest);
     void onLatestPlatformFailure();    
 
     const IServiceFilter * m_serviceFilter;
 
-    ICoreletQueryListener * m_listener;
+    IServiceQueryListener * m_listener;
 
     // invoke listener failure callback if listener is defined
     void transactionFailed();

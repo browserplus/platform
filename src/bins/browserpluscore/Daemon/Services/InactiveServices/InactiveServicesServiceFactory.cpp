@@ -21,37 +21,37 @@
  */
 
 /**
- * InactiveServicesCoreletFactory
+ * InactiveServicesServiceFactory
  *
- * A factory implementation for the "core" corelet
+ * A factory implementation for the "core" service
  */
 
-#include "InactiveServicesCoreletFactory.h"
-#include "InactiveServicesCorelet.h"
+#include "InactiveServicesServiceFactory.h"
+#include "InactiveServicesService.h"
 #include "BPUtils/bplocalization.h"
 
 using namespace std;
 using namespace std::tr1;
 
 
-InactiveServicesCoreletFactory::InactiveServicesCoreletFactory()
+InactiveServicesServiceFactory::InactiveServicesServiceFactory()
 {
 }
 
-InactiveServicesCoreletFactory::~InactiveServicesCoreletFactory()
+InactiveServicesServiceFactory::~InactiveServicesServiceFactory()
 {
 }
 
-shared_ptr<CoreletInstance>
-InactiveServicesCoreletFactory::instantiateInstance(
-    weak_ptr<CoreletExecutionContext> context)
+shared_ptr<ServiceInstance>
+InactiveServicesServiceFactory::instantiateInstance(
+    weak_ptr<ServiceExecutionContext> context)
 {
-    return shared_ptr<InactiveServicesCorelet>(
-        new InactiveServicesCorelet(context));
+    return shared_ptr<InactiveServicesService>(
+        new InactiveServicesService(context));
 }
 
 bp::service::BuiltInSummary
-InactiveServicesCoreletFactory::summary()
+InactiveServicesServiceFactory::summary()
 {
     std::map<std::string, std::string> titles =
         bp::localization::getLocalizations("inactiveServicesTitle");

@@ -253,7 +253,7 @@ int main(int argc, const char ** argv)
                  << absPath << "\n";
         }
     
-        if (!summary.detectCorelet(absPath, error))
+        if (!summary.detectService(absPath, error))
             {
                 cerr << "invalid service: " << error << endl;
                 exit(1);
@@ -329,15 +329,15 @@ int main(int argc, const char ** argv)
         // extract the description and clean up what we no longer need
         controller.reset();
         bp::service::Description desc = serviceMan->description();
-        unsigned int coreletAPIVersion = serviceMan->apiVersion();
+        unsigned int serviceAPIVersion = serviceMan->apiVersion();
 
         serviceMan.reset();
         s_rl.shutdown();
 
-        // attain convenient representation of name and version of corelet
+        // attain convenient representation of name and version of service
         // we're publishing
-        string coreletName(desc.name());
-        string coreletVersion(desc.versionString());
+        string serviceName(desc.name());
+        string serviceVersion(desc.versionString());
 
 
         // publish to distro server
@@ -387,7 +387,7 @@ int main(int argc, const char ** argv)
             }
 
         cout << "packaging service: "
-             << prettyName(coreletName,coreletVersion,platform)
+             << prettyName(serviceName,serviceVersion,platform)
              << " at " << summary.path() << endl;
 
         bp::file::Path targetPath = bp::file::getTempDirectory();
@@ -409,19 +409,19 @@ int main(int argc, const char ** argv)
                 exit(1);
             } 
             bp::Map * m = (bp::Map *) o;
-            // now we must add corelet type to the description
-            m->add("CoreletType", new bp::String(summary.typeAsString()));
+            // now we must add service type to the description
+            m->add("ServiceType", new bp::String(summary.typeAsString()));
 
-            // for standalone or provider corelets, we include the
-            // corelet API version.  For dependent corelets, we include
-            // The corelet that they depend on.
+            // for standalone or provider services, we include the
+            // service API version.  For dependent services, we include
+            // The service that they depend on.
             if (summary.type() == bp::service::Summary::Dependent) {
-                // add CoreletRequires key containing Name, Minversion
+                // add ServiceRequires key containing Name, Minversion
                 // and Version
                 bp::Map * requiresMap = new bp::Map;
 
                 requiresMap->add("Name",
-                                 new bp::String(summary.usesCorelet()));
+                                 new bp::String(summary.usesService()));
                 requiresMap->add("Version",
                                  new bp::String(summary.usesVersion().asString()));
 
@@ -429,14 +429,14 @@ int main(int argc, const char ** argv)
                                  "Minversion",
                                  new bp::String(summary.usesMinversion().asString()));
 
-                m->add("CoreletRequires", requiresMap);
+                m->add("ServiceRequires", requiresMap);
                 
             } else {
-                m->add("CoreletAPIVersion",
-                       new bp::Integer(coreletAPIVersion));
-                // zero never has nor never will be a valid corelet api
+                m->add("ServiceAPIVersion",
+                       new bp::Integer(serviceAPIVersion));
+                // zero never has nor never will be a valid service api
                 // version
-                BPASSERT(coreletAPIVersion != 0);
+                BPASSERT(serviceAPIVersion != 0);
             }
             
             buf = m->toPlainJsonString();
@@ -450,7 +450,7 @@ int main(int argc, const char ** argv)
         }
 
         // now we must generate strings.json from the localized strings
-        // in CoreletSummary (manifest.json)
+        // in ServiceSummary (manifest.json)
         // to <ouput directory>/strings.json
         {
             bp::Map stringsMap;
@@ -506,11 +506,11 @@ int main(int argc, const char ** argv)
             }
         }
     
-        // now package corelet directory to <output directory>/corelet.bpkg
-        bp::file::Path coreletPath = summary.path();
-        bp::file::Path pkgPath = targetPath / "corelet.bpkg";
+        // now package service directory to <output directory>/service.bpkg
+        bp::file::Path servicePath = summary.path();
+        bp::file::Path pkgPath = targetPath / "service.bpkg";
         if (!bp::pkg::packDirectory(privateKey, publicKey, password,
-                                    coreletPath, pkgPath)) {
+                                    servicePath, pkgPath)) {
             cerr << "error packaging service contents to " << pkgPath << endl;
             exit(1);
         }
@@ -525,7 +525,7 @@ int main(int argc, const char ** argv)
     
         // push it!
         if (!pushFile(finalPkgPath, baseURL,
-                      coreletName, coreletVersion, platform)) {
+                      serviceName, serviceVersion, platform)) {
             cerr << "error pushing service to " << baseURL << endl;
             exit(1);
         }
@@ -539,7 +539,7 @@ int main(int argc, const char ** argv)
     
         // all done!
         if (argParser->argumentPresent("v")) {    
-            cout << prettyName(coreletName,coreletVersion,platform)
+            cout << prettyName(serviceName,serviceVersion,platform)
                  << " published in " << sw.elapsedSec() << "s" << endl;
         }
     } catch (const bp::file::tFileSystemError& e) {

@@ -21,13 +21,13 @@
  */
 
 /**
- * CoreletRegistry
+ * ServiceRegistry
  *
- * A collection of available corelets from which corelets may be
- * described, and instances of corelets may be attained.
+ * A collection of available services from which services may be
+ * described, and instances of services may be attained.
  */
 
-#include "CoreletRegistry.h"
+#include "ServiceRegistry.h"
 #include "BPUtils/BPLog.h"
 #include "DynamicServiceManager.h"
 
@@ -35,19 +35,19 @@ using namespace std;
 using namespace std::tr1;
 
 
-CoreletRegistry::CoreletRegistry(const std::string & loglevel,
+ServiceRegistry::ServiceRegistry(const std::string & loglevel,
                                  const bp::file::Path & logfile)
 {
     m_dynamicManager.reset(new DynamicServiceManager(loglevel, logfile));
 }
 
-CoreletRegistry::~CoreletRegistry()
+ServiceRegistry::~ServiceRegistry()
 {
 }
 
 bool
-CoreletRegistry::registerCorelet(const bp::service::Description & desc,
-                                 shared_ptr<CoreletFactory> factory)
+ServiceRegistry::registerService(const bp::service::Description & desc,
+                                 shared_ptr<ServiceFactory> factory)
 {
     if (getReg(desc.name(), desc.versionString(), std::string()).second != NULL)
     {
@@ -62,37 +62,37 @@ CoreletRegistry::registerCorelet(const bp::service::Description & desc,
 }
 
 bool 
-CoreletRegistry::purgeCorelet(const std::string & name,
+ServiceRegistry::purgeService(const std::string & name,
                               const std::string & version)
 {
     return m_dynamicManager->purgeService(name, version);
 }
 
 void
-CoreletRegistry::forceRescan()
+ServiceRegistry::forceRescan()
 {
     m_dynamicManager->forceRescan();
 }
 
 bool
-CoreletRegistry::isBusy()
+ServiceRegistry::isBusy()
 {
     return m_dynamicManager->isBusy();
 }
 
 void
-CoreletRegistry::unregisterAll()
+ServiceRegistry::unregisterAll()
 {
     m_registrations.clear();
 }
 
 std::list<bp::service::Description>
-CoreletRegistry::availableCorelets()
+ServiceRegistry::availableServices()
 {
     std::list<bp::service::Description> x;
     std::list<DescFactPair>::iterator it;
 
-    // append descriptions of all synthetic corelets.
+    // append descriptions of all synthetic services.
     for (it = m_registrations.begin(); it != m_registrations.end(); it++)
     {
         x.push_back(it->first);
@@ -110,9 +110,9 @@ CoreletRegistry::availableCorelets()
 }
 
 std::list<bp::service::Summary>
-CoreletRegistry::availableCoreletSummaries()
+ServiceRegistry::availableServiceSummaries()
 {
-    // first get descriptions of the dynamic corelets
+    // first get descriptions of the dynamic services
     std::list<bp::service::Summary> x;
 
     // now the builtins
@@ -134,7 +134,7 @@ CoreletRegistry::availableCoreletSummaries()
 }
 
 bool
-CoreletRegistry::describe(const std::string & name,
+ServiceRegistry::describe(const std::string & name,
                           const std::string & version,
                           const std::string & minversion,
                           bp::service::Description & oDescription)
@@ -151,7 +151,7 @@ CoreletRegistry::describe(const std::string & name,
 }
 
 bool
-CoreletRegistry::summary(const std::string & name,
+ServiceRegistry::summary(const std::string & name,
                          const std::string & version,
                          const std::string & minversion,
                          bp::service::Summary & oSummary)
@@ -165,11 +165,11 @@ CoreletRegistry::summary(const std::string & name,
 }
 
 bool
-CoreletRegistry::haveCorelet(const std::string & name,
+ServiceRegistry::haveService(const std::string & name,
                              const std::string & version,
                              const std::string & minversion)
 {
-    // check built-in corelets
+    // check built-in services
 	DescFactPair reg = getReg(name, version, minversion);
 	if (reg.second != NULL) return true;
 
@@ -179,19 +179,19 @@ CoreletRegistry::haveCorelet(const std::string & name,
 
 struct CRInstanceContext
 {
-    shared_ptr<CoreletInstance> inst;
-    weak_ptr<ICoreletRegistryListener> listener;
+    shared_ptr<ServiceInstance> inst;
+    weak_ptr<IServiceRegistryListener> listener;
     unsigned int instantiateId;
     
 };
 
 void
-CoreletRegistry::onHop(void * x)
+ServiceRegistry::onHop(void * x)
 {
     CRInstanceContext * ctx = (CRInstanceContext *) x;
     BPASSERT(ctx != NULL);
 
-    shared_ptr<ICoreletRegistryListener> regListener;
+    shared_ptr<IServiceRegistryListener> regListener;
     regListener = ctx->listener.lock();
 
     if (regListener == NULL) {
@@ -206,23 +206,23 @@ CoreletRegistry::onHop(void * x)
 }
 
 unsigned int
-CoreletRegistry::instantiate(
+ServiceRegistry::instantiate(
     const std::string & name,
     const std::string & version,
-    weak_ptr<CoreletExecutionContext> context,
-    weak_ptr<ICoreletRegistryListener> listener)
+    weak_ptr<ServiceExecutionContext> context,
+    weak_ptr<IServiceRegistryListener> listener)
 {
     // get a factory which would allow us to allocate an instance of a
     // registered service. This will look through *built in* services
     // (at time of writing this comment there's only one, "InactiveServices"), 
-    shared_ptr<CoreletFactory> fact =
+    shared_ptr<ServiceFactory> fact =
         getReg(name, version, std::string()).second;
 
     // if 'fact' is NULL, we couldn't find a registered built-in service
     // which satisfied the requirement, we'll check dynamic services
     if (fact != NULL)
     {
-        shared_ptr<CoreletInstance> inst;
+        shared_ptr<ServiceInstance> inst;
         inst = fact->instantiateInstance(context);
         if (inst == NULL) return 0;
 
@@ -244,8 +244,8 @@ CoreletRegistry::instantiate(
 }
 
 
-CoreletRegistry::DescFactPair
-CoreletRegistry::getReg(const std::string & name,
+ServiceRegistry::DescFactPair
+ServiceRegistry::getReg(const std::string & name,
                         const std::string & version,
                         const std::string & minversion)
 {
@@ -277,7 +277,7 @@ CoreletRegistry::getReg(const std::string & name,
     {
         if (!it->first.name().compare(name))
         {
-            // we've found a corelet with the correct name.  now check
+            // we've found a service with the correct name.  now check
             // it's version.  To be a winner it must:
             // 1. be newer than what we've alread found
             // 2. match the wantver
@@ -306,7 +306,7 @@ CoreletRegistry::getReg(const std::string & name,
 }
 
 void
-CoreletRegistry::setPluginDirectory(const bp::file::Path & path)
+ServiceRegistry::setPluginDirectory(const bp::file::Path & path)
 {
     m_dynamicManager->setPluginDirectory(path);
 }

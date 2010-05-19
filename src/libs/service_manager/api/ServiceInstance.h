@@ -21,24 +21,24 @@
  */
 
 /**
- * CoreletInstance
+ * ServiceInstance
  *
- * An instantiated corelet instance upon which functions may be
+ * An instantiated service instance upon which functions may be
  * invoked.
  */
 
-#ifndef __CORELETINSTANCE_H__
-#define __CORELETINSTANCE_H__
+#ifndef __SERVICEINSTANCE_H__
+#define __SERVICEINSTANCE_H__
 
 #include "BPUtils/bpthreadhopper.h"
 #include "BPUtils/bpfile.h"
-#include "CoreletExecutionContext.h"
+#include "ServiceExecutionContext.h"
 
 
-class ICoreletInstanceListener
+class IServiceInstanceListener
 {
   public:
-    virtual ~ICoreletInstanceListener() { }
+    virtual ~IServiceInstanceListener() { }
 
     virtual void executionComplete(unsigned int tid,
                                    const bp::Object & results) = 0;
@@ -48,19 +48,19 @@ class ICoreletInstanceListener
         const std::string & verboseError) = 0;
 };
 
-class CoreletInstance :
-    virtual public ICoreletExecutionContextListener,
+class ServiceInstance :
+    virtual public IServiceExecutionContextListener,
     virtual public bp::thread::HoppingClass,
-    public std::tr1::enable_shared_from_this<CoreletInstance>
+    public std::tr1::enable_shared_from_this<ServiceInstance>
 {
 public:
-    CoreletInstance(std::tr1::weak_ptr<CoreletExecutionContext> context);
-    virtual ~CoreletInstance();    
+    ServiceInstance(std::tr1::weak_ptr<ServiceExecutionContext> context);
+    virtual ~ServiceInstance();    
 
-    void setListener(std::tr1::weak_ptr<ICoreletInstanceListener> listener);
+    void setListener(std::tr1::weak_ptr<IServiceInstanceListener> listener);
 
     /**
-     * execute a function on this corelet instance
+     * execute a function on this service instance
      * \param tid A transaction id that should be included in the event
      *            raised once the execution is complete
      * \param function The name of the function to call
@@ -73,8 +73,8 @@ public:
   protected:
     // TODO: are these *always* references to the the same underlying
     //       object?
-    std::tr1::weak_ptr<ICoreletInstanceListener> m_listener;
-    std::tr1::weak_ptr<CoreletExecutionContext> m_context;
+    std::tr1::weak_ptr<IServiceInstanceListener> m_listener;
+    std::tr1::weak_ptr<ServiceExecutionContext> m_context;
 
     // utilities for derived classes to send failure and success results.
     // These utility routines will hop to ensure delivery post function

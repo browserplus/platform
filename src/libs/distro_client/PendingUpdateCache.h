@@ -28,22 +28,22 @@
 #ifndef __PENDINGUPDATECACHE_H__
 #define __PENDINGUPDATECACHE_H__
 
-#include "CoreletQuery.h"
+#include "ServiceQuery.h"
 #include "DistQueryTypes.h"
 //#include "BPUtils/BPUtils.h"
 
 namespace PendingUpdateCache {
-    // enumerate all currently cached corelets
+    // enumerate all currently cached services
     std::list<bp::service::Summary> cached();
 
-    // unpack and save a downloaded corelet to the cache
+    // unpack and save a downloaded service to the cache
     bool save(std::string name, std::string version,
               const std::vector<unsigned char> & buf);
 
-    // purge all corelets from the cache
+    // purge all services from the cache
     bool purge();
 
-    // install a corelet from the cache 
+    // install a service from the cache 
     bool install(std::string name, std::string version);
 
     bool isCached(std::string name, std::string version);

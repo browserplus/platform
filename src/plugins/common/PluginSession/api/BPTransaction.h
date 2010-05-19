@@ -41,7 +41,7 @@ class BPTransaction
 
     unsigned int tid();
     
-    // in the case of a transaction using BPProtocol (corelet, not pluglet)
+    // in the case of a transaction using BPProtocol (service, not pluglet)
     // we'll keep the protocol transaction id here, for future cancelation.
     unsigned int m_bpProtoTransactionID;
 

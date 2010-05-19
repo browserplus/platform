@@ -35,8 +35,8 @@
 #define __DYNAMICSERVICESTATE_H__
 
 #include "ServiceRunnerLib/ServiceRunnerLib.h"
-#include "CoreletExecutionContext.h"
-#include "CoreletRegistry.h"
+#include "ServiceExecutionContext.h"
+#include "ServiceRegistry.h"
 #include "DynamicServiceInstance.h"
 
 
@@ -88,8 +88,8 @@ class DynamicServiceState : public bp::time::ITimerListener
     // create a DynamicServiceInstance and initialize data members
     std::tr1::shared_ptr<DynamicServiceInstance>
         createInstance(DynamicServiceManager * manager,
-                       std::tr1::weak_ptr<CoreletExecutionContext> contextWeak,
-                       std::tr1::weak_ptr<ICoreletRegistryListener> listener,
+                       std::tr1::weak_ptr<ServiceExecutionContext> contextWeak,
+                       std::tr1::weak_ptr<IServiceRegistryListener> listener,
                        unsigned int instantiateId,
                        const bp::service::Summary & summary);
 

@@ -23,7 +23,7 @@
 /**
  * Description
  *
- * A Class which describes the functionality provided by a corelet.
+ * A Class which describes the functionality provided by a service.
  */
 
 #include "ServiceDescription.h"
@@ -577,12 +577,12 @@ service::Description::version() const
 }
 
 bool 
-service::Description::fromBPCoreletDefinition(const BPCoreletDefinition * def)
+service::Description::fromBPServiceDefinition(const BPServiceDefinition * def)
 {
     clear();
     if (!def) return false;
 
-    if (def->coreletName) m_name.append(def->coreletName);
+    if (def->serviceName) m_name.append(def->serviceName);
     m_majorVersion = def->majorVersion;    
     m_minorVersion = def->minorVersion;
     m_microVersion = def->microVersion;
@@ -801,7 +801,7 @@ bp::service::Description::toHumanReadableString() const
 {
     std::stringstream ss;
     
-    ss << "Describing corelet '"
+    ss << "Describing service '"
        << (name().empty() ? "unknown" : name())
        << "', version: "
        << versionString() << std::endl;

@@ -32,7 +32,7 @@ ELSEIF (LINUX)
 ENDIF(APPLE)
 
 SET(BrowserPlusCore_LINK_STATIC 
-    DistributionClient CoreletManager Permissions
+    DistributionClient ServiceManager Permissions
     ServiceRunnerLib BPUtils I18n)
 
 YBT_BUILD(BINARY BrowserPlusCore)

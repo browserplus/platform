@@ -23,14 +23,14 @@
 /**
  * bptypeutil.hh -- c++ utilities to make building hierarchies of BPElements
  *                  eaiser.  A tool that may be consumed in source form
- *                  by a corelet author to simplify mapping into and out of
- *                  introspectable corelet API types.
+ *                  by a service author to simplify mapping into and out of
+ *                  introspectable service API types.
  */
 
 #ifndef __BPTYPEUTIL_HH__
 #define __BPTYPEUTIL_HH__
 
-// when you compile this file, the corelet SDK include directory must
+// when you compile this file, the service SDK include directory must
 // be in the include path
 #include <ServiceAPI/bptypes.h>
 

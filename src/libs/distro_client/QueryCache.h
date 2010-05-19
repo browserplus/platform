@@ -22,7 +22,7 @@
 
 /**
  * QueryCache - A class responsible for generating a list of available
- *              corelets by querying multiple distribution servers.
+ *              services by querying multiple distribution servers.
  *              This class is also responsible for short term caching
  *              responses to minimize network traffic without requiring
  *              the client keep any sort of context.    
@@ -52,8 +52,8 @@ class LatestPlatformServerAndVersion
 class IQueryCacheListener
 {
   public:
-    virtual void onCoreletList(const AvailableCoreletList & list) = 0;
-    virtual void onCoreletListFailure() = 0;    
+    virtual void onServiceList(const AvailableServiceList & list) = 0;
+    virtual void onServiceListFailure() = 0;    
     virtual void onLatestPlatform(
         const LatestPlatformServerAndVersion & latest) = 0;
     virtual void onLatestPlatformFailure() = 0;    
@@ -69,7 +69,7 @@ class QueryCache : public bp::thread::HoppingClass
 
     void setListener(IQueryCacheListener * l);
     
-    void coreletList(std::string plat);
+    void serviceList(std::string plat);
 
     void latestPlatformVersion(std::string plat);
 
@@ -78,7 +78,7 @@ class QueryCache : public bp::thread::HoppingClass
 
     IQueryCacheListener * m_listener;
 
-    enum { T_None, T_CoreletList, T_PlatformVersion } m_qType;
+    enum { T_None, T_ServiceList, T_PlatformVersion } m_qType;
 
     class MyListener : public bp::http::client::Listener,
                        public std::tr1::enable_shared_from_this<MyListener>
@@ -132,9 +132,9 @@ class QueryCache : public bp::thread::HoppingClass
     std::set<MyListenerPtr> m_listenersToReap;
     unsigned int m_numComplete;
 
-    // used in T_CoreletList case
-    AvailableCoreletList mergeResponses();
-    void pruneBlacklisted(AvailableCoreletList & oList);
+    // used in T_ServiceList case
+    AvailableServiceList mergeResponses();
+    void pruneBlacklisted(AvailableServiceList & oList);
 
     // used in T_PlatformVersion case
     bool parsePlatformVersionResponses(
@@ -142,7 +142,7 @@ class QueryCache : public bp::thread::HoppingClass
     
     bp::time::Stopwatch m_sw;
 
-    // the platform for which we're querying corelets
+    // the platform for which we're querying services
     std::string m_plat;
 
     // a filter which prunes services from the server returned list
@@ -152,7 +152,7 @@ class QueryCache : public bp::thread::HoppingClass
     IQueryCacheListener * m_clientListener;
 
     LatestPlatformServerAndVersion m_latest;
-    AvailableCoreletList m_listToReturn;
+    AvailableServiceList m_listToReturn;
 };
 
 #endif

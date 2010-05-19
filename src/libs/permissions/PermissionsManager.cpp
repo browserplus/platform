@@ -624,8 +624,8 @@ PermissionsManager::load()
         // get obj into an std::map
         map<string, const bp::Object*> m = *obj;
                     
-        // corelet blacklist is a list of coreletname/version pairs
-        // gets turned into a map whose key is coreletname and whose value
+        // service blacklist is a list of servicename/version pairs
+        // gets turned into a map whose key is servicename and whose value
         // is list of versions
         const bp::Object * objPtr;
         objPtr = m["blacklist"];

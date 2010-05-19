@@ -21,13 +21,13 @@
  */
 
 /**
- * InactiveServicesCorelet
+ * InactiveServicesService
  *
- * An instantiated corelet instance upon which functions may be
+ * An instantiated service instance upon which functions may be
  * invoked.
  */
 
-#include "InactiveServicesCorelet.h"
+#include "InactiveServicesService.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/bpconfig.h"
 #include "BPUtils/BPLog.h"
@@ -39,9 +39,9 @@ using namespace std;
 using namespace std::tr1;
 
 
-InactiveServicesCorelet::InactiveServicesCorelet(
-    weak_ptr<CoreletExecutionContext> context)
-    : CoreletInstance(context), m_distQuery(NULL)
+InactiveServicesService::InactiveServicesService(
+    weak_ptr<ServiceExecutionContext> context)
+    : ServiceInstance(context), m_distQuery(NULL)
 {
     // Setup a config file reader.
     bp::config::ConfigReader configReader;
@@ -68,14 +68,14 @@ InactiveServicesCorelet::InactiveServicesCorelet(
 }
 
 
-InactiveServicesCorelet::~InactiveServicesCorelet()
+InactiveServicesService::~InactiveServicesService()
 {
     delete m_distQuery;
 }
 
 
 void
-InactiveServicesCorelet::execute(unsigned int tid,
+InactiveServicesService::execute(unsigned int tid,
                                  const std::string & function,
                                  const bp::Object & args)
 {    
@@ -90,7 +90,7 @@ InactiveServicesCorelet::execute(unsigned int tid,
             std::string s = (std::string) *(args.get("platform"));
             if (s.compare("osx") != 0 && s.compare("win32") != 0) {
                 sendFailure(tid,
-                            "InactiveServicesCorelet.invalidArguments",
+                            "InactiveServicesService.invalidArguments",
                             " 'platform' must be 'osx' or 'win32'");
                 return;
             }
@@ -102,7 +102,7 @@ InactiveServicesCorelet::execute(unsigned int tid,
 
         if (did == 0) {
             sendFailure(tid,
-                        "InactiveServicesCorelet.httpError",
+                        "InactiveServicesService.httpError",
                         " failed to start HTTP transaction with distribution"
                         " server.");
         } else {
@@ -121,7 +121,7 @@ InactiveServicesCorelet::execute(unsigned int tid,
             s = (std::string) *(args.get("platform"));
             if (s.compare("osx") != 0 && s.compare("win32") != 0) {
                 sendFailure(tid,
-                            "InactiveServicesCorelet.invalidArguments",
+                            "InactiveServicesService.invalidArguments",
                             " 'platform' must be 'osx' or 'win32'");
                 return;
             }
@@ -133,11 +133,11 @@ InactiveServicesCorelet::execute(unsigned int tid,
         service = (std::string) *(args.get("service"));
         version = (std::string) *(args.get("version"));
 
-        unsigned int did = m_distQuery->coreletDetails(service, version, platform);;
+        unsigned int did = m_distQuery->serviceDetails(service, version, platform);;
 
         if (did == 0) {
             sendFailure(tid,
-                        "InactiveServicesCorelet.httpError",
+                        "InactiveServicesService.httpError",
                         " failed to start HTTP transaction with distribution"
                         " server.");
         } else {
@@ -150,7 +150,7 @@ InactiveServicesCorelet::execute(unsigned int tid,
 
 
 const bp::service::Description *
-InactiveServicesCorelet::getDescription()
+InactiveServicesService::getDescription()
 {
     static bool ran = false;
     static bp::service::Description desc;
@@ -175,7 +175,7 @@ InactiveServicesCorelet::getDescription()
             arg.setRequired(false);
             arg.setDocString(
                 "The platform (either 'osx' or 'win32') for which you would "
-                "like to see available corelets");
+                "like to see available services");
             args.push_back(arg);
             all.setArguments(args);
             funcs.push_back(all);
@@ -221,7 +221,7 @@ InactiveServicesCorelet::getDescription()
 }
 
 void
-InactiveServicesCorelet::onTransactionFailed(unsigned int tid)
+InactiveServicesService::onTransactionFailed(unsigned int tid)
 {
     using namespace bp;
     
@@ -240,7 +240,7 @@ InactiveServicesCorelet::onTransactionFailed(unsigned int tid)
 }
 
 void
-InactiveServicesCorelet::gotServiceDetails(
+InactiveServicesService::gotServiceDetails(
     unsigned int tid,
     const bp::service::Description & desc)
 {
@@ -259,8 +259,8 @@ InactiveServicesCorelet::gotServiceDetails(
 }
 
 void
-InactiveServicesCorelet::gotAvailableServices(unsigned int tid,
-                                              const CoreletList & list)
+InactiveServicesService::gotAvailableServices(unsigned int tid,
+                                              const ServiceList & list)
 {
     using namespace bp;
     
@@ -274,16 +274,16 @@ InactiveServicesCorelet::gotAvailableServices(unsigned int tid,
     }
     unsigned int smmTid = it->second;
     m_distToTransMap.erase(it);
-    List corelets;
+    List services;
 
     // map from STL into bp::Object
     std::list<std::pair<std::string, std::string> >::const_iterator li;
     for (li = list.begin(); li != list.end(); ++li)
     {
-        Map* corelet = new Map;
-        corelet->add("name", new String(li->first));
-        corelet->add("version", new String(li->second));
-        corelets.append(corelet);
+        Map* service = new Map;
+        service->add("name", new String(li->first));
+        service->add("version", new String(li->second));
+        services.append(service);
     }
-    sendComplete(smmTid, corelets);
+    sendComplete(smmTid, services);
 }

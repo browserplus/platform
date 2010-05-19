@@ -22,7 +22,7 @@
 
 /**
  * QueryCache - A class responsible for generating a list of available
- *              corelets by querying multiple distribution servers.
+ *              services by querying multiple distribution servers.
  *              This class is also responsible for short term caching
  *              responses to minimize network traffic without requiring
  *              the client keep any sort of context.    
@@ -34,7 +34,7 @@
 
 #include <boost/scoped_ptr.hpp>
 
-bool operator<(const AvailableCorelet& lhs, const AvailableCorelet& rhs)
+bool operator<(const AvailableService& lhs, const AvailableService& rhs)
 {
     if (lhs.name.compare(rhs.name) < 0) return true;
     if (lhs.name.compare(rhs.name) > 0) return false;
@@ -69,12 +69,12 @@ QueryCache::setListener(IQueryCacheListener * l)
 
 #define MAX_CACHE_AGE 60.0
 // cache is scoped by platform
-static std::map<std::string, AvailableCoreletList> s_cache;
+static std::map<std::string, AvailableServiceList> s_cache;
 static bp::time::Stopwatch s_cacheAge;
 
-static const AvailableCoreletList * getPlatCache(std::string plat)
+static const AvailableServiceList * getPlatCache(std::string plat)
 {
-    std::map<std::string, AvailableCoreletList>::iterator it;
+    std::map<std::string, AvailableServiceList>::iterator it;
     it = s_cache.find(plat);
     if (it != s_cache.end()) return &(it->second);
     return NULL;
@@ -82,26 +82,26 @@ static const AvailableCoreletList * getPlatCache(std::string plat)
 
 static void clearPlatCache(std::string plat)
 {
-    std::map<std::string, AvailableCoreletList>::iterator it;
+    std::map<std::string, AvailableServiceList>::iterator it;
     it = s_cache.find(plat);
     if (it != s_cache.end()) s_cache.erase(it);
 }
 
-static void setPlatCache(std::string plat, const AvailableCoreletList & clp)
+static void setPlatCache(std::string plat, const AvailableServiceList & clp)
 {
-    std::map<std::string, AvailableCoreletList>::iterator it;
+    std::map<std::string, AvailableServiceList>::iterator it;
     it = s_cache.find(plat);
     if (it != s_cache.end()) s_cache.erase(it);
     s_cache[plat] = clp;
 }
 
 void
-QueryCache::coreletList(std::string plat)
+QueryCache::serviceList(std::string plat)
 {
-    m_qType = T_CoreletList;
+    m_qType = T_ServiceList;
 
     if (m_serverURLs.size() == 0) {
-        BPLOG_ERROR("QueryCache::CoreletList called without any distribution servers");
+        BPLOG_ERROR("QueryCache::ServiceList called without any distribution servers");
         // asynchronous failure return
         hop((void *) false);
         return;
@@ -110,12 +110,12 @@ QueryCache::coreletList(std::string plat)
     if (plat.empty()) plat.append("none");
     m_plat = plat;
     
-    const AvailableCoreletList * cache = getPlatCache(plat);
+    const AvailableServiceList * cache = getPlatCache(plat);
     
     // simple cache implementation
     if (s_cacheAge.elapsedSec() < MAX_CACHE_AGE && cache != NULL) {
         // cache hit!
-        BPLOG_INFO_STRM("Returning corelet list from cache ("
+        BPLOG_INFO_STRM("Returning service list from cache ("
                         << s_cacheAge.elapsedSec() << "s old");
         m_listToReturn = *cache;
         // asynchronous success return
@@ -130,7 +130,7 @@ QueryCache::coreletList(std::string plat)
     
     for (it = m_serverURLs.begin(); it != m_serverURLs.end(); it++) {
         std::string url =
-            WSProtocol::buildURL(*it, WSProtocol::AVAILABLE_CORELETS_PATH);
+            WSProtocol::buildURL(*it, WSProtocol::AVAILABLE_SERVICES_PATH);
         if (plat.compare("none") != 0) url += "/" + plat;
 
         bp::http::RequestPtr myReq = WSProtocol::buildRequest(url);    
@@ -145,7 +145,7 @@ QueryCache::coreletList(std::string plat)
     // if we couldn't successfully kick off a single query, then we're
     // sunk
     if (m_numComplete == m_serverURLs.size()) {
-        BPLOG_ERROR("Couldn't query any distribution servers for available corelets.");
+        BPLOG_ERROR("Couldn't query any distribution servers for available services.");
         // asynchronous failure return
         hop((void *) false);
     }
@@ -211,9 +211,9 @@ QueryCache::listenerCompleted(MyListenerPtr l,
             } else {
                 hop((void *) true);
             }
-        } else if (m_qType == T_CoreletList) {
+        } else if (m_qType == T_ServiceList) {
             // now let's parse the server responses into one list
-            AvailableCoreletList cl;
+            AvailableServiceList cl;
             cl = mergeResponses();
             pruneBlacklisted(cl);
 
@@ -250,9 +250,9 @@ QueryCache::onHop(void * boolAsPtr)
     if (m_qType == T_PlatformVersion) {
         if (!success) m_listener->onLatestPlatformFailure();
         else m_listener->onLatestPlatform(m_latest);
-    } else if (m_qType == T_CoreletList) {
-        if (!success) m_listener->onCoreletListFailure();
-        else m_listener->onCoreletList(m_listToReturn);
+    } else if (m_qType == T_ServiceList) {
+        if (!success) m_listener->onServiceListFailure();
+        else m_listener->onServiceList(m_listToReturn);
     } else {
         BPLOG_ERROR_STRM("m_qType has unexpected value: " << m_qType);        
     }
@@ -319,13 +319,13 @@ QueryCache::parsePlatformVersionResponses(LatestPlatformServerAndVersion & lates
     return foundOne;
 }
 
-std::list<AvailableCorelet>
+std::list<AvailableService>
 QueryCache::mergeResponses()
 {
-    // a set of the corelets that we've already seen
-    std::set<AvailableCorelet> seenCorelets;
+    // a set of the services that we've already seen
+    std::set<AvailableService> seenServices;
     // the full list that we will return
-    std::list<AvailableCorelet> returnList;
+    std::list<AvailableService> returnList;
 
     // iterate through all of the responses in priority order
     std::list<std::string>::iterator url_it;
@@ -369,7 +369,7 @@ QueryCache::mergeResponses()
                     !m->has("size", BPTInteger))
                 {
                     BPLOG_WARN_STRM("malformed server response for "
-                                    << "available corelets");
+                                    << "available services");
                     continue;
                 }
 
@@ -383,56 +383,56 @@ QueryCache::mergeResponses()
                 unsigned int size =
                     (unsigned int) (dynamic_cast<const Integer*>(m->get("size")))->value();
 
-                AvailableCorelet ac;
-                ac.dependentCorelet = false;
+                AvailableService ac;
+                ac.dependentService = false;
                 ac.serverURL = it->first;
                 ac.name = name;
                 ac.sizeBytes = size;
 
                 if (!ac.version.parse(verStr)) {
                     BPLOG_WARN_STRM("malformed version string in "
-                                    << "available corelets");
+                                    << "available services");
                     continue;
                 }
 
                 // now extract provider information
-                // now if thist is a dependent corelet, let's report that
-                if (m->has("CoreletType", BPTString)) {
-                    std::string ctype = dynamic_cast<const String*>(m->get("CoreletType"))->value();
+                // now if thist is a dependent service, let's report that
+                if (m->has("ServiceType", BPTString)) {
+                    std::string ctype = dynamic_cast<const String*>(m->get("ServiceType"))->value();
                     if (!ctype.compare("dependent"))
                     {
-                        ac.dependentCorelet = true;
+                        ac.dependentService = true;
 
                         // now we require a name key
-                        if (!m->has("CoreletRequires/Name", BPTString)) {
+                        if (!m->has("ServiceRequires/Name", BPTString)) {
                             continue;
                         }
 
-                        // extract corelet name
+                        // extract service name
                         ac.providerName =
                             (dynamic_cast<const String*>
-                             (m->get("CoreletRequires/Name")))->value();
+                             (m->get("ServiceRequires/Name")))->value();
 
-                        if (m->has("CoreletRequires/Minversion", BPTString))
+                        if (m->has("ServiceRequires/Minversion", BPTString))
                         {
                             ac.providerMinversion = 
                                 (dynamic_cast<const String*>
-                                 (m->get("CoreletRequires/Minversion")))
+                                 (m->get("ServiceRequires/Minversion")))
                                 ->value();
                         }
                 
-                        if (m->has("CoreletRequires/Version", BPTString))
+                        if (m->has("ServiceRequires/Version", BPTString))
                         {
                             ac.providerVersion = 
                                 dynamic_cast<const String*>
-                                (m->get("CoreletRequires/Version"))
+                                (m->get("ServiceRequires/Version"))
                                 ->value();
                         }
                     }
                 }
 
-                if (seenCorelets.find(ac) == seenCorelets.end()) {
-                    seenCorelets.insert(ac);
+                if (seenServices.find(ac) == seenServices.end()) {
+                    seenServices.insert(ac);
                     returnList.push_back(ac);
                 }
             }
@@ -445,9 +445,9 @@ QueryCache::mergeResponses()
 }
 
 void
-QueryCache::pruneBlacklisted(AvailableCoreletList & lst)
+QueryCache::pruneBlacklisted(AvailableServiceList & lst)
 {
-    std::list<AvailableCorelet>::iterator it = lst.begin();    
+    std::list<AvailableService>::iterator it = lst.begin();    
 
     while (it != lst.end())
     {
@@ -455,8 +455,8 @@ QueryCache::pruneBlacklisted(AvailableCoreletList & lst)
             !m_serviceFilter->serviceMayRun(it->name,
                                             it->version.asString()))
         {
-            BPLOG_INFO_STRM("Purging blacklisted corelet from available "
-                            << "corelet list: "
+            BPLOG_INFO_STRM("Purging blacklisted service from available "
+                            << "service list: "
                             << it->name << " - " << it->version.asString());
             it = lst.erase(it);
         }

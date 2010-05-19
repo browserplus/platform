@@ -41,14 +41,14 @@ using namespace std::tr1;
 
 
 bool
-bp::pluginutil::appendEnumerateResultsToList(const BPElement * corelets,
+bp::pluginutil::appendEnumerateResultsToList(const BPElement * services,
                                              bp::List &serviceList)
 {
     bool rv = true;
 
     // lets start by building on a bp object that we can interact with
     // a bit more cleanly
-    bp::Object * obj = bp::Object::build(corelets);
+    bp::Object * obj = bp::Object::build(services);
     BPASSERT(obj != NULL && obj->type() == BPTList);
     bp::List * l = (bp::List *) obj;        
 

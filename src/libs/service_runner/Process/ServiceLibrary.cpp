@@ -140,7 +140,7 @@ ServiceLibrary::logFunction(unsigned int level, const char * fmt, ...)
 #endif
     va_end(test);
 
-    // limit size of log entry.  no evil corelets
+    // limit size of log entry.  no evil services
     // trying to get us to malloc a gigabyte!
     if (sz > 4095) {
         BPLOG_WARN_STRM("log entry reduced from " << sz << " to 4096 bytes");
@@ -437,7 +437,7 @@ ServiceLibrary::getFunctionTable()
 
 ServiceLibrary::ServiceLibrary() :
     m_currentId(1), m_attachId(0), m_handle(NULL), m_funcTable(NULL),
-    m_desc(), m_coreletAPIVersion(0), m_instances(), m_listener(NULL),
+    m_desc(), m_serviceAPIVersion(0), m_instances(), m_listener(NULL),
     m_promptToTransaction(), 
     m_serviceLogMode( bp::log::kServiceLogCombined ), m_serviceLogger()
 {
@@ -468,7 +468,7 @@ ServiceLibrary::~ServiceLibrary()
     }
     
     // shutdown and unload the library
-    shutdownCorelet(true);
+    shutdownService(true);
 
     s_libObjectPtr = NULL;
 }
@@ -477,7 +477,7 @@ ServiceLibrary::~ServiceLibrary()
 bool
 ServiceLibrary::parseManifest(std::string & err)
 {
-    return m_summary.detectCorelet(bpf::canonicalPath(bpf::Path(".")), err);
+    return m_summary.detectService(bpf::canonicalPath(bpf::Path(".")), err);
 }
 
 std::string
@@ -506,32 +506,32 @@ ServiceLibrary::load(const bpf::Path & providerPath, std::string & err)
     BPASSERT(m_funcTable == NULL);    
 
     // now let's determine the path to the shared library.  For
-    // dependent corelets this will be extracted from the manifest
+    // dependent services this will be extracted from the manifest
     bpf::Path path;
     bpf::Path servicePath;
     if (m_summary.type() == bp::service::Summary::Dependent) {
         bp::service::Summary s;
 
-        if (!s.detectCorelet(providerPath, err)) {
+        if (!s.detectService(providerPath, err)) {
             BPLOG_ERROR_STRM("error loading dependent service: " << err);
             return false;
         }
         servicePath = providerPath;
-        path = providerPath / s.coreletLibraryPath();
+        path = providerPath / s.serviceLibraryPath();
     } else {
         servicePath = m_summary.path();
-        path = m_summary.path() / m_summary.coreletLibraryPath();
+        path = m_summary.path() / m_summary.serviceLibraryPath();
     }
     path = bpf::canonicalPath(path);
     
-    BPLOG_INFO_STRM("loading corelet library: " <<
+    BPLOG_INFO_STRM("loading service library: " <<
                     bpf::utf8FromNative(path.filename()));
 
     m_handle = dlopenNP(path);
 
     if (m_handle != NULL)
     {
-        // now we should initialize the corelet
+        // now we should initialize the service
         const BPPFunctionTable * (*entryPointFunc)(void);
 
         entryPointFunc = (const BPPFunctionTable * (*)(void))
@@ -541,33 +541,33 @@ ServiceLibrary::load(const bpf::Path & providerPath, std::string & err)
         {
             // set up the parameters to the initialize function
             bp::Map params;
-            params.add("CoreletDirectory", new bp::String(servicePath.utf8()));
+            params.add("ServiceDirectory", new bp::String(servicePath.utf8()));
 
             m_funcTable = entryPointFunc();
             funcTable = (const BPPFunctionTable *) m_funcTable;
 
             if (funcTable == NULL || funcTable->initializeFunc == NULL)
             {
-                BPLOG_WARN_STRM("invalid corelet, NULL initialize function ("
+                BPLOG_WARN_STRM("invalid service, NULL initialize function ("
                                 << path << ")");
                 success = false;
                 // still call shutdown
             } else {
-                if (funcTable->coreletAPIVersion != BPP_CORELET_API_VERSION)
+                if (funcTable->serviceAPIVersion != BPP_SERVICE_API_VERSION)
                 {
-                    BPLOG_WARN_STRM("invalid corelet, unsupported corelet "
+                    BPLOG_WARN_STRM("invalid service, unsupported service "
                                     << "API version "
-                                    << funcTable->coreletAPIVersion 
-                                    << ", require " << BPP_CORELET_API_VERSION
+                                    << funcTable->serviceAPIVersion 
+                                    << ", require " << BPP_SERVICE_API_VERSION
                                     << "("  << path << ")");
                     success = false;
                     // surpress calling of shutdown
                     callShutdown = false;
                 } else {
 
-                    m_coreletAPIVersion = funcTable->coreletAPIVersion;
+                    m_serviceAPIVersion = funcTable->serviceAPIVersion;
                     
-                    const BPCoreletDefinition * def = NULL;
+                    const BPServiceDefinition * def = NULL;
                     
                     def = funcTable->initializeFunc(
                         (const BPCFunctionTable *) getFunctionTable(),
@@ -575,11 +575,11 @@ ServiceLibrary::load(const bpf::Path & providerPath, std::string & err)
                     
                     if (def == NULL)
                     {
-                        BPLOG_WARN_STRM("invalid corelet, NULL return from "
+                        BPLOG_WARN_STRM("invalid service, NULL return from "
                                         << "initialize function ("
                                         << path << ")");
                         success = false;
-                        // don't call shutdown.  This corelet has already
+                        // don't call shutdown.  This service has already
                         // violated a contract
                         callShutdown = false;
                     }
@@ -587,10 +587,10 @@ ServiceLibrary::load(const bpf::Path & providerPath, std::string & err)
                     // extract an API definition, because the providers'
                     // api will not be exposed.  In this case the m_desc
                     // structure will be re-populated below
-                    else if (!m_desc.fromBPCoreletDefinition(def))
+                    else if (!m_desc.fromBPServiceDefinition(def))
                     {
                         BPLOG_WARN_STRM("couldn't populate Description "
-                                        "from returned corelet structure ");
+                                        "from returned service structure ");
                         success = false;
                         callShutdown = true;
                     }
@@ -623,7 +623,7 @@ ServiceLibrary::load(const bpf::Path & providerPath, std::string & err)
 
         // set up the parameters to the attach function
         bp::Map params;
-        params.add("CoreletDirectory",
+        params.add("ServiceDirectory",
                    new bp::String(m_summary.path().utf8()));
 
         // add in arguments from dependent manifest
@@ -653,7 +653,7 @@ ServiceLibrary::load(const bpf::Path & providerPath, std::string & err)
         BPLOG_INFO_STRM("attach to " << path << " with " << paramStr 
                         << ", cwd = " << curdir);
 
-        const BPCoreletDefinition * def = NULL;
+        const BPServiceDefinition * def = NULL;
         def = funcTable->attachFunc(m_attachId, params.elemPtr());
         if (def == NULL) {
             BPLOG_WARN_STRM("attachFunc returns NULL description");
@@ -662,7 +662,7 @@ ServiceLibrary::load(const bpf::Path & providerPath, std::string & err)
             }
             success = false;
             callShutdown = true;
-        } else if (!m_desc.fromBPCoreletDefinition(def)) {
+        } else if (!m_desc.fromBPServiceDefinition(def)) {
             BPLOG_WARN_STRM("couldn't populate Description "
                             "from structure returned from attach function");
             success = false;
@@ -670,14 +670,14 @@ ServiceLibrary::load(const bpf::Path & providerPath, std::string & err)
         }
     }
     
-    if (!success) shutdownCorelet(callShutdown);
+    if (!success) shutdownService(callShutdown);
 
     return success;
 }
 
-// shutdown the corelet, NULL out m_handle, and m_def
+// shutdown the service, NULL out m_handle, and m_def
 void
-ServiceLibrary::shutdownCorelet(bool callShutdown)
+ServiceLibrary::shutdownService(bool callShutdown)
 {
     const BPPFunctionTable * table = (const BPPFunctionTable *) m_funcTable;
     
@@ -688,8 +688,8 @@ ServiceLibrary::shutdownCorelet(bool callShutdown)
             table->shutdownFunc();
         }
 
-        BPLOG_INFO_STRM("unloading corelet library: "
-                        << m_summary.coreletLibraryPath());
+        BPLOG_INFO_STRM("unloading service library: "
+                        << m_summary.serviceLibraryPath());
 
         dlcloseNP(m_handle);
         m_handle = NULL;
@@ -713,8 +713,8 @@ ServiceLibrary::allocate(const bp::Map & m)
     is->version = m_summary.version();
     is->context = m;
 
-    // set service_dir and the deprecated corelet_dir here     
-    is->context.add("corelet_dir", new bp::String(m_summary.path().utf8()));
+    // set service_dir and the deprecated service_dir here     
+    is->context.add("service_dir", new bp::String(m_summary.path().utf8()));
     is->context.add("service_dir", new bp::String(m_summary.path().utf8()));
 
     is->cookie = NULL;
@@ -1037,5 +1037,5 @@ ServiceLibrary::findContextFromPromptId(unsigned int promptId,
 unsigned int
 ServiceLibrary::apiVersion()
 {
-    return m_coreletAPIVersion;
+    return m_serviceAPIVersion;
 }

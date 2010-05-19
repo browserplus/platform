@@ -22,7 +22,7 @@ SET(progName DistQuery)
 SET(${progName}_MAJOR_VERSION 0)
 SET(${progName}_MINOR_VERSION 1)
 SET(${progName}_LINK_STATIC BPUtils ConsoleLib DistributionClient
-                            CoreletManager ServiceRunnerLib Permissions
+                            ServiceManager ServiceRunnerLib Permissions
                             ArchiveLib)
 
 YBT_BUILD(BINARY ${progName})

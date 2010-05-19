@@ -24,7 +24,7 @@
  * DynamicServiceManager
  *
  * An object responsible for loading and searching of dynamic
- * corelets.
+ * services.
  */
 
 #include "DynamicServiceManager.h"
@@ -222,7 +222,7 @@ getBestProvider(const bp::service::Summary & dep,
                 const std::map<bp::service::Summary, bp::service::Description>
                      & installed)
 {
-    std::string name = dep.usesCorelet();
+    std::string name = dep.usesService();
     bp::ServiceVersion version = dep.usesVersion();
     bp::ServiceVersion minversion = dep.usesMinversion();
 
@@ -250,8 +250,8 @@ unsigned int
 DynamicServiceManager::instantiate(
     const std::string & name,
     const std::string & version,
-    weak_ptr<CoreletExecutionContext> contextWeak,
-    weak_ptr<ICoreletRegistryListener> listener)
+    weak_ptr<ServiceExecutionContext> contextWeak,
+    weak_ptr<IServiceRegistryListener> listener)
 {
     unsigned int instantiateId = m_instantiateId++;
 
@@ -265,7 +265,7 @@ DynamicServiceManager::instantiate(
     }
 
     // convert context ptr to strong
-    shared_ptr<CoreletExecutionContext> context = contextWeak.lock();
+    shared_ptr<ServiceExecutionContext> context = contextWeak.lock();
     if (context == NULL) return 0;
 
     // if we don't have a Controller allocated for this service we'll
@@ -378,7 +378,7 @@ DynamicServiceManager::startAllocation(
     shared_ptr<DynamicServiceInstance> instance,   
     unsigned int majorVer)
 {
-    shared_ptr<CoreletExecutionContext> context =
+    shared_ptr<ServiceExecutionContext> context =
         instance->m_context.lock();
 
     if (context == NULL) {
@@ -392,7 +392,7 @@ DynamicServiceManager::startAllocation(
 
     unsigned int aid = controller->allocate(
         context->URI(),
-        bp::paths::getCoreletDataDirectory(instance->m_summary.name(),
+        bp::paths::getServiceDataDirectory(instance->m_summary.name(),
                                            majorVer),
         tmpdir,
         context->locale(),
@@ -453,7 +453,7 @@ DynamicServiceManager::onEnded(ServiceRunner::Controller * c)
     // Notify each pending allocation's listener that it ain't gonna happen.
     for (tInstSet::iterator it = pendingAllocs.begin();
          it != pendingAllocs.end(); ++it) {
-        shared_ptr<ICoreletRegistryListener> listener;
+        shared_ptr<IServiceRegistryListener> listener;
         listener = (*it)->m_registryListener.lock();
         if (listener != NULL) {
             listener->onAllocationFailure((*it)->m_instantiateId);
@@ -494,7 +494,7 @@ DynamicServiceManager::onAllocated(ServiceRunner::Controller * c,
     instance->m_instanceId = id;
 
     // let's call back into our listener
-    shared_ptr<ICoreletRegistryListener> regListener;
+    shared_ptr<IServiceRegistryListener> regListener;
     regListener = instance->m_registryListener.lock();
 
     if (regListener == NULL) {
@@ -600,7 +600,7 @@ DynamicServiceManager::onPrompt(ServiceRunner::Controller * c,
         m_state.findInstance(c, instance);
 
     if (dsi != NULL) {
-        shared_ptr<CoreletExecutionContext> context = dsi->m_context.lock();
+        shared_ptr<ServiceExecutionContext> context = dsi->m_context.lock();
 
         if (context == NULL) {
             BPLOG_WARN_STRM("received prompt request, however execution "

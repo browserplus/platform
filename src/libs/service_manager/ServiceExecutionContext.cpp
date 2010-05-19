@@ -21,7 +21,7 @@
  */
 
 /**
- * CoreletExecutionContext.cpp
+ * ServiceExecutionContext.cpp
  * 
  * Default implementation returns empty strings and always generates
  * UserDeny events. 
@@ -30,62 +30,62 @@
  * Copyright (c) 2007 Yahoo!, Inc. All rights reserved.
  */
  
-#include "api/CoreletExecutionContext.h"
+#include "api/ServiceExecutionContext.h"
 #include "BPUtils/bptypeutil.h"
 
 using namespace std;
 using namespace std::tr1;
 
 
-CoreletExecutionContext::CoreletExecutionContext()
+ServiceExecutionContext::ServiceExecutionContext()
 {
 }
 
 
-CoreletExecutionContext::~CoreletExecutionContext()
+ServiceExecutionContext::~ServiceExecutionContext()
 {
 }
  
 
 std::string
-CoreletExecutionContext::locale()
+ServiceExecutionContext::locale()
 {
     return "";
 }
 
 
 std::string 
-CoreletExecutionContext::URI()
+ServiceExecutionContext::URI()
 {
     return "";
 }
 
 std::string 
-CoreletExecutionContext::userAgent()
+ServiceExecutionContext::userAgent()
 {
     return "";
 }
 
 long
-CoreletExecutionContext::clientPid()
+ServiceExecutionContext::clientPid()
 {
     return 0;
 }
 
 void
-CoreletExecutionContext::promptUser(
-        weak_ptr<ICoreletExecutionContextListener> l,
+ServiceExecutionContext::promptUser(
+        weak_ptr<IServiceExecutionContextListener> l,
         unsigned int id,
         const bp::file::Path&,
         const bp::Object *)  
 {
-    if(shared_ptr<ICoreletExecutionContextListener> r = l.lock()) {
+    if(shared_ptr<IServiceExecutionContextListener> r = l.lock()) {
         r->onUserResponse(id, bp::Null());
     }
 }
 
 
 void 
-CoreletExecutionContext::invokeCallback(unsigned int, const bp::Map*)
+ServiceExecutionContext::invokeCallback(unsigned int, const bp::Map*)
 {
 }

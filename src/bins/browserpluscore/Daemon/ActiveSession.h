@@ -35,8 +35,8 @@
 
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bpfile.h"
-#include "CoreletManager/CoreletManager.h"
-// for LocalizedCoreletDescriptionPtr, used when display component
+#include "ServiceManager/ServiceManager.h"
+// for LocalizedServiceDescriptionPtr, used when display component
 // installation prompt.
 #include "DistributionClient/DistributionClient.h"
 #include "RequireRequest.h"
@@ -52,20 +52,20 @@ class IActiveSessionListener
 
 class ActiveSession : public virtual RequireLock::ILockListener,
 					  public virtual bp::ipc::IChannelListener,
-                      public virtual CoreletExecutionContext,
+                      public virtual ServiceExecutionContext,
                       public virtual IPermissionsManagerListener,
-                      public virtual ICoreletInstanceListener,
+                      public virtual IServiceInstanceListener,
                       public virtual RequireRequest::IRequireListener,
                       // this is only necc because ActiveSession does
                       // prompting.  We should be able to move ALL prompting
                       // to RequireRequest.
-                      public virtual ICoreletExecutionContextListener,
-                      public virtual ICoreletRegistryListener,
+                      public virtual IServiceExecutionContextListener,
+                      public virtual IServiceRegistryListener,
                       public std::tr1::enable_shared_from_this<ActiveSession>
 {
   public:
     ActiveSession(bp::ipc::Channel * session,
-                  std::tr1::shared_ptr<CoreletRegistry> registry,
+                  std::tr1::shared_ptr<ServiceRegistry> registry,
                   const std::string & primaryDistroServer,
                   std::list<std::string> distroServers);
     virtual ~ActiveSession();
@@ -89,7 +89,7 @@ class ActiveSession : public virtual RequireLock::ILockListener,
     /** attain the domain of the client that initiated this session */
     std::string domain();
 
-    /** attain names and versions of corelet instances held by this
+    /** attain names and versions of service instances held by this
      *  session */
     std::vector< std::pair<std::string, std::string> > instances();
     
@@ -97,7 +97,7 @@ class ActiveSession : public virtual RequireLock::ILockListener,
     PermissionsManager::Permission transientPermission(const std::string& perm);
     void setTransientPermission(const std::string& perm, bool val);
 
-    /** Overrides from CoreletExecutionContext */
+    /** Overrides from ServiceExecutionContext */
 
     /** display an installation promt to the user.  This should instruct the client
      *  to display a modal dialog which causes the user to agree or
@@ -116,14 +116,14 @@ class ActiveSession : public virtual RequireLock::ILockListener,
      *           components to install (see DistQueryTypes.h)
      */
     void displayInstallPrompt(
-        std::tr1::weak_ptr<ICoreletExecutionContextListener> listener,
+        std::tr1::weak_ptr<IServiceExecutionContextListener> listener,
         unsigned int cookie,
         const std::vector<std::string>& permissions,
         const ServiceSynopsisList & platformUpdates,
         const ServiceSynopsisList & componentsToInstall);
                              
     virtual void promptUser(
-        std::tr1::weak_ptr<ICoreletExecutionContextListener> listener,
+        std::tr1::weak_ptr<IServiceExecutionContextListener> listener,
         unsigned int cookie,
         const bp::file::Path& pathToHTMLDialog,
         const bp::Object * obj);
@@ -131,21 +131,21 @@ class ActiveSession : public virtual RequireLock::ILockListener,
     virtual void invokeCallback(unsigned int tid,
                                 const bp::Map* cbInfo);
     
-    std::tr1::shared_ptr<CoreletRegistry> registry(); 
+    std::tr1::shared_ptr<ServiceRegistry> registry(); 
 
     void setListener(IActiveSessionListener * listener) {
         m_listener = listener;
     }
 
     ///
-    // ICoreletRegistryListener impl
+    // IServiceRegistryListener impl
     
-    // invoked by CoreletRegistry/DynamicServiceManager upon successful
+    // invoked by ServiceRegistry/DynamicServiceManager upon successful
     // service instance allocation
     void onAllocationSuccess(unsigned int allocationId,
-                             std::tr1::shared_ptr<CoreletInstance> instance);
+                             std::tr1::shared_ptr<ServiceInstance> instance);
 
-    // invoked by CoreletRegistry/DynamicServiceManager upon failed
+    // invoked by ServiceRegistry/DynamicServiceManager upon failed
     // service instance allocation
     void onAllocationFailure(unsigned int allocationId);
     
@@ -221,7 +221,7 @@ class ActiveSession : public virtual RequireLock::ILockListener,
     std::list<MessageContext*> m_messages;
     
     // invoked when a response to a installation prompt is received
-    // implemented from ICoreletExecutionContextListener to handle
+    // implemented from IServiceExecutionContextListener to handle
     // prompt responses.
     void onUserResponse(unsigned int cookie, const bp::Object & resp);
 
@@ -248,7 +248,7 @@ class ActiveSession : public virtual RequireLock::ILockListener,
                    const std::string & verboseError);
 
     bp::ipc::Channel * m_session;
-    std::tr1::shared_ptr<CoreletRegistry> m_registry;
+    std::tr1::shared_ptr<ServiceRegistry> m_registry;
 
     // services used by this session
     std::set<std::pair<std::string, std::string> > m_servicesUsed;
@@ -260,9 +260,9 @@ class ActiveSession : public virtual RequireLock::ILockListener,
                         std::pair<std::string, std::string> rhs) const;
     };
 
-    // a map containing corelet instances associated with this session
+    // a map containing service instances associated with this session
     std::map<std::pair<std::string, std::string>,
-        std::tr1::shared_ptr<CoreletInstance>,
+        std::tr1::shared_ptr<ServiceInstance>,
         TwoStringCompare> m_instanceMap;
 
     // a map containing function invocations pending instance allocation
@@ -284,7 +284,7 @@ class ActiveSession : public virtual RequireLock::ILockListener,
     
     PendingExecutionMap m_pendingExecutions;
 
-    void doExecution(std::tr1::shared_ptr<CoreletInstance> instance,
+    void doExecution(std::tr1::shared_ptr<ServiceInstance> instance,
                      unsigned int tid,
                      const std::string & function,
                      const bp::Object * args);
@@ -293,7 +293,7 @@ class ActiveSession : public virtual RequireLock::ILockListener,
     // map, adding it if it does not exist.  Instances spring into existance
     // upon first usage
     // primarily to abstract the confusing STL syntax here.
-    std::tr1::shared_ptr<CoreletInstance> attainInstance(const std::string & corelet,
+    std::tr1::shared_ptr<ServiceInstance> attainInstance(const std::string & service,
                                                       const std::string & version);
 
     // send a prompt user protocol message to the client.  This function
@@ -301,18 +301,18 @@ class ActiveSession : public virtual RequireLock::ILockListener,
     // message is malformed, this will be considered user refusal and
     // the error will be logged.
     unsigned int sendPromptUserMessage(
-        std::tr1::weak_ptr<ICoreletExecutionContextListener> listener,
+        std::tr1::weak_ptr<IServiceExecutionContextListener> listener,
         unsigned int cookie, const bp::Object * o);
 
     // when a response is recieved to a prompt user message, this
     // function will process the response and send the results to
-    // the appropriate corelet instance
+    // the appropriate service instance
     void handlePromptUserResponse(const bp::ipc::Response & resp);
 
     // a map holding outstanding eula / prompt user requests for this session.
     // the map is IPC Query ids - > listeners
     std::map<unsigned int,
-             std::pair<std::tr1::weak_ptr<ICoreletExecutionContextListener>
+             std::pair<std::tr1::weak_ptr<IServiceExecutionContextListener>
                        , unsigned int> > m_promptRequests;
     
     // a list of outstanding require requests for this session

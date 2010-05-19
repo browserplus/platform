@@ -119,7 +119,7 @@ BPSession::describeReturn(void * cookie)
 void
 BPSession::describeServiceCallback(BPErrorCode ec,
                                    void * cookie,
-                                   const BPCoreletDefinition * def,
+                                   const BPServiceDefinition * def,
                                    const char * error,
                                    const char * verboseError)
 {

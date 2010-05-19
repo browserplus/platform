@@ -21,18 +21,18 @@
  */
 
 /**
- * CoreletUpdater.h - A singleton responsible for periodic update of 
- *                    recently used corelets
+ * ServiceUpdater.h - A singleton responsible for periodic update of 
+ *                    recently used services
  *
  * Created by Lloyd Hilaiel on Fri October 18th 2007.
  * Copyright (c) 2007 Yahoo!, Inc. All rights reserved.
  */
 
-#include "CoreletUpdater.h"
+#include "ServiceUpdater.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bpphash.h"
 #include "BPUtils/OS.h"
-#include "CoreletInstaller.h"
+#include "ServiceInstaller.h"
 #include "DistributionClient/DistributionClient.h"
 #include "Permissions/Permissions.h"
 #include "RequireRequest.h"
@@ -41,7 +41,7 @@ using namespace std;
 using namespace std::tr1;
 
 
-static const char* s_lastCheckTSKey = "CoreletUpdater::lastCheckTS"; 
+static const char* s_lastCheckTSKey = "ServiceUpdater::lastCheckTS"; 
 
 // no more frequently than 15 minutes
 #define MIN_POLL_PERIOD 900
@@ -51,7 +51,7 @@ class UpdaterSingleton : virtual public bp::time::ITimerListener,
 {
 public:
     UpdaterSingleton(unsigned int pollPeriod, 
-                     shared_ptr<CoreletRegistry> coreletRegistry,
+                     shared_ptr<ServiceRegistry> serviceRegistry,
                      list<string> distroServers);
     ~UpdaterSingleton();
 
@@ -61,14 +61,14 @@ public:
 private:
     // implemented methods from IDistQueryListener interface
     void onTransactionFailed(unsigned int tid);
-    void onCacheUpdated(unsigned int tid, const CoreletList & updates);
+    void onCacheUpdated(unsigned int tid, const ServiceList & updates);
 
     void timesUp(bp::time::Timer * t);
 
     void upToDateCheck();
 
     std::string m_url;
-    shared_ptr<CoreletRegistry> m_registry;
+    shared_ptr<ServiceRegistry> m_registry;
     unsigned int m_pollPeriod;    
     bp::time::Timer m_timer;
     DistQuery * m_distQuery;
@@ -79,20 +79,20 @@ private:
 static UpdaterSingleton* s_updater = NULL;
 
 void
-CoreletUpdater::startup(list<string> distroServers,
-                        shared_ptr<CoreletRegistry> coreletRegistry,
+ServiceUpdater::startup(list<string> distroServers,
+                        shared_ptr<ServiceRegistry> serviceRegistry,
                         unsigned int pollPeriodSeconds)
 {
     BPASSERT(s_updater == NULL);
     s_updater = new UpdaterSingleton(pollPeriodSeconds, 
-                                     coreletRegistry,
+                                     serviceRegistry,
                                      distroServers);
     s_updater->start();
 }
 
 
 void
-CoreletUpdater::shutdown()
+ServiceUpdater::shutdown()
 {
     if (s_updater != NULL) {
         s_updater->stop();
@@ -102,7 +102,7 @@ CoreletUpdater::shutdown()
 }
 
 bool
-CoreletUpdater::isBusy()
+ServiceUpdater::isBusy()
 {
     BPASSERT(s_updater != NULL);
     return s_updater->busy();
@@ -110,14 +110,14 @@ CoreletUpdater::isBusy()
 
 
 UpdaterSingleton::UpdaterSingleton(unsigned int pollPeriod,
-                                   shared_ptr<CoreletRegistry> coreletRegistry,
+                                   shared_ptr<ServiceRegistry> serviceRegistry,
                                    list<string> distroServers)
 {
     m_tid = 0;
     m_platform = bp::os::PlatformAsString();
     m_pollPeriod = ((pollPeriod > MIN_POLL_PERIOD)
                     ? pollPeriod : MIN_POLL_PERIOD);
-    m_registry = coreletRegistry;
+    m_registry = serviceRegistry;
     m_distQuery = new DistQuery(distroServers, PermissionsManager::get());
     if (m_distQuery != NULL) {
         m_distQuery->setListener(this);
@@ -180,12 +180,12 @@ UpdaterSingleton::start()
     }
 
     if (mustCheck) {
-        // must check, get installed corelets
+        // must check, get installed services
         list<bp::service::Summary> installed =
-            m_registry->availableCoreletSummaries();
+            m_registry->availableServiceSummaries();
         
         // now get our previous require statements
-        list<CoreletRequireStatement> reqStmts;
+        list<ServiceRequireStatement> reqStmts;
         using namespace bp;
         string requireMapStr;
         (void)bp::phash::get(RequireRequest::kRequireStatementsKey, requireMapStr);
@@ -202,7 +202,7 @@ UpdaterSingleton::start()
                 vector<string> tokens = bp::strutil::split(
                     s->value(), RequireRequest::kVersionSeparator);
                 if (tokens.size() != 2) continue;
-                CoreletRequireStatement req;
+                ServiceRequireStatement req;
                 req.m_name = key;
                 req.m_version = tokens[0];
                 req.m_minversion = tokens[1];
@@ -255,7 +255,7 @@ UpdaterSingleton::onTransactionFailed(unsigned int)
 
 void
 UpdaterSingleton::onCacheUpdated(unsigned int,
-                                 const CoreletList &)
+                                 const ServiceList &)
 {
     // store time of last check
     BPTime now;

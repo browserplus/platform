@@ -72,7 +72,7 @@ namespace bp {
         }
 
         unsigned int
-        Fetcher::getServices(const list<CoreletRequireStatement>& services)
+        Fetcher::getServices(const list<ServiceRequireStatement>& services)
         {
             m_state = eFetchingRequirements;
     
@@ -100,7 +100,7 @@ namespace bp {
 
         void
         Fetcher::onServiceFound(unsigned int tid,
-                                const AvailableCorelet& list)
+                                const AvailableService& list)
         {
             // empty
         }
@@ -137,7 +137,7 @@ namespace bp {
                 try {
                     pair<string, string> p = m_neededServices.front();
                     bpf::Path destDir = m_destDir / "services";
-                    CoreletUnpacker unpacker(buf, destDir, p.first,
+                    ServiceUnpacker unpacker(buf, destDir, p.first,
                                              p.second, m_keyPath);
                     string errMsg;
                     bool rval = (unpacker.unpack(errMsg) && unpacker.install(errMsg));
@@ -159,7 +159,7 @@ namespace bp {
 
         void 
         Fetcher::onRequirementsSatisfied(unsigned int tid,
-                                         const CoreletList& clist) 
+                                         const ServiceList& clist) 
         {
             // Run thru clist, only adding services that we don't
             // have to m_neededServices.  We check for the existence
@@ -167,10 +167,10 @@ namespace bp {
             // is removed, the directory and dll will still exist,
             // but the manifest file won't (since windows can't remove
             // open files or their containing dirs).
-            bpf::Path coreletDir = bp::paths::getCoreletDirectory();
-            CoreletList::const_iterator it;
+            bpf::Path serviceDir = bp::paths::getServiceDirectory();
+            ServiceList::const_iterator it;
             for (it = clist.begin(); it != clist.end(); ++it) {
-                bpf::Path path = coreletDir / it->first / it->second / "manifest.json";
+                bpf::Path path = serviceDir / it->first / it->second / "manifest.json";
                 if (!bpf::exists(path)) {
                     m_neededServices.push_back(*it);
                 }
@@ -234,7 +234,7 @@ namespace bp {
     
             if (!m_neededServices.empty()) {
                 pair<string, string> p = m_neededServices.front();
-                return m_distQuery->downloadCorelet(p.first, p.second,
+                return m_distQuery->downloadService(p.first, p.second,
                                                     bp::os::PlatformAsString());
             } else {
                 m_state = eIdle;

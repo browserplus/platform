@@ -21,26 +21,26 @@
  */
 
 /*
- * CoreletUnpacker.h
+ * ServiceUnpacker.h
  *
  * Created by Gordon Durand on 07/23/07.
  * Copyright 2007 Yahoo! Inc.  All rights reservered.
  */
 
-#ifndef __CORELETUNPACKER_H__
-#define __CORELETUNPACKER_H__
+#ifndef __SERVICEUNPACKER_H__
+#define __SERVICEUNPACKER_H__
 
 #include <string>
 #include <map>
 #include "Unpacker.h"
 
-class CoreletUnpacker : virtual public Unpacker
+class ServiceUnpacker : virtual public Unpacker
 {
  public:
     /** 
      * Create an instance to unpack a bpkg file
      */
-    CoreletUnpacker(const bp::file::Path& pkgFile,
+    ServiceUnpacker(const bp::file::Path& pkgFile,
                     const bp::file::Path& destDir,
                     const std::string& name,
                     const std::string& version,
@@ -50,18 +50,18 @@ class CoreletUnpacker : virtual public Unpacker
      * Create an instance to unpack a buffer containing
      * a bpkg
      */
-    CoreletUnpacker(const std::vector<unsigned char> & buf,
+    ServiceUnpacker(const std::vector<unsigned char> & buf,
                     const bp::file::Path& destDir,
                     const std::string& name,
                     const std::string& version,
                     const bp::file::Path& certFile = bp::file::Path());
                 
-    virtual ~CoreletUnpacker(); 
+    virtual ~ServiceUnpacker(); 
 
     // unpacks, returns true on success
     bool unpack(std::string& errMsg);
 
-    // installs to coreletdir            
+    // installs to servicedir            
     // On error, error msg returned in errMsg    
     bool install(std::string& errMsg);
 

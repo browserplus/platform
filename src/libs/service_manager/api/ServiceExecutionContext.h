@@ -21,9 +21,9 @@
  */
 
 /**
- * CoreletExecutionContext.h
+ * ServiceExecutionContext.h
  * 
- * Interface to allow corelets to interact with their execution context.  
+ * Interface to allow services to interact with their execution context.  
  * Default implementation returns empty strings and always generates
  * UserDeny events. 
  *
@@ -31,8 +31,8 @@
  * Copyright (c) 2007 Yahoo!, Inc. All rights reserved.
  */
 
-#ifndef __CORELETEXECTIONCONTEXT_H__
-#define __CORELETEXECTIONCONTEXT_H__
+#ifndef __SERVICEEXECTIONCONTEXT_H__
+#define __SERVICEEXECTIONCONTEXT_H__
 
 #include <string>
 #include "BPUtils/bptr1.h"
@@ -45,20 +45,20 @@ namespace bp {
 }
 
 
-class ICoreletExecutionContextListener 
+class IServiceExecutionContextListener 
 {
   public:
-    virtual ~ICoreletExecutionContextListener() { }
+    virtual ~IServiceExecutionContextListener() { }
     
     virtual void onUserResponse(unsigned int cookie,
                                 const bp::Object & resp) = 0;
 };
 
-class CoreletExecutionContext
+class ServiceExecutionContext
 {
 public:
-    CoreletExecutionContext();
-    virtual ~CoreletExecutionContext();
+    ServiceExecutionContext();
+    virtual ~ServiceExecutionContext();
     
     /** attain the locale of the client session */
     virtual std::string locale();
@@ -77,7 +77,7 @@ public:
      *
      * The results of the user interaction will be a passed in the
      * invocation of listener's
-     * ICoreletExecutionContextListener::onUserResponse()
+     * IServiceExecutionContextListener::onUserResponse()
      * callback.
      *
      *  \param cookie - client state.  The client may pass in an integer
@@ -91,7 +91,7 @@ public:
      *                                contents are defined by the dialog.
      */
     virtual void promptUser(
-        std::tr1::weak_ptr<ICoreletExecutionContextListener> listener,
+        std::tr1::weak_ptr<IServiceExecutionContextListener> listener,
         unsigned int cookie,
         const bp::file::Path& pathToHTMLDialog,
         const bp::Object * arguments);  

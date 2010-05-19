@@ -21,35 +21,35 @@
  */
 
 /**
- * CoreletUpdater.h - A singleton responsible for periodic update of 
- *                    recently used corelets
+ * ServiceUpdater.h - A singleton responsible for periodic update of 
+ *                    recently used services
  *
  * Created by Lloyd Hilaiel on Fri October 18th 2007.
  * Copyright (c) 2007 Yahoo!, Inc. All rights reserved.
  */
 
-#ifndef __CORELETUPDATER_H__
-#define __CORELETUPDATER_H__
+#ifndef __SERVICEUPDATER_H__
+#define __SERVICEUPDATER_H__
 
-#include "CoreletManager/CoreletManager.h"
+#include "ServiceManager/ServiceManager.h"
 
-namespace CoreletUpdater
+namespace ServiceUpdater
 {
     /**
-     * Start up the corelet updater.  should occur once per process
+     * Start up the service updater.  should occur once per process
      * \param distroServers - a list of urls to available BrowserPlus
      *        distribution servers (i.e http://browserplus.yahoo.com/api). 
-     * \param coreletRegistry - the corelet registry to use
+     * \param serviceRegistry - the service registry to use
      * \param pollPeriodSeconds - the maximum frequency at which we
      *                  may check for updates
 
      */
     void startup(std::list<std::string> distroServers,
-                 std::tr1::shared_ptr<CoreletRegistry> coreletRegistry,
+                 std::tr1::shared_ptr<ServiceRegistry> serviceRegistry,
                  unsigned int pollPeriodSeconds);
 
     /**
-     * shut down the corelet updater
+     * shut down the service updater
      */
     void shutdown();
 

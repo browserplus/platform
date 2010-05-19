@@ -133,34 +133,34 @@ main(int argc, const char ** argv)
             BP_COMMAND_HANDLER(CommandExecutor::execute),
             3, 4,
             "execute a service function.  takes 3 or 4 arguments:\n"
-            "  1. corelet to call\n"
-            "  2. corelet version\n"
-            "  3. function to call on corelet\n"
+            "  1. service to call\n"
+            "  2. service version\n"
+            "  3. function to call on service\n"
             "  4. JSON representation of arguments to function\n\n");
 
-        // describe the interface of a corelet.
+        // describe the interface of a service.
         parser->registerHandler(
             std::string("describe"), chp,
             BP_COMMAND_HANDLER(CommandExecutor::describe),
             2, 2,
-            "describe the interface of a corelet");
+            "describe the interface of a service");
 
-        // enumerate the currently installed corelets.
+        // enumerate the currently installed services.
         parser->registerHandler(
             "installed", chp,
             BP_COMMAND_HANDLER(CommandExecutor::enumerate),
             0, 0,
-            "display the currently installed corelets.");
+            "display the currently installed services.");
 
-        // require a corelet
+        // require a service
         parser->registerHandler(
             "require", chp,
             BP_COMMAND_HANDLER(CommandExecutor::require),
             1, 1,
-            "require corelets by specifying a list of maps, each element contains: \n"
-            "  service - the name of the corelet\n"
-            "  version - a version pattern that the corelet must patch\n"
-            "  minversion - a version pattern that the corelet must exceed\n");
+            "require services by specifying a list of maps, each element contains: \n"
+            "  service - the name of the service\n"
+            "  version - a version pattern that the service must patch\n"
+            "  minversion - a version pattern that the service must exceed\n");
 
         // get some state
         parser->registerHandler(

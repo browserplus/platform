@@ -115,23 +115,23 @@ namespace ServiceRunner
 
         bp::service::Summary m_summary;
 
-        // curently allocated corelet
+        // curently allocated service
         void * m_handle;
 
-        // pointer to the corelet instances function table
+        // pointer to the service instances function table
         const void * m_funcTable;
 
-        // corelet description
+        // service description
         bp::service::Description m_desc;
 
-        // the corelet api version, populated during load
-        unsigned int m_coreletAPIVersion;
+        // the service api version, populated during load
+        unsigned int m_serviceAPIVersion;
 
-        // get the function table that we'll pass to corelets
+        // get the function table that we'll pass to services
         static const void * getFunctionTable();
 
         // shutdown the service and unload the library
-        void shutdownCorelet(bool callShutdown);
+        void shutdownService(bool callShutdown);
     
         // All NP functions must be implemented once per platform.
         /**

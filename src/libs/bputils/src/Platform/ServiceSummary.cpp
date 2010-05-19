@@ -23,8 +23,8 @@
 /**
  * Summary
  *
- * A Class capable of determining if a directory represents a valid corelet,
- * and if so the type of corelet and metadata contained in the corelet
+ * A Class capable of determining if a directory represents a valid service,
+ * and if so the type of service and metadata contained in the service
  * manifest.
  */
 
@@ -47,18 +47,18 @@ static const char * s_providerType = "provider";
 
 static const char * s_manifestFileName = "manifest.json";
 
-static const char * s_coreletLibraryKey = "CoreletLibrary";
+static const char * s_serviceLibraryKey = "ServiceLibrary";
 static const char * s_typeKey = "type";
 static const char * s_usesKey = "uses";
 
 static const char * s_shutdownDelayKey = "shutdownDelaySecs";
-static const char * s_coreletKey = "corelet";
+static const char * s_serviceKey = "service";
 static const char * s_versionKey = "version";
 static const char * s_minversionKey = "minversion";
 
 static const char * s_argumentsKey = "arguments";
 
-// localization of end user facing description of corelet.
+// localization of end user facing description of service.
 static const char * s_stringsKey = "strings";
 static const char * s_titleKey = "title";
 static const char * s_summaryKey = "summary";
@@ -95,7 +95,7 @@ service::Summary::path() const
 }
 
 bool
-service::Summary::detectCorelet(const bp::file::Path &dirName,
+service::Summary::detectService(const bp::file::Path &dirName,
                                 std::string &error)
 {    
     clear();
@@ -123,7 +123,7 @@ service::Summary::detectCorelet(const bp::file::Path &dirName,
         return false;
     }
     
-    // determine the Corelet type
+    // determine the Service type
     if (!o->has(s_typeKey, BPTString))
     {
         error.append("Manifest missing required '");
@@ -141,7 +141,7 @@ service::Summary::detectCorelet(const bp::file::Path &dirName,
         m_shutdownDelaySecs = (int) (long long) *(o->get(s_shutdownDelayKey));
     }
 
-    // all corelets must be localized to at least english
+    // all services must be localized to at least english
     std::map<std::string, std::pair<std::string, std::string> > localizations;
 
     if (!o->has(s_stringsKey, BPTMap))
@@ -225,12 +225,12 @@ service::Summary::detectCorelet(const bp::file::Path &dirName,
     // based on the type we'll do further validation
     if (!type.compare(s_standaloneType))
     {
-        // extract the path to the corelet library
-        if (!o->has(s_coreletLibraryKey, BPTString))
+        // extract the path to the service library
+        if (!o->has(s_serviceLibraryKey, BPTString))
         {
             std::stringstream ss;
-            ss << "'" << s_standaloneType << "' corelets require a '"
-               << s_coreletLibraryKey << "' key";
+            ss << "'" << s_standaloneType << "' services require a '"
+               << s_serviceLibraryKey << "' key";
             error.append(ss.str());
             delete o;
             return false;
@@ -238,23 +238,23 @@ service::Summary::detectCorelet(const bp::file::Path &dirName,
 
         // got it, allocate summary
         m_type = Standalone;
-        m_coreletLibraryPath /= *(o->get(s_coreletLibraryKey));
+        m_serviceLibraryPath /= *(o->get(s_serviceLibraryKey));
     }
     else if (!type.compare(s_providerType))
     {
-        // extract the path to the corelet library
-        if (!o->has(s_coreletLibraryKey, BPTString))
+        // extract the path to the service library
+        if (!o->has(s_serviceLibraryKey, BPTString))
         {
             std::stringstream ss;
-            ss << "'" << s_providerType << "' corelets require a '"
-               << s_coreletLibraryKey << "' key";
+            ss << "'" << s_providerType << "' services require a '"
+               << s_serviceLibraryKey << "' key";
             error.append(ss.str());
             delete o;
             return false;
         }
 
         m_type = Provider;
-        m_coreletLibraryPath /= *(o->get(s_coreletLibraryKey));
+        m_serviceLibraryPath /= *(o->get(s_serviceLibraryKey));
     }
     else if (!strcmp(s_dependentType, type.c_str()))
     {
@@ -262,7 +262,7 @@ service::Summary::detectCorelet(const bp::file::Path &dirName,
         if (!o->has(s_usesKey, BPTMap))
         {
             std::stringstream ss;
-            ss << "'" << s_dependentType << "' corelets require a '"
+            ss << "'" << s_dependentType << "' services require a '"
                << s_usesKey << "' key";
             error.append(ss.str());
             delete o;
@@ -272,18 +272,18 @@ service::Summary::detectCorelet(const bp::file::Path &dirName,
         const bp::Object * uses = o->get(s_usesKey);
         BPASSERT(uses != NULL);
         
-        // "uses" map requires at least corelet name
-        if (!uses->has(s_coreletKey, BPTString))
+        // "uses" map requires at least service name
+        if (!uses->has(s_serviceKey, BPTString))
         {
             std::stringstream ss;
-            ss << "'" << s_usesKey << "' map requires a '" << s_coreletKey
+            ss << "'" << s_usesKey << "' map requires a '" << s_serviceKey
                << "' key.";
             error.append(ss.str());
             delete o;
             return false;
         }
 
-        m_usesCorelet.append(*(uses->get(s_coreletKey)));
+        m_usesService.append(*(uses->get(s_serviceKey)));
 
         // now extract the versions and validate them if present 
         if (uses->has(s_versionKey, BPTString)) {
@@ -332,7 +332,7 @@ service::Summary::detectCorelet(const bp::file::Path &dirName,
     }
     else
     {
-        error.append("Invalid corelet type '" + type + "'");
+        error.append("Invalid service type '" + type + "'");
         delete o;
         return false;
     }
@@ -360,7 +360,7 @@ service::Summary::detectCorelet(const bp::file::Path &dirName,
     // hierarchy where the parent is the version, and the grandparent
     // is the service name.  This code works by testing if the parent
     // is a parseable version, if it isn't then we assume that this
-    // corelet isn't in a <name>/<version> dir, and leave these two
+    // service isn't in a <name>/<version> dir, and leave these two
     // members empty.
     std::string versionCandidate = bp::file::utf8FromNative(dirName.filename());
     bp::ServiceVersion sv;
@@ -454,14 +454,14 @@ service::Summary::setLocalizations(std::map<std::string,
 }
 
 bp::file::Path
-service::Summary::coreletLibraryPath() const
+service::Summary::serviceLibraryPath() const
 {
-    return m_coreletLibraryPath;
+    return m_serviceLibraryPath;
 }
 std::string
-service::Summary::usesCorelet() const
+service::Summary::usesService() const
 {
-    return m_usesCorelet;
+    return m_usesService;
 }
 
 bp::ServiceVersion
@@ -476,7 +476,7 @@ service::Summary::usesMinversion() const
     return m_usesMinversion;
 }
 
-service::Summary::CoreletType
+service::Summary::ServiceType
 service::Summary::type() const
 {
     return m_type;
@@ -501,8 +501,8 @@ service::Summary::clear()
     m_permissions.clear();
     // TODO: reset m_modDate;
 
-    m_coreletLibraryPath.clear();    
-    m_usesCorelet.clear();
+    m_serviceLibraryPath.clear();    
+    m_usesService.clear();
     m_usesVersion.parse("");
     m_usesMinversion.parse("");
     m_arguments.clear();
@@ -525,7 +525,7 @@ bool
 bp::service::operator<(const service::Summary & lhs,
                        const service::Summary & rhs)
 {
-    // sort dependent corelets last
+    // sort dependent services last
     if (lhs.type() == service::Summary::Dependent && 
         rhs.type() != lhs.type())
     {
@@ -560,10 +560,10 @@ bp::service::Summary::toHumanReadableString() const
     }
     ss << "type: " << typeAsString() << std::endl;
     if (m_type == Provider || m_type == Standalone) {
-        ss << "library: " << m_coreletLibraryPath << std::endl;
+        ss << "library: " << m_serviceLibraryPath << std::endl;
     } else if (m_type == Dependent) {
         ss << "depends on: " << std::endl;
-        ss << "   service: " << m_usesCorelet << std::endl;
+        ss << "   service: " << m_usesService << std::endl;
         if (m_usesVersion.majorVer() >= 0) {
             ss << "   version: " << m_usesVersion.asString() << std::endl;
         }

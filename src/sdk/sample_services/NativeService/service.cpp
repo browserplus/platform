@@ -198,7 +198,7 @@ static BPFunctionDefinition s_myServiceFunctions[] = {
     }
 };
 
-static BPCoreletDefinition s_myServiceDef = {
+static BPServiceDefinition s_myServiceDef = {
     "SampleService",
     1, 0, 0,
     "A do-nothing service to see what writing a service is like.",
@@ -212,7 +212,7 @@ static BPCoreletDefinition s_myServiceDef = {
  * should allocated any service wide resources required and should not
  * block.
  */
-static const BPCoreletDefinition *
+static const BPServiceDefinition *
 myInitialize(const BPCFunctionTable * bpCoreFunctions,
               const BPElement * parameterMap)
 {
@@ -224,7 +224,7 @@ myInitialize(const BPCFunctionTable * bpCoreFunctions,
 /* and finally, declare the entry point to the service, which is a
  * function table */
 static BPPFunctionTable funcTable = {
-    BPP_CORELET_API_VERSION,
+    BPP_SERVICE_API_VERSION,
     myInitialize,
     myShutdown,
     myAllocate,

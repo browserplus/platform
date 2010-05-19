@@ -161,7 +161,7 @@ uninstallerExe = "#{buildDir}/dist/bin/#{$intDir}/BrowserPlusUninstaller#{exeSuf
 FileUtils.install(uninstallerExe, shippingBinsDir, :mode => 0755, :verbose => $beVerbose)
 
 
-# Internal corelet validator and publisher
+# Internal service validator and publisher
 #
 installerExe = "#{buildDir}/dist/bin/#{$intDir}/ServiceInstaller#{exeSuffix}"
 publisherExe = "#{buildDir}/dist/bin/#{$intDir}/ServicePublisher#{exeSuffix}"
@@ -202,7 +202,7 @@ else
   myCP_R(prefPane, shippingBinsDir)
 end
 
-# Throw in stuff to sign corelets with test certificates
+# Throw in stuff to sign services with test certificates
 #
 FileUtils.mkdir_p(signingDir, :verbose => $beVerbose)
 bpSignerExe = "#{buildDir}/dist/bin/#{$intDir}/bpsigner#{exeSuffix}"
@@ -224,14 +224,14 @@ else
 end
 
 # Put native sample service in SDK
-sampleCoreletFiles = []
+sampleServiceFiles = []
 if $platform == "Windows"
-  sampleCoreletFiles = %w[README.txt service.cpp manifest.json.windows SampleService.vcproj SampleService.sln InstallThisService.bat SampleServiceTest.html]
+  sampleServiceFiles = %w[README.txt service.cpp manifest.json.windows SampleService.vcproj SampleService.sln InstallThisService.bat SampleServiceTest.html]
 else
-  sampleCoreletFiles = %w[README.txt service.cpp manifest.json Makefile SampleServiceTest.html]
+  sampleServiceFiles = %w[README.txt service.cpp manifest.json Makefile SampleServiceTest.html]
 end
 FileUtils.mkdir_p("#{sdkDir}/samples/NativeService")
-sampleCoreletFiles.each do |f|
+sampleServiceFiles.each do |f|
   # magicially handle the fact that .erb files are substituted into the
   # build directory
   [ "#{$topDir}/sdk/sample_services/NativeService/#{f}",
@@ -243,9 +243,9 @@ sampleCoreletFiles.each do |f|
 end
 
 # Put ruby sample service in SDK
-sampleCoreletFiles = %w[README.html hello.rb manifest.json]
+sampleServiceFiles = %w[README.html hello.rb manifest.json]
 FileUtils.mkdir_p("#{sdkDir}/samples/RubyService")
-sampleCoreletFiles.each do |f|
+sampleServiceFiles.each do |f|
   FileUtils.install("#{$topDir}/sdk/sample_services/RubyService/#{f}",
                     "#{sdkDir}/samples/RubyService", :verbose => $beVerbose)
 end

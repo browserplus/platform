@@ -24,7 +24,7 @@
 #include "CommandExecutor.h"
 #include "BPUtils/ProductPaths.h"
 #include "BPUtils/bpfile.h"
-#include "CoreletManager/CoreletManager.h"
+#include "ServiceManager/ServiceManager.h"
 
 #include <stdexcept>
 #include <string>
@@ -45,7 +45,7 @@ CommandExecutor::CommandExecutor(const std::string & ll,
 {
     m_instanceMan.reset(new InstanceManager(this));
 
-    m_servMan->setPluginDirectory(bp::paths::getCoreletDirectory());
+    m_servMan->setPluginDirectory(bp::paths::getServiceDirectory());
 }
 
 CommandExecutor::~CommandExecutor()
@@ -155,8 +155,8 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::instantiate)
     // now let's begin the async allocation
     (void) m_servMan->instantiate(
         name, version,
-        weak_ptr<CoreletExecutionContext>(m_instanceMan),
-        weak_ptr<ICoreletRegistryListener>(m_instanceMan));
+        weak_ptr<ServiceExecutionContext>(m_instanceMan),
+        weak_ptr<IServiceRegistryListener>(m_instanceMan));
 }
 
 BP_DEFINE_COMMAND_HANDLER(CommandExecutor::destroy)
@@ -190,7 +190,7 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::execute)
     }
 
     // now find the instance
-    shared_ptr<CoreletInstance> iPtr =
+    shared_ptr<ServiceInstance> iPtr =
         m_instanceMan->findInstance(instance);
 
     if (iPtr == NULL) {

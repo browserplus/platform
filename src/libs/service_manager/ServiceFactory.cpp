@@ -21,17 +21,17 @@
  */
 
 /**
- * CoreletFactory
+ * ServiceFactory
  *
- * A factory capable of creating corelet instances.
+ * A factory capable of creating service instances.
  */
 
-#include "CoreletFactory.h"
+#include "ServiceFactory.h"
 
-CoreletFactory::CoreletFactory()
+ServiceFactory::ServiceFactory()
 {
 }
 
-CoreletFactory::~CoreletFactory()
+ServiceFactory::~ServiceFactory()
 {
 }

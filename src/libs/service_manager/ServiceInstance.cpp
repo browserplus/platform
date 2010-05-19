@@ -21,13 +21,13 @@
  */
 
 /**
- * CoreletInstance
+ * ServiceInstance
  *
- * An instantiated corelet instance upon which functions may be
+ * An instantiated service instance upon which functions may be
  * invoked.
  */
 
-#include "CoreletInstance.h"
+#include "ServiceInstance.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bptypeutil.h"
 
@@ -35,12 +35,12 @@ using namespace std;
 using namespace std::tr1;
 
 
-CoreletInstance::CoreletInstance(weak_ptr<CoreletExecutionContext> c)
+ServiceInstance::ServiceInstance(weak_ptr<ServiceExecutionContext> c)
 {
     m_context = c;
 }
 
-CoreletInstance::~CoreletInstance()
+ServiceInstance::~ServiceInstance()
 {
 }
 
@@ -78,7 +78,7 @@ struct DataToCore
 };
 
 void
-CoreletInstance::sendComplete(unsigned int tid,
+ServiceInstance::sendComplete(unsigned int tid,
                               const bp::Object & results)
 {
     DataToCore * dtc = new DataToCore(DataToCore::T_ExecutionComplete);
@@ -88,7 +88,7 @@ CoreletInstance::sendComplete(unsigned int tid,
 }
 
 void
-CoreletInstance::sendFailure(unsigned int tid, const std::string & error,
+ServiceInstance::sendFailure(unsigned int tid, const std::string & error,
                              const std::string & verboseError)
 {
     DataToCore * dtc = new DataToCore(DataToCore::T_ExecutionFailure);
@@ -99,7 +99,7 @@ CoreletInstance::sendFailure(unsigned int tid, const std::string & error,
 }
 
 void
-CoreletInstance::invokeCallback(unsigned int tid,
+ServiceInstance::invokeCallback(unsigned int tid,
                                 const bp::Object & results)
 {
     DataToCore * dtc = new DataToCore(DataToCore::T_InvokeCallback);
@@ -110,7 +110,7 @@ CoreletInstance::invokeCallback(unsigned int tid,
 
 
 void
-CoreletInstance::sendUserPrompt(
+ServiceInstance::sendUserPrompt(
     unsigned int cookie,
     const bp::file::Path& pathToHTMLDialog,
     const bp::Object * arguments)
@@ -123,7 +123,7 @@ CoreletInstance::sendUserPrompt(
 }
 
 void
-CoreletInstance::onHop(void * ctx)
+ServiceInstance::onHop(void * ctx)
 {
     DataToCore * dtc = (DataToCore *) ctx;
 
@@ -132,7 +132,7 @@ CoreletInstance::onHop(void * ctx)
         return;
     }
 
-    shared_ptr<CoreletExecutionContext> context = m_context.lock();
+    shared_ptr<ServiceExecutionContext> context = m_context.lock();
 
     // is the context null?  if so we must abort
     if (context == NULL) {
@@ -141,7 +141,7 @@ CoreletInstance::onHop(void * ctx)
         return;
     }
     
-    shared_ptr<ICoreletInstanceListener> listener = m_listener.lock();
+    shared_ptr<IServiceInstanceListener> listener = m_listener.lock();
 
     // is the listener null?  if so we must abort
     if (listener == NULL) {
@@ -191,8 +191,8 @@ CoreletInstance::onHop(void * ctx)
 }
 
 void
-CoreletInstance::setListener(
-    weak_ptr<ICoreletInstanceListener> listener)
+ServiceInstance::setListener(
+    weak_ptr<IServiceInstanceListener> listener)
 {
     m_listener = listener;
 }

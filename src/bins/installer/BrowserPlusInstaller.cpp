@@ -66,7 +66,7 @@ public:
     } tCommand;
 
     AsyncHelper(const Path& keyPath,
-				const list<CoreletRequireStatement>& services,
+				const list<ServiceRequireStatement>& services,
                 const list<string>& distroServers,
                 const Path& destDir,
                 bp::runloop::RunLoop* rl)
@@ -159,7 +159,7 @@ public:
 
 private:
     bp::install::Fetcher m_fetcher;
-    list<CoreletRequireStatement> m_services;
+    list<ServiceRequireStatement> m_services;
     bp::runloop::RunLoop* m_rl;
     weak_ptr<bp::install::IFetcherListener> m_listener;
 
@@ -172,7 +172,7 @@ runIt(AsyncHelper::tCommand command,
 	  const Path& keyPath,
       const list<string>& servers,
       const Path& destDir,
-      list<CoreletRequireStatement> services = list<CoreletRequireStatement>())
+      list<ServiceRequireStatement> services = list<ServiceRequireStatement>())
 { 
     bp::runloop::RunLoop rl;
     rl.init();
@@ -213,7 +213,7 @@ public:
                    const Path& keyPath,
                    const list<string>& servers,
                    const string& version,
-                   const list<CoreletRequireStatement> & services,
+                   const list<ServiceRequireStatement> & services,
                    const string& permissions,
                    const string& autoUpdatePermissions,
                    shared_ptr<InstallerSkin> skin,
@@ -268,7 +268,7 @@ private:
     list<string> m_servers;
     string m_platformVersion;
     size_t m_platformSize;
-    list<CoreletRequireStatement> m_services;
+    list<ServiceRequireStatement> m_services;
     string m_permissions;
     string m_autoUpdatePermissions;
     shared_ptr<InstallerSkin> m_skin;
@@ -633,7 +633,7 @@ readConfig(const Path& configPath,
 		   list<string>& servers,
            Path& updatePackage,
            string& version,
-           list<CoreletRequireStatement>& services,
+           list<ServiceRequireStatement>& services,
            string& permissions,
            string& autoUpdatePermissions,
            unsigned int& width,
@@ -681,7 +681,7 @@ readConfig(const Path& configPath,
     // Get list of requested services
     if (configMap->getList("services", l)) {
         for (unsigned int i = 0; i < l->size(); i++) {
-            CoreletRequireStatement req;
+            ServiceRequireStatement req;
             const bp::Map* m = dynamic_cast<const bp::Map*>(l->value(i));
             if (!m) {
                 BP_THROW("bad config file format");
@@ -886,7 +886,7 @@ main(int argc, const char** argv)
         (void) remove(destDir);  // doze re-uses same dir.  sigh
 
         list<string> servers;
-        list<CoreletRequireStatement> services;
+        list<ServiceRequireStatement> services;
         string permissions;
         // default width and height
         unsigned int width = 400, height = 440;

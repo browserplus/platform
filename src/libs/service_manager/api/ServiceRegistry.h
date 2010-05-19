@@ -21,100 +21,100 @@
  */
 
 /**
- * CoreletRegistry
+ * ServiceRegistry
  *
- * A collection of available corelets from which corelets may be
- * described, and instances of corelets may be attained.
+ * A collection of available services from which services may be
+ * described, and instances of services may be attained.
  */
 
-#ifndef __CORELETREGISTRY_H__
-#define __CORELETREGISTRY_H__
+#ifndef __SERVICEREGISTRY_H__
+#define __SERVICEREGISTRY_H__
 
 #include "BPUtils/ServiceDescription.h"
 #include "BPUtils/bpfile.h"
-#include "CoreletManager/CoreletExecutionContext.h"
-#include "CoreletManager/CoreletInstance.h"
-#include "CoreletManager/CoreletFactory.h"
+#include "ServiceManager/ServiceExecutionContext.h"
+#include "ServiceManager/ServiceInstance.h"
+#include "ServiceManager/ServiceFactory.h"
 
 
-class ICoreletRegistryListener  
+class IServiceRegistryListener  
 {
 public:
-    virtual ~ICoreletRegistryListener() { }
+    virtual ~IServiceRegistryListener() { }
     
     virtual void
     onAllocationSuccess(unsigned int allocationId,
-                        std::tr1::shared_ptr<CoreletInstance> instance) = 0;
+                        std::tr1::shared_ptr<ServiceInstance> instance) = 0;
     
     virtual void
     onAllocationFailure(unsigned int allocationId) = 0;
 };
 
 
-class CoreletRegistry : public bp::thread::HoppingClass
+class ServiceRegistry : public bp::thread::HoppingClass
 {
 public:
     /**
-     * Instantiate a corelet registry, specifying logfile and loglevel
+     * Instantiate a service registry, specifying logfile and loglevel
      * which will be relayed to spawned services.
      */
-    CoreletRegistry(const std::string & loglevel,
+    ServiceRegistry(const std::string & loglevel,
                     const bp::file::Path & logfile);
 
     /**
-     * Destory a corelet registry
+     * Destory a service registry
      */
-    ~CoreletRegistry();    
+    ~ServiceRegistry();    
     /**
      * Set the directory where dynamic services are installed
      */
     void setPluginDirectory(const bp::file::Path & path);
 
    /**
-     * By default the CoreletManager library is conservative with
+     * By default the ServiceManager library is conservative with
      * touching the disk to rescan services.  This means that any
-     * time a corelet is installed or deleted, one must explicitly
+     * time a service is installed or deleted, one must explicitly
      * force a rescan to cause a running BrowserPlusCore to notice
      * updated services on disk.
      */
     void forceRescan();
 
     /**
-     * register a corelet with the registry
+     * register a service with the registry
      *
-     * \param description - an object which describes the corelet
+     * \param description - an object which describes the service
      * \param factory - a factory which may produce instances of
-     *                  the corelet 
+     *                  the service 
      *
-     * \returns false if a corelet with the same name and version
+     * \returns false if a service with the same name and version
      *                is already registered.
      */
-    bool registerCorelet(const bp::service::Description & description,
-                         std::tr1::shared_ptr<CoreletFactory> factory);
+    bool registerService(const bp::service::Description & description,
+                         std::tr1::shared_ptr<ServiceFactory> factory);
 
     /** 
-     * purge a specified corelet
+     * purge a specified service
      */
-    bool purgeCorelet(const std::string & name,
+    bool purgeService(const std::string & name,
                       const std::string & version);
     
     /**
-     * unregister all registered corelets
+     * unregister all registered services
      */
     void unregisterAll();
 
     /**
-     * Attain a list of the descriptions of available corelets.
+     * Attain a list of the descriptions of available services.
      */
-    std::list<bp::service::Description> availableCorelets();
+    std::list<bp::service::Description> availableServices();
     
     /**
-     * Attain a list of the summaries of available corelets
+     * Attain a list of the summaries of available services
      */
-    std::list<bp::service::Summary> availableCoreletSummaries();
+    std::list<bp::service::Summary> availableServiceSummaries();
 
     /**
-     * Attain a description of a specified corelet.  On failure,
+     * Attain a description of a specified service.  On failure,
      * description's name will be empty
      */
     bool describe(const std::string & name,
@@ -123,8 +123,8 @@ public:
                   bp::service::Description & oDescription);
     
     /**
-     * Attain a summary of a specified corelet.  empty name returned
-     * for builtin corelets
+     * Attain a summary of a specified service.  empty name returned
+     * for builtin services
      */
     bool summary(const std::string & name,
                  const std::string & version,
@@ -132,9 +132,9 @@ public:
                  bp::service::Summary & oSummary);
 
     /**
-     * do we have a corelet that can satisfy the requires statement
+     * do we have a service that can satisfy the requires statement
      */
-    bool haveCorelet(const std::string & name,
+    bool haveService(const std::string & name,
                      const std::string & version,
                      const std::string & minversion);
     
@@ -152,11 +152,11 @@ public:
     unsigned int instantiate(
         const std::string & name,
         const std::string & version,
-        std::tr1::weak_ptr<CoreletExecutionContext> context,
-        std::tr1::weak_ptr<ICoreletRegistryListener> listener);
+        std::tr1::weak_ptr<ServiceExecutionContext> context,
+        std::tr1::weak_ptr<IServiceRegistryListener> listener);
 
     /** 
-     * Determine if the CoreletRegistry is busy, this may be true if
+     * Determine if the ServiceRegistry is busy, this may be true if
      * services have requested a delayed shutdown, or other quick
      * non-interruptable operations are in progress.
      */
@@ -164,7 +164,7 @@ public:
 
   private:
     typedef std::pair< bp::service::Description,
-                       std::tr1::shared_ptr<CoreletFactory> >
+                       std::tr1::shared_ptr<ServiceFactory> >
         DescFactPair;
     std::list<DescFactPair> m_registrations;
     DescFactPair getReg(const std::string & name, const std::string & version,

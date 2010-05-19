@@ -1,6 +1,6 @@
 {
   "type": "standalone",
-  "CoreletLibrary": "@ServiceLibrary@",
+  "ServiceLibrary": "@ServiceLibrary@",
   "strings": { 
     "en": { 
       "title": "Sample Service", 

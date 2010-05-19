@@ -71,7 +71,7 @@ public:
 
     /**
      * A very specific, but common test which occurs all over.
-     * When scanning a list of available corelets, how do we tell if
+     * When scanning a list of available services, how do we tell if
      * the 'current' version both matches the wanted 'version' and
      * 'minversion', AND is newer than the match we've already 'got'
      */

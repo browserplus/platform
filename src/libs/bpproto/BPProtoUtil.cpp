@@ -21,7 +21,7 @@
  */
 
 /**
- * BPProtoUtil.h -- custom little tools used by the corelet library.
+ * BPProtoUtil.h -- custom little tools used by the service library.
  */
 #include "BPProtoUtil.h"
 #include "BPUtils/BPLog.h"
@@ -118,9 +118,9 @@ getTypeValue(const bp::Object * obj)
     return t;
 }
 
-BPCoreletDefinition * objectToDefinition(const bp::Object * obj)
+BPServiceDefinition * objectToDefinition(const bp::Object * obj)
 {
-    BPCoreletDefinition * def = NULL;
+    BPServiceDefinition * def = NULL;
     
     // ensure that the object is well formed
     if (obj == NULL || obj->type() != BPTMap)
@@ -132,11 +132,11 @@ BPCoreletDefinition * objectToDefinition(const bp::Object * obj)
     const bp::Map * m = dynamic_cast<const bp::Map *>(obj);
     BPASSERT(m != NULL);
 
-    // we seem good.  allocate the top level corelet definition structure.
-    def = (BPCoreletDefinition *) calloc(1, sizeof(BPCoreletDefinition));
+    // we seem good.  allocate the top level service definition structure.
+    def = (BPServiceDefinition *) calloc(1, sizeof(BPServiceDefinition));
     
     // now pull out all the information we can
-    def->coreletName = getStringValue(m->get("name"));
+    def->serviceName = getStringValue(m->get("name"));
     def->docString = getStringValue(m->get("documentation"));
 
     // handle version
@@ -208,7 +208,7 @@ BPCoreletDefinition * objectToDefinition(const bp::Object * obj)
     return def;
 }
 
-void freeDefinition(BPCoreletDefinition * definition)
+void freeDefinition(BPServiceDefinition * definition)
 {
     if (definition != NULL) {
         // TODO: implement me!  this is memory leak!
@@ -275,16 +275,16 @@ mapResponseToErrorCode(const bp::Object * obj,
     else
     {
         // now determine the results of the command
-        if (!errorString.compare("BP.noSuchCorelet")) {
-            ec = BP_EC_NO_SUCH_CORELET;
+        if (!errorString.compare("BP.noSuchService")) {
+            ec = BP_EC_NO_SUCH_SERVICE;
         }
         else if (!errorString.compare("BP.noSuchFunction"))
         {
             ec = BP_EC_NO_SUCH_FUNCTION;
         }
-        else if (!errorString.compare("BP.coreletExecError"))
+        else if (!errorString.compare("BP.serviceExecError"))
         {
-            ec = BP_EC_CORELET_EXEC_ERROR;
+            ec = BP_EC_SERVICE_EXEC_ERROR;
         }
         else if (!errorString.compare("BP.extendedError"))
         {

@@ -21,49 +21,49 @@
  */
 
 /**
- * CoreletQueryUtil - logic to perform corelet matching, and determine
+ * ServiceQueryUtil - logic to perform service matching, and determine
  *                    hot to satisfy requirements.
  */
 
-#ifndef __CORELETQUERYUTIL_H__
-#define __CORELETQUERYUTIL_H__
+#ifndef __SERVICEQUERYUTIL_H__
+#define __SERVICEQUERYUTIL_H__
 
-#include "CoreletQuery.h"
+#include "ServiceQuery.h"
 #include "DistQueryTypes.h"
 //#include "BPUtils/BPUtils.h"
 
-namespace CoreletQueryUtil {
+namespace ServiceQueryUtil {
     bool findBestMatch(std::string name,
                        std::string versionStr,
                        std::string minversionStr,
-                       const AvailableCoreletList & list,
-                       AvailableCorelet & oMatch);
+                       const AvailableServiceList & list,
+                       AvailableService & oMatch);
 
-    // get a (reverse) topologically sorted list of corelets that
+    // get a (reverse) topologically sorted list of services that
     // satisfy the given requirements
-    bool findSatisfyingCorelets(
-        const std::list<CoreletRequireStatement> & requirements,
+    bool findSatisfyingServices(
+        const std::list<ServiceRequireStatement> & requirements,
         const std::list<bp::service::Summary> & installed,
-        const AvailableCoreletList & available, bool wantNewest,
-        AvailableCoreletList & oNeed);
+        const AvailableServiceList & available, bool wantNewest,
+        AvailableServiceList & oNeed);
 
     // given the set of requirements, satisfied by the provided list of
-    // installed corelets, are there corelets on the 'updates' list that
+    // installed services, are there services on the 'updates' list that
     // are newer and would still satisfy these requirements?
     bool haveUpdates(
-        const std::list<CoreletRequireStatement> & requirements,
+        const std::list<ServiceRequireStatement> & requirements,
         const std::list<bp::service::Summary> & installed,
         const std::list<bp::service::Summary> & updates,
-        AvailableCoreletList & oBest);
+        AvailableServiceList & oBest);
 
-    // reformat the internal representation of a available corelet list
+    // reformat the internal representation of a available service list
     // to something we send out to the client
-    CoreletList reformatAvailableCoreletList(
-        const AvailableCoreletList & list);
+    ServiceList reformatAvailableServiceList(
+        const AvailableServiceList & list);
 
-    // reformat a corelet summary pointer into an ACLPtr 
-    AvailableCoreletList
-        coreletSummaryToACL(const std::list<bp::service::Summary> & cs);
+    // reformat a service summary pointer into an ACLPtr 
+    AvailableServiceList
+        serviceSummaryToACL(const std::list<bp::service::Summary> & cs);
 };
 
 #endif

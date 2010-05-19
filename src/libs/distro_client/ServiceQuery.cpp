@@ -21,16 +21,16 @@
  */
 
 /**
- * CoreletQuery - A class capable of querying multiple distribution servers
- *                to find and attain corelets.
+ * ServiceQuery - A class capable of querying multiple distribution servers
+ *                to find and attain services.
  */
 
-#include "CoreletQuery.h"
+#include "ServiceQuery.h"
 #include "ArchiveLib/ArchiveLib.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/bplocalization.h"
 #include "BPUtils/ProductPaths.h"
-#include "CoreletQueryUtil.h"
+#include "ServiceQueryUtil.h"
 #include "PendingUpdateCache.h"
 #include "WSProtocol.h"
 
@@ -47,11 +47,11 @@ using namespace std;
 using namespace std::tr1;
 namespace bpf = bp::file;
 
-ICoreletQueryListener::~ICoreletQueryListener()
+IServiceQueryListener::~IServiceQueryListener()
 {
 }
 
-CoreletQuery::CoreletQuery(std::list<std::string> serverURLs,
+ServiceQuery::ServiceQuery(std::list<std::string> serverURLs,
                            const IServiceFilter * serviceFilter)
     : bp::http::client::Listener(), m_qc(serverURLs, serviceFilter),
       m_type(None), m_serviceFilter(serviceFilter), m_listener(NULL) 
@@ -60,18 +60,18 @@ CoreletQuery::CoreletQuery(std::list<std::string> serverURLs,
 }
 
 
-CoreletQuery::~CoreletQuery()
+ServiceQuery::~ServiceQuery()
 {
 }
 
 void
-CoreletQuery::setListener(ICoreletQueryListener * listener)
+ServiceQuery::setListener(IServiceQueryListener * listener)
 {
     m_listener = listener;
 }
 
 void 
-CoreletQuery::onResponseStatus(const bp::http::Status& status,
+ServiceQuery::onResponseStatus(const bp::http::Status& status,
                                const bp::http::Headers& headers)
 {
     bp::http::client::Listener::onResponseStatus(status, headers);
@@ -89,7 +89,7 @@ CoreletQuery::onResponseStatus(const bp::http::Status& status,
 
 
 void 
-CoreletQuery::onResponseBodyBytes(const unsigned char* pBytes, 
+ServiceQuery::onResponseBodyBytes(const unsigned char* pBytes, 
                                   unsigned int size)
 {
     bp::http::client::Listener::onResponseBodyBytes(pBytes, size);
@@ -116,25 +116,25 @@ CoreletQuery::onResponseBodyBytes(const unsigned char* pBytes,
 
 
 void 
-CoreletQuery::onClosed()
+ServiceQuery::onClosed()
 {
     // maintain the life of this object until the completion
     // of the function in case one of our listeners delete us from
     // a callback.
-    shared_ptr<CoreletQuery> tStrong(shared_from_this());
+    shared_ptr<ServiceQuery> tStrong(shared_from_this());
 
     BPLOG_INFO_STRM(this << ": onClosed");
     bp::http::client::Listener::onClosed();
     try {
         if (m_type == Download) {
-            // now we've got the buffer of the downloaded corelet
+            // now we've got the buffer of the downloaded service
             // file.  w00t.
             if (m_listener != NULL) {
                 m_listener->onDownloadComplete(this, m_cletBuf);
             }
             m_cletBuf.clear();
         } else if (m_type == UpdateCache) {
-            // now buf is a cached corelet we must install into cache
+            // now buf is a cached service we must install into cache
             BPLOG_INFO_STRM(this << ": CacheUpdate: downloaded "
                             << m_cletBuf.size()
                             << " bytes for "
@@ -154,14 +154,14 @@ CoreletQuery::onClosed()
                 if (m_listener) {
                     m_listener->onCacheUpdated(
                         this, 
-                        CoreletQueryUtil::reformatAvailableCoreletList(m_updates));
+                        ServiceQueryUtil::reformatAvailableServiceList(m_updates));
                 }
                 
             } else {
                 startDownload(*m_currentUpdate);
             }
     
-        } else if (m_type == CoreletDetails) {
+        } else if (m_type == ServiceDetails) {
             if (response()->body.size() == 0) {
                 throw("missing response body");
             }
@@ -192,7 +192,7 @@ CoreletQuery::onClosed()
                 throw("no body in AttainServiceSynopses response");
             } else {
                 // now body holds the localized description of the
-                // corelet.  we must parse it and append information
+                // service.  we must parse it and append information
                 // to last entry in m_locDescs list
                 parseLocalization(response()->body.elementAddr(0),
                                   response()->body.size());
@@ -222,7 +222,7 @@ CoreletQuery::onClosed()
 
 
 void 
-CoreletQuery::onTimeout()
+ServiceQuery::onTimeout()
 {
     BPLOG_WARN_STRM(this << ": transaction timed out");
     bp::http::client::Listener::onTimeout();
@@ -230,7 +230,7 @@ CoreletQuery::onTimeout()
 }
 
 void 
-CoreletQuery::onCancel() 
+ServiceQuery::onCancel() 
 {
     BPLOG_WARN_STRM(this << ": transaction cancelled");
     bp::http::client::Listener::onCancel();
@@ -239,7 +239,7 @@ CoreletQuery::onCancel()
 
 
 void 
-CoreletQuery::onError(const std::string& msg) 
+ServiceQuery::onError(const std::string& msg) 
 {
     BPLOG_WARN_STRM(this << ": transaction error " << msg);
     bp::http::client::Listener::onError(msg);
@@ -248,19 +248,19 @@ CoreletQuery::onError(const std::string& msg)
 
 
 void
-CoreletQuery::availableServices(std::string platform)
+ServiceQuery::availableServices(std::string platform)
 {
     m_type = AvailableServices;
-    m_qc.coreletList(platform);
+    m_qc.serviceList(platform);
 }
 
 
 void
-CoreletQuery::findCorelet(std::string name, std::string version,
+ServiceQuery::findService(std::string name, std::string version,
                           std::string minversion, std::string platform)
 {
-    m_type = FindCorelet;
-    m_qc.coreletList(platform);
+    m_type = FindService;
+    m_qc.serviceList(platform);
 
     m_name = name;
     m_version = version;
@@ -268,11 +268,11 @@ CoreletQuery::findCorelet(std::string name, std::string version,
 }
 
 void
-CoreletQuery::downloadCorelet(std::string name, std::string version,
+ServiceQuery::downloadService(std::string name, std::string version,
                               std::string platform)
 {
     m_type = Download;
-    m_qc.coreletList(platform);
+    m_qc.serviceList(platform);
     m_name = name;
     m_version = version;
     m_platform = platform;
@@ -280,11 +280,11 @@ CoreletQuery::downloadCorelet(std::string name, std::string version,
 
 
 void
-CoreletQuery::coreletDetails(std::string name, std::string version,
+ServiceQuery::serviceDetails(std::string name, std::string version,
                              std::string platform)
 {
-    m_type = CoreletDetails;
-    m_qc.coreletList(platform);
+    m_type = ServiceDetails;
+    m_qc.serviceList(platform);
     m_name = name;
     m_version = version;
     m_platform = platform;
@@ -292,22 +292,22 @@ CoreletQuery::coreletDetails(std::string name, std::string version,
 
 
 void
-CoreletQuery::serviceSynopses(const std::string & platform,
+ServiceQuery::serviceSynopses(const std::string & platform,
                               const std::string & locale,
-                              const CoreletList & corelets)
+                              const ServiceList & services)
 {
     if (platform.empty()) {
-        BP_THROW_FATAL("empty platform in CoreletQuery::serviceSynopses()");
+        BP_THROW_FATAL("empty platform in ServiceQuery::serviceSynopses()");
     }
     if (locale.empty()) {
-        BP_THROW_FATAL("empty locale in CoreletQuery::serviceSynopses()");
+        BP_THROW_FATAL("empty locale in ServiceQuery::serviceSynopses()");
     }
     
     m_type = AttainServiceSynopses;
     m_platform = platform;
     m_locale = locale;
     
-    m_coreletList = corelets;
+    m_serviceList = services;
 
     // hop before getting next localization.  this prevents us from
     // calling back to the caller before our function returns.
@@ -315,7 +315,7 @@ CoreletQuery::serviceSynopses(const std::string & platform,
 }
 
 void 
-CoreletQuery::onHop(void * hopact)
+ServiceQuery::onHop(void * hopact)
 {
     if (hopact == HOPACT_GET_NEXT_L10N) {
         getNextLocalization();    
@@ -325,10 +325,10 @@ CoreletQuery::onHop(void * hopact)
 }
 
 void
-CoreletQuery::getNextLocalization()
+ServiceQuery::getNextLocalization()
 {
     // nothing more to localize?  call it quits 
-    if (m_coreletList.empty()) {
+    if (m_serviceList.empty()) {
         if (m_listener) {
             m_listener->gotServiceSynopsis(this, m_locDescs);
         }
@@ -336,8 +336,8 @@ CoreletQuery::getNextLocalization()
     }
 
     std::string name, version;
-    std::pair<std::string, std::string> i =  m_coreletList.front();
-    m_coreletList.pop_front();
+    std::pair<std::string, std::string> i =  m_serviceList.front();
+    m_serviceList.pop_front();
 
     name = i.first;
     version = i.second;
@@ -377,14 +377,14 @@ CoreletQuery::getNextLocalization()
         // from the distro server.
 
         // XXX: what if there are no services on the distro servers?
-        if (m_corelets.size() == 0) {
-            m_coreletList.push_front(i);
-            m_qc.coreletList(m_platform);
+        if (m_services.size() == 0) {
+            m_serviceList.push_front(i);
+            m_qc.serviceList(m_platform);
         } else {
             // figure out which distribution server to query
-            AvailableCorelet acp;
-            if (!CoreletQueryUtil::findBestMatch(i.first, i.second,
-                                                std::string(), m_corelets,
+            AvailableService acp;
+            if (!ServiceQueryUtil::findBestMatch(i.first, i.second,
+                                                std::string(), m_services,
                                                 acp))
             {
                 BPLOG_ERROR_STRM(this << ": Couldn't localize " << name << "/"
@@ -403,8 +403,8 @@ CoreletQuery::getNextLocalization()
             // If any version already exists on disk, this is an update.
             // This happens when minversion in a require forces us
             // to download a newer version before we cache the update.
-            bpf::Path coreletPath = bp::paths::getCoreletDirectory() / name;
-            synopsis.m_isUpdate = bpf::isDirectory(coreletPath);
+            bpf::Path servicePath = bp::paths::getServiceDirectory() / name;
+            synopsis.m_isUpdate = bpf::isDirectory(servicePath);
             
             m_locDescs.push_back(synopsis);
             fetchLocalization(acp);
@@ -414,7 +414,7 @@ CoreletQuery::getNextLocalization()
 
 
 void
-CoreletQuery::parseLocalization(const unsigned char* buf,
+ServiceQuery::parseLocalization(const unsigned char* buf,
                                 size_t len)
 {
     if (m_locDescs.size() == 0) {
@@ -515,23 +515,23 @@ CoreletQuery::parseLocalization(const unsigned char* buf,
 
 
 void
-CoreletQuery::satisfyRequirements(
+ServiceQuery::satisfyRequirements(
     std::string platform,
-    const std::list<CoreletRequireStatement> & requirements,
+    const std::list<ServiceRequireStatement> & requirements,
     const std::list<bp::service::Summary> & installed)
 {
     m_type = SatisfyRequirements;
     m_platform = platform;
     m_requirements = requirements;
     m_installed = installed;
-    m_qc.coreletList(platform);
+    m_qc.serviceList(platform);
 }
 
 void
-CoreletQuery::fetchDetails(const AvailableCorelet & acp)
+ServiceQuery::fetchDetails(const AvailableService & acp)
 {
     std::string url = WSProtocol::buildURL(acp.serverURL,
-                                           WSProtocol::CORELET_METADATA_PATH);
+                                           WSProtocol::SERVICE_METADATA_PATH);
     url += "/" + m_name + "/" + m_version + "/" + m_platform;
 
     bp::http::RequestPtr req(WSProtocol::buildRequest(url));
@@ -543,7 +543,7 @@ CoreletQuery::fetchDetails(const AvailableCorelet & acp)
 
 
 void
-CoreletQuery::fetchLocalization(const AvailableCorelet & acp)
+ServiceQuery::fetchLocalization(const AvailableService & acp)
 {
     std::string url =
         WSProtocol::buildURL(acp.serverURL,
@@ -561,14 +561,14 @@ CoreletQuery::fetchLocalization(const AvailableCorelet & acp)
 
 
 void
-CoreletQuery::startDownload(const AvailableCorelet & acp)
+ServiceQuery::startDownload(const AvailableService & acp)
 {
     m_dlSize = acp.sizeBytes;
     m_lastPct = 0;
     m_zeroPctSent = false;
     
     std::string url = WSProtocol::buildURL(acp.serverURL,
-                                            WSProtocol::CORELET_DOWNLOAD_PATH);
+                                            WSProtocol::SERVICE_DOWNLOAD_PATH);
     url += "/" + acp.name + "/" + acp.version.asString() + "/" + m_platform;
 
     bp::http::RequestPtr req(WSProtocol::buildRequest(url));
@@ -582,21 +582,21 @@ CoreletQuery::startDownload(const AvailableCorelet & acp)
 
 
 void
-CoreletQuery::updateCache(
+ServiceQuery::updateCache(
     std::string platform,
-    const std::list<CoreletRequireStatement> & requirements,
+    const std::list<ServiceRequireStatement> & requirements,
     const std::list<bp::service::Summary> & installed)
 {
     m_type = UpdateCache;
     m_platform = platform;
     m_requirements = requirements;
     m_installed = installed;
-    m_qc.coreletList(platform);
+    m_qc.serviceList(platform);
 }
 
 
 void
-CoreletQuery::latestPlatformVersion(std::string platform)
+ServiceQuery::latestPlatformVersion(std::string platform)
 {
     m_type = LatestPlatformVersion;
     m_platform = platform;
@@ -605,7 +605,7 @@ CoreletQuery::latestPlatformVersion(std::string platform)
 
 
 void
-CoreletQuery::downloadLatestPlatform(std::string platform)
+ServiceQuery::downloadLatestPlatform(std::string platform)
 {
     m_type = DownloadLatestPlatform;
     m_platform = platform;
@@ -620,24 +620,24 @@ CoreletQuery::downloadLatestPlatform(std::string platform)
 
 
 void
-CoreletQuery::onCoreletList(const AvailableCoreletList & list)
+ServiceQuery::onServiceList(const AvailableServiceList & list)
 {
     switch (m_type) {
         case AttainServiceSynopses: {
-            m_corelets = list;
+            m_services = list;
             getNextLocalization();
             break;
         }
         case SatisfyRequirements: {
-            AvailableCoreletList need;
-            if (!CoreletQueryUtil::findSatisfyingCorelets(
+            AvailableServiceList need;
+            if (!ServiceQueryUtil::findSatisfyingServices(
                     m_requirements, m_installed, list, false, need))
             {
                 transactionFailed();
             }
             else
             {
-                // now we know the minimal number of corelets we'll
+                // now we know the minimal number of services we'll
                 // need to download and install.  let's add in
                 // potential updates, and see if it makes sense to
                 // bundle any in. 
@@ -645,19 +645,19 @@ CoreletQuery::onCoreletList(const AvailableCoreletList & list)
                     PendingUpdateCache::cached();
                     
                 if (cachedList.size() > 0) {
-                    AvailableCoreletList cached = 
-                        CoreletQueryUtil::coreletSummaryToACL(cachedList);
+                    AvailableServiceList cached = 
+                        ServiceQueryUtil::serviceSummaryToACL(cachedList);
 
-                    AvailableCoreletList combined = list;
+                    AvailableServiceList combined = list;
                     combined.insert(combined.begin(),
                                     cached.begin(), cached.end());
                         
-                    (void) CoreletQueryUtil::findSatisfyingCorelets(
+                    (void) ServiceQueryUtil::findSatisfyingServices(
                         m_requirements, m_installed, combined, true, need);
                 }
 
-                CoreletList clist =
-                    CoreletQueryUtil::reformatAvailableCoreletList(need);
+                ServiceList clist =
+                    ServiceQueryUtil::reformatAvailableServiceList(need);
 
                 if (m_listener) {
                     m_listener->onRequirementsSatisfied(this, clist);
@@ -668,10 +668,10 @@ CoreletQuery::onCoreletList(const AvailableCoreletList & list)
         case AvailableServices:
             if (m_listener) m_listener->gotAvailableServices(this, list);
             break;
-        case FindCorelet: {
-            AvailableCorelet acp;
+        case FindService: {
+            AvailableService acp;
 
-            if (!CoreletQueryUtil::findBestMatch(m_name, m_version,
+            if (!ServiceQueryUtil::findBestMatch(m_name, m_version,
                                                  m_minversion, list, acp))
             {
                 transactionFailed();
@@ -682,10 +682,10 @@ CoreletQuery::onCoreletList(const AvailableCoreletList & list)
             }
             break;
         }
-        case CoreletDetails: {
-            AvailableCorelet acp;
+        case ServiceDetails: {
+            AvailableService acp;
 
-            if (!CoreletQueryUtil::findBestMatch(m_name, m_version,
+            if (!ServiceQueryUtil::findBestMatch(m_name, m_version,
                                                  m_minversion, list, acp))
             {
                 transactionFailed();
@@ -694,15 +694,15 @@ CoreletQuery::onCoreletList(const AvailableCoreletList & list)
             {
                 // now we must hit server again for the details,
                 // the serverURL in acp tells us which server the
-                // corelet resides on.
+                // service resides on.
                 fetchDetails(acp);
             }
             break;
         }
         case Download: {
-            AvailableCorelet acp;
+            AvailableService acp;
 
-            if (!CoreletQueryUtil::findBestMatch(m_name, m_version,
+            if (!ServiceQueryUtil::findBestMatch(m_name, m_version,
                                                  m_minversion, list, acp))
             {
                 transactionFailed();
@@ -711,7 +711,7 @@ CoreletQuery::onCoreletList(const AvailableCoreletList & list)
             {
                 // now we must hit server again for the download,
                 // the serverURL in acp tells us which server the
-                // corelet resides on.
+                // service resides on.
                 startDownload(acp);
                 break;
             }
@@ -719,24 +719,24 @@ CoreletQuery::onCoreletList(const AvailableCoreletList & list)
         }
         case UpdateCache: {
             // now we have all of the required inputs, let's
-            // determine what corelets we need to download
+            // determine what services we need to download
             std::list<bp::service::Summary> got =
                 PendingUpdateCache::cached();
 
-            // merge the cached installed corelets into one list.  all
+            // merge the cached installed services into one list.  all
             // should be considered "installed" for the purposes of
             // determining updates.
             got.insert(got.begin(), m_installed.begin(), m_installed.end());
             
             m_updates.clear();
-            CoreletQueryUtil::findSatisfyingCorelets(
+            ServiceQueryUtil::findSatisfyingServices(
                 m_requirements, got, list, true, m_updates);
 
             if (m_updates.size() > 0) {
                 m_currentUpdate = m_updates.begin();
                 startDownload(*m_currentUpdate);
             } else if (m_listener) {
-                m_listener->onCacheUpdated(this, CoreletList());
+                m_listener->onCacheUpdated(this, ServiceList());
             }
             break;
         }
@@ -748,19 +748,19 @@ CoreletQuery::onCoreletList(const AvailableCoreletList & list)
 }
 
 void
-CoreletQuery::onCoreletListFailure()
+ServiceQuery::onServiceListFailure()
 {
     transactionFailed();
 }
 
 void
-CoreletQuery::transactionFailed()
+ServiceQuery::transactionFailed()
 {
     if (m_listener) m_listener->onTransactionFailed(this);
 }
 
 void
-CoreletQuery::onLatestPlatform(const LatestPlatformServerAndVersion & latest)
+ServiceQuery::onLatestPlatform(const LatestPlatformServerAndVersion & latest)
 {
     if (m_type == LatestPlatformVersion) {
         if (m_listener) {
@@ -792,7 +792,7 @@ CoreletQuery::onLatestPlatform(const LatestPlatformServerAndVersion & latest)
 }
 
 void
-CoreletQuery::onLatestPlatformFailure()
+ServiceQuery::onLatestPlatformFailure()
 {
     transactionFailed();
 }

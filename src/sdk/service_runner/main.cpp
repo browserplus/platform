@@ -224,7 +224,7 @@ main(int argc, const char ** argv)
         // now let's parse the manifest and determine if this is a dependent
         bp::service::Summary s;
         std::string err;
-        if (!s.detectCorelet(controller->path(), err)) {
+        if (!s.detectService(controller->path(), err)) {
             std::cerr << "couldn't load service: " << err << std::endl;
             exit(1);
         }
@@ -241,13 +241,13 @@ main(int argc, const char ** argv)
             } else {
                 std::string err;
 
-                // determine the path without using corelet manager
+                // determine the path without using service manager
                 providerPath = ServiceRunner::determineProviderPath(s, err);
                 if (!err.empty()) {
                     std::cerr << "Couldn't run service because I couldn't "
                               << "find an appropriate installed " << std::endl
                               << "provider service satisfying: "  << std::endl
-                              << "  name:       " << s.usesCorelet()
+                              << "  name:       " << s.usesService()
                               << std::endl
                               << "  version:    " << s.usesVersion().asString()
                               << std::endl

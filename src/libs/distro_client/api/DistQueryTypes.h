@@ -37,39 +37,39 @@
 #include "BPUtils/bpserviceversion.h"
 
 /**
- * a smart pointer container for a list of corelet name, version pairs.
+ * a smart pointer container for a list of service name, version pairs.
  * used as event payload
  */
-typedef std::list<std::pair<std::string, std::string> > CoreletList;
+typedef std::list<std::pair<std::string, std::string> > ServiceList;
 
 /**
- * a corelet name and version.
+ * a service name and version.
  */
-class AvailableCorelet
+class AvailableService
 {
   public:
-    AvailableCorelet() : sizeBytes(0), dependentCorelet(false) { }
+    AvailableService() : sizeBytes(0), dependentService(false) { }
 
     std::string name;
     bp::ServiceVersion version;    
     std::string serverURL;    
     unsigned int sizeBytes;
 
-    bool dependentCorelet;
+    bool dependentService;
     std::string providerName;
     std::string providerMinversion;
     std::string providerVersion;
 };
 
 /** operator< for strict weak ordering, stl support.  */
-bool operator<(const AvailableCorelet& lhs, const AvailableCorelet& rhs);
+bool operator<(const AvailableService& lhs, const AvailableService& rhs);
 
-typedef std::list<AvailableCorelet> AvailableCoreletList;
+typedef std::list<AvailableService> AvailableServiceList;
 
 /**
  * a memory representation of a require statement
  */
-class CoreletRequireStatement
+class ServiceRequireStatement
 {
   public:
     std::string m_name;
@@ -78,7 +78,7 @@ class CoreletRequireStatement
 };
 
 /**
- * representation of a corelet description along with localized
+ * representation of a service description along with localized
  * title and description 
  */
 class ServiceSynopsis
@@ -93,7 +93,7 @@ class ServiceSynopsis
     std::string m_summary;
 
     /* The size, in bytes, of data that will need to be downloaded for
-     * this corelet to be installed.  This will be zero for cached updates */
+     * this service to be installed.  This will be zero for cached updates */
     unsigned int m_sizeInBytes;
 
     bool m_isUpdate;

@@ -270,7 +270,7 @@ BPSession::executeMethod(const std::string &service,
     
     // now let's add the transaction to the list
     if (ctx->ec == BP_EC_OK) {
-        // we must either invoke the pluglet or the corelet
+        // we must either invoke the pluglet or the service
 
         // first, check if this is a pluglet
         Pluglet * pluglet = m_plugletRegistry->find(service, version, "");

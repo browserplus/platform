@@ -21,23 +21,23 @@
  */
 
 /**
- * CoreletQueryUtil - logic to perform corelet matching, and determine
+ * ServiceQueryUtil - logic to perform service matching, and determine
  *                    hot to satisfy requirements.
  */
 
 //#include "BPUtils/BPUtils.h"
-#include "CoreletQueryUtil.h"
+#include "ServiceQueryUtil.h"
 
-AvailableCoreletList
-CoreletQueryUtil::coreletSummaryToACL(
+AvailableServiceList
+ServiceQueryUtil::serviceSummaryToACL(
     const std::list<bp::service::Summary> & cs)
 {
-    AvailableCoreletList acl;
+    AvailableServiceList acl;
     {
         std::list<bp::service::Summary>::const_iterator it;
         for (it = cs.begin(); it != cs.end(); it++)
         {
-            AvailableCorelet acp;
+            AvailableService acp;
             acp.name.append(it->name().c_str());
             std::string verStr(it->version().c_str());
             if (!acp.version.parse(verStr)) {
@@ -45,15 +45,15 @@ CoreletQueryUtil::coreletSummaryToACL(
                                 << (it->version().empty() ? "empty version string" :
                                     it->version())
                                 << ")");
-                return AvailableCoreletList();
+                return AvailableServiceList();
             }
             if (it->type() == bp::service::Summary::Dependent) {
-                acp.dependentCorelet = true;
-                acp.providerName = it->usesCorelet();
+                acp.dependentService = true;
+                acp.providerName = it->usesService();
                 acp.providerMinversion = it->usesMinversion().asString();
                 acp.providerVersion = it->usesVersion().asString();
             } else {
-                acp.dependentCorelet = false;
+                acp.dependentService = false;
             }
             acl.push_back(acp);
         }
@@ -64,30 +64,30 @@ CoreletQueryUtil::coreletSummaryToACL(
 
 
 bool
-CoreletQueryUtil::findBestMatch(std::string name,
+ServiceQueryUtil::findBestMatch(std::string name,
                                 std::string versionStr,
                                 std::string minversionStr,
-                                const AvailableCoreletList & list,
-                                AvailableCorelet & oMatch)
+                                const AvailableServiceList & list,
+                                AvailableService & oMatch)
 {
-    // goal is to find the highest version corelet that satisfies
+    // goal is to find the highest version service that satisfies
     // the specified constraints.  To do this we iterate through
-    // the list of all available corelets as returned from the server
-    // and for each corelet we check
-    // 1. if the corelet name matches
-    // 2. if the corelet version matches
-    // 3. it the corelet version is greater than the minversion
+    // the list of all available services as returned from the server
+    // and for each service we check
+    // 1. if the service name matches
+    // 2. if the service version matches
+    // 3. it the service version is greater than the minversion
     // 4. if we have a current candidate, if the version of the
     //    new candidate is greater than that of the current candidate.
 
-    // when we find a candidate corelet, this thing is populated.
-    // NULL means we've yet to find a corelet that satisfies the
+    // when we find a candidate service, this thing is populated.
+    // NULL means we've yet to find a service that satisfies the
     // constraints.
-    AvailableCorelet cand;
+    AvailableService cand;
     bool rv = false;
     
     // when nav is non-null, found is meaningful, and is the version
-    // of the corelet we've found
+    // of the service we've found
     bp::ServiceVersion found;
     bp::ServiceVersion version;
     bp::ServiceVersion minversion;
@@ -105,7 +105,7 @@ CoreletQueryUtil::findBestMatch(std::string name,
     }
 
     // iterate through the list.  
-    std::list<AvailableCorelet>::const_iterator it;
+    std::list<AvailableService>::const_iterator it;
     
     for (it = list.begin(); it != list.end(); it++)
     {
@@ -132,26 +132,26 @@ CoreletQueryUtil::findBestMatch(std::string name,
     return rv;
 }
 
-static bool findCoreletSet(
-    const std::list<CoreletRequireStatement> & iRequirements,
-    const AvailableCoreletList & available,
-    const AvailableCoreletList & installed,
+static bool findServiceSet(
+    const std::list<ServiceRequireStatement> & iRequirements,
+    const AvailableServiceList & available,
+    const AvailableServiceList & installed,
     bool wantNewest,
-    AvailableCoreletList & need)
+    AvailableServiceList & need)
 {
     // don't modify the const param
-    std::list<CoreletRequireStatement> requirements = iRequirements;
+    std::list<ServiceRequireStatement> requirements = iRequirements;
 
     // iterate through all of the require statements
     while (requirements.size() > 0) {
-        CoreletRequireStatement curStmt = requirements.front();
+        ServiceRequireStatement curStmt = requirements.front();
         requirements.pop_front();
 
-        AvailableCorelet acp;
+        AvailableService acp;
         
         // determine if the current statement is already satisfied by
         // something on the need list
-        if (CoreletQueryUtil::findBestMatch(
+        if (ServiceQueryUtil::findBestMatch(
                 curStmt.m_name, curStmt.m_version, curStmt.m_minversion,
                 need, acp))
         {
@@ -160,21 +160,21 @@ static bool findCoreletSet(
 
         // figure out if anything is currently installed which satisfies
         // this requirement
-        AvailableCorelet iacp;
-        bool haveInstalled = CoreletQueryUtil::findBestMatch(
+        AvailableService iacp;
+        bool haveInstalled = ServiceQueryUtil::findBestMatch(
             curStmt.m_name, curStmt.m_version, curStmt.m_minversion,
             installed, iacp);
 
         // figure out if anything is available from the distro server
         // which would satisfy this requirement
-        bool haveFromDistro = CoreletQueryUtil::findBestMatch(
+        bool haveFromDistro = ServiceQueryUtil::findBestMatch(
             curStmt.m_name, curStmt.m_version, curStmt.m_minversion,
             available, acp);
 
         // now given wantNewest, iacp and acp, we must decide wether to
-        // include this corelet.
+        // include this service.
         
-        AvailableCorelet * dcp = NULL;
+        AvailableService * dcp = NULL;
 
         // if nothing is installed, the choice is simple
         if (!haveInstalled) {
@@ -191,18 +191,18 @@ static bool findCoreletSet(
             need.push_back(acp);
             dcp = &acp;
         } else if (haveFromDistro) {
-            // have something which will work.  only add corelet to need
+            // have something which will work.  only add service to need
             // list if we want newest and a newer one is available
             if (wantNewest && (acp.version.compare(iacp.version) > 0)) {
                 need.push_back(acp);
-                dcp = &acp; // check deps on new corelet
+                dcp = &acp; // check deps on new service
             } else {
-                // check deps on installed corelet
+                // check deps on installed service
                 dcp = &iacp;
             }
         } else {
             // nothing on available list satisfies, but something on
-            // installed corelet list satisfies.  
+            // installed service list satisfies.  
             dcp = &iacp;
         }
 
@@ -210,8 +210,8 @@ static bool findCoreletSet(
         
         // if dcp depends on something, push the dependency onto the
         // requirements list 
-        if (dcp->dependentCorelet) {
-            CoreletRequireStatement dep;
+        if (dcp->dependentService) {
+            ServiceRequireStatement dep;
             dep.m_name = dcp->providerName;
             dep.m_version = dcp->providerVersion;
             dep.m_minversion = dcp->providerMinversion;
@@ -224,18 +224,18 @@ static bool findCoreletSet(
 
 
 bool 
-CoreletQueryUtil::findSatisfyingCorelets(
-    const std::list<CoreletRequireStatement> & requirements,
+ServiceQueryUtil::findSatisfyingServices(
+    const std::list<ServiceRequireStatement> & requirements,
     const std::list<bp::service::Summary> & installedList,
-    const AvailableCoreletList & available,
-    bool wantNewest, AvailableCoreletList & need)
+    const AvailableServiceList & available,
+    bool wantNewest, AvailableServiceList & need)
 {
 
     // 0. get installedList into a easier to manage format
-    AvailableCoreletList installed = coreletSummaryToACL(installedList);
+    AvailableServiceList installed = serviceSummaryToACL(installedList);
     
-    // 1. Build a set of corelets that satisfy the requirements (verticies)
-    if (!findCoreletSet(requirements, available, installed, wantNewest, need))
+    // 1. Build a set of services that satisfy the requirements (verticies)
+    if (!findServiceSet(requirements, available, installed, wantNewest, need))
     {
         return false;
     }
@@ -243,13 +243,13 @@ CoreletQueryUtil::findSatisfyingCorelets(
     // 2. Build a set of start nodes and edges.
     //
     // we do this by building a set of the need list, iterating through need,
-    // list, and removing any corelets that are required by others from
+    // list, and removing any services that are required by others from
     // the startNodes set
-    std::set<AvailableCorelet> startNodes;
-    // no multimap, one corelet may not directly depend on multple others
-    std::map<AvailableCorelet, AvailableCorelet> edges;
+    std::set<AvailableService> startNodes;
+    // no multimap, one service may not directly depend on multple others
+    std::map<AvailableService, AvailableService> edges;
     {
-        std::list<AvailableCorelet>::iterator it;
+        std::list<AvailableService>::iterator it;
         for (it = need.begin(); it != need.end(); it++)
         {
             startNodes.insert(*it);
@@ -257,15 +257,15 @@ CoreletQueryUtil::findSatisfyingCorelets(
 
         for (it = need.begin(); it != need.end(); it++)
         {
-            if (it->dependentCorelet)
+            if (it->dependentService)
             {
                 // find and delete the satisfying dependency
-                AvailableCorelet dep;
-                if (CoreletQueryUtil::findBestMatch(it->providerName,
+                AvailableService dep;
+                if (ServiceQueryUtil::findBestMatch(it->providerName,
                                                     it->providerVersion,
                                                     it->providerMinversion,
                                                     need, dep)) {
-                    std::set<AvailableCorelet>::iterator dit;
+                    std::set<AvailableService>::iterator dit;
                     dit = startNodes.find(dep);
                     if (dit != startNodes.end()) startNodes.erase(dit);
                     edges[*it] = dep;
@@ -290,22 +290,22 @@ CoreletQueryUtil::findSatisfyingCorelets(
     // else 
     //   output message (proposed topologically sorted order: L)
     // 
-    std::list<AvailableCorelet> sorted;
+    std::list<AvailableService> sorted;
     
     while (startNodes.size() > 0) {
-        AvailableCorelet n = *(startNodes.begin());
+        AvailableService n = *(startNodes.begin());
         startNodes.erase(startNodes.begin());
         sorted.push_back(n);
         
-        std::map<AvailableCorelet, AvailableCorelet>::iterator eit;
+        std::map<AvailableService, AvailableService>::iterator eit;
         eit = edges.find(n);
         if (eit != edges.end()) {
-            AvailableCorelet m = eit->second;
+            AvailableService m = eit->second;
             edges.erase(eit);
             
             // n^2 here, oh well
             bool mHasIncomingEdges  = false;
-            std::map<AvailableCorelet, AvailableCorelet>::iterator it2;
+            std::map<AvailableService, AvailableService>::iterator it2;
             for (it2 = edges.begin(); it2 != edges.end(); it2++) {
                 if (!(it2->second < m) && !(m < it2->second)) {
                     mHasIncomingEdges = true;
@@ -318,7 +318,7 @@ CoreletQueryUtil::findSatisfyingCorelets(
 
     // if edges contains anything, there's a cyclic dependency!
     if (edges.size() != 0) {
-        BPLOG_ERROR("!!! cyclic dependency detected in required corelets");
+        BPLOG_ERROR("!!! cyclic dependency detected in required services");
     }
 
     // 4. reverse list and return
@@ -329,26 +329,26 @@ CoreletQueryUtil::findSatisfyingCorelets(
 }
 
 bool
-CoreletQueryUtil::haveUpdates(
-    const std::list<CoreletRequireStatement> & requirements,
+ServiceQueryUtil::haveUpdates(
+    const std::list<ServiceRequireStatement> & requirements,
     const std::list<bp::service::Summary> & installedList,
     const std::list<bp::service::Summary> & updateList,
-    AvailableCoreletList & best)
+    AvailableServiceList & best)
 {
     // 0. get installedList and updateList into a easier to manage format
-    AvailableCoreletList installed = coreletSummaryToACL(installedList);
-    AvailableCoreletList updates = coreletSummaryToACL(updateList);    
+    AvailableServiceList installed = serviceSummaryToACL(installedList);
+    AvailableServiceList updates = serviceSummaryToACL(updateList);    
 
     // 1. get the best satisfaction of requirements, favoring updates
-    if (!findCoreletSet(requirements, updates, installed, true, best)) {
+    if (!findServiceSet(requirements, updates, installed, true, best)) {
         // can't satisfy        
         return false;
     }
 
     // 2. build a set for easy/fast checking of presence on installed list
-    std::set<AvailableCorelet> installedSet;
+    std::set<AvailableService> installedSet;
     {
-        std::list<AvailableCorelet>::iterator it;
+        std::list<AvailableService>::iterator it;
         for (it = installed.begin();
              it != installed.end();
              it++)
@@ -359,8 +359,8 @@ CoreletQueryUtil::haveUpdates(
 
     // 3. now prune anything off the best list that is already installed.
     {
-        std::list<AvailableCorelet> pruned;
-        std::list<AvailableCorelet>::iterator it;
+        std::list<AvailableService> pruned;
+        std::list<AvailableService>::iterator it;
         for (it = best.begin(); it != best.end(); it++)
         {
             if (installedSet.find(*it) == installedSet.end()) {
@@ -374,13 +374,13 @@ CoreletQueryUtil::haveUpdates(
     return true;
 }
 
-CoreletList
-CoreletQueryUtil::reformatAvailableCoreletList(const AvailableCoreletList & acl)
+ServiceList
+ServiceQueryUtil::reformatAvailableServiceList(const AvailableServiceList & acl)
 {
-    // turn AvailableCoreletList into CoreletList
-    CoreletList clp;
+    // turn AvailableServiceList into ServiceList
+    ServiceList clp;
 
-    std::list<AvailableCorelet>::const_iterator it;
+    std::list<AvailableService>::const_iterator it;
     for (it = acl.begin(); it != acl.end(); it++)
     {
         std::pair<std::string, std::string>

@@ -21,7 +21,7 @@ SET(progName ServiceManagerTester)
 
 SET(${progName}_MAJOR_VERSION 0)
 SET(${progName}_MINOR_VERSION 1)
-SET(${progName}_LINK_STATIC BPUtils ConsoleLib CoreletManager ServiceRunnerLib
+SET(${progName}_LINK_STATIC BPUtils ConsoleLib ServiceManager ServiceRunnerLib
                             Permissions)
 
 YBT_BUILD(BINARY ${progName})

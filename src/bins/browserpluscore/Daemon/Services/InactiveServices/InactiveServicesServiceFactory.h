@@ -21,30 +21,28 @@
  */
 
 /**
- * CoreletFactory
+ * InactiveServicesServiceFactory
  *
- * A factory capable of creating corelet instances.
+ * A factory implementation for the "core" service
  */
 
-#ifndef __CORELETFACTORY_H__
-#define __CORELETFACTORY_H__
+#ifndef __INACTIVESERVICESSERVICEFACTORY_H__
+#define __INACTIVESERVICESSERVICEFACTORY_H__
 
-#include "BPUtils/ServiceSummary.h"
-#include "CoreletExecutionContext.h"
-#include "CoreletInstance.h"
+#include "ServiceManager/ServiceManager.h"
 
-
-class CoreletFactory
+class InactiveServicesServiceFactory : virtual public ServiceFactory
 {
 public:
-    CoreletFactory();
-    virtual ~CoreletFactory();
+    InactiveServicesServiceFactory();
+    virtual ~InactiveServicesServiceFactory();
 
-    virtual bp::service::BuiltInSummary summary() = 0;
+    virtual bp::service::BuiltInSummary summary();
 
-    virtual std::tr1::shared_ptr<CoreletInstance>
-        instantiateInstance(std::tr1::weak_ptr<CoreletExecutionContext> context)
-        = 0;
+    virtual std::tr1::shared_ptr<ServiceInstance>
+        instantiateInstance(std::tr1::weak_ptr<ServiceExecutionContext> context);
+  private:
+    std::tr1::shared_ptr<ServiceRegistry> m_registry;
 };
 
 #endif

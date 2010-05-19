@@ -17,7 +17,7 @@ a service that displays desktop notifications:
 \code
 {
   "type": "standalone",
-  "CoreletLibrary": "notify.dll",
+  "ServiceLibrary": "notify.dll",
   "strings": {
     "en": {
       "title": "Notify",

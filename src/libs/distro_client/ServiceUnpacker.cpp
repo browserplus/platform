@@ -21,7 +21,7 @@
  */
 
 /*
- * CoreletUnpacker.cpp
+ * ServiceUnpacker.cpp
  *
  * Created by Gordon Durand on 07/23/07.
  * Copyright 2007 Yahoo! Inc.  All rights reservered.
@@ -30,7 +30,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "api/CoreletUnpacker.h"
+#include "api/ServiceUnpacker.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/bptime.h"
 #include "BPUtils/BPLog.h"
@@ -39,7 +39,7 @@
 using namespace std;
 using namespace bp::file;
 
-CoreletUnpacker::CoreletUnpacker(const Path& pkgFile,
+ServiceUnpacker::ServiceUnpacker(const Path& pkgFile,
                                  const Path& destDir,
                                  const std::string& name,
                                  const std::string& version,
@@ -49,7 +49,7 @@ CoreletUnpacker::CoreletUnpacker(const Path& pkgFile,
 }
 
 
-CoreletUnpacker::CoreletUnpacker(const std::vector<unsigned char> & buf,
+ServiceUnpacker::ServiceUnpacker(const std::vector<unsigned char> & buf,
                                  const Path& destDir,
                                  const std::string& name,
                                  const std::string& version,
@@ -59,23 +59,23 @@ CoreletUnpacker::CoreletUnpacker(const std::vector<unsigned char> & buf,
 }
 
 
-CoreletUnpacker::~CoreletUnpacker()
+ServiceUnpacker::~ServiceUnpacker()
 {
 }
 
 
 bool
-CoreletUnpacker::unpack(string& errMsg)
+ServiceUnpacker::unpack(string& errMsg)
 {
     bool rval = Unpacker::unpack(errMsg);
     if (!rval) {
         BPTime now;
         ofstream log;
-        if (openWritableStream(log, bp::paths::getCoreletLogPath(), 
+        if (openWritableStream(log, bp::paths::getServiceLogPath(), 
                                std::ios_base::app | std::ios::binary)) {
-            log << now.asString() << ": Error unpacking corelet " << m_name << " " 
+            log << now.asString() << ": Error unpacking service " << m_name << " " 
                 << m_version << ": " << errMsg << endl;
-            BPLOG_WARN_STRM("Error unpacking corelet " << m_name << " " 
+            BPLOG_WARN_STRM("Error unpacking service " << m_name << " " 
                             << m_version << ": " << errMsg);
         }
     }
@@ -84,7 +84,7 @@ CoreletUnpacker::unpack(string& errMsg)
 
 
 bool
-CoreletUnpacker::install(string& errMsg)
+ServiceUnpacker::install(string& errMsg)
 {
     errMsg.clear();
     bool rval = true;
@@ -96,29 +96,29 @@ CoreletUnpacker::install(string& errMsg)
             throw ss.str();
         }
 
-        // nuke existing corelet and move this one into place
-        Path coreletTopDir = m_destDir / m_name;
+        // nuke existing service and move this one into place
+        Path serviceTopDir = m_destDir / m_name;
         try {
-            boost::filesystem::create_directories(coreletTopDir);
+            boost::filesystem::create_directories(serviceTopDir);
         } catch(const tFileSystemError&) {
             throw string("unable to create directory " 
-                         + coreletTopDir.externalUtf8());
+                         + serviceTopDir.externalUtf8());
         }
-        Path coreletDir = coreletTopDir / m_version;
-        bool rval = remove(coreletDir) && move(m_tmpDir, coreletDir);
+        Path serviceDir = serviceTopDir / m_version;
+        bool rval = remove(serviceDir) && move(m_tmpDir, serviceDir);
         if (rval) {
             BPTime now;
             ofstream log;
 
-            if (openWritableStream(log, bp::paths::getCoreletLogPath(), 
+            if (openWritableStream(log, bp::paths::getServiceLogPath(), 
                                    std::ios_base::app | std::ios::binary)) {
                 log << now.asString() << ": Installed " << m_name 
                     << " " << m_version << endl;
             } 
         } else {
-            BPLOG_INFO_STRM("unable to delete " << coreletDir << " or move "
-                            << m_tmpDir << " to " << coreletDir);
-            remove(coreletDir);
+            BPLOG_INFO_STRM("unable to delete " << serviceDir << " or move "
+                            << m_tmpDir << " to " << serviceDir);
+            remove(serviceDir);
         }
     } catch(const string& s) {
         errMsg = s;

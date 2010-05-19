@@ -23,8 +23,8 @@
 /**
  * bputil.hh -- c++ utilities to make building hierarchies of BPElements
  *              eaiser.  A tool that may be consumed in source form
- *              by a corelet author to simplify mapping into and out of
- *              introspectable corelet API types.
+ *              by a service author to simplify mapping into and out of
+ *              introspectable service API types.
  */
 
 #include "bptypeutil.h"

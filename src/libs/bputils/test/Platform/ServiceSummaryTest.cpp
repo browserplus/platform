@@ -38,7 +38,7 @@ ServiceSummaryTest::standaloneTest()
     static const char * manifestJson =
         "{"
         "    \"type\": \"standalone\","
-        "    \"CoreletLibrary\": \"lib.dll\","
+        "    \"ServiceLibrary\": \"lib.dll\","
         "    \"strings\": { "
         "        \"en\": { "
         "            \"title\": \"Image Manipulation Plugin\", "
@@ -65,7 +65,7 @@ ServiceSummaryTest::standaloneTest()
     // now load it
     bp::service::Summary s;
     std::string error;
-    CPPUNIT_ASSERT( s.detectCorelet(m_testServiceDir, error) );
+    CPPUNIT_ASSERT( s.detectService(m_testServiceDir, error) );
 
     //  --- now check everything is as expected --- 
     CPPUNIT_ASSERT( s.type() == bp::service::Summary::Standalone );
@@ -97,8 +97,8 @@ ServiceSummaryTest::standaloneTest()
     CPPUNIT_ASSERT( s.localization("de", title, summary) );
     CPPUNIT_ASSERT( !title.compare("Image Manipulation Plugin") );    
 
-    // empty dependent corelet stuff
-    CPPUNIT_ASSERT_MESSAGE( s.usesCorelet().c_str(), s.usesCorelet().empty() );
+    // empty dependent service stuff
+    CPPUNIT_ASSERT_MESSAGE( s.usesService().c_str(), s.usesService().empty() );
 
     CPPUNIT_ASSERT( s.isInitialized() );
 
@@ -125,7 +125,7 @@ ServiceSummaryTest::shutdownDelayTest()
     static const char * manifestJson =
         "{"
         "    \"type\": \"standalone\","
-        "    \"CoreletLibrary\": \"lib.dll\","
+        "    \"ServiceLibrary\": \"lib.dll\","
         "    \"strings\": { "
         "        \"en\": { "
         "            \"title\": \"foo\", "
@@ -144,7 +144,7 @@ ServiceSummaryTest::shutdownDelayTest()
     // now load it
     bp::service::Summary s;
     std::string error;
-    bool detectedService = s.detectCorelet(m_testServiceDir, error);
+    bool detectedService = s.detectService(m_testServiceDir, error);
     CPPUNIT_ASSERT_MESSAGE( error, detectedService );
 
     // now check that shutdownDelaySecs is set properly

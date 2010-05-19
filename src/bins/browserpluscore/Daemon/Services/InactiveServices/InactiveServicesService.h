@@ -21,35 +21,35 @@
  */
 
 /**
- * InactiveServicesCorelet
+ * InactiveServicesService
  *
  * A built-in which allows for querying of distribution servers
  */
 
-#ifndef __INACTIVESERVICESCORELET_H__
-#define __INACTIVESERVICESCORELET_H__
+#ifndef __INACTIVESERVICESSERVICE_H__
+#define __INACTIVESERVICESSERVICE_H__
 
 #include "DistributionClient/DistributionClient.h"
-#include "CoreletManager/CoreletManager.h"
+#include "ServiceManager/ServiceManager.h"
 //#include "BPUtils/BPUtils.h"
 
-class InactiveServicesCorelet : virtual public CoreletInstance,
+class InactiveServicesService : virtual public ServiceInstance,
                                 virtual public IDistQueryListener
 {
 public:
-    InactiveServicesCorelet(
-        std::tr1::weak_ptr<CoreletExecutionContext> context);
-    virtual ~InactiveServicesCorelet();    
+    InactiveServicesService(
+        std::tr1::weak_ptr<ServiceExecutionContext> context);
+    virtual ~InactiveServicesService();    
 
     virtual void execute(unsigned int tid,
                          const std::string & function,
                          const bp::Object & args);
 
     /**
-     * Because the "InactiveServices" corelet is a synthetic corelet, the
+     * Because the "InactiveServices" service is a synthetic service, the
      * interface description is returned from this static rather
      * than dynamically determined from probing a plugin.
-     * This keeps the corelet definition and implementation close
+     * This keeps the service definition and implementation close
      * together.
      */
     static const bp::service::Description * getDescription();
@@ -60,7 +60,7 @@ public:
     void gotServiceDetails(unsigned int tid,
                            const bp::service::Description & desc);
     void gotAvailableServices(unsigned int tid,
-                              const CoreletList & list);
+                              const ServiceList & list);
 
     DistQuery * m_distQuery;
 

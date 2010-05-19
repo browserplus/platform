@@ -1,6 +1,6 @@
 {
   "type": "standalone",
-  "CoreletLibrary": "SampleService.dll",
+  "ServiceLibrary": "SampleService.dll",
   "strings": { 
     "en": { 
       "title": "Sample Service", 
