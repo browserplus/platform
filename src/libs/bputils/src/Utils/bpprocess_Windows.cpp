@@ -44,13 +44,6 @@ using std::string;
 using std::stringstream;
 using std::vector;
 
-// Forward Declarations
-static bool
-invokeCreateProcess(const bp::file::Path& path,
-                    const std::string& sTitle,
-                    const bp::file::Path& workingDirectory,
-                    const vector<string>& vsArgs,
-                    bp::process::spawnStatus* pStat);
 
 
 static std::wstring
@@ -87,29 +80,17 @@ bp::process::currentPid()
 }
 
 
+// TODO
+// * env handling
+// * optional close/return handles?
+// * figure out how to reliably change process name so that sTitle appears
+//   in the "Activity Monitor" or "Task Manager" 
 bool
 bp::process::spawn(const bp::file::Path& path,
                    const vector<string>& vsArgs,
                    spawnStatus* status,
                    const bp::file::Path& workingDirectory,
                    const std::string& sTitle)
-{
-    return invokeCreateProcess(path, sTitle, workingDirectory,
-                               vsArgs, status);
-}
-
-
-// TODO
-// * env handling
-// * optional close/return handles?
-// * figure out how to reliably change process name so that sTitle appears
-//   in the "Activity Monitor" or "Task Manager" 
-static bool 
-invokeCreateProcess(const bp::file::Path& path,
-                    const std::string& sTitle, 
-                    const bp::file::Path& workingDirectory,
-                    const vector<string>& vsArgs,
-                    bp::process::spawnStatus* pStat)
 {
 	// get args into writable C buf needed by CreateProcessW()
     std::wstring wsArgs;
@@ -143,16 +124,16 @@ invokeCreateProcess(const bp::file::Path& path,
                                  &pinfo);           // process information
 
     if (bRet) {
-        if (pStat) {
-            pStat->errCode = 0;
-            pStat->pid = pinfo.dwProcessId;
-            pStat->handle = pinfo.hProcess;
+        if (status) {
+            status->errCode = 0;
+            status->pid = pinfo.dwProcessId;
+            status->handle = pinfo.hProcess;
         }
     } else {
-        if (pStat) {
-            pStat->errCode = GetLastError();
-            pStat->pid = 0;
-            pStat->handle = 0;
+        if (status) {
+            status->errCode = GetLastError();
+            status->pid = 0;
+            status->handle = 0;
         }
     }
     if (wsBuf) {
