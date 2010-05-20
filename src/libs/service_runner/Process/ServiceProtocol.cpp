@@ -175,18 +175,6 @@ ServiceProtocol::onQuery(bp::ipc::Channel *, const bp::ipc::Query & query,
                              << " query");
             return false;
         }
-        
-        std::string err;
-        if (!m_lib->invoke(
-                (unsigned int) (long long) *(query.payload()->get("instance")),
-                query.id(),
-                (std::string) *(query.payload()->get("function")),
-                query.payload()->get("arguments"),
-                err))
-        {
-            BPLOG_ERROR_STRM("Service method invocation fails: "
-                             << err);
-        }
 
         unsigned int id = m_lib->allocate(
             (std::string) *(context.get("uri")),
