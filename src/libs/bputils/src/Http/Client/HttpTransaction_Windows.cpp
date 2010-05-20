@@ -303,36 +303,180 @@ private:
     }
 
     void setError(const std::string& msg) {
+        BPLOG_ERROR_STRM(msg);
         m_eState = eError;
         IListenerPtr p = m_pListener.lock();
         if (p) p->onError(msg);
     }
 
-    bool isSSLError(DWORD error) {
-        return error == ERROR_INTERNET_INVALID_CA
-               || error == ERROR_INTERNET_SEC_CERT_CN_INVALID
-               || error == ERROR_INTERNET_SEC_CERT_DATE_INVALID
-               || error == ERROR_INTERNET_SEC_CERT_REVOKED;
-    }
-
-    std::string sslErrorString(DWORD error) {
-        std::string rval = "SSL error: ";
+    std::string wininetErrorString(DWORD error) {
+        std::string rval;
         switch (error) {
         case ERROR_INTERNET_INVALID_CA:
-            rval += "valid certificate chain, untrusted root";
+            rval += "SSL error: valid certificate chain, untrusted root";
             break;
         case ERROR_INTERNET_SEC_CERT_CN_INVALID:
-            rval += "the certificate common name is incorrect";
+            rval += "SSL error: the certificate common name is incorrect";
             break;
         case ERROR_INTERNET_SEC_CERT_DATE_INVALID:
-            rval += "certificate expired";
+            rval += "SSL error: certificate expired";
             break;
         case ERROR_INTERNET_SEC_CERT_REVOKED:
-            rval += "certificate revoked";
+            rval += "SSL error: certificate revoked";
             break;
-        default:
-            rval.clear();
+        case ERROR_INTERNET_OUT_OF_HANDLES:
+            rval = "No more handles could be generated at this time.";
             break;
+        case ERROR_INTERNET_TIMEOUT:
+            rval = "The request has timed out.";
+            break;
+        case ERROR_INTERNET_EXTENDED_ERROR:
+            rval = "An extended error was returned from the server.";
+            break;
+       case ERROR_INTERNET_INTERNAL_ERROR:
+           rval = "An internal error has occurred.";
+           break;
+        case ERROR_INTERNET_INVALID_URL:
+            rval = "The URL is invalid.";
+            break;
+        case ERROR_INTERNET_UNRECOGNIZED_SCHEME:
+            rval = "The URL scheme could not be recognized or is not supported.";
+            break;
+        case ERROR_INTERNET_NAME_NOT_RESOLVED:
+            rval = "The server name could not be resolved.";
+            break;
+        case ERROR_INTERNET_PROTOCOL_NOT_FOUND:
+            rval = "The requested protocol could not be located.";
+            break;
+        case ERROR_INTERNET_INVALID_OPTION:
+            rval = "A request to InternetQueryOption or InternetSetOption "
+                   "specified an invalid option value.";
+            break;
+        case ERROR_INTERNET_BAD_OPTION_LENGTH:
+            rval = "The length of an option supplied to InternetQueryOption "
+                   "or InternetSetOption is incorrect for the type of option "
+                   "specified.";
+            break;
+        case ERROR_INTERNET_OPTION_NOT_SETTABLE:
+            rval = "The request option cannot be set, only queried.";
+            break;
+        case ERROR_INTERNET_SHUTDOWN:
+            rval = "The Win32 Internet function support is being shut down "
+                   "or unloaded.";
+            break;
+        case ERROR_INTERNET_INVALID_OPERATION:
+            rval = "The requested operation is invalid.";
+            break;
+        case ERROR_INTERNET_OPERATION_CANCELLED:
+            rval = "The operation was canceled, usually because the handle on "
+                   "which the request was operating was closed before the "
+                   "operation completed.";
+            break;
+        case ERROR_INTERNET_INCORRECT_HANDLE_TYPE:
+            rval = "The type of handle supplied is incorrect for this operation";
+            break;
+        case ERROR_INTERNET_INCORRECT_HANDLE_STATE:
+            rval = "The requested operation cannot be carried out because the "
+                   "handle supplied is not in the correct state.";
+            break;
+        case ERROR_INTERNET_NOT_PROXY_REQUEST:
+            rval = "The request cannot be made via a proxy.";
+            break;
+        case ERROR_INTERNET_REGISTRY_VALUE_NOT_FOUND:
+            rval = "A required registry value could not be located.";
+            break;
+        case ERROR_INTERNET_BAD_REGISTRY_PARAMETER:
+            rval = "A required registry value was located but is an incorrect "
+                   "type or has an invalid value.";
+            break;
+        case ERROR_INTERNET_NO_DIRECT_ACCESS:
+            rval = "Direct network access cannot be made at this time.";
+            break;
+        case ERROR_INTERNET_NO_CONTEXT:
+            rval = "An asynchronous request could not be made because a zero "
+                   " context value was supplied.";
+            break;
+        case ERROR_INTERNET_NO_CALLBACK:
+            rval = "An asynchronous request could not be made because a "
+                   "callback function has not been set.";
+            break;
+        case ERROR_INTERNET_REQUEST_PENDING:
+            rval = "The required operation could not be completed because one "
+                   "or more requests are pending.";
+            break;
+        case ERROR_INTERNET_INCORRECT_FORMAT:
+            rval = "The format of the request is invalid.";
+            break;
+        case ERROR_INTERNET_ITEM_NOT_FOUND:
+            rval = "The requested item could not be located.";
+            break;
+        case ERROR_INTERNET_CANNOT_CONNECT:
+            rval = "The attempt to connect to the server failed.";
+            break;
+        case ERROR_INTERNET_CONNECTION_ABORTED:
+            rval = "The connection with the server has been terminated.";
+            break;
+        case ERROR_INTERNET_CONNECTION_RESET:
+            rval = "The connection with the server has been reset.";
+            break;
+        case ERROR_INTERNET_FORCE_RETRY:
+            rval = "Calls for the Win32 Internet function to redo the request.";
+            break;
+        case ERROR_INTERNET_INVALID_PROXY_REQUEST:
+            rval = "The request to the proxy was invalid.";
+            break;
+        case ERROR_INTERNET_HANDLE_EXISTS:
+            rval = "The request failed because the handle already exists.";
+            break;
+        case ERROR_INTERNET_HTTP_TO_HTTPS_ON_REDIR:
+            rval = "The application is moving from a non-SSL to an SSL "
+                   "connection because of a redirect.";
+            break;
+        case ERROR_INTERNET_HTTPS_TO_HTTP_ON_REDIR:
+            rval = "The application is moving from an SSL to an non-SSL "
+                   "connection because of a redirect.";
+            break;
+        case ERROR_INTERNET_MIXED_SECURITY:
+            rval = "Indicates that the content is not entirely secure. "
+                   "Some of the content being viewed may have come from "
+                   "unsecured servers.";
+            break;
+        case ERROR_INTERNET_CHG_POST_IS_NON_SECURE:
+            rval = "The application is posting and attempting to change "
+                   "multiple lines of text on a server that is not secure.";
+            break;
+        case ERROR_INTERNET_POST_IS_NON_SECURE:
+            rval = "The application is posting data to a server that is not secure.";
+            break;
+        case ERROR_HTTP_HEADER_NOT_FOUND:
+            rval = "The requested header could not be located.";
+            break;
+        case ERROR_HTTP_DOWNLEVEL_SERVER:
+            rval = "The server did not return any headers.";
+            break;
+        case ERROR_HTTP_INVALID_SERVER_RESPONSE:
+            rval = "The server response could not be parsed.";
+            break;
+        case ERROR_HTTP_INVALID_HEADER:
+            rval = "The supplied header is invalid.";
+            break;
+        case ERROR_HTTP_INVALID_QUERY_REQUEST:
+            rval = "The request made to HttpQueryInfo is invalid.";
+            break;
+        case ERROR_HTTP_HEADER_ALREADY_EXISTS:
+            rval = "The header could not be added because it already exists.";
+            break;
+        case ERROR_HTTP_REDIRECT_FAILED:
+            rval = "The redirection failed because either the scheme changed "
+                   "(for example, HTTP to FTP) or all attempts made to redirect "
+                   "failed (default is five attempts).";
+            break;
+        default: 
+            {
+            std::stringstream ss;
+            ss << "Unknown wininet error " << error;
+            rval = ss.str(); 
+            }
         }
         return rval;
     }
@@ -610,20 +754,11 @@ Transaction::Impl::processRequest(DWORD error)
         return;
     }
 
-    // handle connection failures (which manifest as an error code
+    // handle failures (which manifest as an error code
     // passed by the REQUEST COMPLETE wininet message 
-    if (error == ERROR_INTERNET_CANNOT_CONNECT) {
+    if (error != ERROR_SUCCESS && error != ERROR_IO_PENDING) {
+        setError(wininetErrorString(error));
         closeConnection();        
-        setError("cannot connect");
-        return;
-    } else if (isSSLError(error)) {
-        setError(sslErrorString(error));
-        return;
-    } else if (error != ERROR_SUCCESS && error != ERROR_IO_PENDING) {
-        std::stringstream ss;
-        ss << "unknown wininet error: (" << error << ")";
-        closeConnection();        
-        setError(ss.str());
         return;
     }
 
