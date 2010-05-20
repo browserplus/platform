@@ -61,7 +61,9 @@ bp::install::utils::getFolderPath(int selector)
 std::string
 bp::install::utils::axName()
 {
-    return "CBPCtl Object";
+    // Note: This string is exposed to the user via the "Manage Add-ons" screen.
+    //       It is also used in some registry key names and data.
+    return "Yahoo! BrowserPlus";
 }
 
 
