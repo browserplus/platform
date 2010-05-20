@@ -360,9 +360,7 @@ ScriptableConfigObject::invoke(const string & functionName,
 #endif
 
         // now run uninstaller
-        bp::process::spawnStatus status;
-        bp::process::spawn(uninstaller, std::string(), Path(), 
-                           uninstArgs, &status);
+        bp::process::spawn(uninstaller, uninstArgs);
 
         if (lock) {
             bp::releaseProcessLock(lock);

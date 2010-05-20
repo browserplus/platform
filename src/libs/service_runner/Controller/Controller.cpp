@@ -172,8 +172,8 @@ Controller::run(const bpf::Path & pathToHarness,
     m_sw.start();    
 
 	// spawn the little dude
-    if (bp::process::spawn(executable, serviceTitle, m_path, args,
-                           &m_spawnStatus))
+    if (bp::process::spawn(executable, args, &m_spawnStatus, m_path, 
+                           serviceTitle))
     {
         BPLOG_INFO_STRM("successfully spawned service process for "
                         << m_path << ", pid: " << m_spawnStatus.pid <<

@@ -89,10 +89,10 @@ bp::process::currentPid()
 
 bool
 bp::process::spawn(const bp::file::Path& path,
-                   const std::string& sTitle,
-                   const bp::file::Path& workingDirectory,
                    const vector<string>& vsArgs,
-                   spawnStatus* status)
+                   spawnStatus* status,
+                   const bp::file::Path& workingDirectory,
+                   const std::string& sTitle)
 {
     return invokeCreateProcess(path, sTitle, workingDirectory,
                                vsArgs, status);
@@ -194,9 +194,8 @@ bp::process::kill(const string& name,
     killArgs.push_back("/IM");
     killArgs.push_back(name);
     bp::process::spawnStatus status;
-    return bp::process::spawn(bp::file::Path(L"taskkill.exe"),
-                              std::string(), bp::file::Path(),
-                              killArgs, &status);
+    return bp::process::spawn(bp::file::Path(L"taskkill.exe"), killArgs,
+                              &status);
 }
 
 

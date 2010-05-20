@@ -245,7 +245,7 @@ PlatformUpdaterSingleton::spawnUpdate(const string& version)
     vector<string> args;
     args.push_back(cacheDir.utf8());
     args.push_back(daemonLock);
-    bool rval = spawn(updater, std::string(), Path(), args, &status);
+    bool rval = spawn(updater, args, &status);
     m_busy = false;
     return rval;
 }

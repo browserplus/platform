@@ -64,10 +64,10 @@ bp::process::currentPid()
 
 bool
 bp::process::spawn(const Path& path,
-                   const string& sTitle,
-                   const Path& wd,
                    const vector<string>& vsArgs,
-                   spawnStatus* pStatus)
+                   spawnStatus* pStatus,
+                   const Path& wd,
+                   const string& sTitle)
 {
     // Setup argv.
     vector<char*> vArgs;

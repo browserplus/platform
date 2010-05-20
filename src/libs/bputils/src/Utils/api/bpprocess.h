@@ -75,11 +75,12 @@ namespace process {
      * \return Success or failure
      */
     bool spawn(const bp::file::Path& path,
-               const std::string& sTitle,
-               const bp::file::Path& workingDirectory,
-               const std::vector<std::string>& vsArgs,
-               spawnStatus* status);
-    
+               const std::vector<std::string>& vsArgs =
+                     std::vector<std::string>(),
+               spawnStatus* status = NULL,
+               const bp::file::Path& workingDirectory = bp::file::Path(),
+               const std::string& sTitle = std::string());
+        
     /**
      * Wait for a process
      * \param  status - spawn status returned from spawn()
