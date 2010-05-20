@@ -108,8 +108,7 @@ Installer::installPlugins()
     bpf::Path iePath = pluginsDir / bpf::Path("YBPAddon_" + m_version.asString()
                                               + ".dll");
     if (registerControl(mimeTypes(), typeLibGuid(), iePath, activeXGuid(),
-                        "CBPCtl Object", "Yahoo.BPCtl",
-                        "Yahoo.BPCtl." + m_version.asString()) != 0) {
+                        axName(), axViProgid(), axProgid(m_version)) != 0) {
         BP_THROW(lastErrorString("unable to register " + iePath.externalUtf8()));
     }
 
@@ -240,8 +239,7 @@ Installer::postflight()
                                                                  + m_version.asString()
                                                                  + ".dll");
     if (registerControl(mimeTypes(), typeLibGuid(), thisIEPluginPath, activeXGuid(),
-                        "CBPCtl Object", "Yahoo.BPCtl",
-                        "Yahoo.BPCtl." + m_version.asString()) != 0) {
+                        axName(), axViProgid(), axProgid(m_version)) != 0) {
         BP_THROW(lastErrorString("unable to register " + thisIEPluginPath.externalUtf8()));
     }
 
@@ -296,7 +294,7 @@ Installer::disablePlugins(const bp::ServiceVersion& version)
         vector<string> mtypes;
         if (getControlInfo(path, vers, typeLibGuid, activeXGuid, mtypes)) {
             if (unRegisterControl(mtypes, typeLibGuid, path, activeXGuid,
-                                  "Yahoo.BPCtl", "Yahoo.BPCtl." + vers) != 0) {
+                                  axViProgid(), axProgid(vers)) != 0) {
                 BPLOG_WARN_STRM("unable to unregister " << path);
             }
         }

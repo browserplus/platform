@@ -91,8 +91,8 @@ Uninstaller::run(bool fromRunonce)
                                            activeXGuid, mtypes)) {
                             if (unRegisterControl(mtypes, typeLibGuid, 
                                                   plugin, activeXGuid,
-                                                  "Yahoo.BPCtl",
-                                                  "Yahoo.BPCtl."+version) != 0) {
+                                                  axViProgid(),
+                                                  axProgid(version)) != 0) {
                                 BPLOG_WARN_STRM("unable to unregister " << plugin);
                                 m_error = true;
                             }

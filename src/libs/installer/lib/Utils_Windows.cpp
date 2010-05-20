@@ -58,6 +58,34 @@ bp::install::utils::getFolderPath(int selector)
 }
 
 
+std::string
+bp::install::utils::axName()
+{
+    return "CBPCtl Object";
+}
+
+
+std::string
+bp::install::utils::axViProgid()
+{
+    return "Yahoo.BPCtl";
+}
+
+
+std::string
+bp::install::utils::axProgid(const std::string& version)
+{
+    return axViProgid() + "." + version;
+}
+
+
+std::string
+bp::install::utils::axProgid(const bp::ServiceVersion& version)
+{
+    return axProgid(version.asString());
+}
+
+
 bpf::Path
 bp::install::utils::npapiPluginDir(const bpf::Path& dir)
 {
@@ -127,7 +155,7 @@ bp::install::utils::getControlInfo(const bpf::Path& path,
         }
           
         // get activeXGuid from HKCU\\Yahoo.BPCtl.<version>\CLSID\(Default)
-        key = "HKCU\\Software\\Classes\\Yahoo.BPCtl." + version + "\\CLSID";
+        key = "HKCU\\Software\\Classes\\" + axProgid(version) + "\\CLSID";
         if (keyExists(key)) {
             activeXGuid = readString(key);
         }
@@ -398,8 +426,7 @@ bp::install::utils::unregisterCruftControls(bool force)
             vector<string> mtypes;
             if (getControlInfo(path, vers, typeLibGuid, activeXGuid, mtypes)) {
                 if (unRegisterControl(mtypes, typeLibGuid, path, activeXGuid,
-                                      "Yahoo.BPCtl",
-                                      "Yahoo.BPCtl." + vers) != 0) {
+                                      axViProgid(), axProgid(vers)) != 0) {
                     BPLOG_WARN_STRM("unable to unregister " << path);
                     rval = 1;
                 }
