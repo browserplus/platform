@@ -296,8 +296,7 @@ Installer::disablePlugins(const bp::ServiceVersion& version)
         vector<string> mtypes;
         if (getControlInfo(path, vers, typeLibGuid, activeXGuid, mtypes)) {
             if (unRegisterControl(mtypes, typeLibGuid, path, activeXGuid,
-                                  "CBPCtl Object", "Yahoo.BPCtl",
-                                  "Yahoo.BPCtl." + vers) != 0) {
+                                  "Yahoo.BPCtl", "Yahoo.BPCtl." + vers) != 0) {
                 BPLOG_WARN_STRM("unable to unregister " << path);
             }
         }

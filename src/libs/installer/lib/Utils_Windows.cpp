@@ -276,7 +276,6 @@ bp::install::utils::unRegisterControl(const std::vector<std::string>& vsMimetype
                                       const string& sModuleUuid,
                                       const bpf::Path& modulePath,
                                       const string& sCoClassUuid,
-                                      const string& sCoClassName,
                                       const string& sViProgid,
                                       const string& sProgid)
 {
@@ -399,7 +398,7 @@ bp::install::utils::unregisterCruftControls(bool force)
             vector<string> mtypes;
             if (getControlInfo(path, vers, typeLibGuid, activeXGuid, mtypes)) {
                 if (unRegisterControl(mtypes, typeLibGuid, path, activeXGuid,
-                                      "CBPCtl Object", "Yahoo.BPCtl",
+                                      "Yahoo.BPCtl",
                                       "Yahoo.BPCtl." + vers) != 0) {
                     BPLOG_WARN_STRM("unable to unregister " << path);
                     rval = 1;

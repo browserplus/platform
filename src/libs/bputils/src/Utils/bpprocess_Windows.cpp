@@ -44,13 +44,6 @@ using std::string;
 using std::stringstream;
 using std::vector;
 
-// Forward Declarations
-static bool
-invokeCreateProcess(const bp::file::Path& path,
-                    const std::string& sTitle,
-                    const bp::file::Path& workingDirectory,
-                    const vector<string>& vsArgs,
-                    bp::process::spawnStatus* pStat);
 
 
 static std::wstring
@@ -87,41 +80,18 @@ bp::process::currentPid()
 }
 
 
-bool
-bp::process::spawn(const bp::file::Path& path,
-                   const bp::file::Path& workingDirectory,
-                   spawnStatus* status)
-{
-    // TODO: set working directory
-    vector<string> vsArgs;
-    return invokeCreateProcess(path, std::string(), workingDirectory,
-                               vsArgs, status);
-}
-
-
-bool
-bp::process::spawn(const bp::file::Path& path,
-                   const std::string& sTitle,
-                   const bp::file::Path& workingDirectory,
-                   const vector<string>& vsArgs,
-                   spawnStatus* status)
-{
-    return invokeCreateProcess(path, sTitle, workingDirectory,
-                               vsArgs, status);
-}
-
-
 // TODO
 // * env handling
 // * optional close/return handles?
 // * figure out how to reliably change process name so that sTitle appears
 //   in the "Activity Monitor" or "Task Manager" 
-static bool 
-invokeCreateProcess(const bp::file::Path& path,
-                    const std::string& sTitle, 
-                    const bp::file::Path& workingDirectory,
-                    const vector<string>& vsArgs,
-                    bp::process::spawnStatus* pStat)
+bool
+bp::process::spawn(const bp::file::Path& path,
+                   const vector<string>& vsArgs,
+                   spawnStatus* status,
+                   const bp::file::Path& workingDirectory,
+                   const std::string& sTitle,
+                   bool inheritWin32StdHandles)
 {
 	// get args into writable C buf needed by CreateProcessW()
     std::wstring wsArgs;
@@ -133,21 +103,29 @@ invokeCreateProcess(const bp::file::Path& path,
         return false;
     }
 
-    // now execute path with args
+    // Setup CreateProcess.
+    BOOL inheritHandles = inheritWin32StdHandles ? TRUE : FALSE;
     std::wstring dir = workingDirectory.external_directory_string();
     const wchar_t* pDir = dir.empty() ? NULL : dir.c_str();
     STARTUPINFO sinfo;
     ZeroMemory(&sinfo, sizeof(sinfo));
     sinfo.dwFlags = STARTF_USESHOWWINDOW;
+    if (inheritWin32StdHandles) {
+        sinfo.dwFlags |= STARTF_USESTDHANDLES;
+        sinfo.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
+        sinfo.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+        sinfo.hStdError = GetStdHandle(STD_ERROR_HANDLE);
+    }
     sinfo.wShowWindow = SW_HIDE;
     sinfo.cb = sizeof(sinfo);
     PROCESS_INFORMATION pinfo;
     ZeroMemory(&pinfo, sizeof(pinfo));
+    
     BOOL bRet = ::CreateProcessW(path.external_file_string().c_str(),
                                  wsBuf,
                                  NULL,              // process attributes
                                  NULL,              // thread attributes
-                                 FALSE,             // inherit handles
+                                 inheritHandles,    // inherit handles
                                  CREATE_NO_WINDOW,  // creation flags
                                  NULL,              // environment
                                  pDir,              // working directory
@@ -155,16 +133,16 @@ invokeCreateProcess(const bp::file::Path& path,
                                  &pinfo);           // process information
 
     if (bRet) {
-        if (pStat) {
-            pStat->errCode = 0;
-            pStat->pid = pinfo.dwProcessId;
-            pStat->handle = pinfo.hProcess;
+        if (status) {
+            status->errCode = 0;
+            status->pid = pinfo.dwProcessId;
+            status->handle = pinfo.hProcess;
         }
     } else {
-        if (pStat) {
-            pStat->errCode = GetLastError();
-            pStat->pid = 0;
-            pStat->handle = 0;
+        if (status) {
+            status->errCode = GetLastError();
+            status->pid = 0;
+            status->handle = 0;
         }
     }
     if (wsBuf) {
@@ -206,9 +184,8 @@ bp::process::kill(const string& name,
     killArgs.push_back("/IM");
     killArgs.push_back(name);
     bp::process::spawnStatus status;
-    return bp::process::spawn(bp::file::Path(L"taskkill.exe"),
-                              std::string(), bp::file::Path(),
-                              killArgs, &status);
+    return bp::process::spawn(bp::file::Path(L"taskkill.exe"), killArgs,
+                              &status);
 }
 
 

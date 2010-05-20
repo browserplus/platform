@@ -79,8 +79,8 @@ InstallProcessRunner::start(const bp::file::Path& dir,
     args.push_back("-logPath=" + m_logPath.externalUtf8());
     args.push_back("-logLevel=" + m_logLevel);
     args.push_back(dir.externalUtf8());
-    if (bp::process::spawn(updaterExe, "BrowserPlusUpdater",
-                           dir, args, &m_procStatus)) {
+    if (bp::process::spawn(updaterExe, args, &m_procStatus,
+                           dir, "BrowserPlusUpdater")) {
         // set a timer to catch non-responsive updater
         m_timer.setMsec(TIMER_MSECS);
     } else {

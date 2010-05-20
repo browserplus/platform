@@ -64,28 +64,11 @@ bp::process::currentPid()
 
 bool
 bp::process::spawn(const Path& path,
-                   const Path& wd,
-                   spawnStatus* pStatus)
-{
-    // Setup argv.
-    vector<char*> vArgs;
-    
-    // argv[0] = name used to invoke the program.
-    vArgs.push_back(const_cast<char*>(path.externalUtf8().c_str()));
-    
-    // argv[argc] = 0.
-    vArgs.push_back(0);
-    
-    return forkAndExec(path, wd, &vArgs[0], pStatus);
-}
-
-
-bool
-bp::process::spawn(const Path& path,
-                   const string& sTitle,
-                   const Path& wd,
                    const vector<string>& vsArgs,
-                   spawnStatus* pStatus)
+                   spawnStatus* pStatus,
+                   const Path& wd,
+                   const string& sTitle,
+                   bool /*inheritWin32StdHandles*/)
 {
     // Setup argv.
     vector<char*> vArgs;

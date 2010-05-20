@@ -206,8 +206,7 @@ int APIENTRY WinMain( HINSTANCE, HINSTANCE, LPSTR, int )
         bp::process::spawnStatus status;
 
         // (relay arguments through to spawned process)
-        if (!bp::process::spawn(instExe, "", extractTo,
-                                args, &status))
+        if (!bp::process::spawn(instExe, args, &status, extractTo, "", true))
         {
             BS_ERROR_OUTPUT( "Couldn't spawn installer executable: " << instExe );
             return 1;
