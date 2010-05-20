@@ -80,7 +80,6 @@ namespace utils {
                           const std::string& sModuleUuid,
                           const bp::file::Path& sModulePath,
                           const std::string& sCoClassUuid,
-                          const std::string& sCoClassName,
                           const std::string& sViProgid,
                           const std::string& sProgid);
 
@@ -92,7 +91,7 @@ namespace utils {
     // Returns 0 on success, non-zero otherwise
     int unregisterCruftControls(bool force);
 
-    // Delete a registry key and all of it's subkeys.
+    // Delete a registry key and all of its subkeys.
     //
     // BE VERY, VERY CAREFUL USING THIS METHOD, IT CAN DESTROY A SYSTEM.
     // CHECK, DOUBLE CHECK, AND THEN TRIPLE CHECK THE KEY THAT YOU PASS.
