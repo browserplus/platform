@@ -25,6 +25,8 @@
 #include "I18n/FormatTime.h"
 #include "I18n/idna.h"
 
+#include <string.h>
+
 using namespace std;
 using namespace std::tr1;
 

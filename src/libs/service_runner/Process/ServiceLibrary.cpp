@@ -280,7 +280,7 @@ ServiceLibrary::invokeCallbackFunction(unsigned int tid,
 unsigned int
 ServiceLibrary::promptUserFunction(
     unsigned int tid,
-    const char * utf8PathToHTMLDialog,
+    const BPPath pathToHTMLDialog,
     const BPElement * args,
     BPUserResponseCallbackFuncPtr responseCallback,
     void * cookie)
@@ -299,7 +299,7 @@ ServiceLibrary::promptUserFunction(
     InstanceResponse * ir = new InstanceResponse;
     ir->type = InstanceResponse::T_Prompt;
     ir->tid = tid;
-    if (utf8PathToHTMLDialog) ir->dialogPath.append(utf8PathToHTMLDialog);
+    if (pathToHTMLDialog) ir->dialogPath.append(pathToHTMLDialog);
     ir->o = (args ? bp::Object::build(args) : NULL);
     ir->responseCallback = responseCallback;
     ir->responseCookie = cookie;
@@ -310,112 +310,6 @@ ServiceLibrary::promptUserFunction(
     return cpid;
 }
 // END call-in points for dynamically loaded services
-
-
-// BEGIN runloop hooks for instance threads
-struct InstanceState 
-{
-    // arguments to allocate
-    bp::Map context;
-    std::string name;
-    std::string version;
-    // instance cookie retured by service, to be passed into subsequent
-    // calls
-    void * cookie;
-    // attachment id.  Largely obsolete, a remnant from a time when
-    // multiple different dependent services could be loaded into the same
-    // process.
-    unsigned int attachID;
-    // the function table, call-in points to the service
-    const BPPFunctionTable * funcTable;
-};
-
-static void
-onThreadStartFunc(void * c)
-{
-    InstanceState * is = (InstanceState *) c;
-
-    if (is->funcTable->allocateFunc != NULL)
-    {
-        int rv = is->funcTable->allocateFunc(
-            &(is->cookie), is->attachID, is->context.elemPtr());
-
-        if (rv != 0) {
-            BPLOG_ERROR_STRM(
-                "Failed to allocate instance of "
-                << is->name << " (" << is->version
-                << ") - BPPAllocate returns non-zero code: "
-                << rv);
-
-            // in debug mode we'll bring the process down.
-            // TODO: eventually we should be getting this error back
-            // to BrowserPlusCore - and a single instance allocation
-            // should not bring down the whole process.
-            BPASSERT(rv == 0);
-        }
-    }
-}
-
-/**
- * events that can be sent to an instance runloop include:
- * 1. function invocation
- * 2. prompt user results
- */
-struct InstanceEvent
-{
-    enum { T_Invoke, T_PromptResults } type;
-    
-    // for function invocation
-    unsigned int tid;
-    bp::Map args;
-    std::string name;
-
-    // for prompt results
-    unsigned int promptId;
-    BPUserResponseCallbackFuncPtr callback;
-    void * cookie;
-    bp::Object * results;
-};
-
-static void
-processEventFunc(void * c, bp::runloop::Event e)
-{
-    InstanceState * is = (InstanceState *) c;
-    InstanceEvent * ie = (InstanceEvent *) e.payload();
-    BPASSERT(ie != NULL);
-    
-    if (ie->type == InstanceEvent::T_Invoke) {
-        if (is->funcTable->invokeFunc != NULL)
-        {
-            is->funcTable->invokeFunc(is->cookie,
-                                      ie->name.c_str(),
-                                      ie->tid,
-                                      ie->args.elemPtr());
-        }
-    } else if (ie->type == InstanceEvent::T_PromptResults) {
-        if (ie->callback) {
-            const BPElement * r = NULL;
-            if (ie->results) r = ie->results->elemPtr();
-            ie->callback(ie->cookie, ie->promptId, r);
-        }
-    }
-
-    if (ie) delete ie;
-}
-
-static void
-onThreadEndFunc(void * c)
-{
-    InstanceState * is = (InstanceState *) c;
-
-    if (is->funcTable->destroyFunc != NULL)
-    {
-        is->funcTable->destroyFunc(is->cookie);
-    }
-
-    delete is;
-}
-// END runloop hooks for instance threads
 
 // the static callback function table
 const void *
@@ -436,7 +330,7 @@ ServiceLibrary::getFunctionTable()
 }
 
 ServiceLibrary::ServiceLibrary() :
-    m_currentId(1), m_attachId(0), m_handle(NULL), m_funcTable(NULL),
+    m_currentId(1), m_handle(NULL), m_funcTable(NULL),
     m_desc(), m_serviceAPIVersion(0), m_instances(), m_listener(NULL),
     m_promptToTransaction(), 
     m_serviceLogMode( bp::log::kServiceLogCombined ), m_serviceLogger()
@@ -446,27 +340,20 @@ ServiceLibrary::ServiceLibrary() :
         
 ServiceLibrary::~ServiceLibrary()
 {
+    const BPPFunctionTable * funcTable = (const BPPFunctionTable *) m_funcTable;
+
     // deallocate all instances
     while (m_instances.size() > 0)
     {
-        std::map<unsigned int,
-            shared_ptr<bp::runloop::RunLoopThread> >::iterator it;
-
+        std::map<unsigned int, void *>::iterator it;
         it = m_instances.begin();
-        it->second->stop();
-        it->second->join();
+        if (funcTable->destroyFunc != NULL)
+        {
+            funcTable->destroyFunc(it->second);
+        }
         m_instances.erase(it);
     }
 
-    // detach dependent services
-    if (m_summary.type() == bp::service::Summary::Dependent) {
-        const BPPFunctionTable * table =
-            (const BPPFunctionTable *) m_funcTable;
-        if (table && table->detachFunc) {
-            table->detachFunc(m_attachId);
-        }
-    }
-    
     // shutdown and unload the library
     shutdownService(true);
 
@@ -509,23 +396,40 @@ ServiceLibrary::load(const bpf::Path & providerPath, std::string & err)
     // dependent services this will be extracted from the manifest
     bpf::Path path;
     bpf::Path servicePath;
-    if (m_summary.type() == bp::service::Summary::Dependent) {
+    bpf::Path dependentPath;
+    const BPElement * dependentParams = NULL;    
+    bp::Map dependentParamsStorage;
+    
+    if (m_summary.type() == bp::service::Summary::Dependent)
+    {
         bp::service::Summary s;
 
         if (!s.detectService(providerPath, err)) {
             BPLOG_ERROR_STRM("error loading dependent service: " << err);
             return false;
         }
+        dependentPath = m_summary.path();
         servicePath = providerPath;
         path = providerPath / s.serviceLibraryPath();
-    } else {
+
+        // now populate dependent params
+        std::map<std::string, std::string> summaryArgs = m_summary.arguments();
+        std::map<std::string, std::string>::iterator it;
+        for (it = summaryArgs.begin(); it != summaryArgs.end(); it++)
+        {
+            dependentParamsStorage.add(it->first.c_str(), new bp::String(it->second));
+        }
+        dependentParams = dependentParamsStorage.elemPtr();
+    }
+    else
+    {
+        // leave dependent path empty()
         servicePath = m_summary.path();
         path = m_summary.path() / m_summary.serviceLibraryPath();
     }
     path = bpf::canonicalPath(path);
     
-    BPLOG_INFO_STRM("loading service library: " <<
-                    bpf::utf8FromNative(path.filename()));
+    BPLOG_INFO_STRM("loading service library: " << bpf::utf8FromNative(path.filename()));
 
     m_handle = dlopenNP(path);
 
@@ -539,10 +443,6 @@ ServiceLibrary::load(const bpf::Path & providerPath, std::string & err)
 
         if (entryPointFunc != NULL)
         {
-            // set up the parameters to the initialize function
-            bp::Map params;
-            params.add("ServiceDirectory", new bp::String(servicePath.utf8()));
-
             m_funcTable = entryPointFunc();
             funcTable = (const BPPFunctionTable *) m_funcTable;
 
@@ -571,7 +471,9 @@ ServiceLibrary::load(const bpf::Path & providerPath, std::string & err)
                     
                     def = funcTable->initializeFunc(
                         (const BPCFunctionTable *) getFunctionTable(),
-                        params.elemPtr());
+                        (const BPPath) (servicePath.external_file_string().c_str()),
+                        (const BPPath) (dependentPath.empty() ? NULL : dependentPath.external_file_string().c_str()),
+                        dependentParams);
                     
                     if (def == NULL)
                     {
@@ -583,10 +485,6 @@ ServiceLibrary::load(const bpf::Path & providerPath, std::string & err)
                         // violated a contract
                         callShutdown = false;
                     }
-                    // TODO: It's unnecesary in the dependent case to
-                    // extract an API definition, because the providers'
-                    // api will not be exposed.  In this case the m_desc
-                    // structure will be re-populated below
                     else if (!m_desc.fromBPServiceDefinition(def))
                     {
                         BPLOG_WARN_STRM("couldn't populate Description "
@@ -599,9 +497,9 @@ ServiceLibrary::load(const bpf::Path & providerPath, std::string & err)
         }
         else 
         {
-            BPLOG_WARN_STRM("skipping '" << path
-                            << "', failed to get address for "
-                            "BPPGetEntryPoints symbol");
+            BPLOG_ERROR_STRM("skipping '" << path
+                             << "', failed to get address for "
+                             "BPPGetEntryPoints symbol");
             success = false;
             callShutdown = false;
         }
@@ -614,62 +512,6 @@ ServiceLibrary::load(const bpf::Path & providerPath, std::string & err)
         callShutdown = false;
     }
 
-    // now if we've successfully initialized, and this is a dependent
-    // service, let's attach!
-    if (success && m_summary.type() == bp::service::Summary::Dependent &&
-        funcTable->attachFunc != NULL)
-    {
-        m_attachId = 1000;
-
-        // set up the parameters to the attach function
-        bp::Map params;
-        params.add("ServiceDirectory",
-                   new bp::String(m_summary.path().utf8()));
-
-        // add in arguments from dependent manifest
-        std::map<std::string, std::string> summaryArgs =
-            m_summary.arguments();
-
-        std::map<std::string, std::string>::iterator it;
-
-        bp::Map * sargs = new bp::Map;
-        for (it = summaryArgs.begin(); it != summaryArgs.end(); it++)
-        {
-            sargs->add(it->first.c_str(), new bp::String(it->second));
-        }
-        params.add("Parameters", sargs);
-
-        bp::file::Path curdir;
-#ifdef WIN32
-        wchar_t* cwd = _wgetcwd(NULL, 0);
-#else
-        char* cwd = getwd(NULL);
-#endif
-        if (cwd) {
-            curdir = cwd;
-            free(cwd);
-        }
-        std::string paramStr = params.toJsonString();
-        BPLOG_INFO_STRM("attach to " << path << " with " << paramStr 
-                        << ", cwd = " << curdir);
-
-        const BPServiceDefinition * def = NULL;
-        def = funcTable->attachFunc(m_attachId, params.elemPtr());
-        if (def == NULL) {
-            BPLOG_WARN_STRM("attachFunc returns NULL description");
-            if (funcTable->detachFunc) {
-                funcTable->detachFunc(m_attachId);
-            }
-            success = false;
-            callShutdown = true;
-        } else if (!m_desc.fromBPServiceDefinition(def)) {
-            BPLOG_WARN_STRM("couldn't populate Description "
-                            "from structure returned from attach function");
-            success = false;
-            callShutdown = true;
-        }
-    }
-    
     if (!success) shutdownService(callShutdown);
 
     return success;
@@ -698,36 +540,46 @@ ServiceLibrary::shutdownService(bool callShutdown)
 }
 
 unsigned int
-ServiceLibrary::allocate(const bp::Map & m)
+ServiceLibrary::allocate(std::string uri, bpf::Path dataDir,
+                         bpf::Path tempDir, std::string locale,
+                         std::string userAgent, unsigned int clientPid)
 {
     unsigned int id = m_currentId++;
 
-    // allocate runloop thread and add to map
-    shared_ptr<bp::runloop::RunLoopThread>
-        rlthr(new bp::runloop::RunLoopThread);
+    // client popupulated context ptr
+    void * cookie = NULL;
 
-    // now let's allocate and populate the instance's state structure
-    // this will be freed by the thread in the onThreadEndFunc
-    InstanceState * is = new InstanceState;
-    is->name = m_summary.name();
-    is->version = m_summary.version();
-    is->context = m;
+    const BPPFunctionTable * funcTable =
+        (const BPPFunctionTable *) m_funcTable;    
 
-    // set service_dir and the deprecated service_dir here     
-    is->context.add("service_dir", new bp::String(m_summary.path().utf8()));
-    is->context.add("service_dir", new bp::String(m_summary.path().utf8()));
+    if (funcTable->allocateFunc != NULL)
+    {
+        bpf::Path serviceDir = m_summary.path();
+        
+        int rv = funcTable->allocateFunc(
+            &cookie,
+            (const BPString) uri.c_str(),
+            (const BPPath) serviceDir.external_file_string().c_str(),
+            (const BPPath) dataDir.external_file_string().c_str(),
+            (const BPPath) tempDir.external_file_string().c_str(),
+            (const BPString) locale.c_str(),
+            (const BPString) userAgent.c_str(),
+            clientPid);
 
-    is->cookie = NULL;
-    is->attachID = m_attachId; 
-    is->funcTable = (const BPPFunctionTable *) m_funcTable;
+        if (rv != 0) {
+            BPLOG_ERROR_STRM(
+                "Failed to allocate instance of "
+                << name() << " (" << version()
+                << ") - BPPAllocate returns non-zero code: "
+                << rv);
 
-    rlthr->setCallBacks(onThreadStartFunc, (void *) is,
-                        onThreadEndFunc, (void *) is,
-                        processEventFunc, (void *) is);
+            return 0;
+        }
 
-    m_instances[id] = rlthr;
-    
-    rlthr->run();
+    }
+
+    // add the instance
+    m_instances[id] = cookie;
 
     return id;
 }
@@ -735,13 +587,18 @@ ServiceLibrary::allocate(const bp::Map & m)
 void
 ServiceLibrary::destroy(unsigned int id)
 {
-    std::map<unsigned int,
-             shared_ptr<bp::runloop::RunLoopThread> >::iterator it;
+    const BPPFunctionTable * funcTable = (const BPPFunctionTable *) m_funcTable;
+
+    std::map<unsigned int, void *>::iterator it;
 
     it = m_instances.find(id);
-    if (it != m_instances.end()) {
-        it->second->stop();
-        it->second->join();
+
+    if (it != m_instances.end())
+    {
+        if (funcTable->destroyFunc != NULL)
+        {
+            funcTable->destroyFunc(it->second);
+        }
         m_instances.erase(it);
     }
 }
@@ -784,8 +641,7 @@ ServiceLibrary::invoke(unsigned int id, unsigned int tid,
     }
     
     // finally, does the specified instance exist?
-    std::map<unsigned int,
-        shared_ptr<bp::runloop::RunLoopThread> >::iterator it;
+    std::map<unsigned int, void *>::iterator it;
     it = m_instances.find(id);
 
     if (it == m_instances.end()) {
@@ -797,19 +653,14 @@ ServiceLibrary::invoke(unsigned int id, unsigned int tid,
     }
     
     // good to go!  now we're ready to actually invoke the function!
+    const BPPFunctionTable * funcTable = (const BPPFunctionTable *) m_funcTable;
 
-    InstanceEvent * ie = new InstanceEvent;
-    ie->type = InstanceEvent::T_Invoke;
-    ie->tid = tid;
-    ie->name = function;
-    if (arguments && arguments->type() == BPTMap) {
-        ie->args = *((bp::Map *) arguments);
-    }
-
-    if (!it->second->sendEvent(bp::runloop::Event(ie))) {
-        delete ie;
-        err.append("couldn't send event to instance runloop");
-        postErrorFunction(tid, "bp.invokeError", err.c_str());
+    if (funcTable->invokeFunc != NULL)
+    {
+        funcTable->invokeFunc(it->second,
+                              function.c_str(),
+                              tid,
+                              ((arguments && arguments->type() == BPTMap) ? arguments->elemPtr() : NULL));
     }
 
     return true;
@@ -821,8 +672,7 @@ ServiceLibrary::promptResponse(unsigned int promptId,
 {
     PromptContext ctx;
     unsigned int instance;
-    std::map<unsigned int,
-        shared_ptr<bp::runloop::RunLoopThread> >::iterator it;
+    std::map<unsigned int, void *>::iterator it;
     
     if (!findContextFromPromptId(promptId, ctx)) {
         BPLOG_ERROR_STRM("prompt response with unknown prompt ID: "
@@ -833,23 +683,9 @@ ServiceLibrary::promptResponse(unsigned int promptId,
     } else if ((it = m_instances.find(instance)) == m_instances.end()) {
         BPLOG_ERROR_STRM("prompt response associated with unknown instance "
                          "id: " << instance);
-    } else {
-        // we got all we need! let's pass it to the correct instance
-        // runloop
-        InstanceEvent * ie = new InstanceEvent;
-        ie->type = InstanceEvent::T_PromptResults;
-        ie->callback = ctx.cb;
-        ie->cookie = ctx.cookie;
-        ie->promptId = promptId;
-
-        if (arguments) ie->results = arguments->clone();
-        else ie->results = NULL;
-
-        if (!it->second->sendEvent(bp::runloop::Event(ie))) {
-            BPLOG_ERROR_STRM("couldn't relay prompt event to correct "
-                             "runloop, dropping");
-            delete ie;
-        }
+    } else if (ctx.cb) {
+        // invoke the client callback
+        ctx.cb(ctx.cookie, promptId, (arguments ? arguments->elemPtr() : NULL));
     }
 
     // regardless of the outcome, let's ensure we've removed our

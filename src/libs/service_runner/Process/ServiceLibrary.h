@@ -42,6 +42,7 @@
 #include "BPUtils/LogConfigurator.h"
 #include "BPUtils/ServiceDescription.h"
 #include "BPUtils/ServiceSummary.h"
+#include "BPUtils/bpfile.h"
 #include "ServiceAPI/bppfunctions.h"
 
 namespace ServiceRunner 
@@ -92,7 +93,12 @@ namespace ServiceRunner
         std::string version();
         const bp::service::Description & description() { return m_desc; }
 
-        unsigned int allocate(const bp::Map & context);
+        /** returns zero on failure (client allocate() function failed), or non-zero id
+         *  upon success */
+        unsigned int allocate(std::string uri, bp::file::Path dataDir,
+                              bp::file::Path tempDir, std::string locale,
+                              std::string userAgent, unsigned int clientPid);
+
         void destroy(unsigned int id);
 
         bool invoke(unsigned int id, unsigned int tid,
@@ -106,12 +112,6 @@ namespace ServiceRunner
       private:
         // current instance id.  we start counting at 1
         unsigned int m_currentId;
-
-        // zero for standalone or providers, 1000 for dependents.  Because
-        // now depndents always run in their own process space, this is
-        // a bit of an unneccesary artifact that should be eliminated after
-        // we rev and clean up the service API
-        unsigned int m_attachId;
 
         bp::service::Summary m_summary;
 
@@ -150,8 +150,7 @@ namespace ServiceRunner
         static void * dlsymNP(void * handle, const char * sym);
 
         // a map mapping instances to RunLoop thread handles.
-        std::map<unsigned int,
-                 std::tr1::shared_ptr<bp::runloop::RunLoopThread> > m_instances;
+        std::map<unsigned int, void *> m_instances;
 
         // how instance threads call back into the main thread.
         void onHop(void * context);
@@ -171,7 +170,7 @@ namespace ServiceRunner
                                            const struct BPElement_t * results);
         static unsigned int promptUserFunction(
             unsigned int tid,
-            const char * utf8PathToHTMLDialog,
+            const BPPath utf8PathToHTMLDialog,
             const BPElement * args,
             BPUserResponseCallbackFuncPtr responseCallback,
             void * cookie);
