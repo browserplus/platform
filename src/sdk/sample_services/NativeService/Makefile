@@ -8,13 +8,13 @@ INCLUDE = -I${BPSDK_PATH}/include
 NAME = SampleService
 PLAT = $(strip $(shell uname))
 ifeq ($(PLAT), Linux)
-  DYFLAG=-rdynamic
+  PLAT_FLAGS=-rdynamic
 else
-  DYFLAG=-bundle
+  PLAT_FLAGS=-bundle -m32
 endif
 
 ${NAME}/lib${NAME}.so: ${SRC_PATH}/service.cpp ${NAME} ${NAME}/manifest.json
-	g++ $(DYFLAG) -o $@ ${INCLUDE} $<
+	g++ $(PLAT_FLAGS) -g -o $@ ${INCLUDE} $<
 
 ${NAME}/manifest.json: ${SRC_PATH}/manifest.json
 	sed -e 's/@ServiceLibrary@/lib${NAME}.so/' < $< > $@
