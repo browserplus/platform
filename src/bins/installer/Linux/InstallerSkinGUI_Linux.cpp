@@ -26,10 +26,9 @@
 
 #include <string>
 #include <sstream>
-
 #include <iostream>
 
-InstallerSkinGUI::InstallerSkinGUI(const std::string & uiDirectory)
+InstallerSkinGUI::InstallerSkinGUI(const bp::file::Path & uiDirectory)
 		: m_uiDirectory(uiDirectory)
 {
 }

@@ -21,7 +21,9 @@
  */
 
 #include "InstallerSkin.h"
+
 #include <iostream>
+#include <stdlib.h>
 
 InstallerSkin::InstallerSkin()
     : m_listener(NULL)

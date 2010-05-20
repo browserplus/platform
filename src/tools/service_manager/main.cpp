@@ -20,7 +20,6 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include <iostream>
 #include "BPUtils/APTArgParse.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bprunloop.h"
@@ -28,6 +27,12 @@
 
 // here's our implementation of handling commands
 #include "CommandExecutor.h"
+
+#ifndef WIN32
+#include <signal.h>
+#endif
+#include <iostream>
+
 
 using namespace std;
 using namespace std::tr1;

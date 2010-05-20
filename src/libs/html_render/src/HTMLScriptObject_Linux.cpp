@@ -26,42 +26,4 @@
  *                running javascript context. 
  */
 
-#include "api/HTMLWindow.h"
-
-
-bp::html::HTMLWindow::HTMLWindow()
-{
-}
-
-bp::html::HTMLWindow::~HTMLWindow()
-{
-}
-
-
-void
-bp::html::HTMLWindow::setDimensions(int , int )
-{
-}
-
-void
-bp::html::HTMLWindow::setParent(void * )
-{
-}
-
-bool
-bp::html::HTMLWindow::render(const std::string &)
-{
-	return false;
-}
-
-bool
-bp::html::HTMLWindow::show()
-{
-	return false;
-}
-
-bool
-bp::html::HTMLWindow::hide()
-{
-	return false;
-}
+#include "api/HTMLScriptObject.h"

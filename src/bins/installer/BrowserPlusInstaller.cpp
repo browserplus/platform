@@ -21,8 +21,6 @@
  */
 
 #include "BPInstaller/BPInstaller.h"
-#include <string>
-#include <list>
 #include "BPUtils/ARGVConverter.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/bplocalization.h"
@@ -37,6 +35,10 @@
 #include "InstallerSkinGUI.h"
 #include "InstallerRunner.h"
 #include "InstallProcessRunner.h"
+
+#include <string>
+#include <list>
+#include <string.h>
 
 using namespace std;
 using namespace std::tr1;

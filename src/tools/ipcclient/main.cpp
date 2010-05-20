@@ -21,9 +21,17 @@
  */
 
 
+#include "BPUtils/IPCConnection.h"
+
 #include <iostream>
 #include <sstream>
-#include "BPUtils/IPCConnection.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#ifndef WIN32
+#include <signal.h>
+#endif
 
 class MyIPCClient : public bp::ipc::IConnectionListener
 {

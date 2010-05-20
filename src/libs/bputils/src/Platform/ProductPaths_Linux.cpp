@@ -74,6 +74,14 @@ bp::paths::getIPCName()
 
 
 string 
+bp::paths::getEphemeralIPCName()
+{
+    Path p = getTempPath(getTempDirectory(), "BPIPC");
+    return p.utf8();
+}
+
+
+string 
 bp::paths::getIPCLockName(int major,
                           int minor,
                           int micro)
