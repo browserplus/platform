@@ -67,7 +67,8 @@ bp::process::spawn(const Path& path,
                    const vector<string>& vsArgs,
                    spawnStatus* pStatus,
                    const Path& wd,
-                   const string& sTitle)
+                   const string& sTitle,
+                   bool /*inheritWin32StdHandles*/)
 {
     // Setup argv.
     vector<char*> vArgs;

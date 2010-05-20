@@ -90,7 +90,8 @@ bp::process::spawn(const bp::file::Path& path,
                    const vector<string>& vsArgs,
                    spawnStatus* status,
                    const bp::file::Path& workingDirectory,
-                   const std::string& sTitle)
+                   const std::string& sTitle,
+                   bool inheritWin32StdHandles)
 {
 	// get args into writable C buf needed by CreateProcessW()
     std::wstring wsArgs;
@@ -102,21 +103,29 @@ bp::process::spawn(const bp::file::Path& path,
         return false;
     }
 
-    // now execute path with args
+    // Setup CreateProcess.
+    BOOL inheritHandles = inheritWin32StdHandles ? TRUE : FALSE;
     std::wstring dir = workingDirectory.external_directory_string();
     const wchar_t* pDir = dir.empty() ? NULL : dir.c_str();
     STARTUPINFO sinfo;
     ZeroMemory(&sinfo, sizeof(sinfo));
     sinfo.dwFlags = STARTF_USESHOWWINDOW;
+    if (inheritWin32StdHandles) {
+        sinfo.dwFlags |= STARTF_USESTDHANDLES;
+        sinfo.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
+        sinfo.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+        sinfo.hStdError = GetStdHandle(STD_ERROR_HANDLE);
+    }
     sinfo.wShowWindow = SW_HIDE;
     sinfo.cb = sizeof(sinfo);
     PROCESS_INFORMATION pinfo;
     ZeroMemory(&pinfo, sizeof(pinfo));
+    
     BOOL bRet = ::CreateProcessW(path.external_file_string().c_str(),
                                  wsBuf,
                                  NULL,              // process attributes
                                  NULL,              // thread attributes
-                                 FALSE,             // inherit handles
+                                 inheritHandles,    // inherit handles
                                  CREATE_NO_WINDOW,  // creation flags
                                  NULL,              // environment
                                  pDir,              // working directory
