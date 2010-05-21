@@ -129,10 +129,11 @@ toJsonRecurse(const Object* obj,
             yajl_gen_string(ghand, (const unsigned char*) "path", 
                             strlen("path"));
             yajl_gen_string(ghand, valueKey, valueKeyLen);
-            Path* s = (Path*) obj;
+			bp::file::Path p = *((Path*) obj);
+			std::string str = p.utf8();
             yajl_gen_string(ghand,
-                            (const unsigned char*) s->value(),
-                            (strlen(s->value())));
+                            (const unsigned char*) str.c_str(),
+                            str.length()); 
             break;
         }
         case BPTAny: {

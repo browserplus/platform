@@ -35,6 +35,11 @@ SET (serviceName SampleService)
 PROJECT(${serviceName}Service)
 
 IF (WIN32)
+  INCLUDE_EXTERNAL_MSPROJECT(
+    "${serviceName}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/${serviceName}.vcproj"
+    PackageSDK)
+ELSE ()
   ADD_CUSTOM_TARGET(
       ${serviceName} ALL
       COMMAND echo SRC_PATH=${CMAKE_CURRENT_SOURCE_DIR}
@@ -45,9 +50,4 @@ IF (WIN32)
 			  make -f "${CMAKE_CURRENT_SOURCE_DIR}/Makefile"
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
   ADD_DEPENDENCIES(${serviceName} PackageSDK)
-ELSE ()
-  INCLUDE_EXTERNAL_MSPROJECT(
-    "${serviceName}"
-    "${CMAKE_CURRENT_SOURCE_DIR}/${serviceName}.vcproj"
-    PackageSDK)
 ENDIF ()

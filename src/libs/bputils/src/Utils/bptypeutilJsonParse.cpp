@@ -229,8 +229,7 @@ bp::createBPObject(const Map * map)
         // Make a Path from the String value
         sObj = dynamic_cast<const String*>(valObj);
         if (sObj == NULL) return NULL;
-        bp::file::Path p = bp::file::pathFromURL(sObj->value());
-        rval = new bp::Path(p);
+        rval = new bp::Path(bp::file::Path(sObj->value()));
     } else if (bpType.compare("callback") == 0) {
         // Make a Callback from the Integer value
         const Integer * iObj = dynamic_cast<const Integer*>(valObj);

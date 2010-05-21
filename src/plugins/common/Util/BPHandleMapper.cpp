@@ -105,7 +105,7 @@ BPHandleMapper::insertHandles(const bp::Object* bpObj)
         {
             // Path must become a map containing id/name keys
             const Path* pObj = dynamic_cast<const Path*>(bpObj);
-            bpf::Path path = bpf::pathFromURL(pObj->value());
+            bpf::Path path = *pObj;
             BPHandle handle = pathToHandle(path);
             Map* m = new Map;
             m->add(BROWSERPLUS_HANDLETYPE_KEY, new String(handle.type()));

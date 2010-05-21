@@ -153,8 +153,7 @@ bp::Object::build(const BPElement * elem)
                 break;
             case BPTPath: 
             {
-                bp::file::Path p = bp::file::pathFromURL(elem->value.pathVal);
-                obj = new bp::Path(p);
+                obj = new bp::Path(bp::file::Path(elem->value.pathVal));
                 break;
             }
             case BPTMap:
@@ -212,6 +211,11 @@ bp::Object::operator bool() const
 bp::Object::operator std::string() const 
 {
     throw ConversionException("cannot convert to string");
+}
+
+bp::Object::operator bp::file::Path() const 
+{
+    throw ConversionException("cannot convert to path");
 }
 
 bp::Object::operator long long() const 
@@ -348,25 +352,35 @@ bp::String::operator std::string() const
 }
 
 bp::Path::Path(const bp::file::Path & path)
-    : bp::String(path.utf8())
+    : bp::Object(BPTPath), m_path(path.external_file_string())
 {
-    e.type = BPTPath;
-    this->str = path.url();
-    e.value.pathVal = (char *)this->str.c_str();
+    e.value.pathVal = (BPPath) m_path.c_str();
 }
 
 bp::Path::Path(const Path & other)
-    : bp::String(other.str)
+    :  bp::Object(BPTPath), m_path(other.m_path)
 {
     e.type = BPTPath;
+    e.value.pathVal = (BPPath) m_path.c_str();
+}
+
+const BPPath
+bp::Path::value() const
+{
+    return e.value.pathVal;
 }
 
 bp::Path &
 bp::Path::operator= (const Path & other)
 {
-    str = other.str;
-    e.value.pathVal = (char *) str.c_str();
+    m_path = other.m_path;
+    e.value.pathVal = (BPPath) m_path.c_str();
     return *this;
+}
+
+bp::Path::operator bp::file::Path() const 
+{
+	return bp::file::Path(m_path);
 }
 
 bp::Path::~Path()
@@ -386,6 +400,7 @@ bp::Map::Map() : bp::Object(BPTMap)
     e.value.mapVal.size = 0;
     e.value.mapVal.elements = NULL;
 }
+
 
 bp::Map::Map(const Map & o) : bp::Object(BPTMap) 
 {

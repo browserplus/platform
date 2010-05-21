@@ -238,7 +238,7 @@ service::Summary::detectService(const bp::file::Path &dirName,
 
         // got it, allocate summary
         m_type = Standalone;
-        m_serviceLibraryPath /= *(o->get(s_serviceLibraryKey));
+		m_serviceLibraryPath /= (std::string) *(o->get(s_serviceLibraryKey));
     }
     else if (!type.compare(s_providerType))
     {
@@ -254,7 +254,7 @@ service::Summary::detectService(const bp::file::Path &dirName,
         }
 
         m_type = Provider;
-        m_serviceLibraryPath /= *(o->get(s_serviceLibraryKey));
+		m_serviceLibraryPath /= (std::string) *(o->get(s_serviceLibraryKey));
     }
     else if (!strcmp(s_dependentType, type.c_str()))
     {

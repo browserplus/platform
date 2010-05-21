@@ -71,7 +71,7 @@ struct InstanceResponse
     long long int callbackId;
 
     // prompt
-    std::string dialogPath;
+	bp::file::Path dialogPath;
     BPUserResponseCallbackFuncPtr responseCallback;
     void * responseCookie;
     unsigned int promptId;
@@ -299,7 +299,7 @@ ServiceLibrary::promptUserFunction(
     InstanceResponse * ir = new InstanceResponse;
     ir->type = InstanceResponse::T_Prompt;
     ir->tid = tid;
-    if (pathToHTMLDialog) ir->dialogPath.append(pathToHTMLDialog);
+    if (pathToHTMLDialog) ir->dialogPath /= pathToHTMLDialog;
     ir->o = (args ? bp::Object::build(args) : NULL);
     ir->responseCallback = responseCallback;
     ir->responseCookie = cookie;
