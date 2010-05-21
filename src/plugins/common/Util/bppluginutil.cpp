@@ -35,6 +35,7 @@
 #include "BPUtils/ProductPaths.h"
 #include "BPUtils/bperrorutil.h"
 
+#include <string.h>
 
 using namespace std;
 using namespace std::tr1;

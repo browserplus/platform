@@ -33,6 +33,7 @@
 #define __IDROPMANAGER_H__
 
 #include <set>
+#include <string>
 
 // Forward Decl
 class IDropListener;

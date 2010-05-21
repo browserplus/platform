@@ -20,35 +20,20 @@
  * ***** END LICENSE BLOCK *****
  */
 
-/*
- *  common.h
- *  BrowserPlus
- *
- *  Created by Gordon Durand on 5/7/07.
- *  Copyright 2007 Yahoo! Inc. All rights reserved.
- *
- */
+#include "HTMLRenderTest.h"
+#include "HTMLRender/HTMLRender.h"
+#include <iostream>
 
-#ifndef __COMMON_H__
-#define __COMMON_H__
+HTMLRenderTest::JavascriptRunner::JavascriptRunner() : m_osSpecific(NULL)
+{
+}
+HTMLRenderTest::JavascriptRunner::~JavascriptRunner()
+{
+}
 
-#include "npapi/npapi.h"
-#include "npapi/npupp.h"
-#include "npapi/npruntime.h"
-
-// Define PLUGIN_TRACE to 1 to have the wrapper functions emit
-// DebugStr messages whenever they are called.
-//
-//#define PLUGIN_TRACE 1	
-#if PLUGIN_TRACE
-#define PLUGINDEBUGSTR(msg)		::DebugStr(msg)
-#else
-#define PLUGINDEBUGSTR(msg)    ((void) 0)
-#endif
-
-// Function table for procs in browser called by plugin
-extern "C" {
-    extern NPNetscapeFuncs gBrowserFuncs;
-};
-
-#endif
+void 
+HTMLRenderTest::JavascriptRunner::run(const bp::file::Path & path,
+                                      bp::html::ScriptableObject & so,
+                                      const std::string & soName)
+{
+}

@@ -27,3 +27,25 @@
  */
 
 #include "api/HTMLScriptObject.h"
+#include "JSFunctionWrapper.h"
+
+bp::html::ScriptableObject::~ScriptableObject()
+{
+}
+
+bp::Object *
+JSFunctionWrapper::invoke(std::vector<const bp::Object *> args)
+{
+    return NULL;
+}
+
+void
+JSFunctionWrapper::retain(void * o)
+{
+}
+
+void
+JSFunctionWrapper::release(void * o)
+{
+}
+

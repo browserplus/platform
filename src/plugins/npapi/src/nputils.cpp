@@ -26,14 +26,14 @@
 // Disable "nameless struct/union" warnings that come from winnt.h that is 
 // evidently included through some npapi header.
 
-#include <iostream>
-#include <sstream>
-
 #include "common.h"
 #include "NPAPIObject.h"
 #include "nputils.h"
 #include "PluginCommonLib/BPHandleMapper.h"
 
+#include <iostream>
+#include <sstream>
+#include <string.h>
 
 void
 npu::releaseVariant(NPVariant& var)

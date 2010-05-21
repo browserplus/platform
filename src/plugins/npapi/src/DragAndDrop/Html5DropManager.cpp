@@ -39,6 +39,8 @@
 
 #include "NPAPIVariant.h"
 
+#include <string.h>
+
 using namespace std;
 
 // a JavaScript function to add HTML5 style handlers to a supplied dom id, which call back into the supplied 

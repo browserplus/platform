@@ -36,6 +36,7 @@
 #include "BPUtils/ProductPaths.h"
 #include "BPUtils/ProcessLock.h"
 
+#include <string.h>
 
 #ifdef MACOSX
 #include <CoreFoundation/CoreFoundation.h>

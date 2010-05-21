@@ -17,10 +17,23 @@
 # 
 # Contributor(s): 
 # ***** END LICENSE BLOCK *****
-IF (APPLE)
-  ADD_SUBDIRECTORY(Darwin)
-ELSIF (WIN32)
-  ADD_SUBDIRECTORY(Windows)
-ELSE ()
-  ADD_SUBDIRECTORY(Linux)
-ENDIF ()
+# looser syntax
+
+SET(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS 1)
+
+# INCLUDE and link paths for platform libraries
+INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/../../../../dist/include")
+LINK_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/../../../../dist/lib")
+
+# INCLUDE path for config panel Common headers
+INCLUDE_DIRECTORIES("../Common")
+
+SET(HDRS ../Common/ScriptableConfigObject.h)
+SET(SRCS bpprefpane.cpp ../Common/ScriptableConfigObject.cpp)
+
+SET(BINNAME BrowserPlusPrefs)
+
+ADD_EXECUTABLE(${BINNAME} ${SRCS} ${HDRS})
+
+TARGET_LINK_LIBRARIES(${BINNAME} BPProtocol_s
+                      HTMLRender_s BPUtils_s ArchiveLib_s ${OS_LIBS})

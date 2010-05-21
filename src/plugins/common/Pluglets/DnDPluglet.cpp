@@ -24,6 +24,7 @@
 #include "BPUtils/BPLog.h"
 #include "PluginCommonLib/CommonErrors.h"
 
+#include <string.h>
 
 #define DEFAULT_DROP_LIMIT 1000
 
