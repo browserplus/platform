@@ -83,11 +83,12 @@ typedef void (*BPPShutdownPtr)(void);
  *        'corelet_dir' DEPRECATED, use service_dir instead.
  *        'service_dir' is an absolute path to the directory containing the
  *                   files distributed with the service.
- *        'data_dir' is a absolute path to where the service should store
+ *        'data_dir' is an absolute path to where the service should store
  *                   any data that needs to persist.
- *        'temp_dir' is a directory that may be used for temporary
- *                   data.  it will be unique for every instance, and will
- *                   be purged when the instance is deallocated.
+ *        'temp_dir' is an instance-specific directory that may be used for
+ *                   temporary data.  Service is responsible for
+ *                   creating the directory.  Service should remove the
+ *                   directory when the instance is deallocated.
  *        'locale' The locale of the end user to which strings, if any,
  *                 should be localized.
  *        'userAgent' The client user-agent string.
