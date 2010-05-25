@@ -98,6 +98,9 @@ Controller::~Controller()
     m_spawnCheckTimer.cancel();
 
     m_serviceConnector.reset();
+
+    // Delete any temp dirs that may have been left around by the service.
+    std::for_each(m_tempDirs.begin(), m_tempDirs.end(), bp::file::remove);
 }
 
 void
@@ -232,6 +235,7 @@ Controller::describe()
     }
 }
 
+
 unsigned int
 Controller::allocate(const std::string & uri,
                      const bpf::Path & data_dir,
@@ -240,8 +244,6 @@ Controller::allocate(const std::string & uri,
                      const std::string & userAgent,
                      unsigned int clientPid)
 {
-    bp::ipc::Query q;
-
     if (m_chan != NULL)
     {
         bp::Map context;
@@ -252,14 +254,20 @@ Controller::allocate(const std::string & uri,
         context.add("locale", new bp::String(locale));
         context.add("userAgent", new bp::String(userAgent));
         context.add("clientPid", new bp::Integer(clientPid));
+
+        bp::ipc::Query q;
         q.setCommand("allocate");
         q.setPayload(context.clone());
-        if (m_chan->sendQuery(q)) return q.id();
-        // if send fails, return -1
+        if (!m_chan->sendQuery(q)) {
+            return (unsigned int) -1;
+        }
+        m_tempDirs.push_back(temp_dir);
+        return q.id();
+    } else {
+        return (unsigned int) -1;
     }
-
-    return (unsigned int) -1;
 }
+
 
 void
 Controller::destroy(unsigned int id)
@@ -268,6 +276,9 @@ Controller::destroy(unsigned int id)
         bp::ipc::Message m;
         m.setCommand("destroy");
         m.setPayload(new bp::Integer(id));
+
+        // TODO: should this be a sendQuery so we can know when
+        // service is unloaded?
         (void) m_chan->sendMessage(m);
     } else {
         // TODO: we do not convey this condition to the client

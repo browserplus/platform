@@ -260,7 +260,11 @@ namespace ServiceRunner
         // only set in channelEnded case).
         bp::ipc::IConnectionListener::TerminationReason m_chanTermReason;
         std::string m_chanTermErrorString;
+
+        // Temp dirs that were provided to instances.
+        // We purge at end in case service does not.
+        std::vector<bp::file::Path> m_tempDirs;
     };
-};
+}
 
 #endif
