@@ -150,8 +150,9 @@ BPObjectTest::pathTest()
 	json += "\"}";
 
     bp::Object * bp = bp::Object::fromJsonString(json);
-	
-	CPPUNIT_ASSERT( bp::file::Path(somePathNative) == ((bp::file::Path) *bp) );
+
+    bp::file::Path orig = *((bp::Path *) bp);
+	CPPUNIT_ASSERT( bp::file::Path(somePathNative) == orig );
     CPPUNIT_ASSERT( bp->type() == BPTPath);
 
     bp::Object * clone = bp->clone();
@@ -163,7 +164,8 @@ BPObjectTest::pathTest()
 
     bp::file::Path p(somePathNative);
     bp::Path asp(p);
-	CPPUNIT_ASSERT( p == (bp::file::Path)asp );
+    bp::file::Path after = asp;
+	CPPUNIT_ASSERT( p == after );
 
     delete bp;
 }
