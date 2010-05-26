@@ -25,7 +25,6 @@
  * abstracts dlloading and all interaction.
  *
  * First introduced by Lloyd Hilaiel on 2009/01/15
- * Copyright (c) 2009 Yahoo!, Inc. All rights reserved.
  */
 
 #ifndef __SERVICELIBRARY_H__
@@ -69,7 +68,7 @@ namespace ServiceRunner
         virtual ~IServiceLibraryListener() { }
     };
 
-    class ServiceLibrary : public bp::thread::HoppingClass
+    class ServiceLibrary
     {
       public:
         ServiceLibrary();
@@ -91,7 +90,7 @@ namespace ServiceRunner
         
         std::string name();
         std::string version();
-        const bp::service::Description & description() { return m_desc; }
+        const bp::service::Description & description();
 
         /** returns zero on failure (client allocate() function failed), or non-zero id
          *  upon success */
@@ -110,29 +109,10 @@ namespace ServiceRunner
                             const bp::Object * arguments);
 
       private:
-        // current instance id.  we start counting at 1
-        unsigned int m_currentId;
-
+        std::tr1::shared_ptr<class ServiceLibraryImpl> m_impl;
+        
         bp::service::Summary m_summary;
 
-        // curently allocated service
-        void * m_handle;
-
-        // pointer to the service instances function table
-        const void * m_funcTable;
-
-        // service description
-        bp::service::Description m_desc;
-
-        // the service api version, populated during load
-        unsigned int m_serviceAPIVersion;
-
-        // get the function table that we'll pass to services
-        static const void * getFunctionTable();
-
-        // shutdown the service and unload the library
-        void shutdownService(bool callShutdown);
-    
         // All NP functions must be implemented once per platform.
         /**
          * open a shared library returning an opaque handle or NULL
@@ -149,70 +129,8 @@ namespace ServiceRunner
          */
         static void * dlsymNP(void * handle, const char * sym);
 
-        // a map mapping instances to RunLoop thread handles.
-        std::map<unsigned int, void *> m_instances;
-
-        // how instance threads call back into the main thread.
-        void onHop(void * context);
-
-        // entry points for services
-        static void postResultsFunction(unsigned int tid,
-                                        const struct BPElement_t * results);
-
-        static void postErrorFunction(unsigned int tid,
-                                      const char * error,
-                                      const char * verboseError);
-
-        static void logFunction(unsigned int level, const char * fmt, ...);
-        
-        static void invokeCallbackFunction(unsigned int tid,
-                                           long long int callbackHandle,
-                                           const struct BPElement_t * results);
-        static unsigned int promptUserFunction(
-            unsigned int tid,
-            const BPPath utf8PathToHTMLDialog,
-            const BPElement * args,
-            BPUserResponseCallbackFuncPtr responseCallback,
-            void * cookie);
-
-        IServiceLibraryListener * m_listener;
-
-        // transaction bookkeeping required for a couple reasons:
-        // 1. mapping promptId to instance for user prompt responses.
-        // 2. determining instance id for callbacks
-        // 3. determining instance id for sending user prompts
-        
-        // mapping transaction ids to instance ids
-        std::map<unsigned int, unsigned int> m_transactionToInstance;
-        void beginTransaction(unsigned int tid, unsigned int instance);
-        bool transactionKnown(unsigned int tid);
-        void endTransaction(unsigned int tid);
-        bool findInstanceFromTransactionId(unsigned int tid,
-                                           unsigned int & instance);
-
-        // mapping prompt ids to transaction ids & context
-        // a table mapping prompt ids to callback and cookie
-        struct PromptContext {
-            unsigned int tid;
-            BPUserResponseCallbackFuncPtr cb;
-            void * cookie;
-        };
-
-        std::map<unsigned int, PromptContext> m_promptToTransaction;
-        void beginPrompt(unsigned int promptId,
-                         unsigned int tid,
-                         BPUserResponseCallbackFuncPtr cb,
-                         void * cookie);
-        void endPrompt(unsigned int promptId);
-        bool promptKnown(unsigned int promptId);
-        bool findContextFromPromptId(unsigned int promptId,
-                                     PromptContext & ctx);
-
-        void setupServiceLogging();
-        void logServiceEvent(unsigned int level, const std::string& msg);
-        bp::log::ServiceLogMode m_serviceLogMode;
-        bp::log::Logger m_serviceLogger;
-        
+        /* a pointer to handle returned by dlopenNP */
+        void * m_handle;
     };
 }
 
