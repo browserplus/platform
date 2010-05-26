@@ -34,7 +34,7 @@ using namespace bp::time;
 class LinuxTimer : public bp::thread::HoppingClass
 {
 public:
-    LinuxTimer(Timer * timerPtr) : m_timerPtr(timerPtr)
+    LinuxTimer(Timer * timerPtr) : m_listener(NULL), m_thread(NULL), m_timerPtr(timerPtr)
     {
     }
         
