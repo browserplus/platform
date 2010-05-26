@@ -28,11 +28,12 @@
  * Copyright (c) 2009 Yahoo!, Inc. All rights reserved.
  */
 
-#include "ServiceLibrary_v4.h"
 #include <v4_bptypes.h>
 #include <v4_bpdefinition.h>
 #include <v4_bpcfunctions.h>
 #include <v4_bppfunctions.h>
+
+#include "ServiceLibrary_v4.h"
 #include "BPUtils/bpconfig.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
@@ -83,11 +84,11 @@ struct InstanceResponse
     ~InstanceResponse() { if (o) delete o; }
 };
 
-static ServiceLibrary * s_libObjectPtr = NULL;
+static ServiceLibrary_v4 * s_libObjectPtr = NULL;
     
 void
-ServiceLibrary::postResultsFunction(unsigned int tid,
-                                    const struct BPElement_t * results)
+ServiceLibrary_v4::postResultsFunction(unsigned int tid,
+                                       const struct sapi_v4::BPElement_t * results)
 {
     InstanceResponse * ir = new InstanceResponse;
     ir->type = InstanceResponse::T_Results;
@@ -97,7 +98,7 @@ ServiceLibrary::postResultsFunction(unsigned int tid,
 }
 
 void
-ServiceLibrary::postErrorFunction(unsigned int tid,
+ServiceLibrary_v4::postErrorFunction(unsigned int tid,
                                   const char * error,
                                   const char * verboseError)
 {
@@ -110,7 +111,7 @@ ServiceLibrary::postErrorFunction(unsigned int tid,
 }
 
 void
-ServiceLibrary::logFunction(unsigned int level, const char * fmt, ...)
+ServiceLibrary_v4::logFunction(unsigned int level, const char * fmt, ...)
 {
 // copying va_args.
 #ifndef va_copy
@@ -199,7 +200,7 @@ static bp::log::Level BPLevelFromServiceLevel(unsigned int level)
 // a separate destination for logging from the dll.
 //
 void
-ServiceLibrary::setupServiceLogging()
+ServiceLibrary_v4::setupServiceLogging()
 {
     bp::log::Configurator cfg;
     cfg.loadConfigFile();
@@ -234,7 +235,7 @@ ServiceLibrary::setupServiceLogging()
 //////////////////
 // Log events from the dll over the Service API come in here.
 void
-ServiceLibrary::logServiceEvent(unsigned int level, const std::string& msg)
+ServiceLibrary_v4::logServiceEvent(unsigned int level, const std::string& msg)
 {
     static bool s_firstTime = true;
 
@@ -265,9 +266,9 @@ ServiceLibrary::logServiceEvent(unsigned int level, const std::string& msg)
 
 
 void
-ServiceLibrary::invokeCallbackFunction(unsigned int tid,
+ServiceLibrary_v4::invokeCallbackFunction(unsigned int tid,
                                        long long int callbackHandle,
-                                       const struct BPElement_t * results)
+                                       const struct sapi_v4::BPElement_t * results)
 {
     InstanceResponse * ir = new InstanceResponse;
     ir->type = InstanceResponse::T_CallBack;
@@ -278,7 +279,7 @@ ServiceLibrary::invokeCallbackFunction(unsigned int tid,
 }
 
 unsigned int
-ServiceLibrary::promptUserFunction(
+ServiceLibrary_v4::promptUserFunction(
     unsigned int tid,
     const char * utf8PathToHTMLDialog,
     const BPElement * args,
@@ -327,7 +328,7 @@ struct InstanceState
     // process.
     unsigned int attachID;
     // the function table, call-in points to the service
-    const BPPFunctionTable * funcTable;
+    const sapi_v4::BPPFunctionTable * funcTable;
 };
 
 static void
@@ -419,10 +420,10 @@ onThreadEndFunc(void * c)
 
 // the static callback function table
 const void *
-ServiceLibrary::getFunctionTable()
+ServiceLibrary_v4::getFunctionTable()
 {
-    static BPCFunctionTable * table = NULL;
-    static BPCFunctionTable tableData;
+    static sapi_v4::BPCFunctionTable * table = NULL;
+    static sapi_v4::BPCFunctionTable tableData;
     if (table != NULL) return table;
     memset((void *) &tableData, 0, sizeof(tableData));
     tableData.postResults = postResultsFunction;
@@ -435,7 +436,7 @@ ServiceLibrary::getFunctionTable()
     return (void *) table;
 }
 
-ServiceLibrary::ServiceLibrary() :
+ServiceLibrary_v4::ServiceLibrary() :
     m_currentId(1), m_attachId(0), m_handle(NULL), m_funcTable(NULL),
     m_desc(), m_coreletAPIVersion(0), m_instances(), m_listener(NULL),
     m_promptToTransaction(), 
@@ -444,7 +445,7 @@ ServiceLibrary::ServiceLibrary() :
     s_libObjectPtr = this;
 }
         
-ServiceLibrary::~ServiceLibrary()
+ServiceLibrary_v4::~ServiceLibrary()
 {
     // deallocate all instances
     while (m_instances.size() > 0)
@@ -475,26 +476,26 @@ ServiceLibrary::~ServiceLibrary()
 
 // parse the manifest from the cwd, populating name and version
 bool
-ServiceLibrary::parseManifest(std::string & err)
+ServiceLibrary_v4::parseManifest(std::string & err)
 {
     return m_summary.detectCorelet(bpf::canonicalPath(bpf::Path(".")), err);
 }
 
 std::string
-ServiceLibrary::version()
+ServiceLibrary_v4::version()
 {
     return m_desc.versionString();
 }
 
 std::string
-ServiceLibrary::name()
+ServiceLibrary_v4::name()
 {
     return m_desc.name();
 }
 
 // load the service
 bool
-ServiceLibrary::load(const bpf::Path & providerPath, std::string & err)
+ServiceLibrary_v4::load(const bpf::Path & providerPath, std::string & err)
 {
     const BPPFunctionTable * funcTable = NULL;
     
@@ -677,7 +678,7 @@ ServiceLibrary::load(const bpf::Path & providerPath, std::string & err)
 
 // shutdown the corelet, NULL out m_handle, and m_def
 void
-ServiceLibrary::shutdownCorelet(bool callShutdown)
+ServiceLibrary_v4::shutdownCorelet(bool callShutdown)
 {
     const BPPFunctionTable * table = (const BPPFunctionTable *) m_funcTable;
     
@@ -698,7 +699,7 @@ ServiceLibrary::shutdownCorelet(bool callShutdown)
 }
 
 unsigned int
-ServiceLibrary::allocate(const bp::Map & m)
+ServiceLibrary_v4::allocate(const bp::Map & m)
 {
     unsigned int id = m_currentId++;
 
@@ -733,7 +734,7 @@ ServiceLibrary::allocate(const bp::Map & m)
 }
 
 void
-ServiceLibrary::destroy(unsigned int id)
+ServiceLibrary_v4::destroy(unsigned int id)
 {
     std::map<unsigned int,
              shared_ptr<bp::runloop::RunLoopThread> >::iterator it;
@@ -747,7 +748,7 @@ ServiceLibrary::destroy(unsigned int id)
 }
 
 bool
-ServiceLibrary::invoke(unsigned int id, unsigned int tid,
+ServiceLibrary_v4::invoke(unsigned int id, unsigned int tid,
                        const std::string & function,
                        const bp::Object * arguments,
                        std::string & err)
@@ -816,7 +817,7 @@ ServiceLibrary::invoke(unsigned int id, unsigned int tid,
 }
 
 void
-ServiceLibrary::promptResponse(unsigned int promptId,
+ServiceLibrary_v4::promptResponse(unsigned int promptId,
                                const bp::Object * arguments)
 {
     PromptContext ctx;
@@ -858,7 +859,7 @@ ServiceLibrary::promptResponse(unsigned int promptId,
 }
 
 void
-ServiceLibrary::onHop(void * context)
+ServiceLibrary_v4::onHop(void * context)
 {
     InstanceResponse * ir = (InstanceResponse *) context;
     BPASSERT(ir != NULL);
@@ -918,13 +919,13 @@ ServiceLibrary::onHop(void * context)
 }
 
 void
-ServiceLibrary::setListener(IServiceLibraryListener * listener)
+ServiceLibrary_v4::setListener(IServiceLibraryListener * listener)
 {
     m_listener = listener;
 }
     
 bool
-ServiceLibrary::transactionKnown(unsigned int tid)
+ServiceLibrary_v4::transactionKnown(unsigned int tid)
 {
     std::map<unsigned int, unsigned int>::iterator i;
     i = m_transactionToInstance.find(tid);
@@ -933,7 +934,7 @@ ServiceLibrary::transactionKnown(unsigned int tid)
 
 
 void
-ServiceLibrary::beginTransaction(unsigned int tid, unsigned int instance)
+ServiceLibrary_v4::beginTransaction(unsigned int tid, unsigned int instance)
 {
     if (transactionKnown(tid)) {
         BPLOG_ERROR_STRM("duplicate transaction id detected: " << tid);
@@ -943,7 +944,7 @@ ServiceLibrary::beginTransaction(unsigned int tid, unsigned int instance)
 }
 
 void
-ServiceLibrary::endTransaction(unsigned int tid)
+ServiceLibrary_v4::endTransaction(unsigned int tid)
 {
     std::map<unsigned int, unsigned int>::iterator i;
     i = m_transactionToInstance.find(tid);
@@ -976,7 +977,7 @@ ServiceLibrary::endTransaction(unsigned int tid)
 }
 
 bool
-ServiceLibrary::findInstanceFromTransactionId(unsigned int tid,
+ServiceLibrary_v4::findInstanceFromTransactionId(unsigned int tid,
                                               unsigned int & instance)
 {
     instance = 0;
@@ -989,7 +990,7 @@ ServiceLibrary::findInstanceFromTransactionId(unsigned int tid,
 }
 
 bool
-ServiceLibrary::promptKnown(unsigned int promptId)
+ServiceLibrary_v4::promptKnown(unsigned int promptId)
 {
     std::map<unsigned int, PromptContext>::iterator i;
     i = m_promptToTransaction.find(promptId);
@@ -997,7 +998,7 @@ ServiceLibrary::promptKnown(unsigned int promptId)
 }
 
 void
-ServiceLibrary::beginPrompt(unsigned int promptId, unsigned int tid,
+ServiceLibrary_v4::beginPrompt(unsigned int promptId, unsigned int tid,
                             BPUserResponseCallbackFuncPtr cb, void * cookie)
 {
     if (promptKnown(promptId)) {
@@ -1012,7 +1013,7 @@ ServiceLibrary::beginPrompt(unsigned int promptId, unsigned int tid,
 }
 
 void
-ServiceLibrary::endPrompt(unsigned int promptId)
+ServiceLibrary_v4::endPrompt(unsigned int promptId)
 {
     std::map<unsigned int, PromptContext>::iterator i;
     i = m_promptToTransaction.find(promptId);
@@ -1024,7 +1025,7 @@ ServiceLibrary::endPrompt(unsigned int promptId)
 }
 
 bool
-ServiceLibrary::findContextFromPromptId(unsigned int promptId,
+ServiceLibrary_v4::findContextFromPromptId(unsigned int promptId,
                                         PromptContext & ctx)
 {
     std::map<unsigned int, PromptContext>::iterator i;
@@ -1035,7 +1036,7 @@ ServiceLibrary::findContextFromPromptId(unsigned int promptId,
 }
 
 unsigned int
-ServiceLibrary::apiVersion()
+ServiceLibrary_v4::apiVersion()
 {
     return m_coreletAPIVersion;
 }

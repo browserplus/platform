@@ -27,28 +27,3 @@
  * by using these you increase the symmetry between your services
  * and others.
  */
-
-#ifndef __BPERROR_H__
-#define __BPERROR_H__
-
-#ifdef __cplusplus
-extern "C" {
-#endif    
-
-
-/** Invalid Parameters.  BrowserPlus validates the types of top
- *  level parameters, but cannot validate semantic meaning
- *  (a string as enum), nor complex parameters (Maps and Lists) */
-#define BPE_INVALID_PARAMETERS "invalidParameters"
-/** An error code to return when functionality is not yet implemented */
-#define BPE_NOT_IMPLEMENTED "notImplemented"
-/** the service encounterd an internal error which prevented the
- *  completion of the function execution.  Be more specific when
- *  possible */
-#define BPE_INTERNAL_ERROR "internalError"
-
-#ifdef __cplusplus
-};
-#endif    
-
-#endif

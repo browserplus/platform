@@ -29,15 +29,13 @@
  * arguments.
  */
 
-#ifndef __BPDEFINITION_H__
-#define __BPDEFINITION_H__
+#ifndef __BPDEFINITION_V4_H__
+#define __BPDEFINITION_V4_H__
 
-#include <ServiceAPI/bptypes.h>
-#include <ServiceAPI/bperror.h>
+#include <v4_bptypes.h>
+#include <v4_bperror.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif    
+namespace sapi_v4 {
 
 /** The definition of an argument */
 typedef struct {
@@ -81,8 +79,6 @@ typedef struct BPCoreletDefinition_t {
     BPFunctionDefinition * functions;
 } BPCoreletDefinition;
 
-#ifdef __cplusplus
 };
-#endif    
 
 #endif

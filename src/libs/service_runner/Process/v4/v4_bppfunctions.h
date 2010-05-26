@@ -29,16 +29,14 @@
  * BPP and are located in this file.  
  */
 
-#ifndef __BPPFUNCTIONS_H__
-#define __BPPFUNCTIONS_H__
+#ifndef __BPPFUNCTIONS_V4_H__
+#define __BPPFUNCTIONS_V4_H__
 
-#include <ServiceAPI/bptypes.h>
-#include <ServiceAPI/bpdefinition.h>
-#include <ServiceAPI/bpcfunctions.h>
+#include <v4_bptypes.h>
+#include <v4_bpdefinition.h>
+#include <v4_bpcfunctions.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif    
+namespace sapi_v4 {
 
 /**
  * Initialize the service, called once at service load time.
@@ -160,7 +158,7 @@ typedef const BPCoreletDefinition * (*BPPAttachPtr)(
  */
 typedef void (*BPPDetachPtr)(unsigned int attachID);
 
-#define BPP_CORELET_API_VERSION 4
+//#define BPP_CORELET_API_VERSION 4
 
 typedef struct BPPFunctionTable_t 
 {
@@ -176,19 +174,6 @@ typedef struct BPPFunctionTable_t
     BPPDetachPtr detachFunc;    
 } BPPFunctionTable;
 
-/**
- * The single entry point into the plugin which attains a
- * BPPFunctionTable containing the version.  Having a single symbol 
- * which is sought in the plugin interface allows the service author to
- * strip all other symbols.
- */
-#ifdef WIN32
-__declspec(dllexport)
-#endif
-const BPPFunctionTable * BPPGetEntryPoints(void);
-
-#ifdef __cplusplus
 };
-#endif    
 
 #endif

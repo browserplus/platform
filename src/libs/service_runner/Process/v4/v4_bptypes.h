@@ -29,12 +29,11 @@
  * native types in different target execution environments.
  */
 
-#ifndef __BPTYPES_H__
-#define __BPTYPES_H__
+#ifndef __BPTYPES_V4_H__
+#define __BPTYPES_V4_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif    
+namespace sapi_v4
+{
 
 /**
  *  The available types that may be passed across the BrowserPlus <-> Service
@@ -61,9 +60,9 @@ typedef enum {
 /** booleans are represented as integers */
 typedef int BPBool;
 /** BPBool true value */
-#define BP_TRUE 1
+//#define BP_TRUE 1
 /** BPBool false value */
-#define BP_FALSE 0
+//#define BP_FALSE 0
 /** strings are UTF8 */
 typedef char * BPString;
 /** integers are 64 bit signed entities */
@@ -119,8 +118,6 @@ typedef struct BPMapElem_t {
     BPElement * value;
 } BPMapElem;
 
-#ifdef __cplusplus
 };
-#endif    
 
 #endif

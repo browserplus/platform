@@ -26,15 +26,13 @@
  * BPC* functions are provided by BPCore and called by the corelet 
  */
 
-#ifndef __BPCFUNCTIONS_H__
-#define __BPCFUNCTIONS_H__
+#ifndef __BPCFUNCTIONS_V4_H__
+#define __BPCFUNCTIONS_V4_H__
 
-#include <ServiceAPI/bptypes.h>
-#include <ServiceAPI/bpdefinition.h>
+#include <v4_bptypes.h>
+#include <v4_bpdefinition.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif    
+namespace sapi_v4 {
 
 /**
  * Post results from a called BPPFunctionPtr.

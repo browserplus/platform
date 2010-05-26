@@ -46,6 +46,8 @@
 #include "ServiceAPI/bppfunctions.h"
 #include "../ServiceLibraryImpl.h"
 
+#include <v4_bptypes.h>
+
 namespace ServiceRunner 
 {
     class ServiceLibrary_v4 : public ServiceLibraryImpl , public bp::thread::HoppingClass
@@ -137,7 +139,7 @@ namespace ServiceRunner
 
         // entry points for services
         static void postResultsFunction(unsigned int tid,
-                                        const struct BPElement_t * results);
+                                        const struct sapi_v4::BPElement_t * results);
 
         static void postErrorFunction(unsigned int tid,
                                       const char * error,
@@ -147,7 +149,7 @@ namespace ServiceRunner
         
         static void invokeCallbackFunction(unsigned int tid,
                                            long long int callbackHandle,
-                                           const struct BPElement_t * results);
+                                           const struct sapi_v4::BPElement_t * results);
         static unsigned int promptUserFunction(
             unsigned int tid,
             const char * utf8PathToHTMLDialog,
