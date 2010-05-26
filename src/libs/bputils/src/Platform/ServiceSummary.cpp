@@ -48,6 +48,7 @@ static const char * s_providerType = "provider";
 static const char * s_manifestFileName = "manifest.json";
 
 static const char * s_serviceLibraryKey = "ServiceLibrary";
+static const char * s_deprecatedServiceLibraryKey = "CoreletLibrary";
 static const char * s_typeKey = "type";
 static const char * s_usesKey = "uses";
 
@@ -225,8 +226,18 @@ service::Summary::detectService(const bp::file::Path &dirName,
     // based on the type we'll do further validation
     if (!type.compare(s_standaloneType))
     {
+        std::string serviceLibrary;
+        
         // extract the path to the service library
-        if (!o->has(s_serviceLibraryKey, BPTString))
+        if (o->has(s_serviceLibraryKey, BPTString))
+        {
+            serviceLibrary = (std::string) *(o->get(s_serviceLibraryKey));
+        }
+        else if (o->has(s_deprecatedServiceLibraryKey, BPTString))
+        {
+            serviceLibrary = (std::string) *(o->get(s_deprecatedServiceLibraryKey));
+        }
+        else
         {
             std::stringstream ss;
             ss << "'" << s_standaloneType << "' services require a '"
@@ -235,10 +246,10 @@ service::Summary::detectService(const bp::file::Path &dirName,
             delete o;
             return false;
         }
-
+        
         // got it, allocate summary
         m_type = Standalone;
-		m_serviceLibraryPath /= (std::string) *(o->get(s_serviceLibraryKey));
+		m_serviceLibraryPath /= serviceLibrary;
     }
     else if (!type.compare(s_providerType))
     {
