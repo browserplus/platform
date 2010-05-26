@@ -379,7 +379,7 @@ ServiceLibrary_v5::load(const bp::service::Summary &summary,
                         void * functionTable)
 {
     const BPPFunctionTable * funcTable = NULL;
-    
+     
     bool success = true;
     // meaningful when success == false;
     bool callShutdown = true;
@@ -389,6 +389,7 @@ ServiceLibrary_v5::load(const bp::service::Summary &summary,
 
     m_summary = summary;
     m_handle = functionTable;
+    m_funcTable = functionTable;
 
     // now let's determine the path to the shared library.  For
     // dependent services this will be extracted from the manifest

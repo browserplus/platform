@@ -50,7 +50,7 @@ using namespace ServiceRunner;
 namespace bpf = bp::file;
 
 
-ServiceLibrary::ServiceLibrary()
+ServiceLibrary::ServiceLibrary() : m_handle(NULL)
 {
 }
         
