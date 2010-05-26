@@ -8,7 +8,7 @@ INCLUDE = -I${BPSDK_PATH}/include
 NAME = SampleService
 PLAT = $(strip $(shell uname))
 ifeq ($(PLAT), Linux)
-  PLAT_FLAGS=-rdynamic
+  PLAT_FLAGS=-shared -fPIC
 else
   PLAT_FLAGS=-bundle -m32
 endif
