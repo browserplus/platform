@@ -39,6 +39,7 @@
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bpstrutil.h"
 #include "BPUtils/ProductPaths.h"
+#include "V4ObjectConverter.h"
 
 #include <stdarg.h>
 #include <string.h>
@@ -93,7 +94,7 @@ ServiceLibrary_v4::postResultsFunction(unsigned int tid,
     InstanceResponse * ir = new InstanceResponse;
     ir->type = InstanceResponse::T_Results;
     ir->tid = tid;
-    ir->o = (results ? bp::Object::build(results) : NULL);
+    ir->o = (results ? sapi_v4::v4ToBPObject(results) : NULL);
     s_libObjectPtr->hop(ir);
 }
 
@@ -274,7 +275,7 @@ ServiceLibrary_v4::invokeCallbackFunction(unsigned int tid,
     ir->type = InstanceResponse::T_CallBack;
     ir->tid = tid;
     ir->callbackId = callbackHandle;
-    ir->o = (results ? bp::Object::build(results) : NULL);
+    ir->o = (results ? sapi_v4::v4ToBPObject(results) : NULL);
     s_libObjectPtr->hop(ir);
 }
 
@@ -338,8 +339,12 @@ onThreadStartFunc(void * c)
 
     if (is->funcTable->allocateFunc != NULL)
     {
+        sapi_v4::BPElement * e = sapi_v4::v5ElementToV4(is->context.elemPtr());
+
         int rv = is->funcTable->allocateFunc(
-            &(is->cookie), is->attachID, is->context.elemPtr());
+            &(is->cookie), is->attachID, e);
+
+        sapi_v4::freeDynamicV4Element(e);
 
         if (rv != 0) {
             BPLOG_ERROR_STRM(
