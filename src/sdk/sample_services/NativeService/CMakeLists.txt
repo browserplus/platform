@@ -18,8 +18,8 @@
 # Contributor(s): 
 # ***** END LICENSE BLOCK *****
 #
-# A CMake build file for the HelloWorld corelet, a simple demonstration
-# of how to write and build a corelet.
+# A CMake build file for the HelloWorld service, a simple demonstration
+# of how to write and build a service.
 # 
 # Author: Lloyd Hilaiel
 # (c) Yahoo 2007, all rights reserved
@@ -28,15 +28,20 @@
 # looser syntax
 SET(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS 1)
 
-# corelet name
-SET (coreletName SampleService)
+# service name
+SET (serviceName SampleService)
 
 # Name our project
-PROJECT(${coreletName}Service)
+PROJECT(${serviceName}Service)
 
-IF (APPLE)
+IF (WIN32)
+  INCLUDE_EXTERNAL_MSPROJECT(
+    "${serviceName}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/${serviceName}.vcproj"
+    PackageSDK)
+ELSE ()
   ADD_CUSTOM_TARGET(
-      ${coreletName} ALL
+      ${serviceName} ALL
       COMMAND echo SRC_PATH=${CMAKE_CURRENT_SOURCE_DIR}
 	          BPSDK_PATH=${CMAKE_CURRENT_BINARY_DIR}/../../../bpsdk
 			  make
@@ -44,10 +49,5 @@ IF (APPLE)
 	          BPSDK_PATH="../../../bpsdk"
 			  make -f "${CMAKE_CURRENT_SOURCE_DIR}/Makefile"
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-  ADD_DEPENDENCIES(${coreletName} PackageSDK)
-ELSEIF (WIN32)
-  INCLUDE_EXTERNAL_MSPROJECT(
-    "${coreletName}"
-    "${CMAKE_CURRENT_SOURCE_DIR}/${coreletName}.vcproj"
-    PackageSDK)
+  ADD_DEPENDENCIES(${serviceName} PackageSDK)
 ENDIF ()

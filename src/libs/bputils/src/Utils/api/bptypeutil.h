@@ -23,14 +23,14 @@
 /**
  * bptypeutil.hh -- c++ utilities to make building hierarchies of BPElements
  *                  eaiser.  A tool that may be consumed in source form
- *                  by a corelet author to simplify mapping into and out of
- *                  introspectable corelet API types.
+ *                  by a service author to simplify mapping into and out of
+ *                  introspectable service API types.
  */
 
 #ifndef __BPTYPEUTIL_HH__
 #define __BPTYPEUTIL_HH__
 
-// when you compile this file, the corelet SDK include directory must
+// when you compile this file, the service SDK include directory must
 // be in the include path
 #include <ServiceAPI/bptypes.h>
 
@@ -157,7 +157,8 @@ namespace bp {
          */
         virtual operator bool() const; // throw(ConversionException)
         virtual operator std::string() const; // throw(ConversionException)
-        virtual operator long long() const; // throw(ConversionException)
+		virtual operator bp::file::Path() const; // throw(ConversionException)
+		virtual operator long long() const; // throw(ConversionException)
         virtual operator double() const; // throw(ConversionException)
         virtual operator std::map<std::string, const Object *>() const;
             // throw(ConversionException)
@@ -205,9 +206,9 @@ namespace bp {
         String(const String &);
         String & operator= (const String & other);
         virtual ~String();
-        const BPString value() const;
         // note: the returned pointer is to internal memory, and is
         // only valid for the lifetime of the object, or the invocation
+        const BPString value() const;
         operator std::string() const; // throw(ConversionException)
         virtual Object * clone() const;
     protected:
@@ -215,15 +216,20 @@ namespace bp {
     };
     
     // Path represents a pathname in URI form.
-    class Path : public String
+    class Path : public Object
     {
     public:
         Path(const bp::file::Path & path);
         Path(const Path & other);
         Path & operator= (const Path & other);
-
+        // note: the returned pointer is to internal memory, and is
+        // only valid for the lifetime of the object, or the invocation
+        const BPPath value() const;
         virtual ~Path();
+        operator bp::file::Path() const; // throw(ConversionException)
         virtual Object * clone() const;
+    protected:
+        bp::file::tString m_path;
     };
 
     class Integer : public Object

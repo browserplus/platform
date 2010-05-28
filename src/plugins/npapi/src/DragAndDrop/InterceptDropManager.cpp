@@ -25,6 +25,8 @@
 #include "nputils.h"
 #include "BPUtils/BPLog.h"
 
+#include <string.h>
+
 using namespace std;
 
 #ifdef WIN32

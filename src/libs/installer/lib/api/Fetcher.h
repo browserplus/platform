@@ -22,7 +22,7 @@
 
 #include <string>
 #include "DistributionClient/DistributionClient.h"
-#include "CoreletManager/CoreletManager.h"
+#include "ServiceManager/ServiceManager.h"
 #include "BPUtils/bpfile.h"
 
 namespace bp {
@@ -74,7 +74,7 @@ class Fetcher : virtual public IDistQueryListener
     virtual unsigned int getPlatform();
 
     // Get and "install" services to destination dir.
-    virtual unsigned int getServices(const std::list<CoreletRequireStatement>& services);
+    virtual unsigned int getServices(const std::list<ServiceRequireStatement>& services);
     
     virtual std::string platformVersion() const {
         return m_platformVersion;
@@ -88,13 +88,13 @@ class Fetcher : virtual public IDistQueryListener
     //
     virtual void onTransactionFailed(unsigned int tid);
     virtual void onServiceFound(unsigned int tid,
-                                const AvailableCorelet& list);
+                                const AvailableService& list);
     virtual void onDownloadProgress(unsigned int tid,
                                     unsigned int pct);
     virtual void onDownloadComplete(unsigned int tid,
                                     const std::vector<unsigned char>& buf);
     virtual void onRequirementsSatisfied(unsigned int tid,
-                                         const CoreletList& clist);
+                                         const ServiceList& clist);
     virtual void gotLatestPlatformVersion(unsigned int tid,
                                           const std::string& latest);
     virtual void onLatestPlatformDownloaded(unsigned int tid,
@@ -108,8 +108,8 @@ class Fetcher : virtual public IDistQueryListener
     bp::file::Path m_destDir;
     std::string m_platformVersion;
     size_t m_platformSize;
-    std::list<CoreletRequireStatement> m_requires;
-    CoreletList m_neededServices;
+    std::list<ServiceRequireStatement> m_requires;
+    ServiceList m_neededServices;
     boost::scoped_ptr<MyServiceFilter> m_filter;
     boost::scoped_ptr<DistQuery> m_distQuery;
     std::tr1::weak_ptr<IFetcherListener> m_listener;

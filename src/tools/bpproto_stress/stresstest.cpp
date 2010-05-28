@@ -41,7 +41,7 @@ static void startConnection(BPProtoHand * pph);
 
 static void requireCallback(BPErrorCode ec,
                             void * cookie,
-                            const BPCoreletDefinition ** ,
+                            const BPServiceDefinition ** ,
                             unsigned int ,
                             const char *, const char *)
 {

@@ -35,7 +35,7 @@ void *
 ServiceLibrary::dlopenNP(const bp::file::Path & path)
 {
     // At the time we load a library, it must be able to find
-    // DLLs that it uses.  Additionally, the corelet should not be
+    // DLLs that it uses.  Additionally, the service should not be
     // able to find any dlls that BrowserPlusCore uses.  To attain
     // this goal, we use LoadLibraryEx with the
     // LOAD_WITH_ALTERED_SEARCH_PATH argument

@@ -23,7 +23,7 @@
 /**
  *  ServiceInterfaceCache - wrappers around lower level bputils facilities
  *                          to give a high level API for caching serialized
- *                          corelet descriptions.
+ *                          service descriptions.
  *                          
  * (c) 2008 Yahoo!
  */
@@ -36,7 +36,7 @@
 
 namespace bp { namespace serviceInterfaceCache {
 
-  /* check if a cached interface exists for the corelet name/version that
+  /* check if a cached interface exists for the service name/version that
    * is newer than the provided time */ 
   bool isNewerThan(const std::string & name,
                    const std::string & version,

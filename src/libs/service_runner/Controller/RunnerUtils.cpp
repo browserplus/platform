@@ -28,12 +28,12 @@ bp::file::Path
 ServiceRunner::determineProviderPath(const bp::service::Summary & s,
                                      std::string & err)
 {
-    std::string name = s.usesCorelet();
+    std::string name = s.usesService();
     bp::ServiceVersion version = s.usesVersion();
     bp::ServiceVersion minversion = s.usesMinversion();
 
     // build directory where versions of this service should be
-    bp::file::Path d = bp::paths::getCoreletDirectory() / name;
+    bp::file::Path d = bp::paths::getServiceDirectory() / name;
 
     if (!bp::file::isDirectory(d)) {
         err.append("No such service installed: ");

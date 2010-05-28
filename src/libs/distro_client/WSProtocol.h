@@ -38,9 +38,9 @@ namespace WSProtocol
     extern const char * API_PREFIX;
     extern const char * WS_VERSION;
     extern const char * PERMISSIONS_PATH;
-    extern const char * AVAILABLE_CORELETS_PATH;
-    extern const char * CORELET_METADATA_PATH;
-    extern const char * CORELET_DOWNLOAD_PATH;
+    extern const char * AVAILABLE_SERVICES_PATH;
+    extern const char * SERVICE_METADATA_PATH;
+    extern const char * SERVICE_DOWNLOAD_PATH;
     extern const char * USAGE_PATH;
     extern const char * SERVICE_SYNOPSIS_PATH;
     extern const char * LATEST_PLATFORM_VERSION_PATH;

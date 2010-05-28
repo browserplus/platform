@@ -25,6 +25,10 @@
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
 #include "BPInstaller/BPInstaller.h"
+#include "BPUtils/bpexitcodes.h"
+
+
+#include <string.h>
 
 using namespace std;
 using namespace bp::file;
@@ -56,11 +60,11 @@ main(int argc, const char** argv)
         }
     
         if (!logLevel.empty()) {
+            bp::log::Level l = bp::log::levelFromString( logLevel );
             if (logFile.empty()) {
-                bp::log::setupLogToConsole(logLevel);
+                bp::log::setupLogToConsole(l);
             } else {
-                bp::log::setupLogToFile(logFile, logLevel,
-                                        bp::log::kSizeRollover);
+                bp::log::setupLogToFile(logFile, l, bp::log::kSizeRollover);
             }
         }
         bp::install::Uninstaller unins;

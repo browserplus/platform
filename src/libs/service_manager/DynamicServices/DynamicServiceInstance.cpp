@@ -28,8 +28,8 @@ using namespace std::tr1;
 
 
 DynamicServiceInstance::DynamicServiceInstance(
-    weak_ptr<CoreletExecutionContext> context)
-    : CoreletInstance(context), m_instanceId(0), 
+    weak_ptr<ServiceExecutionContext> context)
+    : ServiceInstance(context), m_instanceId(0), 
       m_summary(), m_instantiateId(0), m_registryListener(),
       m_tidMap(), m_manager(NULL)
 {

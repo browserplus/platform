@@ -26,42 +26,26 @@
  *                running javascript context. 
  */
 
-#include "api/HTMLWindow.h"
+#include "api/HTMLScriptObject.h"
+#include "JSFunctionWrapper.h"
 
-
-bp::html::HTMLWindow::HTMLWindow()
+bp::html::ScriptableObject::~ScriptableObject()
 {
 }
 
-bp::html::HTMLWindow::~HTMLWindow()
+bp::Object *
+JSFunctionWrapper::invoke(std::vector<const bp::Object *> args)
 {
-}
-
-
-void
-bp::html::HTMLWindow::setDimensions(int , int )
-{
+    return NULL;
 }
 
 void
-bp::html::HTMLWindow::setParent(void * )
+JSFunctionWrapper::retain(void * o)
 {
 }
 
-bool
-bp::html::HTMLWindow::render(const std::string &)
+void
+JSFunctionWrapper::release(void * o)
 {
-	return false;
 }
 
-bool
-bp::html::HTMLWindow::show()
-{
-	return false;
-}
-
-bool
-bp::html::HTMLWindow::hide()
-{
-	return false;
-}

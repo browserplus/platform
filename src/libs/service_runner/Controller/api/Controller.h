@@ -119,7 +119,7 @@ namespace ServiceRunner
         /**
          * Instantiate a Controller for a installed service.  Path
          * to the service will be assumed to be standard installation
-         * path, determined using  bp::paths::getCoreletDirectory()
+         * path, determined using  bp::paths::getServiceDirectory()
          */
         Controller(const std::string & service, const std::string & version);
         /**

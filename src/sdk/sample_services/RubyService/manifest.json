@@ -1,7 +1,7 @@
 {
 	"type": "dependent",
 	"uses": {
-		"corelet": "RubyInterpreter",
+		"service": "RubyInterpreter",
 		"version": "4"
 	},
 	"arguments": {"ScriptFile": "hello.rb"},

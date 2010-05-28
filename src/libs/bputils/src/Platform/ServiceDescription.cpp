@@ -23,7 +23,7 @@
 /**
  * Description
  *
- * A Class which describes the functionality provided by a corelet.
+ * A Class which describes the functionality provided by a service.
  */
 
 #include "ServiceDescription.h"
@@ -165,7 +165,7 @@ service::Argument::fromBPArgumentDefinition(const BPArgumentDefinition * def)
         case BPTMap: m_type = Map; break;
         case BPTList: m_type = List; break;
         case BPTCallBack: m_type = CallBack; break;
-        case BPTPath: m_type = Path; break;
+        case BPTNativePath: m_type = Path; break;
         case BPTAny: m_type = Any; break;
         default: m_type = None; break;
     }
@@ -577,12 +577,12 @@ service::Description::version() const
 }
 
 bool 
-service::Description::fromBPCoreletDefinition(const BPCoreletDefinition * def)
+service::Description::fromBPServiceDefinition(const BPServiceDefinition * def)
 {
     clear();
     if (!def) return false;
 
-    if (def->coreletName) m_name.append(def->coreletName);
+    if (def->serviceName) m_name.append(def->serviceName);
     m_majorVersion = def->majorVersion;    
     m_minorVersion = def->minorVersion;
     m_microVersion = def->microVersion;
@@ -686,7 +686,7 @@ bp::service::validateArguments(const bp::service::Function & desc,
                             gottype = "string";
                         }
                         break;
-                    case BPTPath:
+                    case BPTNativePath:
                         if (adesc.type() != bp::service::Argument::Path)
                         {
                             gottype = "path";
@@ -801,7 +801,7 @@ bp::service::Description::toHumanReadableString() const
 {
     std::stringstream ss;
     
-    ss << "Describing corelet '"
+    ss << "Describing service '"
        << (name().empty() ? "unknown" : name())
        << "', version: "
        << versionString() << std::endl;

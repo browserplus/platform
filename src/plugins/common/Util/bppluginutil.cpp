@@ -35,20 +35,21 @@
 #include "BPUtils/ProductPaths.h"
 #include "BPUtils/bperrorutil.h"
 
+#include <string.h>
 
 using namespace std;
 using namespace std::tr1;
 
 
 bool
-bp::pluginutil::appendEnumerateResultsToList(const BPElement * corelets,
+bp::pluginutil::appendEnumerateResultsToList(const BPElement * services,
                                              bp::List &serviceList)
 {
     bool rv = true;
 
     // lets start by building on a bp object that we can interact with
     // a bit more cleanly
-    bp::Object * obj = bp::Object::build(corelets);
+    bp::Object * obj = bp::Object::build(services);
     BPASSERT(obj != NULL && obj->type() == BPTList);
     bp::List * l = (bp::List *) obj;        
 
@@ -182,8 +183,7 @@ bp::pluginutil::applyFilters(const vector<bp::file::Path>& selection,
         int parentID = 0;
         if (flags & kIncludeGestureInfo) {
             bp::Path* itemPath = new bp::Path(item);
-            bp::file::Path path = bp::file::pathFromURL(itemPath->value());
-            BPHandle h = BPHandleMapper::pathToHandle(path);
+            BPHandle h = BPHandleMapper::pathToHandle(*itemPath);
             parentID = h.id();
             selList->append(itemPath);
         }

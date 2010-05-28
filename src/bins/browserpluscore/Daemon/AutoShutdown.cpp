@@ -28,8 +28,8 @@
  *
  */
 #include "AutoShutdown.h"
-#include "CoreletInstaller.h"
-#include "CoreletUpdater.h"
+#include "ServiceInstaller.h"
+#include "ServiceUpdater.h"
 #include "PlatformUpdater.h"
 #include "Permissions/Permissions.h"
 #include "BPDaemon.h"
@@ -91,8 +91,8 @@ AutoShutdownAgent::timesUp(bp::time::Timer * /*t*/)
     // the daemon.
     else if ((m_sessionManager->numCurrentSessions() == 0) &&
              !PlatformUpdater::isBusy() &&
-             !CoreletInstaller::isBusy() &&
-             !CoreletUpdater::isBusy() &&
+             !ServiceInstaller::isBusy() &&
+             !ServiceUpdater::isBusy() &&
              !PermissionsManager::get()->isBusy() &&
              !BPDaemon::getSharedDaemon()->registry()->isBusy())
     {

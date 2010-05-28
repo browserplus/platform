@@ -29,9 +29,9 @@ using namespace std;
 using namespace std::tr1;
 
 
-SessionManager::SessionManager(shared_ptr<CoreletRegistry> registry)
+SessionManager::SessionManager(shared_ptr<ServiceRegistry> registry)
 {
-    m_coreletRegistry = registry;
+    m_serviceRegistry = registry;
 
     // Setup a config file reader.
     bp::config::ConfigReader configReader;
@@ -73,7 +73,7 @@ SessionManager::gotChannel(bp::ipc::Channel * cptr)
     BPLOG_DEBUG_STRM("new connection established: " << cptr);
 
     shared_ptr<ActiveSession> activeSession(
-        new ActiveSession(cptr, m_coreletRegistry, m_primaryDistroServer,
+        new ActiveSession(cptr, m_serviceRegistry, m_primaryDistroServer,
                           m_secondaryDistroServers));
     cptr->setListener(activeSession.get());
     activeSession->setListener(this);

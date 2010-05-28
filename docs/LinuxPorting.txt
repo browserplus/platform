@@ -19,7 +19,13 @@ running on linux
 
    WARNING: how do we handle proxies!?
 
-3. Rendering HTML.
+3. Rendering HTML. (libhtmlrender)
 
 4. Drag and Drop. 
+
+5. File Browse
+
+6. installation/uninstallation
+
+7. Configuration Panel
 

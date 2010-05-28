@@ -6,9 +6,15 @@ BPSDK_PATH ?= ../..
 SRC_PATH ?= .
 INCLUDE = -I${BPSDK_PATH}/include
 NAME = SampleService
+PLAT = $(strip $(shell uname))
+ifeq ($(PLAT), Linux)
+  PLAT_FLAGS=-shared -fPIC
+else
+  PLAT_FLAGS=-bundle -m32
+endif
 
 ${NAME}/lib${NAME}.so: ${SRC_PATH}/service.cpp ${NAME} ${NAME}/manifest.json
-	g++ -bundle -o $@ ${INCLUDE} $<
+	g++ $(PLAT_FLAGS) -g -o $@ ${INCLUDE} $<
 
 ${NAME}/manifest.json: ${SRC_PATH}/manifest.json
 	sed -e 's/@ServiceLibrary@/lib${NAME}.so/' < $< > $@

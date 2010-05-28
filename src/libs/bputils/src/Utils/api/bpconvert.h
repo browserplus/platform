@@ -32,7 +32,7 @@
 #define _BPCONVERT_H_
 
 #include <sstream>
-
+#include <typeinfo>
 
 namespace bp {
 namespace conv {

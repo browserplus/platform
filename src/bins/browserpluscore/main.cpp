@@ -38,6 +38,10 @@
 #include "Daemon/BPDaemon.h"
 #include "ServiceRunnerLib/ServiceRunnerLib.h"
 
+#ifndef WIN32
+#include <signal.h>
+#endif
+
 using namespace std;
 using namespace std::tr1;
 

@@ -34,7 +34,7 @@
  *                  (e.g. http://somehost.yahoo.com/api)
  */
 bool pushFile(bp::file::Path file, std::string baseurl,
-              std::string coreletName, std::string coreletVersion,
+              std::string serviceName, std::string serviceVersion,
               std::string platform);
 
 #endif

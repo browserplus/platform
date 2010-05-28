@@ -96,8 +96,8 @@ DynamicServiceState::addPendingAllocation(
 shared_ptr<DynamicServiceInstance>
 DynamicServiceState::createInstance(
     DynamicServiceManager * manager,
-    weak_ptr<CoreletExecutionContext> contextWeak,
-    weak_ptr<ICoreletRegistryListener> listener,
+    weak_ptr<ServiceExecutionContext> contextWeak,
+    weak_ptr<IServiceRegistryListener> listener,
     unsigned int instantiateId,
     const bp::service::Summary & summary)
 {

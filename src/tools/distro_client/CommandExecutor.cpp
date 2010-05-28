@@ -30,7 +30,7 @@
 #include "BPUtils/OS.h"
 #include "BPUtils/ProductPaths.h"
 #include "BPUtils/bperrorutil.h"
-#include "CoreletManager/CoreletManager.h"
+#include "ServiceManager/ServiceManager.h"
 #include "Permissions/Permissions.h"
 
 using namespace std;
@@ -48,18 +48,18 @@ public:
         : m_dqHand(distroServers, PermissionsManager::get())
     {
         m_dqHand.setListener(this);
-        m_registry.reset(new CoreletRegistry(std::string(), bp::file::Path()));
-        m_registry->setPluginDirectory(bp::paths::getCoreletDirectory());
+        m_registry.reset(new ServiceRegistry(std::string(), bp::file::Path()));
+        m_registry->setPluginDirectory(bp::paths::getServiceDirectory());
     }
 
     DistQuery m_dqHand;
-    shared_ptr<CoreletRegistry> m_registry;
+    shared_ptr<ServiceRegistry> m_registry;
 
     virtual void onTransactionFailed(unsigned int tid);
     virtual void gotAvailableServices(unsigned int tid,
-                                      const CoreletList & list);
+                                      const ServiceList & list);
     virtual void onServiceFound(unsigned int tid,
-                                const AvailableCorelet & list);
+                                const AvailableService & list);
     virtual void onDownloadProgress(unsigned int tid,
                                     unsigned int pct);
     virtual void onDownloadComplete(unsigned int tid,
@@ -70,9 +70,9 @@ public:
                                 std::vector<unsigned char> permBundle);
     virtual void onPageUsageReported(unsigned int tid);
     virtual void onRequirementsSatisfied(unsigned int tid,
-                                         const CoreletList & clist);
+                                         const ServiceList & clist);
     virtual void onCacheUpdated(unsigned int tid,
-                                const CoreletList & updates);
+                                const ServiceList & updates);
     virtual void gotServiceSynopsis(unsigned int tid,
                                     const ServiceSynopsisList & sslist);
     virtual void gotLatestPlatformVersion(unsigned int tid,
@@ -89,7 +89,7 @@ public:
 
 
 static bool
-parseJSONRequires(std::list<CoreletRequireStatement> &reqStmts,
+parseJSONRequires(std::list<ServiceRequireStatement> &reqStmts,
                   std::string json)
 {
     using namespace bp;    
@@ -115,7 +115,7 @@ parseJSONRequires(std::list<CoreletRequireStatement> &reqStmts,
             const Map * m = dynamic_cast<const Map *>(l->value(i));
             if (m == NULL) continue;
 
-            CoreletRequireStatement reqStmt;
+            ServiceRequireStatement reqStmt;
             
             const String * s = dynamic_cast<const String*>(m->value("name"));
             if (s == NULL) continue;
@@ -139,12 +139,12 @@ parseJSONRequires(std::list<CoreletRequireStatement> &reqStmts,
     return true;
 }
 
-static CoreletList
-parseJSONCoreletList(std::string json)
+static ServiceList
+parseJSONServiceList(std::string json)
 {
     using namespace bp;    
 
-    CoreletList clp;
+    ServiceList clp;
 
     // parse
     Object * obj = NULL;
@@ -154,7 +154,7 @@ parseJSONCoreletList(std::string json)
         if (!obj) {
             std::cout << "couldn't parse json:" << std::endl
                       << err.c_str() << std::endl;
-            return CoreletList();
+            return ServiceList();
         }
     }
 
@@ -188,9 +188,9 @@ parseJSONCoreletList(std::string json)
 }
 
 static void
-printReqStmts(const std::list<CoreletRequireStatement> & reqStmts)
+printReqStmts(const std::list<ServiceRequireStatement> & reqStmts)
 {
-    std::list<CoreletRequireStatement>::const_iterator it;
+    std::list<ServiceRequireStatement>::const_iterator it;
         
     for (it = reqStmts.begin(); it != reqStmts.end(); it++) {
         std::cout << " * " << it->m_name;
@@ -205,7 +205,7 @@ printReqStmts(const std::list<CoreletRequireStatement> & reqStmts)
 }
 
 static void
-printCoreletList(CoreletList cl)
+printServiceList(ServiceList cl)
 {
     std::list<std::pair<std::string, std::string> >::iterator it;
     for (it = cl.begin(); it != cl.end(); it++)
@@ -241,7 +241,7 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::permissions)
 
 BP_DEFINE_COMMAND_HANDLER(CommandExecutor::details)
 {
-    m_runner->m_dqHand.coreletDetails(tokens[0], tokens[1], tokens[2]);
+    m_runner->m_dqHand.serviceDetails(tokens[0], tokens[1], tokens[2]);
 }
 
 BP_DEFINE_COMMAND_HANDLER(CommandExecutor::latestPlatformVersion)
@@ -316,8 +316,8 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::satisfy)
     }
 
     // now we must parse json and turn it into a list of
-    // CoreletRequireStatements
-    std::list<CoreletRequireStatement> reqStmts;
+    // ServiceRequireStatements
+    std::list<ServiceRequireStatement> reqStmts;
     if (!parseJSONRequires(reqStmts, json)) {
         onFailure();
         return;
@@ -326,7 +326,7 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::satisfy)
     // pass off control to DistQuery to satisfy requirements
     std::list<bp::service::Summary> installed;
     if (useInstalled) {
-        installed = m_runner->m_registry->availableCoreletSummaries();
+        installed = m_runner->m_registry->availableServiceSummaries();
     }
     
     // output what we parsed
@@ -341,7 +341,7 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::satisfy)
 BP_DEFINE_COMMAND_HANDLER(CommandExecutor::installed)
 {
     std::list<bp::service::Summary> installed =
-        m_runner->m_registry->availableCoreletSummaries();
+        m_runner->m_registry->availableServiceSummaries();
 
     std::list<bp::service::Summary>::iterator it;
     unsigned int i;
@@ -356,13 +356,13 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::installed)
 
 BP_DEFINE_COMMAND_HANDLER(CommandExecutor::cached)
 {
-    CoreletList cl = m_runner->m_dqHand.cachedCorelets();
+    ServiceList cl = m_runner->m_dqHand.cachedServices();
 
     std::cout << cl.size()
-              << " pending corelet updates"
+              << " pending service updates"
               << (cl.size() ? ":" : "")
               << std::endl;
-    printCoreletList(cl);
+    printServiceList(cl);
     onSuccess();
 }
 
@@ -382,7 +382,7 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::isCached)
 
 BP_DEFINE_COMMAND_HANDLER(CommandExecutor::installFromCache)
 {
-    bool instd = m_runner->m_dqHand.installCoreletFromCache(tokens[0], tokens[1]);
+    bool instd = m_runner->m_dqHand.installServiceFromCache(tokens[0], tokens[1]);
     std::cout << tokens[0] << " - " << tokens[1] << " "
               << (instd ? "successfully" : "could NOT be")
               << " installed" << std::endl;
@@ -394,32 +394,32 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::strings)
     std::cout << "platform: " << tokens[0] << std::endl
               << "locale:   " << tokens[1] << std::endl;
     
-    CoreletList cl = parseJSONCoreletList(tokens[2]);
+    ServiceList cl = parseJSONServiceList(tokens[2]);
 
     m_runner->m_dqHand.serviceSynopses(tokens[0], tokens[1], cl);
 }
 
 BP_DEFINE_COMMAND_HANDLER(CommandExecutor::haveUpdates)
 {
-    std::list<CoreletRequireStatement> reqStmts;
+    std::list<ServiceRequireStatement> reqStmts;
     if (!parseJSONRequires(reqStmts, tokens[0])) {
         onFailure();
         return;
     }
 
     std::list<bp::service::Summary> installed =
-        m_runner->m_registry->availableCoreletSummaries();
+        m_runner->m_registry->availableServiceSummaries();
 
     std::cout << "attempting to determine if updates are available which "
               << "better satisfy reqs:" << std::endl;
     printReqStmts(reqStmts);
-    CoreletList cl = m_runner->m_dqHand.haveUpdates(reqStmts, installed);
+    ServiceList cl = m_runner->m_dqHand.haveUpdates(reqStmts, installed);
     
     std::cout << cl.size()
-              << " pertinent corelet updates available"
+              << " pertinent service updates available"
               << (cl.size() ? ":" : "")
               << std::endl;
-    printCoreletList(cl);
+    printServiceList(cl);
     onSuccess();
 
 }
@@ -428,14 +428,14 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::updateCache)
 {
     std::string platform = bp::os::PlatformAsString();
 
-    std::list<CoreletRequireStatement> reqStmts;
+    std::list<ServiceRequireStatement> reqStmts;
     if (!parseJSONRequires(reqStmts, tokens[0])) {
         onFailure();
         return;
     }
 
     std::list<bp::service::Summary> installed =
-        m_runner->m_registry->availableCoreletSummaries();
+        m_runner->m_registry->availableServiceSummaries();
 
     std::cout << "attempting to download service updates using require "
               << "history:" << std::endl;
@@ -452,25 +452,25 @@ CommandExecutorRunner::onTransactionFailed(unsigned int tid)
 
 void
 CommandExecutorRunner::gotAvailableServices(unsigned int tid,
-                                         const CoreletList & list)
+                                         const ServiceList & list)
 {
-    std::cout << list.size() << " available corelets:" << std::endl;
-    printCoreletList(list);
+    std::cout << list.size() << " available services:" << std::endl;
+    printServiceList(list);
     onSuccess();
 }
 
 
 void
 CommandExecutorRunner::onServiceFound(unsigned int tid,
-                                   const AvailableCorelet & service)
+                                   const AvailableService & service)
 {
-    std::cout << "Found viable corelet: "
+    std::cout << "Found viable service: "
               << service.name
               << " ver. " 
               << service.version.asString()
               << std::endl;
 
-    if (service.dependentCorelet) {
+    if (service.dependentService) {
         const char * version = NULL;
         const char * minversion = NULL;
         const char * name= "(unknown)";
@@ -550,8 +550,8 @@ CommandExecutorRunner::gotPermissions(unsigned int tid,
             throw runtime_error("malformed response");
         }
 
-        // corelet blacklist is a list of coreletname/version pairs
-        // gets turned into a map whose key is coreletname and whose value
+        // service blacklist is a list of servicename/version pairs
+        // gets turned into a map whose key is servicename and whose value
         // is list of versions
         const List* l = dynamic_cast<const List*>(m->get("blacklist"));
         if (l) {
@@ -599,23 +599,23 @@ CommandExecutorRunner::onPageUsageReported(unsigned int tid)
 
 void
 CommandExecutorRunner::onRequirementsSatisfied(unsigned int tid,
-                                            const CoreletList & clist)
+                                            const ServiceList & clist)
 {
-    std::cout << clist.size() << " required corelets:" << std::endl;
-    printCoreletList(clist);
+    std::cout << clist.size() << " required services:" << std::endl;
+    printServiceList(clist);
     onSuccess();
 }
 
 
 void
 CommandExecutorRunner::onCacheUpdated(unsigned int tid,
-                                   const CoreletList & updates)
+                                   const ServiceList & updates)
 {
     if (updates.size()) {
         std::cout << "cache updated, "
                   << updates.size()
-                  << " corelets downloaded:" << std::endl;            
-        printCoreletList(updates);
+                  << " services downloaded:" << std::endl;            
+        printServiceList(updates);
     } else {
         std::cout << "no new updates available." << std::endl;
     }

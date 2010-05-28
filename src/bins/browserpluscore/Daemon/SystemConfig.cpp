@@ -25,6 +25,8 @@
 #include "I18n/FormatTime.h"
 #include "I18n/idna.h"
 
+#include <string.h>
+
 using namespace std;
 using namespace std::tr1;
 
@@ -249,10 +251,10 @@ activeServicesFunc(const char * locale,
 
     shared_ptr<BPDaemon> daemon = BPDaemon::getSharedDaemon();
     if (daemon != NULL) {
-        shared_ptr<CoreletRegistry> registry = daemon->registry();;
+        shared_ptr<ServiceRegistry> registry = daemon->registry();;
         if (registry) {
             std::list<bp::service::Summary> summaries =
-                registry->availableCoreletSummaries();
+                registry->availableServiceSummaries();
 
             std::list<bp::service::Summary>::iterator it;
 
@@ -421,7 +423,7 @@ deleteServiceFunc(const char *,
         s = dynamic_cast<const bp::String *>(m->get("version"));
         if (!s) BP_THROW("argument missing 'version'");
         string version(s->value());
-        rval = daemon->registry()->purgeCorelet(service, version);
+        rval = daemon->registry()->purgeService(service, version);
     } catch (const std::string& s) {
         BPLOG_ERROR_STRM(s);
     }

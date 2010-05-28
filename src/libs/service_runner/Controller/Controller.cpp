@@ -61,7 +61,7 @@ Controller::Controller(const std::string & service,
 {
     // TODO: set m_service & m_version?
     
-    m_path = bp::paths::getCoreletDirectory() / service / version;
+    m_path = bp::paths::getServiceDirectory() / service / version;
 }
 
 Controller::Controller(const bpf::Path & path) :
@@ -249,8 +249,8 @@ Controller::allocate(const std::string & uri,
         bp::Map context;
         context.add("uri", new bp::String(
                         uri.empty() ? std::string("bpclient://unknown") : uri));
-        context.add("data_dir", new bp::String(data_dir.externalUtf8()));
-        context.add("temp_dir", new bp::String(temp_dir.externalUtf8()));
+        context.add("dataDir", new bp::String(data_dir.externalUtf8()));
+        context.add("tempDir", new bp::String(temp_dir.externalUtf8()));
         context.add("locale", new bp::String(locale));
         context.add("userAgent", new bp::String(userAgent));
         context.add("clientPid", new bp::Integer(clientPid));

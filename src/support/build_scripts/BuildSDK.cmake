@@ -100,7 +100,7 @@ ADD_DEPENDENCIES(InstallLocally MakeInstaller)
 ##### Zip it up, chris.  I'm about to.
 # define a custom target for the compressing of the SDK
 # this command is not run by default.  A good reason for this is if
-# you want to copy anything else, say.. some corelets, into the
+# you want to copy anything else, say.. some services, into the
 # sdk before compressing 
 ADD_CUSTOM_TARGET(CompressSDK COMMENT "Compressing the BrowserPlus SDK")
 

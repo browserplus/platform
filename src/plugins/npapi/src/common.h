@@ -47,6 +47,8 @@
 #endif
 
 // Function table for procs in browser called by plugin
-extern NPNetscapeFuncs gBrowserFuncs;
+extern "C" {
+    extern NPNetscapeFuncs gBrowserFuncs;
+};
 
 #endif

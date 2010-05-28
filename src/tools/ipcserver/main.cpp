@@ -21,11 +21,16 @@
  */
 
 
+#include "BPUtils/IPCServer.h"
+
 #include <iostream>
 #include <set>
 #include <sstream>
-#include "BPUtils/IPCServer.h"
 
+#include <stdio.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
 
 class MyServerListener : public bp::ipc::IServerListener,
                          public bp::ipc::IConnectionListener

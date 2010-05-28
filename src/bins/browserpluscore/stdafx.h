@@ -23,7 +23,7 @@
 
 #pragma once
 
-#include "CoreletManager/CoreletManager.h"
+#include "ServiceManager/ServiceManager.h"
 #include "DistributionClient/DistributionClient.h"
 #include "Permissions/Permissions.h"
 #include "BPUtils/BPUtils.h"

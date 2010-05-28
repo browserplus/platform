@@ -40,7 +40,7 @@
 namespace ServicesUpdated 
 {
     /**
-     * create a small file in the user scoped "Corelets" dir signifying
+     * create a small file in the user scoped "Services" dir signifying
      * that services on disk have been changed.
      */
     void indicateServicesChanged();

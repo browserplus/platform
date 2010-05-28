@@ -24,7 +24,7 @@
 #pragma once
 
 #include "DistributionClient/DistributionClient.h"
-#include "CoreletManager/CoreletManager.h"
+#include "ServiceManager/ServiceManager.h"
 #include "BPUtils/BPUtils.h"
 
 

@@ -109,9 +109,9 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
         },
 
         /**
-         * require attains a description of corelets from BPCore via
+         * require attains a description of services from BPCore via
          * the browser plugin and adds functions appropriate to those
-         * corelets to the corresponding BrowserPlus.CORELET_NAME object.
+         * services to the corresponding BrowserPlus.SERVICE_NAME object.
          * the return value is the full description of the coreles.
          */           
         require: function(args, callback)
@@ -416,22 +416,22 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
         // now we walk the details and populate the BrowserPlus
         // object with callable functions!
         details = details.value;
-        var corelet = details.name;
+        var service = details.name;
         var version = details.versionString;
         
-        if (!BrowserPlus[corelet]) {
-            BrowserPlus[corelet] = {};
-            BrowserPlus[corelet].corelet = corelet;
-            BrowserPlus[corelet].version = version;
+        if (!BrowserPlus[service]) {
+            BrowserPlus[service] = {};
+            BrowserPlus[service].service = service;
+            BrowserPlus[service].version = version;
         }
-        if (!BrowserPlus[corelet][version]) {
-            BrowserPlus[corelet][version] = {};
-            BrowserPlus[corelet][version].corelet = corelet;
-            BrowserPlus[corelet][version].version = version;
+        if (!BrowserPlus[service][version]) {
+            BrowserPlus[service][version] = {};
+            BrowserPlus[service][version].service = service;
+            BrowserPlus[service][version].version = version;
         }
-        // for the core corelet we now update the version string
-        if (corelet == "core") {
-            BrowserPlus[corelet].version = version;
+        // for the core service we now update the version string
+        if (service == "core") {
+            BrowserPlus[service].version = version;
         }
         
         if (details.functions) {
@@ -444,26 +444,26 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
                             if (cb == null || cb.constructor != Function)
                             {
                                 throw new Error("BrowserPlus." +
-                                                corelet + "." + permFuncName +
+                                                service + "." + permFuncName +
                                                 "() invoked without " +
                                                 " required callback " +
                                                 "parameter");
                             }
                             return _corePlugin().ExecuteMethod(
-                                corelet, version,
+                                service, version,
                                 permFuncName, args, cb);
                         };
                     })();
 
-                BrowserPlus[corelet][version][funcName] = afunc;
+                BrowserPlus[service][version][funcName] = afunc;
                 
                 // now if this is the first version of
-                // this corelet loaded, we'll plunk a
+                // this service loaded, we'll plunk a
                 // "symlink" in the versionless path for
                 // convenience
                 
-                if (version == BrowserPlus[corelet].version) {
-                    BrowserPlus[corelet][funcName] = afunc;
+                if (version == BrowserPlus[service].version) {
+                    BrowserPlus[service][funcName] = afunc;
                 }
             }
         }

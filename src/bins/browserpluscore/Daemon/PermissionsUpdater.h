@@ -22,7 +22,7 @@
 
 /**
  * PermissionsUpdater.h - A singleton responsible for periodic update of 
- *                    recently used corelets
+ *                    recently used services
  *
  * Copyright (c) 2007 Yahoo!, Inc. All rights reserved.
  */

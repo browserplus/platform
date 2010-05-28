@@ -80,11 +80,8 @@ Transaction::defaultTimeoutSecs()
 
         
 void
-Transaction::initiate(IListener* pListener)
+Transaction::initiate(IListenerWeakPtr pListener)
 {
-    if (pListener == NULL) {
-        BP_THROW_FATAL("null listener");
-    }
     // XXX
 }
 

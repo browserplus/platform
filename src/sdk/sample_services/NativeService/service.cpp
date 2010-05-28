@@ -58,11 +58,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <string>
 
 static const BPCFunctionTable * g_bpCoreFunctions;
 
-#define SAYHELLO_FUNCNAME "SayHello"
+#define SAYHELLO_FUNCNAME ((char *) "SayHello")
 
 /**
  * a function called at the time a webpage calls a function on your
@@ -77,14 +78,23 @@ static const BPCFunctionTable * g_bpCoreFunctions;
  * distinct thread.  Any static data must be protected.
  */
 static int
-myAllocate(void ** instance, unsigned int, const BPElement * ctx)
+myAllocate(void ** instance, const BPString uri, const BPPath serviceDir,
+           const BPPath dataDir, const BPPath tempDir, const BPString locale,
+           const BPString userAgent, int clientPid)
 {
     /* 'instance' is a pointer to context that you control.  You can
      * allocate whatever session specific context you want and
      * it will later be passed to your invoke and destroy functions */
     *instance = malloc(4);
     (*(unsigned int *)(*instance)) = 77;
-    printf("** (SampleService) BPPAllocate %p\n", *instance);
+    printf("BPPAllocate %p\n", *instance);
+    printf("uri: %s\n", uri);
+    printf("serviceDir: %s\n", serviceDir);
+    printf("dataDir: %s\n", dataDir);
+    printf("tempDir: %s\n", tempDir);
+    printf("locale: %s\n", locale);
+    printf("userAgent: %s\n", userAgent);
+    printf("clientPid: %u\n", clientPid);
     return 0;
 }
 
@@ -124,8 +134,8 @@ static void
 helloWorldFunc(void * instance, unsigned int tid,
                const BPElement * elem)
 {
-    printf("** (SampleService) [%lu] helloWorldFunc %p\n", tid, instance);
-    printf("** (SampleService) called with %lu arguments\n",
+    printf("** (SampleService) [%u] helloWorldFunc %p\n", tid, instance);
+    printf("** (SampleService) called with %u arguments\n",
            elem->value.mapVal.size);    
 
     // extract argument
@@ -182,8 +192,8 @@ myInvoke(void * instance, const char * funcName,
  */
 static BPArgumentDefinition s_helloWorldArguments[] = {
     {
-        "who",
-        "Who we should welcome to the world",
+        (char *) "who",
+        (char *) "Who we should welcome to the world",
         BPTString,
         BP_FALSE
     }
@@ -192,16 +202,16 @@ static BPArgumentDefinition s_helloWorldArguments[] = {
 static BPFunctionDefinition s_myServiceFunctions[] = {
     {
         SAYHELLO_FUNCNAME,
-        "A simple function to say hello world.",
+        (char *) "A simple function to say hello world.",
         1,
         s_helloWorldArguments
     }
 };
 
-static BPCoreletDefinition s_myServiceDef = {
-    "SampleService",
+static BPServiceDefinition s_myServiceDef = {
+    (char *) "SampleService",
     1, 0, 0,
-    "A do-nothing service to see what writing a service is like.",
+    (char *) "A do-nothing service to see what writing a service is like.",
     1,
     s_myServiceFunctions
 };
@@ -212,19 +222,22 @@ static BPCoreletDefinition s_myServiceDef = {
  * should allocated any service wide resources required and should not
  * block.
  */
-static const BPCoreletDefinition *
+static const BPServiceDefinition *
 myInitialize(const BPCFunctionTable * bpCoreFunctions,
-              const BPElement * parameterMap)
+             const BPPath serviceDir,
+             const BPPath /* dependentDir -- not used in a standalone service */,
+             const BPElement * /* dependentParams -- not used in a standalone service */)
 {
     g_bpCoreFunctions = bpCoreFunctions;
-    printf("** (SampleService) BPPInitialize (%p)\n", bpCoreFunctions);
+    printf("** (SampleService) BPPInitialize (%p) (%s)\n", bpCoreFunctions,
+           serviceDir);
     return &s_myServiceDef;
 }
 
 /* and finally, declare the entry point to the service, which is a
  * function table */
 static BPPFunctionTable funcTable = {
-    BPP_CORELET_API_VERSION,
+    BPP_SERVICE_API_VERSION,
     myInitialize,
     myShutdown,
     myAllocate,

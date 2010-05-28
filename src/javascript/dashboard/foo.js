@@ -2,23 +2,23 @@
 // out how long it takes to get the plugin up and running
 var startTime = new Date();
 
-var corelets = new Array;
-corelets["TextToSpeech"] = {require: {service: "TextToSpeech"}, 
+var services = new Array;
+services["TextToSpeech"] = {require: {service: "TextToSpeech"}, 
                             content: "sayContent", 
                             loadedCB: sayLoaded, 
                             cbCalled: false}
-corelets["DragAndDrop"] = {require: {service: "DragAndDrop", version: "1.0.1"}, 
+services["DragAndDrop"] = {require: {service: "DragAndDrop", version: "1.0.1"}, 
                            content: "dropContent",
                            loadedCB: dropLoaded, 
                            cbCalled: false};
-corelets["Zipper"] = {require: {service: "Zipper",
+services["Zipper"] = {require: {service: "Zipper",
                                 minversion: "1.0.0"},
                       content: "dropContent",
                       loadedCB: zipperLoaded, 
                       cbCalled: false};
 
-for (k in corelets) {
-    setAsLoading(corelets[k].content);
+for (k in services) {
+    setAsLoading(services[k].content);
 }
 
 // attempt to initialize browserplus, if not installed, handle upsell
@@ -34,15 +34,15 @@ function initCB(result) {
     displayTiming(BrowserPlus.getPlatformInfo());
 
     var requires = new Array;
-    for (k in corelets) {
-        requires.push(corelets[k].require);
+    for (k in services) {
+        requires.push(services[k].require);
     }
     BrowserPlus.require({services: requires}, requireCB);
     
     // blacklisting should prevent this!
-    BrowserPlus.require({services: [{service: "EvilCorelet"}]}, evilLoaded);
+    BrowserPlus.require({services: [{service: "EvilService"}]}, evilLoaded);
 
-    enumerateCorelets();
+    enumerateServices();
 } 
 
 function requireCB(result) {
@@ -51,13 +51,13 @@ function requireCB(result) {
         return;
     }
     
-    // progress callbacks are only invoked for corelets which 
+    // progress callbacks are only invoked for services which 
     // must be updated or installed.  make sure to call loadedCB()
-    // for all other corelets
-    for (k in corelets) {
-        if (corelets[k].cbCalled == false) {
-            corelets[k].loadedCB();
-            corelets[k].cbCalled = true;
+    // for all other services
+    for (k in services) {
+        if (services[k].cbCalled == false) {
+            services[k].loadedCB();
+            services[k].cbCalled = true;
         }
     }
 }
@@ -75,7 +75,7 @@ function setAsLoaded(divName) {
 }
 
 function sayLoaded() {
-    enumerateCorelets();	
+    enumerateServices();	
     setAsLoaded("sayContent");
 
     function say()
@@ -96,7 +96,7 @@ function sayLoaded() {
 
 function quoteLoaded() {
     setAsLoaded("quoteContent");
-    enumerateCorelets();	
+    enumerateServices();	
 
     function quote()
     {
@@ -161,7 +161,7 @@ function quoteLoaded() {
 }
 
 function searchLoaded() { 
-    enumerateCorelets();	
+    enumerateServices();	
     setAsLoaded("searchContent");
 
     function search()
@@ -252,18 +252,18 @@ function searchLoaded() {
     document.searchform.onsubmit = search;
 }
 
-function coreletDetails(corelet, version)
+function serviceDetails(service, version)
 {
     BrowserPlus.describeService(
-        {service: corelet, version: version},
+        {service: service, version: version},
         function (payload) {
             // update the display area title
-            var qtarget = document.getElementById("coreletTitleDisplay");
-            title = document.createTextNode("Details of '" + corelet +"' Corelet");
+            var qtarget = document.getElementById("serviceTitleDisplay");
+            title = document.createTextNode("Details of '" + service +"' Service");
             qtarget.replaceChild(title, qtarget.childNodes[0]);
             
             // update the document
-            var qtarget = document.getElementById("coreletDisplayArea");
+            var qtarget = document.getElementById("serviceDisplayArea");
             dad = document.createElement("div");
             info = document.createElement("pre");
             info.appendChild(document.createTextNode(JsonUtil.encode(payload)));
@@ -271,56 +271,56 @@ function coreletDetails(corelet, version)
             dad.appendChild(document.createElement("p"));    
             backLink = document.createElement("a");
             backLink.setAttribute("href", null);
-            backLink.appendChild(document.createTextNode("<< back to corelet list"));
-            backLink.onclick = enumerateCorelets;
+            backLink.appendChild(document.createTextNode("<< back to service list"));
+            backLink.onclick = enumerateServices;
             dad.appendChild(backLink);    
             qtarget.replaceChild(dad, qtarget.childNodes[0]);
         });
 }
 
-function enumerateCorelets()
+function enumerateServices()
 {
     BrowserPlus.listActiveServices(
-	function(corelets) {
-            if (!corelets.success)
+	function(services) {
+            if (!services.success)
             {
-                alert("InstalledCorelets failed:" + corelets.error
-                      + ": " + corelets.verboseError);
+                alert("InstalledServices failed:" + services.error
+                      + ": " + services.verboseError);
                 return false;
             }
-            corelets = corelets.value;
+            services = services.value;
 
             list = document.createElement("ul");
 
-            for (i in corelets)
+            for (i in services)
             {
                 var elem = document.createElement("li");
 
-                corelet = corelets[i];
+                service = services[i];
                 ref = document.createElement("a");
                 ref.href = "#"
-                ref.appendChild(document.createTextNode(corelet.name));
+                ref.appendChild(document.createTextNode(service.name));
 
                 // 8.8.4.1 rhino book, local scoping..
-                onClickFunc = (function() { var x = corelet.name;
-                                            var y = corelet.version;
+                onClickFunc = (function() { var x = service.name;
+                                            var y = service.version;
                                             return function() {
-                                                coreletDetails(x, y);
+                                                serviceDetails(x, y);
                                                 return false;
                                             }})();
                 ref.onclick = onClickFunc;
                 elem.appendChild(ref);
-                resText = ": " + corelet.version;
+                resText = ": " + service.version;
                 elem.appendChild(document.createTextNode(resText));
                 list.appendChild(elem);
             }
 
             // now update the document
-            var qtarget = document.getElementById("coreletTitleDisplay");
-            title = document.createTextNode("All Available Corelets");
+            var qtarget = document.getElementById("serviceTitleDisplay");
+            title = document.createTextNode("All Available Services");
             qtarget.replaceChild(title, qtarget.childNodes[0]);
 
-            var qtarget = document.getElementById("coreletDisplayArea");
+            var qtarget = document.getElementById("serviceDisplayArea");
             qtarget.replaceChild(list, qtarget.childNodes[0]);
         });
     
@@ -375,11 +375,11 @@ function forceBrowserReflow(e) {
 }
 
 function zipperLoaded() {
-    enumerateCorelets();
+    enumerateServices();
 }
 
 function dropLoaded() {
-    enumerateCorelets();	
+    enumerateServices();	
     setAsLoaded("dropContent");
 
     function photoHoverCallback(arg)
@@ -455,7 +455,7 @@ function dropLoaded() {
 								      function(){});
 					 alert("zip file "
 					       + res.value.zipFile.name
-					       + " will be removed when corelet unloads");
+					       + " will be removed when service unloads");
 				     });
 	logDrop(arg);
     }
@@ -562,8 +562,8 @@ function dropLoaded() {
 }
 
 function evilLoaded(result) {
-    msg = result.success ? "EvilCorelet loaded in spite of blacklisting!"
-        : "blacklisted EvilCorelet successfully blocked from downloading";
+    msg = result.success ? "EvilService loaded in spite of blacklisting!"
+        : "blacklisted EvilService successfully blocked from downloading";
     var target = document.getElementById("evilStatus");
     var retNode = document.createTextNode(msg);
     target.appendChild(retNode);

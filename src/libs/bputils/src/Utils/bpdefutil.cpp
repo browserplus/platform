@@ -25,13 +25,13 @@
 #include <sstream>
 
 bp::Map *
-bp::defutil::defToJson(const BPCoreletDefinition * def)
+bp::defutil::defToJson(const BPServiceDefinition * def)
 {
     if (def == NULL) return NULL;
 
     bp::Map * m = new bp::Map;
     
-    m->add("name", new bp::String(def->coreletName));
+    m->add("name", new bp::String(def->serviceName));
     bp::Map * verMap = new bp::Map;
     verMap->add("major", new bp::Integer(def->majorVersion));
     verMap->add("minor", new bp::Integer(def->minorVersion));
@@ -87,7 +87,7 @@ bp::defutil::defToJson(const BPCoreletDefinition * def)
 
  
 bp::List *
-bp::defutil::defsToJson(const BPCoreletDefinition ** defs,
+bp::defutil::defsToJson(const BPServiceDefinition ** defs,
                         unsigned int numDefs)
 {
     if (defs == NULL || numDefs == 0) return NULL;

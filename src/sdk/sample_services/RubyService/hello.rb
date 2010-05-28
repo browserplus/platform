@@ -28,7 +28,7 @@
 
 # A Ruby class that serves as the "implementation" of the service
 # the name of the class and functions supported by this class are
-# extracted from the 'rubyCoreletDefinition' below. 
+# extracted from the 'rubyServiceDefinition' below. 
 
 require 'pp'
 
@@ -67,19 +67,19 @@ class HelloRuby
       # your transaction object.  If an error occurs, you could end the
       # transaction and pass an error up to javascript by using the
       # #error method.
-      trans.complete("Hello world from my great corelet instance!")
+      trans.complete("Hello world from my great service instance!")
     end
   end
 end
 
 # The definition of your service interface, ruby style.
-# 'rubyCoreletDefinition' is a required variable that the ruby runtime will
+# 'rubyServiceDefinition' is a required variable that the ruby runtime will
 # pluck out and traverse to interpret your service definition.
 #
 # This definition will be used to automatically express a callable
 # javascript interface to the web.  More documentation is available online at
 # http://browserplus.yahoo.com/developer/services/ruby/
-rubyCoreletDefinition = {
+rubyServiceDefinition = {
   'class' => "HelloRuby",
   'name' => "HelloRuby",
   'major_version' => 1,

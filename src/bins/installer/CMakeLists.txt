@@ -68,7 +68,7 @@ SET(BrowserPlusUpdater_SOURCES BrowserPlusUpdater.cpp)
 
 
 SET(BrowserPlusInstaller_LINK_STATIC 
-    BPInstaller BPUtils HTMLRender DistributionClient CoreletManager)
+    BPInstaller BPUtils HTMLRender DistributionClient ServiceManager)
 SET(BrowserPlusUninstaller_LINK_STATIC BPInstaller BPUtils)
 SET(BrowserPlusUpdater_LINK_STATIC BPInstaller BPUtils)
 

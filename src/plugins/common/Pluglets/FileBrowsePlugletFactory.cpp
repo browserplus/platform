@@ -77,8 +77,8 @@ BPFunctionDefinition s_browseFunctions[] = {
     }
 };
 
-// a description of this corelet.
-static BPCoreletDefinition s_fileBrowsePlugletDef = {
+// a description of this service.
+static BPServiceDefinition s_fileBrowsePlugletDef = {
     "FileBrowse",
     1, 0, 1,
     "Present the user with a file browse dialog.",
@@ -100,8 +100,8 @@ BPFunctionDefinition s_browseFunctions2[] = {
     }
 };
 
-// a description of this corelet.
-static BPCoreletDefinition s_fileBrowsePlugletDef2 = {
+// a description of this service.
+static BPServiceDefinition s_fileBrowsePlugletDef2 = {
     "FileBrowse",
     2, 0, 0,
     "Present the user with a file browse dialog.",
@@ -113,9 +113,9 @@ static BPCoreletDefinition s_fileBrowsePlugletDef2 = {
 FileBrowsePlugletFactory::FileBrowsePlugletFactory()
 {
     m_descriptions.push_back(bp::service::Description());
-    m_descriptions.back().fromBPCoreletDefinition(&s_fileBrowsePlugletDef);
+    m_descriptions.back().fromBPServiceDefinition(&s_fileBrowsePlugletDef);
     m_descriptions.push_back(bp::service::Description());
-    m_descriptions.back().fromBPCoreletDefinition(&s_fileBrowsePlugletDef2);
+    m_descriptions.back().fromBPServiceDefinition(&s_fileBrowsePlugletDef2);
 }
 
 

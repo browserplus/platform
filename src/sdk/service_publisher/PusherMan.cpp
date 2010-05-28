@@ -26,7 +26,7 @@
 #include "BPUtils/HttpRequest.h"
 #include "BPUtils/HttpSyncTransaction.h"
 
-#define PUBLISH_BASE_PATH "/v3/internal/corelet/"
+#define PUBLISH_BASE_PATH "/v3/internal/service/"
 
 using namespace bp;
 using namespace bp::http;
@@ -36,13 +36,13 @@ using namespace std;
 
 bool
 pushFile(bp::file::Path file, string baseurl,
-         string coreletName, string coreletVersion,
+         string serviceName, string serviceVersion,
          string platform)
 {
     baseurl.append(PUBLISH_BASE_PATH);
-    baseurl.append(coreletName);
+    baseurl.append(serviceName);
     baseurl.append("/");    
-    baseurl.append(coreletVersion);        
+    baseurl.append(serviceVersion);        
     baseurl.append("/");    
     baseurl.append(platform);            
 

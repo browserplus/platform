@@ -30,7 +30,7 @@ if (!window.BPDialog) {
                         name: "DesktopSearch", 
                         version: "0.1.7", 
                         title: "Desktop Search",
-                        summary: "A corelet to search your desktop using OS facilities.", 
+                        summary: "A service to search your desktop using OS facilities.", 
                         update: false, 
                         downloadSize: 49202 // 0 for updates, positive for installs 
                     },
@@ -38,7 +38,7 @@ if (!window.BPDialog) {
                         name: "TextToSpeech", 
                         version: "1.0.2", 
                         title: "Text to speech",
-                        summary: " corelet that interfaces the OS provided text to speech facilities.", 
+                        summary: " service that interfaces the OS provided text to speech facilities.", 
                         update: false, 
                         downloadSize: 7311 // 0 for updates, positive for installs 
                     },

@@ -42,6 +42,8 @@
 #include "PluginCommonLib/PluginVariant.h"
 #include "NPAPIObject.h"
 
+#include <string.h>
+
 class NPAPIVariant : public plugin::Variant
 {
   public:

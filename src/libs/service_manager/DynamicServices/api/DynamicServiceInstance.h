@@ -24,11 +24,11 @@
 #define __DYNAMICSERVICEINSTANCE_H__
 
 #include "ServiceRunnerLib/ServiceRunnerLib.h"
-#include "CoreletManager/CoreletInstance.h"
-#include "CoreletManager/CoreletRegistry.h"
+#include "ServiceManager/ServiceInstance.h"
+#include "ServiceManager/ServiceRegistry.h"
 
 // a dumb shim class that represents a client's handle on a service
-class DynamicServiceInstance : public CoreletInstance
+class DynamicServiceInstance : public ServiceInstance
 {
   public:
     ~DynamicServiceInstance();
@@ -37,7 +37,7 @@ class DynamicServiceInstance : public CoreletInstance
                  const std::string & function,
                  const bp::Object & args);
   private:
-    DynamicServiceInstance(std::tr1::weak_ptr<CoreletExecutionContext> context);
+    DynamicServiceInstance(std::tr1::weak_ptr<ServiceExecutionContext> context);
 
     unsigned int m_instanceId;
 
@@ -51,7 +51,7 @@ class DynamicServiceInstance : public CoreletInstance
     // after passing ownership of the service back to the registry
     // listener, the instantiate id and listener are not used
     unsigned int m_instantiateId;
-    std::tr1::weak_ptr<ICoreletRegistryListener> m_registryListener;
+    std::tr1::weak_ptr<IServiceRegistryListener> m_registryListener;
 
     // a map which maps underlying (servicerunner) transaction ids onto
     // client selected transaction ids.

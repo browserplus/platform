@@ -41,6 +41,8 @@
 #include "BPUtils/BPLog.h"
 #include "nputils.h"
 
+#include <string.h>
+
 static std::string
 getStringFromIdentifier(NPIdentifier id)
 {

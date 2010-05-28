@@ -57,13 +57,13 @@ private:
 
     static void descriptionCB(BPErrorCode ec,
                               void * cookie,
-                              const BPCoreletDefinition * def,
+                              const BPServiceDefinition * def,
                               const char * error,
                               const char * verboseError);
 
     static void requireCB(BPErrorCode ec,
                           void * cookie,
-                          const BPCoreletDefinition ** defs,
+                          const BPServiceDefinition ** defs,
                           unsigned int numDefs,
                           const char * error,
                           const char * verboseError);

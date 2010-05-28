@@ -24,8 +24,8 @@
 #include "BPUtils/bpurl.h"
 #include "BPUtils/InstallID.h"
 #include "WSProtocol.h"
-#include "CoreletQuery.h"
-#include "CoreletQueryUtil.h"
+#include "ServiceQuery.h"
+#include "ServiceQueryUtil.h"
 #include "QueryCache.h"
 #include "PendingUpdateCache.h"
 
@@ -77,12 +77,12 @@ DistQuery::allocTransaction(TransactionContext::Type t)
 unsigned int
 DistQuery::availableServices(const std::string & platform)
 {
-    CoreletQuery * cq = new CoreletQuery(m_distroServers, m_serviceFilter);
+    ServiceQuery * cq = new ServiceQuery(m_distroServers, m_serviceFilter);
     cq->setListener(this);
 
     TransactionContextPtr tc = 
-        allocTransaction(TransactionContext::ListCorelets);
-    tc->m_coreletQuery.reset(cq);
+        allocTransaction(TransactionContext::ListServices);
+    tc->m_serviceQuery.reset(cq);
     m_transactions.push_back(tc);
 
     cq->availableServices(platform);
@@ -92,7 +92,7 @@ DistQuery::availableServices(const std::string & platform)
 
 
 unsigned int
-DistQuery::downloadCorelet(const std::string & name,
+DistQuery::downloadService(const std::string & name,
                            const std::string & version,
                            const std::string & platform)
 {
@@ -100,34 +100,34 @@ DistQuery::downloadCorelet(const std::string & name,
         return 0;
     }
 
-    CoreletQuery * cq = new CoreletQuery(m_distroServers, m_serviceFilter);
+    ServiceQuery * cq = new ServiceQuery(m_distroServers, m_serviceFilter);
     cq->setListener(this);
 
     TransactionContextPtr tc =  
         allocTransaction(TransactionContext::Download);
-    tc->m_coreletQuery.reset(cq);
+    tc->m_serviceQuery.reset(cq);
     m_transactions.push_back(tc);
 
-    cq->downloadCorelet(name, version, platform);
+    cq->downloadService(name, version, platform);
 
     return tc->m_tid;
 }
 
 
 unsigned int
-DistQuery::coreletDetails(const std::string & name, 
+DistQuery::serviceDetails(const std::string & name, 
                           const std::string & version,
                           const std::string & platform)
 {
-    CoreletQuery * cq = new CoreletQuery(m_distroServers, m_serviceFilter);
+    ServiceQuery * cq = new ServiceQuery(m_distroServers, m_serviceFilter);
     cq->setListener(this);
 
     TransactionContextPtr tc = 
-        allocTransaction(TransactionContext::CoreletDetails);
-    tc->m_coreletQuery.reset(cq);
+        allocTransaction(TransactionContext::ServiceDetails);
+    tc->m_serviceQuery.reset(cq);
     m_transactions.push_back(tc);
 
-    cq->coreletDetails(name, version, platform);
+    cq->serviceDetails(name, version, platform);
 
     return tc->m_tid;
 }
@@ -139,15 +139,15 @@ DistQuery::findService(const std::string & name,
                        const std::string & minversion,
                        const std::string & platform)
 {
-    CoreletQuery * cq = new CoreletQuery(m_distroServers, m_serviceFilter);
+    ServiceQuery * cq = new ServiceQuery(m_distroServers, m_serviceFilter);
     cq->setListener(this);
 
     TransactionContextPtr tc = 
-        allocTransaction(TransactionContext::FindCorelet);
-    tc->m_coreletQuery.reset(cq);
+        allocTransaction(TransactionContext::FindService);
+    tc->m_serviceQuery.reset(cq);
     m_transactions.push_back(tc);
 
-    cq->findCorelet(name, version, minversion, platform);
+    cq->findService(name, version, minversion, platform);
 
     return tc->m_tid;
 }
@@ -173,11 +173,11 @@ DistQuery::permissions()
 
 
 DistQuery::TransactionContextPtr
-DistQuery::findTransactionByCoreletQuery(const void * cq)
+DistQuery::findTransactionByServiceQuery(const void * cq)
 {
     std::list<TransactionContextPtr >::iterator it;
     for (it = m_transactions.begin(); it != m_transactions.end(); it++) {
-        if ((*it)->m_coreletQuery.get() == cq) {
+        if ((*it)->m_serviceQuery.get() == cq) {
             TransactionContextPtr t = *it;
             m_transactions.erase(it);
             return t;
@@ -278,18 +278,18 @@ DistQuery::reportInstall(const std::string & ysOSVersion,
 unsigned int
 DistQuery::satisfyRequirements(
     const std::string & platform,
-    const std::list<CoreletRequireStatement> & requirements,
-    const std::list<bp::service::Summary> & installedCorelets)
+    const std::list<ServiceRequireStatement> & requirements,
+    const std::list<bp::service::Summary> & installedServices)
 {
-    CoreletQuery * cq = new CoreletQuery(m_distroServers, m_serviceFilter);
+    ServiceQuery * cq = new ServiceQuery(m_distroServers, m_serviceFilter);
     cq->setListener(this);
 
     TransactionContextPtr tc = 
         allocTransaction(TransactionContext::SatisfyRequirements);
-    tc->m_coreletQuery.reset(cq);
+    tc->m_serviceQuery.reset(cq);
     m_transactions.push_back(tc);
 
-    cq->satisfyRequirements(platform, requirements, installedCorelets);
+    cq->satisfyRequirements(platform, requirements, installedServices);
 
     return tc->m_tid;
 }
@@ -298,18 +298,18 @@ DistQuery::satisfyRequirements(
 unsigned int
 DistQuery::updateCache(
     const std::string & platform,
-    const std::list<CoreletRequireStatement> & requirements,
-    const std::list<bp::service::Summary> & installedCorelets)
+    const std::list<ServiceRequireStatement> & requirements,
+    const std::list<bp::service::Summary> & installedServices)
 {
-    CoreletQuery * cq = new CoreletQuery(m_distroServers, m_serviceFilter);
+    ServiceQuery * cq = new ServiceQuery(m_distroServers, m_serviceFilter);
     cq->setListener(this);
 
     TransactionContextPtr tc = 
         allocTransaction(TransactionContext::UpdateCache);
-    tc->m_coreletQuery.reset(cq);
+    tc->m_serviceQuery.reset(cq);
     m_transactions.push_back(tc);
 
-    cq->updateCache(platform, requirements, installedCorelets);
+    cq->updateCache(platform, requirements, installedServices);
 
     return tc->m_tid;
 }
@@ -318,17 +318,17 @@ DistQuery::updateCache(
 unsigned int
 DistQuery::serviceSynopses(const std::string & platform,
                            const std::string & locale,
-                           const CoreletList & corelets)
+                           const ServiceList & services)
 {
-    CoreletQuery * cq = new CoreletQuery(m_distroServers, m_serviceFilter);
+    ServiceQuery * cq = new ServiceQuery(m_distroServers, m_serviceFilter);
     cq->setListener(this);
 
     TransactionContextPtr tc = 
         allocTransaction(TransactionContext::AttainServiceSynopses);
-    tc->m_coreletQuery.reset(cq);
+    tc->m_serviceQuery.reset(cq);
     m_transactions.push_back(tc);
 
-    cq->serviceSynopses(platform, locale, corelets);
+    cq->serviceSynopses(platform, locale, services);
 
     return tc->m_tid;
 }
@@ -342,7 +342,7 @@ DistQuery::purgeCache()
 
 
 bool
-DistQuery::installCoreletFromCache(const std::string & name,
+DistQuery::installServiceFromCache(const std::string & name,
                                    const std::string & version)
 {
     return PendingUpdateCache::install(name, version);
@@ -356,14 +356,14 @@ DistQuery::isCached(const std::string & name, const std::string & version)
 }
 
 
-CoreletList
-DistQuery::cachedCorelets()
+ServiceList
+DistQuery::cachedServices()
 {
     std::list<bp::service::Summary> cached = PendingUpdateCache::cached();
 
     std::list<bp::service::Summary>::iterator it;
 
-    CoreletList lst;
+    ServiceList lst;
 
     for (it = cached.begin(); it != cached.end(); it++)
     {
@@ -375,20 +375,20 @@ DistQuery::cachedCorelets()
 }
 
 
-CoreletList
+ServiceList
 DistQuery::haveUpdates(
-    const std::list<CoreletRequireStatement> &requirements,
+    const std::list<ServiceRequireStatement> &requirements,
     const std::list<bp::service::Summary> & installed)
 {
     std::list<bp::service::Summary> updates = PendingUpdateCache::cached();
 
-    CoreletList cl;
+    ServiceList cl;
 
-    AvailableCoreletList shouldInstall;
-    if (CoreletQueryUtil::haveUpdates(requirements, installed, updates,
+    AvailableServiceList shouldInstall;
+    if (ServiceQueryUtil::haveUpdates(requirements, installed, updates,
                                       shouldInstall))
     {
-        cl = CoreletQueryUtil::reformatAvailableCoreletList(shouldInstall);
+        cl = ServiceQueryUtil::reformatAvailableServiceList(shouldInstall);
     }
     
     return cl;
@@ -398,12 +398,12 @@ DistQuery::haveUpdates(
 unsigned int
 DistQuery::latestPlatformVersion(const std::string & platform)
 {
-    CoreletQuery * cq = new CoreletQuery(m_distroServers, m_serviceFilter);
+    ServiceQuery * cq = new ServiceQuery(m_distroServers, m_serviceFilter);
     cq->setListener(this);
 
     TransactionContextPtr tc = 
         allocTransaction(TransactionContext::LatestPlatformVersion);
-    tc->m_coreletQuery.reset(cq);
+    tc->m_serviceQuery.reset(cq);
     m_transactions.push_back(tc);
 
     cq->latestPlatformVersion(platform);
@@ -415,12 +415,12 @@ DistQuery::latestPlatformVersion(const std::string & platform)
 unsigned int
 DistQuery::downloadLatestPlatform(const std::string & platform)
 {
-    CoreletQuery * cq = new CoreletQuery(m_distroServers, m_serviceFilter);
+    ServiceQuery * cq = new ServiceQuery(m_distroServers, m_serviceFilter);
     cq->setListener(this);
 
     TransactionContextPtr tc = 
         allocTransaction(TransactionContext::DownloadLatestPlatform);
-    tc->m_coreletQuery.reset(cq);
+    tc->m_serviceQuery.reset(cq);
     m_transactions.push_back(tc);
 
     cq->downloadLatestPlatform(platform);
@@ -429,9 +429,9 @@ DistQuery::downloadLatestPlatform(const std::string & platform)
 }
 
 void
-DistQuery::onTransactionFailed(const CoreletQuery * cq)
+DistQuery::onTransactionFailed(const ServiceQuery * cq)
 {
-    TransactionContextPtr ctx = findTransactionByCoreletQuery(cq);
+    TransactionContextPtr ctx = findTransactionByServiceQuery(cq);
     BPASSERT(ctx != NULL);
     if (m_listener) {
         m_listener->onTransactionFailed(ctx->m_tid);
@@ -439,15 +439,15 @@ DistQuery::onTransactionFailed(const CoreletQuery * cq)
 }
 
 void
-DistQuery::gotAvailableServices(const CoreletQuery * cq,
-                                const AvailableCoreletList & list)
+DistQuery::gotAvailableServices(const ServiceQuery * cq,
+                                const AvailableServiceList & list)
 {
-    TransactionContextPtr ctx = findTransactionByCoreletQuery(cq);
+    TransactionContextPtr ctx = findTransactionByServiceQuery(cq);
     BPASSERT(ctx != NULL);
-    BPASSERT(ctx->m_type == TransactionContext::ListCorelets);
+    BPASSERT(ctx->m_type == TransactionContext::ListServices);
 
-    CoreletList cl =
-        CoreletQueryUtil::reformatAvailableCoreletList(list);
+    ServiceList cl =
+        ServiceQueryUtil::reformatAvailableServiceList(list);
 
     ctx->logTransactionCompletion(true);
     if (m_listener) {
@@ -456,13 +456,13 @@ DistQuery::gotAvailableServices(const CoreletQuery * cq,
 }
 
 void
-DistQuery::onServiceFound(const CoreletQuery * cq,
-                          const AvailableCorelet & list)
+DistQuery::onServiceFound(const ServiceQuery * cq,
+                          const AvailableService & list)
 {
 
-    TransactionContextPtr ctx = findTransactionByCoreletQuery(cq);
+    TransactionContextPtr ctx = findTransactionByServiceQuery(cq);
     BPASSERT(ctx != NULL);
-    BPASSERT(ctx->m_type == TransactionContext::FindCorelet);
+    BPASSERT(ctx->m_type == TransactionContext::FindService);
 
     ctx->logTransactionCompletion(true);
     if (m_listener) {
@@ -471,10 +471,10 @@ DistQuery::onServiceFound(const CoreletQuery * cq,
 }
 
 void
-DistQuery::onDownloadProgress(const CoreletQuery * cq,
+DistQuery::onDownloadProgress(const ServiceQuery * cq,
                               unsigned int pct)
 {
-    TransactionContextPtr ctx = findTransactionByCoreletQuery(cq);
+    TransactionContextPtr ctx = findTransactionByServiceQuery(cq);
     m_transactions.push_front(ctx);
     BPASSERT(ctx != NULL);
     BPASSERT(ctx->m_type == TransactionContext::Download ||
@@ -491,10 +491,10 @@ DistQuery::onDownloadProgress(const CoreletQuery * cq,
 }
 
 void
-DistQuery::onDownloadComplete(const CoreletQuery * cq,
+DistQuery::onDownloadComplete(const ServiceQuery * cq,
                               const std::vector<unsigned char> & buf)
 {
-    TransactionContextPtr ctx = findTransactionByCoreletQuery(cq);
+    TransactionContextPtr ctx = findTransactionByServiceQuery(cq);
     BPASSERT(ctx != NULL);
     BPASSERT(ctx->m_type == TransactionContext::Download);
     ctx->logTransactionCompletion(true);
@@ -504,22 +504,22 @@ DistQuery::onDownloadComplete(const CoreletQuery * cq,
 }
 
 void
-DistQuery::gotServiceDetails(const CoreletQuery * cq,
+DistQuery::gotServiceDetails(const ServiceQuery * cq,
                              const bp::service::Description & desc)
 {
-    TransactionContextPtr ctx = findTransactionByCoreletQuery(cq);
+    TransactionContextPtr ctx = findTransactionByServiceQuery(cq);
     BPASSERT(ctx != NULL);
-    BPASSERT(ctx->m_type == TransactionContext::CoreletDetails);
+    BPASSERT(ctx->m_type == TransactionContext::ServiceDetails);
 
     ctx->logTransactionCompletion(true);
     m_listener->gotServiceDetails(ctx->m_tid, desc);
 }
 
 void
-DistQuery::onRequirementsSatisfied(const CoreletQuery * cq,
-                                   const CoreletList & clist)
+DistQuery::onRequirementsSatisfied(const ServiceQuery * cq,
+                                   const ServiceList & clist)
 {
-    TransactionContextPtr ctx = findTransactionByCoreletQuery(cq);
+    TransactionContextPtr ctx = findTransactionByServiceQuery(cq);
     BPASSERT(ctx != NULL);
     BPASSERT(ctx->m_type == TransactionContext::SatisfyRequirements);
     ctx->logTransactionCompletion(true);    
@@ -528,10 +528,10 @@ DistQuery::onRequirementsSatisfied(const CoreletQuery * cq,
 }
 
 void
-DistQuery::onCacheUpdated(const CoreletQuery * cq,
-                          const CoreletList & updates)
+DistQuery::onCacheUpdated(const ServiceQuery * cq,
+                          const ServiceList & updates)
 {
-    TransactionContextPtr ctx = findTransactionByCoreletQuery(cq);
+    TransactionContextPtr ctx = findTransactionByServiceQuery(cq);
     BPASSERT(ctx != NULL);
     BPASSERT(ctx->m_type == TransactionContext::UpdateCache);
     ctx->logTransactionCompletion(true);
@@ -541,10 +541,10 @@ DistQuery::onCacheUpdated(const CoreletQuery * cq,
 }
 
 void
-DistQuery::gotServiceSynopsis(const CoreletQuery * cq,
+DistQuery::gotServiceSynopsis(const ServiceQuery * cq,
                               const ServiceSynopsisList & sslist)
 {
-    TransactionContextPtr ctx = findTransactionByCoreletQuery(cq);
+    TransactionContextPtr ctx = findTransactionByServiceQuery(cq);
     BPASSERT(ctx != NULL);
     BPASSERT(ctx->m_type == TransactionContext::AttainServiceSynopses);
     ctx->logTransactionCompletion(true);
@@ -552,10 +552,10 @@ DistQuery::gotServiceSynopsis(const CoreletQuery * cq,
 }
 
 void
-DistQuery::gotLatestPlatformVersion(const CoreletQuery * cq,
+DistQuery::gotLatestPlatformVersion(const ServiceQuery * cq,
                                     const std::string & latest)
 {
-    TransactionContextPtr ctx = findTransactionByCoreletQuery(cq);
+    TransactionContextPtr ctx = findTransactionByServiceQuery(cq);
     BPASSERT(ctx != NULL);
     BPASSERT(ctx->m_type == TransactionContext::LatestPlatformVersion);
     ctx->logTransactionCompletion(true);
@@ -566,10 +566,10 @@ DistQuery::gotLatestPlatformVersion(const CoreletQuery * cq,
 
 void
 DistQuery::onLatestPlatformDownloaded(
-        const CoreletQuery * cq,
+        const ServiceQuery * cq,
         const LatestPlatformPkgAndVersion & pkgAndVersion)
 {
-    TransactionContextPtr ctx = findTransactionByCoreletQuery(cq);
+    TransactionContextPtr ctx = findTransactionByServiceQuery(cq);
     BPASSERT(ctx != NULL);
     BPASSERT(ctx->m_type == TransactionContext::DownloadLatestPlatform);
 
@@ -583,7 +583,7 @@ DistQuery::onLatestPlatformDownloaded(
 DistQuery::TransactionContext::TransactionContext(DistQuery& owner)
     : bp::http::client::Listener(),
       m_owner(owner), m_type(None), m_tid(0), m_stopWatch(),
-      m_transaction(), m_coreletQuery()
+      m_transaction(), m_serviceQuery()
 {
 }
 
@@ -682,10 +682,10 @@ DistQuery::TransactionContext::logTransactionCompletion(bool success)
         case TransactionContext::UpdateCache:
             what = "service cache update";
             break;
-        case TransactionContext::ListCorelets:
+        case TransactionContext::ListServices:
             what = "enumerate services";
             break;
-        case TransactionContext::CoreletDetails:
+        case TransactionContext::ServiceDetails:
             what = "describe service";
             break;
         case TransactionContext::Permissions:
@@ -694,7 +694,7 @@ DistQuery::TransactionContext::logTransactionCompletion(bool success)
         case TransactionContext::Download:
             what = "download service";
             break;
-        case TransactionContext::FindCorelet:
+        case TransactionContext::FindService:
             what = "locate service";
             break;
         case TransactionContext::SatisfyRequirements:
@@ -728,13 +728,13 @@ DistQuery::TransactionContext::logTransactionCompletion(bool success)
 
 void
 IDistQueryListener::gotAvailableServices(unsigned int,
-                                         const CoreletList &)
+                                         const ServiceList &)
 {
 }
 
 void
 IDistQueryListener::onServiceFound(unsigned int ,
-                                   const AvailableCorelet &)
+                                   const AvailableService &)
 {
 }
     
@@ -767,12 +767,12 @@ IDistQueryListener::onPageUsageReported(unsigned int)
 }
     
 void
-IDistQueryListener::onRequirementsSatisfied(unsigned int, const CoreletList &)
+IDistQueryListener::onRequirementsSatisfied(unsigned int, const ServiceList &)
 {
 }
     
 void
-IDistQueryListener::onCacheUpdated(unsigned int, const CoreletList &)
+IDistQueryListener::onCacheUpdated(unsigned int, const ServiceList &)
 {
 }
     
