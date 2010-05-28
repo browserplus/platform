@@ -674,7 +674,13 @@ ServiceLibrary_v4::allocate(std::string uri, bp::file::Path dataDir,
     is->name = m_summary.name();
     is->version = m_summary.version();
 
-    // set up (v4 sytle) arguments
+    // set up (v4 sytle) arguments - they weren't AT ALL consistent :(
+    is->context.add("uri", new bp::String(uri));
+    is->context.add("data_dir", new bp::String(dataDir.externalUtf8()));
+    is->context.add("temp_dir", new bp::String(tempDir.externalUtf8()));
+    is->context.add("locale", new bp::String(locale));
+    is->context.add("userAgent", new bp::String(userAgent));
+    is->context.add("clientPid", new bp::Integer(clientPid));
     is->context.add("corelet_dir", new bp::String(m_summary.path().utf8()));
     is->context.add("service_dir", new bp::String(m_summary.path().utf8()));
 
