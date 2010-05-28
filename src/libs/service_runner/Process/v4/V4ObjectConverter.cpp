@@ -34,8 +34,8 @@ sapi_v4::v4ToBPObject(const struct sapi_v4::BPElement_t * elemPtr)
     return NULL;
 }
 
-struct sapi_v4::BPElement_t *
-sapi_v4::v5ElementToV4(const struct BPElement_t * elemPtr)
+sapi_v4::BPElement *
+sapi_v4::v5ElementToV4(const ::BPElement * elemPtr)
 {
     return NULL;
 }

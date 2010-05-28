@@ -96,10 +96,7 @@ namespace ServiceRunner
 
         bp::service::Summary m_summary;
 
-        // curently allocated corelet
-        void * m_handle;
-
-        // pointer to the corelet instances function table
+        // pointer to the corelet instance's function table
         const void * m_funcTable;
 
         // corelet description
@@ -153,8 +150,8 @@ namespace ServiceRunner
         static unsigned int promptUserFunction(
             unsigned int tid,
             const char * utf8PathToHTMLDialog,
-            const BPElement * args,
-            BPUserResponseCallbackFuncPtr responseCallback,
+            const sapi_v4::BPElement * args,
+            sapi_v4::BPUserResponseCallbackFuncPtr responseCallback,
             void * cookie);
 
         IServiceLibraryListener * m_listener;
@@ -176,14 +173,14 @@ namespace ServiceRunner
         // a table mapping prompt ids to callback and cookie
         struct PromptContext {
             unsigned int tid;
-            BPUserResponseCallbackFuncPtr cb;
+            sapi_v4::BPUserResponseCallbackFuncPtr cb;
             void * cookie;
         };
 
         std::map<unsigned int, PromptContext> m_promptToTransaction;
         void beginPrompt(unsigned int promptId,
                          unsigned int tid,
-                         BPUserResponseCallbackFuncPtr cb,
+                         sapi_v4::BPUserResponseCallbackFuncPtr cb,
                          void * cookie);
         void endPrompt(unsigned int promptId);
         bool promptKnown(unsigned int promptId);

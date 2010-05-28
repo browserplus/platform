@@ -74,7 +74,7 @@ struct InstanceResponse
 
     // prompt
     std::string dialogPath;
-    BPUserResponseCallbackFuncPtr responseCallback;
+    sapi_v4::BPUserResponseCallbackFuncPtr responseCallback;
     void * responseCookie;
     unsigned int promptId;
 
@@ -283,8 +283,8 @@ unsigned int
 ServiceLibrary_v4::promptUserFunction(
     unsigned int tid,
     const char * utf8PathToHTMLDialog,
-    const BPElement * args,
-    BPUserResponseCallbackFuncPtr responseCallback,
+    const sapi_v4::BPElement * args,
+    sapi_v4::BPUserResponseCallbackFuncPtr responseCallback,
     void * cookie)
 {
     // management of unique prompt ids
@@ -302,7 +302,7 @@ ServiceLibrary_v4::promptUserFunction(
     ir->type = InstanceResponse::T_Prompt;
     ir->tid = tid;
     if (utf8PathToHTMLDialog) ir->dialogPath.append(utf8PathToHTMLDialog);
-    ir->o = (args ? bp::Object::build(args) : NULL);
+    ir->o = (args ? sapi_v4::v4ToBPObject(args) : NULL);
     ir->responseCallback = responseCallback;
     ir->responseCookie = cookie;
     ir->promptId = cpid;
@@ -378,7 +378,7 @@ struct InstanceEvent
 
     // for prompt results
     unsigned int promptId;
-    BPUserResponseCallbackFuncPtr callback;
+    sapi_v4::BPUserResponseCallbackFuncPtr callback;
     void * cookie;
     bp::Object * results;
 };
@@ -393,16 +393,21 @@ processEventFunc(void * c, bp::runloop::Event e)
     if (ie->type == InstanceEvent::T_Invoke) {
         if (is->funcTable->invokeFunc != NULL)
         {
+            sapi_v4::BPElement * e = sapi_v4::v5ElementToV4(is->context.elemPtr());
+
             is->funcTable->invokeFunc(is->cookie,
                                       ie->name.c_str(),
                                       ie->tid,
-                                      ie->args.elemPtr());
+                                      e);
+
+            sapi_v4::freeDynamicV4Element(e);
         }
     } else if (ie->type == InstanceEvent::T_PromptResults) {
         if (ie->callback) {
-            const BPElement * r = NULL;
-            if (ie->results) r = ie->results->elemPtr();
+            sapi_v4::BPElement * r = NULL;
+            if (ie->results) r = sapi_v4::v5ElementToV4(ie->results->elemPtr());
             ie->callback(ie->cookie, ie->promptId, r);
+            if (r) sapi_v4::freeDynamicV4Element(r);
         }
     }
 
@@ -441,8 +446,8 @@ ServiceLibrary_v4::getFunctionTable()
     return (void *) table;
 }
 
-ServiceLibrary_v4::ServiceLibrary() :
-    m_currentId(1), m_attachId(0), m_handle(NULL), m_funcTable(NULL),
+ServiceLibrary_v4::ServiceLibrary_v4() :
+    m_currentId(1), m_attachId(0), m_funcTable(NULL),
     m_desc(), m_coreletAPIVersion(0), m_instances(), m_listener(NULL),
     m_promptToTransaction(), 
     m_serviceLogMode( bp::log::kServiceLogCombined ), m_serviceLogger()
@@ -450,7 +455,7 @@ ServiceLibrary_v4::ServiceLibrary() :
     s_libObjectPtr = this;
 }
         
-ServiceLibrary_v4::~ServiceLibrary()
+ServiceLibrary_v4::~ServiceLibrary_v4()
 {
     // deallocate all instances
     while (m_instances.size() > 0)
@@ -466,24 +471,17 @@ ServiceLibrary_v4::~ServiceLibrary()
 
     // detach dependent services
     if (m_summary.type() == bp::service::Summary::Dependent) {
-        const BPPFunctionTable * table =
-            (const BPPFunctionTable *) m_funcTable;
+        const sapi_v4::BPPFunctionTable * table =
+            (const sapi_v4::BPPFunctionTable *) m_funcTable;
         if (table && table->detachFunc) {
             table->detachFunc(m_attachId);
         }
     }
     
     // shutdown and unload the library
-    shutdownCorelet(true);
+    shutdownService(true);
 
     s_libObjectPtr = NULL;
-}
-
-// parse the manifest from the cwd, populating name and version
-bool
-ServiceLibrary_v4::parseManifest(std::string & err)
-{
-    return m_summary.detectCorelet(bpf::canonicalPath(bpf::Path(".")), err);
 }
 
 std::string
@@ -500,126 +498,87 @@ ServiceLibrary_v4::name()
 
 // load the service
 bool
-ServiceLibrary_v4::load(const bpf::Path & providerPath, std::string & err)
+ServiceLibrary_v4::load(const bp::service::Summary &summary,
+                        const bp::service::Summary &provider,
+                        void * functionTable)
 {
-    const BPPFunctionTable * funcTable = NULL;
+    const sapi_v4::BPPFunctionTable * funcTable = (const sapi_v4::BPPFunctionTable *) functionTable;
     
+
     bool success = true;
     // meaningful when success == false;
     bool callShutdown = true;
     
-    BPASSERT(m_handle == NULL);
     BPASSERT(m_funcTable == NULL);    
+
+    m_summary = summary;
+    m_funcTable = funcTable;
 
     // now let's determine the path to the shared library.  For
     // dependent corelets this will be extracted from the manifest
     bpf::Path path;
     bpf::Path servicePath;
     if (m_summary.type() == bp::service::Summary::Dependent) {
-        bp::service::Summary s;
-
-        if (!s.detectCorelet(providerPath, err)) {
-            BPLOG_ERROR_STRM("error loading dependent service: " << err);
-            return false;
-        }
-        servicePath = providerPath;
-        path = providerPath / s.coreletLibraryPath();
+        servicePath = provider.path();
+        path = provider.path() / provider.serviceLibraryPath();
     } else {
         servicePath = m_summary.path();
-        path = m_summary.path() / m_summary.coreletLibraryPath();
+        path = m_summary.path() / m_summary.serviceLibraryPath();
     }
     path = bpf::canonicalPath(path);
     
-    BPLOG_INFO_STRM("loading corelet library: " <<
-                    bpf::utf8FromNative(path.filename()));
+    BPLOG_INFO_STRM("loading v4 service library: " << bpf::utf8FromNative(path.filename()));
 
-    m_handle = dlopenNP(path);
-
-    if (m_handle != NULL)
     {
-        // now we should initialize the corelet
-        const BPPFunctionTable * (*entryPointFunc)(void);
+        // set up the parameters to the initialize function
+        bp::Map params;
+        params.add("CoreletDirectory", new bp::String(servicePath.utf8()));
 
-        entryPointFunc = (const BPPFunctionTable * (*)(void))
-            dlsymNP(m_handle, "BPPGetEntryPoints");
-
-        if (entryPointFunc != NULL)
+        if (funcTable == NULL || funcTable->initializeFunc == NULL)
         {
-            // set up the parameters to the initialize function
-            bp::Map params;
-            params.add("CoreletDirectory", new bp::String(servicePath.utf8()));
+            BPLOG_WARN_STRM("invalid v4 corelet, NULL initialize function (" << path << ")");
+            success = false;
+            // still call shutdown
+        } else {
+            BPASSERT(funcTable->coreletAPIVersion == 4);
 
-            m_funcTable = entryPointFunc();
-            funcTable = (const BPPFunctionTable *) m_funcTable;
+            m_coreletAPIVersion = funcTable->coreletAPIVersion;
+            
+            const sapi_v4::BPCoreletDefinition * def = NULL;
+            
+            sapi_v4::BPElement * p = NULL;
+            p = sapi_v4::v5ElementToV4(params.elemPtr());
+            def = funcTable->initializeFunc(
+                (const sapi_v4::BPCFunctionTable *) getFunctionTable(),
+                p);
+            if (p) sapi_v4::freeDynamicV4Element(p);
 
-            if (funcTable == NULL || funcTable->initializeFunc == NULL)
+                    
+            if (def == NULL)
             {
-                BPLOG_WARN_STRM("invalid corelet, NULL initialize function ("
+                BPLOG_WARN_STRM("invalid corelet, NULL return from "
+                                << "initialize function ("
                                 << path << ")");
                 success = false;
-                // still call shutdown
-            } else {
-                if (funcTable->coreletAPIVersion != BPP_CORELET_API_VERSION)
-                {
-                    BPLOG_WARN_STRM("invalid corelet, unsupported corelet "
-                                    << "API version "
-                                    << funcTable->coreletAPIVersion 
-                                    << ", require " << BPP_CORELET_API_VERSION
-                                    << "("  << path << ")");
-                    success = false;
-                    // surpress calling of shutdown
-                    callShutdown = false;
-                } else {
-
-                    m_coreletAPIVersion = funcTable->coreletAPIVersion;
-                    
-                    const BPCoreletDefinition * def = NULL;
-                    
-                    def = funcTable->initializeFunc(
-                        (const BPCFunctionTable *) getFunctionTable(),
-                        params.elemPtr());
-                    
-                    if (def == NULL)
-                    {
-                        BPLOG_WARN_STRM("invalid corelet, NULL return from "
-                                        << "initialize function ("
-                                        << path << ")");
-                        success = false;
-                        // don't call shutdown.  This corelet has already
-                        // violated a contract
-                        callShutdown = false;
-                    }
-                    // TODO: It's unnecesary in the dependent case to
-                    // extract an API definition, because the providers'
-                    // api will not be exposed.  In this case the m_desc
-                    // structure will be re-populated below
-                    else if (!m_desc.fromBPCoreletDefinition(def))
-                    {
-                        BPLOG_WARN_STRM("couldn't populate Description "
-                                        "from returned corelet structure ");
-                        success = false;
-                        callShutdown = true;
-                    }
-                }
+                // don't call shutdown.  This corelet has already
+                // violated a contract
+                callShutdown = false;
+            }
+            // TODO: It's unnecesary in the dependent case to
+            // extract an API definition, because the providers'
+            // api will not be exposed.  In this case the m_desc
+            // structure will be re-populated below
+            // XXX: v4 and v5 service definitions are the same
+            else if (!m_desc.fromBPServiceDefinition((const ::BPServiceDefinition *) def))
+            {
+                BPLOG_WARN_STRM("couldn't populate Description "
+                                "from returned corelet structure ");
+                success = false;
+                callShutdown = true;
             }
         }
-        else 
-        {
-            BPLOG_WARN_STRM("skipping '" << path
-                            << "', failed to get address for "
-                            "BPPGetEntryPoints symbol");
-            success = false;
-            callShutdown = false;
-        }
     }
-    else
-    {
-        BPLOG_WARN_STRM("skipping '" << path
-                        << "', cannot load shared library.");
-        success = false;
-        callShutdown = false;
-    }
-
+    
     // now if we've successfully initialized, and this is a dependent
     // service, let's attach!
     if (success && m_summary.type() == bp::service::Summary::Dependent &&
@@ -659,8 +618,11 @@ ServiceLibrary_v4::load(const bpf::Path & providerPath, std::string & err)
         BPLOG_INFO_STRM("attach to " << path << " with " << paramStr 
                         << ", cwd = " << curdir);
 
-        const BPCoreletDefinition * def = NULL;
-        def = funcTable->attachFunc(m_attachId, params.elemPtr());
+        const sapi_v4::BPCoreletDefinition * def = NULL;
+        sapi_v4::BPElement * p = sapi_v4::v5ElementToV4(params.elemPtr());
+        def = funcTable->attachFunc(m_attachId, p);
+        if (p) sapi_v4::freeDynamicV4Element(p);
+
         if (def == NULL) {
             BPLOG_WARN_STRM("attachFunc returns NULL description");
             if (funcTable->detachFunc) {
@@ -668,7 +630,8 @@ ServiceLibrary_v4::load(const bpf::Path & providerPath, std::string & err)
             }
             success = false;
             callShutdown = true;
-        } else if (!m_desc.fromBPCoreletDefinition(def)) {
+        // XXX: v4 and v5 service definitions are the same
+        } else if (!m_desc.fromBPServiceDefinition((const ::BPServiceDefinition *) def)) {
             BPLOG_WARN_STRM("couldn't populate Description "
                             "from structure returned from attach function");
             success = false;
@@ -676,35 +639,28 @@ ServiceLibrary_v4::load(const bpf::Path & providerPath, std::string & err)
         }
     }
     
-    if (!success) shutdownCorelet(callShutdown);
+    if (!success) shutdownService(callShutdown);
 
     return success;
 }
 
 // shutdown the corelet, NULL out m_handle, and m_def
 void
-ServiceLibrary_v4::shutdownCorelet(bool callShutdown)
+ServiceLibrary_v4::shutdownService(bool callShutdown)
 {
-    const BPPFunctionTable * table = (const BPPFunctionTable *) m_funcTable;
+    const sapi_v4::BPPFunctionTable * table = (const sapi_v4::BPPFunctionTable *) m_funcTable;
     
-    if (NULL != m_handle)
-    {
-        // first call shutdown
-        if (callShutdown && table != NULL && table->shutdownFunc != NULL) {
-            table->shutdownFunc();
-        }
-
-        BPLOG_INFO_STRM("unloading corelet library: "
-                        << m_summary.coreletLibraryPath());
-
-        dlcloseNP(m_handle);
-        m_handle = NULL;
+    // first call shutdown
+    if (callShutdown && table != NULL && table->shutdownFunc != NULL) {
+        table->shutdownFunc();
     }
     m_funcTable = NULL;
 }
 
 unsigned int
-ServiceLibrary_v4::allocate(const bp::Map & m)
+ServiceLibrary_v4::allocate(std::string uri, bp::file::Path dataDir,
+                            bp::file::Path tempDir, std::string locale,
+                            std::string userAgent, unsigned int clientPid)
 {
     unsigned int id = m_currentId++;
 
@@ -717,15 +673,14 @@ ServiceLibrary_v4::allocate(const bp::Map & m)
     InstanceState * is = new InstanceState;
     is->name = m_summary.name();
     is->version = m_summary.version();
-    is->context = m;
 
-    // set service_dir and the deprecated corelet_dir here     
+    // set up (v4 sytle) arguments
     is->context.add("corelet_dir", new bp::String(m_summary.path().utf8()));
     is->context.add("service_dir", new bp::String(m_summary.path().utf8()));
 
     is->cookie = NULL;
     is->attachID = m_attachId; 
-    is->funcTable = (const BPPFunctionTable *) m_funcTable;
+    is->funcTable = (const sapi_v4::BPPFunctionTable *) m_funcTable;
 
     rlthr->setCallBacks(onThreadStartFunc, (void *) is,
                         onThreadEndFunc, (void *) is,
@@ -1004,7 +959,8 @@ ServiceLibrary_v4::promptKnown(unsigned int promptId)
 
 void
 ServiceLibrary_v4::beginPrompt(unsigned int promptId, unsigned int tid,
-                            BPUserResponseCallbackFuncPtr cb, void * cookie)
+                               sapi_v4::BPUserResponseCallbackFuncPtr cb,
+                               void * cookie)
 {
     if (promptKnown(promptId)) {
         BPLOG_ERROR_STRM("duplicate prompt id detected: " << promptId);
