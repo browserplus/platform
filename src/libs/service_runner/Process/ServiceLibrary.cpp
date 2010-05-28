@@ -57,6 +57,11 @@ ServiceLibrary::ServiceLibrary() : m_handle(NULL)
         
 ServiceLibrary::~ServiceLibrary()
 {
+    // first we'll clear our shared pointer to implementation.
+    // this is important so that we destruct the impl (involving calling
+    // into the service) before unloading the code.
+    m_impl.reset();
+
     if (m_handle)
     {
         dlcloseNP(m_handle);

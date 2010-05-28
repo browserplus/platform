@@ -393,7 +393,7 @@ processEventFunc(void * c, bp::runloop::Event e)
     if (ie->type == InstanceEvent::T_Invoke) {
         if (is->funcTable->invokeFunc != NULL)
         {
-            sapi_v4::BPElement * e = sapi_v4::v5ElementToV4(is->context.elemPtr());
+            sapi_v4::BPElement * e = sapi_v4::v5ElementToV4(ie->args.elemPtr());
 
             is->funcTable->invokeFunc(is->cookie,
                                       ie->name.c_str(),
