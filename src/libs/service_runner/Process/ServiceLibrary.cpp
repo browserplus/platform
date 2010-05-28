@@ -31,6 +31,7 @@
 #include "ServiceLibrary.h"
 #include "ServiceLibraryImpl.h"
 #include "v5/ServiceLibrary_v5.h"
+#include "v4/ServiceLibrary_v4.h"
 #include <ServiceAPI/bptypes.h>
 #include <ServiceAPI/bpdefinition.h>
 #include <ServiceAPI/bpcfunctions.h>
@@ -170,9 +171,11 @@ ServiceLibrary::load(const bpf::Path & providerPath, std::string & err)
 
     bool success = false;
     
-    if (version == 5) 
+    if (version == 5) m_impl.reset(new ServiceLibrary_v5);
+    else if (version == 4) m_impl.reset(new ServiceLibrary_v4);
+
+    if (m_impl != NULL) 
     {
-        m_impl.reset(new ServiceLibrary_v5);
         success = m_impl->load(m_summary, provider, funcTable);
     }
 

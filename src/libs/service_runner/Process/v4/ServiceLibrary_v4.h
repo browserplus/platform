@@ -46,7 +46,9 @@
 #include "ServiceAPI/bppfunctions.h"
 #include "../ServiceLibraryImpl.h"
 
-#include <v4_bptypes.h>
+#include "v4_bptypes.h"
+#include "v4_bppfunctions.h"
+#include "v4_bpcfunctions.h"
 
 namespace ServiceRunner 
 {

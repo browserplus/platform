@@ -32,8 +32,8 @@
 #ifndef __BPDEFINITION_V4_H__
 #define __BPDEFINITION_V4_H__
 
-#include <v4_bptypes.h>
-#include <v4_bperror.h>
+#include "v4_bptypes.h"
+#include "v4_bperror.h"
 
 namespace sapi_v4 {
 

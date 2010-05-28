@@ -29,8 +29,8 @@
 #ifndef __BPCFUNCTIONS_V4_H__
 #define __BPCFUNCTIONS_V4_H__
 
-#include <v4_bptypes.h>
-#include <v4_bpdefinition.h>
+#include "v4_bptypes.h"
+#include "v4_bpdefinition.h"
 
 namespace sapi_v4 {
 
