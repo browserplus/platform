@@ -54,6 +54,7 @@ static const char * s_usesKey = "uses";
 
 static const char * s_shutdownDelayKey = "shutdownDelaySecs";
 static const char * s_serviceKey = "service";
+static const char * s_deprecatedServiceKey = "corelet";
 static const char * s_versionKey = "version";
 static const char * s_minversionKey = "minversion";
 
@@ -253,8 +254,18 @@ service::Summary::detectService(const bp::file::Path &dirName,
     }
     else if (!type.compare(s_providerType))
     {
+        std::string serviceLibrary;
+
         // extract the path to the service library
-        if (!o->has(s_serviceLibraryKey, BPTString))
+        if (o->has(s_serviceLibraryKey, BPTString))
+        {
+            serviceLibrary = (std::string) *(o->get(s_serviceLibraryKey));
+        }
+        else if (o->has(s_deprecatedServiceLibraryKey, BPTString))
+        {
+            serviceLibrary = (std::string) *(o->get(s_deprecatedServiceLibraryKey));
+        }
+        else
         {
             std::stringstream ss;
             ss << "'" << s_providerType << "' services require a '"
@@ -265,7 +276,7 @@ service::Summary::detectService(const bp::file::Path &dirName,
         }
 
         m_type = Provider;
-		m_serviceLibraryPath /= (std::string) *(o->get(s_serviceLibraryKey));
+		m_serviceLibraryPath /= serviceLibrary;
     }
     else if (!strcmp(s_dependentType, type.c_str()))
     {
@@ -284,7 +295,15 @@ service::Summary::detectService(const bp::file::Path &dirName,
         BPASSERT(uses != NULL);
         
         // "uses" map requires at least service name
-        if (!uses->has(s_serviceKey, BPTString))
+        if (uses->has(s_serviceKey, BPTString))
+        {
+            m_usesService.append(*(uses->get(s_serviceKey)));
+        }
+        else if (uses->has(s_deprecatedServiceKey, BPTString))
+        {
+            m_usesService.append(*(uses->get(s_deprecatedServiceKey)));
+        }
+        else
         {
             std::stringstream ss;
             ss << "'" << s_usesKey << "' map requires a '" << s_serviceKey
@@ -293,8 +312,6 @@ service::Summary::detectService(const bp::file::Path &dirName,
             delete o;
             return false;
         }
-
-        m_usesService.append(*(uses->get(s_serviceKey)));
 
         // now extract the versions and validate them if present 
         if (uses->has(s_versionKey, BPTString)) {
