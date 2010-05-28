@@ -25,9 +25,10 @@
  * compatibility
  */
 
-
 #include "V4ObjectConverter.h"
 #include "BPUtils/bptypeutil.h"
+
+#include <string.h>
 
 bp::Object *
 sapi_v4::v4ToBPObject(const struct sapi_v4::BPElement_t * elemPtr)
@@ -87,7 +88,82 @@ sapi_v4::v4ToBPObject(const struct sapi_v4::BPElement_t * elemPtr)
 sapi_v4::BPElement *
 sapi_v4::v5ElementToV4(const ::BPElement * elemPtr)
 {
-    return NULL;
+    sapi_v4::BPElement * rv = NULL;
+
+    switch (elemPtr->type) {
+        case BPTNull:
+            rv = (sapi_v4::BPElement *) calloc(1, sizeof(struct sapi_v4::BPElement_t));
+            rv->type = sapi_v4::BPTNull;
+            break;
+        case BPTBoolean:
+            rv = (sapi_v4::BPElement *) calloc(1, sizeof(struct sapi_v4::BPElement_t));
+            rv->type = sapi_v4::BPTBoolean;
+            rv->value.booleanVal = elemPtr->value.booleanVal;
+            break;
+        case BPTInteger:
+            rv = (sapi_v4::BPElement *) calloc(1, sizeof(struct sapi_v4::BPElement_t));
+            rv->type = sapi_v4::BPTInteger;
+            rv->value.integerVal = elemPtr->value.integerVal;
+            break;
+        case BPTDouble:
+            rv = (sapi_v4::BPElement *) calloc(1, sizeof(struct sapi_v4::BPElement_t));
+            rv->type = sapi_v4::BPTDouble;
+            rv->value.doubleVal = elemPtr->value.doubleVal;
+            break;
+        case BPTString:
+            rv = (sapi_v4::BPElement *) calloc(1, sizeof(struct sapi_v4::BPElement_t));
+            rv->type = sapi_v4::BPTString;
+            if (elemPtr->value.stringVal) {
+                rv->value.stringVal = strdup(elemPtr->value.stringVal);
+            }
+            break;
+        case BPTMap: {
+            rv = (sapi_v4::BPElement *) calloc(1, sizeof(struct sapi_v4::BPElement_t));
+            rv->type = sapi_v4::BPTMap;
+            rv->value.mapVal.size = elemPtr->value.mapVal.size;
+            if (elemPtr->value.mapVal.size) {
+                rv->value.mapVal.elements = (struct sapi_v4::BPMapElem_t *) calloc(elemPtr->value.mapVal.size, sizeof(struct sapi_v4::BPMapElem_t));
+
+                for (unsigned int i = 0; i < elemPtr->value.mapVal.size; i++) {
+                    rv->value.mapVal.elements[i].key = strdup(elemPtr->value.mapVal.elements[i].key);
+                    rv->value.mapVal.elements[i].value =
+                        sapi_v4::v5ElementToV4(elemPtr->value.mapVal.elements[i].value);
+                }
+            }
+            break;
+        }
+        case BPTList: {
+            rv = (sapi_v4::BPElement *) calloc(1, sizeof(struct sapi_v4::BPElement_t));
+            rv->type = sapi_v4::BPTList;
+            rv->value.listVal.size = elemPtr->value.listVal.size;
+            if (elemPtr->value.listVal.size) {
+                rv->value.listVal.elements = (struct sapi_v4::BPElement_t **) calloc(elemPtr->value.listVal.size, sizeof(struct sapi_v4::BPElement_t *));
+
+                for (unsigned int i = 0; i < elemPtr->value.mapVal.size; i++) {
+                    rv->value.listVal.elements[i] = sapi_v4::v5ElementToV4(elemPtr->value.listVal.elements[i]);
+                }
+            }
+            break;
+        }
+        case BPTCallBack:
+            rv = (struct sapi_v4::BPElement_t *) calloc(1, sizeof(struct sapi_v4::BPElement_t));
+            rv->type = sapi_v4::BPTCallBack;
+            rv->value.callbackVal = elemPtr->value.callbackVal;
+            break;
+        case BPTPath:
+            // a v5 path is native, a v4 Path is a utf8 encoded url, here we convert. 
+            rv = (struct sapi_v4::BPElement_t *) calloc(1, sizeof(struct sapi_v4::BPElement_t));
+            rv->type = sapi_v4::BPTPath;
+            if (elemPtr->value.pathVal) {
+                rv->value.pathVal = strdup(bp::file::Path(elemPtr->value.pathVal).url().c_str());
+            }
+            break;
+        case BPTAny:
+            // noop!
+            break;
+    }
+    
+    return rv;
 }
 
 void
