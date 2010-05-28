@@ -125,7 +125,7 @@ toJsonRecurse(const Object* obj,
             yajl_gen_integer(ghand, static_cast<long>(i->value()));
             break;
         }
-        case BPTPath: {
+        case BPTNativePath: {
             yajl_gen_string(ghand, (const unsigned char*) "path", 
                             strlen("path"));
             yajl_gen_string(ghand, valueKey, valueKeyLen);

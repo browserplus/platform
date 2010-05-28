@@ -112,7 +112,7 @@ getTypeValue(const bp::Object * obj)
         else if (!strcmp(type, "map")) t = BPTMap;
         else if (!strcmp(type, "list")) t = BPTList;
         else if (!strcmp(type, "callback")) t = BPTCallBack;
-        else if (!strcmp(type, "path")) t = BPTPath;
+        else if (!strcmp(type, "path")) t = BPTNativePath;
         else if (!strcmp(type, "any")) t = BPTAny;
     }
     return t;

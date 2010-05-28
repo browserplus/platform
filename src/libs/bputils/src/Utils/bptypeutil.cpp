@@ -51,7 +51,7 @@ bp::typeAsString(BPType t)
         case BPTMap: return "map";
         case BPTList: return "list";
         case BPTCallBack: return "callback";
-        case BPTPath: return "path";
+        case BPTNativePath: return "path";
         case BPTAny: return "any";
     }
     return "unknown";
@@ -151,7 +151,7 @@ bp::Object::build(const BPElement * elem)
             case BPTString:
                 obj = new bp::String(elem->value.stringVal);
                 break;
-            case BPTPath: 
+            case BPTNativePath: 
             {
                 obj = new bp::Path(bp::file::Path(elem->value.pathVal));
                 break;
@@ -352,15 +352,15 @@ bp::String::operator std::string() const
 }
 
 bp::Path::Path(const bp::file::Path & path)
-    : bp::Object(BPTPath), m_path(path.external_file_string())
+    : bp::Object(BPTNativePath), m_path(path.external_file_string())
 {
     e.value.pathVal = (BPPath) m_path.c_str();
 }
 
 bp::Path::Path(const Path & other)
-    :  bp::Object(BPTPath), m_path(other.m_path)
+    :  bp::Object(BPTNativePath), m_path(other.m_path)
 {
-    e.type = BPTPath;
+    e.type = BPTNativePath;
     e.value.pathVal = (BPPath) m_path.c_str();
 }
 

@@ -101,7 +101,7 @@ BPHandleMapper::insertHandles(const bp::Object* bpObj)
         case BPTDouble:
             rval = new Double(dynamic_cast<const Double*>(bpObj)->value());
             break;
-        case BPTPath:
+        case BPTNativePath:
         {
             // Path must become a map containing id/name keys
             const Path* pObj = dynamic_cast<const Path*>(bpObj);
@@ -226,7 +226,7 @@ BPHandleMapper::expandHandles(const bp::Object* bpObj)
             }
             break;
         }
-        case BPTPath:
+        case BPTNativePath:
         case BPTAny:
             break;
     }

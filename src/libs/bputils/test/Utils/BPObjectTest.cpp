@@ -153,12 +153,12 @@ BPObjectTest::pathTest()
 
     bp::file::Path orig = *((bp::Path *) bp);
 	CPPUNIT_ASSERT( bp::file::Path(somePathNative) == orig );
-    CPPUNIT_ASSERT( bp->type() == BPTPath);
+    CPPUNIT_ASSERT( bp->type() == BPTNativePath);
 
     bp::Object * clone = bp->clone();
 	bp::file::Path rhs(somePathNative);
 	bp::file::Path lhs = *((bp::Path *)clone);
-    CPPUNIT_ASSERT( clone->type() == BPTPath );    
+    CPPUNIT_ASSERT( clone->type() == BPTNativePath );    
 	CPPUNIT_ASSERT( rhs.string() == lhs.string() );
     delete clone;
 

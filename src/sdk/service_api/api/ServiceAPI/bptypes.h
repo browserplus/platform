@@ -49,8 +49,8 @@ typedef enum {
     BPTMap,     /*!< map (hash) type. */
     BPTList,    /*!< list (array) type. */
     BPTCallBack,/*!< callback type. */
-    BPTPath,    /*!< pathname type - represented as a native path: UTF8
-                     on unix and UTF16 string on windows.  */
+    BPTNativePath, /*!< pathname type - represented as a native path: UTF8
+                     on unix and UTF16 on windows.  */
     BPTAny      /*!< When specified in an argument description, denotes
                      that any data type is allowable. */
 } BPType;

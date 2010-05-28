@@ -165,7 +165,7 @@ service::Argument::fromBPArgumentDefinition(const BPArgumentDefinition * def)
         case BPTMap: m_type = Map; break;
         case BPTList: m_type = List; break;
         case BPTCallBack: m_type = CallBack; break;
-        case BPTPath: m_type = Path; break;
+        case BPTNativePath: m_type = Path; break;
         case BPTAny: m_type = Any; break;
         default: m_type = None; break;
     }
@@ -686,7 +686,7 @@ bp::service::validateArguments(const bp::service::Function & desc,
                             gottype = "string";
                         }
                         break;
-                    case BPTPath:
+                    case BPTNativePath:
                         if (adesc.type() != bp::service::Argument::Path)
                         {
                             gottype = "path";
