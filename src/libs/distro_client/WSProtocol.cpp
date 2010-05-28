@@ -27,10 +27,10 @@
 const char * WSProtocol::API_PREFIX = "api";
 const char * WSProtocol::WS_VERSION = "v3";
 const char * WSProtocol::PERMISSIONS_PATH = "permissions";
-const char * WSProtocol::AVAILABLE_SERVICES_PATH = "services";
-const char * WSProtocol::SERVICE_METADATA_PATH = "service/metadata";
-const char * WSProtocol::SERVICE_SYNOPSIS_PATH = "service/synopsis";
-const char * WSProtocol::SERVICE_DOWNLOAD_PATH ="service/package";
+const char * WSProtocol::AVAILABLE_SERVICES_PATH = "corelets";
+const char * WSProtocol::SERVICE_METADATA_PATH = "corelet/metadata";
+const char * WSProtocol::SERVICE_SYNOPSIS_PATH = "corelet/synopsis";
+const char * WSProtocol::SERVICE_DOWNLOAD_PATH ="corelet/package";
 const char * WSProtocol::USAGE_PATH = "usage";
 const char * WSProtocol::LATEST_PLATFORM_VERSION_PATH = "platform/latest/version";
 const char * WSProtocol::LATEST_PLATFORM_UPDATE_PATH = "platform/latest/update";
