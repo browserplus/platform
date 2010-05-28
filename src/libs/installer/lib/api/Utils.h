@@ -42,6 +42,16 @@ namespace utils {
 #endif
 
 #ifdef WIN32
+    // Return coclass name of our activex control.
+    std::string axName();
+    
+    // Return version-independent progid of our activex control.
+    std::string axViProgid();
+
+    // Return progid of our activex control.
+    std::string axProgid(const std::string& version);
+    std::string axProgid(const bp::ServiceVersion& version);
+    
     // Return dir into which to install npapi plugin.
     // For users with non-ascii usernames, Firefox can't
     // find the npapi plugin if it is installed under their

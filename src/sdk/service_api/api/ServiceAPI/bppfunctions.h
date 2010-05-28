@@ -87,10 +87,12 @@ typedef void (*BPPShutdownPtr)(void);
  *              files distributed with the service.
  * \param dataDir is an absolute path to where the service should store
  *                any data that needs to persist.
- * \param tempDir is the path to a directory that may be used for
- *                temporary data.  it will be unique for every instance, and will
- *                be purged when the instance is deallocated.
- * \param locale The locale of the end user to which strings, if any, should be localized.
+ * \param tempDir is an instance-specific directory that may be used for
+ *                temporary data.  Service is responsible for
+ *                creating the directory.  Service should remove the
+ *                directory when the instance is deallocated.
+ * \param locale The locale of the end user to which strings, if any,
+ *               should be localized.
  * \param userAgent The client user-agent as a UTF8 encoded string.
  * \param clientPid The process ID of the client program/browser.
  *

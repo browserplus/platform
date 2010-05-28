@@ -50,22 +50,8 @@ static void streamCB(CFReadStreamRef stream,
                      CFStreamEventType eventType,
                      void* cbInfo);
 
-// SSL error codes for which we may want to prompt user for trust.
-static bool
-isSSLError(int code)
-{
-    return (code == errSSLUnknownRootCert
-            || code == errSSLNoRootCert
-            || code == errSSLCertExpired
-            || code == errSSLCertNotYetValid
-            || code == errSSLPeerCertRevoked
-            || code == errSSLPeerCertExpired
-            || code == errSSLPeerCertUnknown
-            || code == errSSLPeerUnknownCA);
-}
-
-
-// strings for the above codes.
+// Strings for ssl error codes that user may see.  Other
+// "internal" ssl errors are just reported as an error code.
 static std::string
 sslErrorString(int code)
 {
@@ -95,9 +81,25 @@ sslErrorString(int code)
     case errSSLPeerUnknownCA:
         rval += "unknown certificate authority";
         break;
-    default:
-        rval.clear();
+    case errSSLHostNameMismatch:
+        rval += "peer host name mismatch";
         break;
+    case errSSLPeerBadCert:
+        rval += "misc. bad certificate";
+        break;
+    case errSSLPeerUnsupportedCert:
+        rval += "bad unsupported certificate format";
+        break;
+    case errSSLPeerExportRestriction:
+        rval += "export restriction";
+        break;
+    default:
+        {
+            std::stringstream ss;
+            ss << rval << "code = " << code;
+            rval = ss.str();
+            break;
+        }
     }
     return rval;
 }
@@ -658,15 +660,7 @@ private:
         } else if (err.domain == kCFStreamErrorDomainMacOSStatus) {
             msg = "Mac error: " + bp::conv::lexical_cast<std::string>(err.error);
         } else if (err.domain == kCFStreamErrorDomainSSL) {
-            if (isSSLError(err.error)) {
-                msg = sslErrorString(err.error);
-            } else {
-                NSError* error = [NSError errorWithDomain: @"kCFStreamErrorDomainSSL"
-                                          code: err.error
-                                          userInfo: nil];
-                NSString* desc = [error localizedDescription];
-                msg = [desc UTF8String];
-            }
+            msg = sslErrorString(err.error);
         }
     }
     [self handleError: msg];
