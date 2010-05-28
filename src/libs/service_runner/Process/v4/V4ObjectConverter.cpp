@@ -167,6 +167,47 @@ sapi_v4::v5ElementToV4(const ::BPElement * elemPtr)
 }
 
 void
-sapi_v4::freeDynamicV4Element(struct sapi_v4::BPElement_t * elemPtr)
+sapi_v4::freeDynamicV4Element(struct sapi_v4::BPElement_t * e)
 {
+    if (!e) return;
+
+    switch (e->type) {
+        case BPTNull:
+        case BPTBoolean:
+        case BPTInteger:
+        case BPTDouble:
+        case BPTCallBack:
+            // noop
+            break;
+        case BPTString:
+            if (e->value.stringVal) free(e->value.stringVal);
+            break;
+        case BPTPath:
+            if (e->value.pathVal) free(e->value.pathVal);
+            break;
+        case BPTList: {
+            if (e->value.listVal.size) {
+                for (unsigned int i = 0; i < e->value.mapVal.size; i++) {
+                    freeDynamicV4Element(e->value.listVal.elements[i]);
+                }
+                free(e->value.listVal.elements);
+            }
+            break;
+        }
+        case BPTMap: {
+            if (e->value.mapVal.size) {
+                for (unsigned int i = 0; i < e->value.mapVal.size; i++) {
+                    free(e->value.mapVal.elements[i].key);
+                    freeDynamicV4Element(e->value.mapVal.elements[i].value);
+                }
+                free(e->value.mapVal.elements);
+            }
+            break;
+        }
+        case BPTAny:
+            // noop!
+            break;
+    }
+    
+    free(e);
 }
