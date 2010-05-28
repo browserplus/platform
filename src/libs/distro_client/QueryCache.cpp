@@ -397,35 +397,35 @@ QueryCache::mergeResponses()
 
                 // now extract provider information
                 // now if thist is a dependent service, let's report that
-                if (m->has("ServiceType", BPTString)) {
-                    std::string ctype = dynamic_cast<const String*>(m->get("ServiceType"))->value();
+                if (m->has("CoreletType", BPTString)) {
+                    std::string ctype = dynamic_cast<const String*>(m->get("CoreletType"))->value();
                     if (!ctype.compare("dependent"))
                     {
                         ac.dependentService = true;
 
                         // now we require a name key
-                        if (!m->has("ServiceRequires/Name", BPTString)) {
+                        if (!m->has("CoreletRequires/Name", BPTString)) {
                             continue;
                         }
 
                         // extract service name
                         ac.providerName =
                             (dynamic_cast<const String*>
-                             (m->get("ServiceRequires/Name")))->value();
+                             (m->get("CoreletRequires/Name")))->value();
 
-                        if (m->has("ServiceRequires/Minversion", BPTString))
+                        if (m->has("CoreletRequires/Minversion", BPTString))
                         {
                             ac.providerMinversion = 
                                 (dynamic_cast<const String*>
-                                 (m->get("ServiceRequires/Minversion")))
+                                 (m->get("CoreletRequires/Minversion")))
                                 ->value();
                         }
                 
-                        if (m->has("ServiceRequires/Version", BPTString))
+                        if (m->has("CoreletRequires/Version", BPTString))
                         {
                             ac.providerVersion = 
                                 dynamic_cast<const String*>
-                                (m->get("ServiceRequires/Version"))
+                                (m->get("CoreletRequires/Version"))
                                 ->value();
                         }
                     }
