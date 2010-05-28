@@ -73,6 +73,8 @@ typedef double BPDouble;
 /** the callback is an integer handle */
 typedef BPInteger BPCallBack;        
 
+struct BPElement_t;
+
 /** A structure representing of a list */
 typedef struct {
     /** The number of elements in the list */
@@ -80,6 +82,8 @@ typedef struct {
     /** an array of pointers to child elements */
     struct BPElement_t ** elements;
 } BPList;
+
+struct BPMapElem_t;
 
 /** a structure representing a map */
 typedef struct {

@@ -77,7 +77,7 @@ NPAPIPlugin::setWindow(NPWindow* window)
 #ifdef WIN32
     // this is a HWND
     m_windowPtr = (void *) (window->window);
-#elsif APPLE
+#elif defined(APPLE)
     // this is a WindowRef (may be null)
     NP_CGContext* ctx = (NP_CGContext*)window->window;
     m_windowPtr = ctx->window;

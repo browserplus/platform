@@ -25,13 +25,19 @@
  * compatibility
  */
 
+#include "v4_bptypes.h"
+
 #include "V4ObjectConverter.h"
 #include "BPUtils/bptypeutil.h"
 
 #include <string.h>
 
+#ifdef WIN32
+#define strdup _strdup
+#endif
+
 bp::Object *
-sapi_v4::v4ToBPObject(const struct sapi_v4::BPElement_t * elemPtr)
+sapi_v4::v4ToBPObject(const sapi_v4::BPElement * elemPtr)
 {
     if (!elemPtr) return NULL;
     bp::Object * o = NULL;
@@ -56,7 +62,7 @@ sapi_v4::v4ToBPObject(const struct sapi_v4::BPElement_t * elemPtr)
             bp::Map * m = new bp::Map;
             for (unsigned int i = 0; i < elemPtr->value.mapVal.size; i++) {
                 m->add(elemPtr->value.mapVal.elements[i].key,
-                       v4ToBPObject(elemPtr->value.mapVal.elements[i].value));
+					v4ToBPObject(elemPtr->value.mapVal.elements[i].value));
             }
             o = m;
             break;
@@ -65,7 +71,7 @@ sapi_v4::v4ToBPObject(const struct sapi_v4::BPElement_t * elemPtr)
             bp::List * l = new bp::List;
             for (unsigned int i = 0; i < elemPtr->value.listVal.size; i++)
             {
-                l->append(v4ToBPObject(elemPtr->value.listVal.elements[i]));
+				l->append(v4ToBPObject(elemPtr->value.listVal.elements[i]));
             }
             o = l;
             break;

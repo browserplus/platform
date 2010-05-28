@@ -39,9 +39,9 @@ namespace sapi_v4
 
     /* convert from a modern BPElement to a v4 BPElement, returning dynamically
      * allocated memory that must be freed */
-    struct sapi_v4::BPElement_t * v5ElementToV4(const ::BPElement * elemPtr);
+    sapi_v4::BPElement * v5ElementToV4(const ::BPElement * elemPtr);
 
-    void freeDynamicV4Element(sapi_v4::BPElement * elemPtr);
+	void freeDynamicV4Element(sapi_v4::BPElement * elemPtr);
 };
 
 #endif
