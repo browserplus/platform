@@ -48,12 +48,13 @@ typedef std::list<std::pair<std::string, std::string> > ServiceList;
 class AvailableService
 {
   public:
-    AvailableService() : sizeBytes(0), dependentService(false) { }
+    AvailableService() : sizeBytes(0), serviceAPIVersion(0), dependentService(false) { }
 
     std::string name;
     bp::ServiceVersion version;    
     std::string serverURL;    
     unsigned int sizeBytes;
+    unsigned int serviceAPIVersion;
 
     bool dependentService;
     std::string providerName;

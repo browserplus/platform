@@ -95,7 +95,7 @@ FOREACH(v ${BackwardCompatibleMimeTypes})
 ENDFOREACH()
 
 # All Service API versions that this platform supports
-SET(ServiceAPIVersionsSupported 4 5)
+SET(ServiceAPIVersionsSupported "4,5")
 
 # All mimetypes that we support
 #

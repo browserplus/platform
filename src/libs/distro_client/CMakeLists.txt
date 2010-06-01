@@ -23,6 +23,9 @@ SET(${libName}_MAJOR_VERSION 0)
 SET(${libName}_MINOR_VERSION 1)
 SET(${libName}_LINK_STATIC BPUtils ArchiveLib yajl)
 
+# explicitly set sources to include QueryCache.cpp which is erb substituted
+FILE (GLOB ${libName}_SOURCES *.cpp ${CMAKE_CURRENT_BINARY_DIR}/*.cpp )
+
 LINK_DIRECTORIES("${BP_EXTERNALS}/lib")
 
 YBT_BUILD(LIBRARY_STATIC ${libName})

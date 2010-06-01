@@ -215,8 +215,8 @@ QueryCache::listenerCompleted(MyListenerPtr l,
             // now let's parse the server responses into one list
             AvailableServiceList cl;
             cl = mergeResponses();
-            pruneBlacklisted(cl);
-
+            pruneBlacklistedAndUnsupported(cl);
+            
             s_cacheAge.reset();
             s_cacheAge.start();
             setPlatCache(m_plat, cl);
@@ -366,7 +366,8 @@ QueryCache::mergeResponses()
                 if (m == NULL || 
                     !m->has("name", BPTString) ||
                     !m->has("versionString", BPTString) ||
-                    !m->has("size", BPTInteger))
+                    !m->has("size", BPTInteger) ||
+                    !m->has("CoreletAPIVersion", BPTInteger))
                 {
                     BPLOG_WARN_STRM("malformed server response for "
                                     << "available services");
@@ -383,11 +384,15 @@ QueryCache::mergeResponses()
                 unsigned int size =
                     (unsigned int) (dynamic_cast<const Integer*>(m->get("size")))->value();
 
+                unsigned int apiVersion =
+                    (unsigned int) (dynamic_cast<const Integer*>(m->get("CoreletAPIVersion")))->value();
+
                 AvailableService ac;
                 ac.dependentService = false;
                 ac.serverURL = it->first;
                 ac.name = name;
                 ac.sizeBytes = size;
+                ac.serviceAPIVersion = apiVersion;
 
                 if (!ac.version.parse(verStr)) {
                     BPLOG_WARN_STRM("malformed version string in "
@@ -445,8 +450,21 @@ QueryCache::mergeResponses()
 }
 
 void
-QueryCache::pruneBlacklisted(AvailableServiceList & lst)
+QueryCache::pruneBlacklistedAndUnsupported(AvailableServiceList & lst)
 {
+    static std::set<unsigned int> supportedServiceAPIVersions;
+
+    // one time initialization of the supported service API versions
+    // set, which is used to filter out services written against
+    // unsupported service API versions
+    if (supportedServiceAPIVersions.size() == 0) {
+<%= 
+    $cmake['ServiceAPIVersionsSupported'].split(",").collect do |version|
+        "supportedServiceAPIVersions.insert(#{version});"
+    end.join("\n")
+%>
+    } 
+
     std::list<AvailableService>::iterator it = lst.begin();    
 
     while (it != lst.end())
@@ -459,6 +477,16 @@ QueryCache::pruneBlacklisted(AvailableServiceList & lst)
                             << "service list: "
                             << it->name << " - " << it->version.asString());
             it = lst.erase(it);
+        }
+        else if (supportedServiceAPIVersions.find(it->serviceAPIVersion) ==
+                 supportedServiceAPIVersions.end())
+        {
+            BPLOG_INFO_STRM("Purging unsupported service from available "
+                            << "service list (sapi v"
+                            << it->serviceAPIVersion<< "): "
+                            << it->name << " - " << it->version.asString());
+            it = lst.erase(it);
+            
         }
         else
         {

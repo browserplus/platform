@@ -134,7 +134,10 @@ class QueryCache : public bp::thread::HoppingClass
 
     // used in T_ServiceList case
     AvailableServiceList mergeResponses();
-    void pruneBlacklisted(AvailableServiceList & oList);
+    // a utility function to remove blacklisted services and services
+    // with an unsupported service API version from the list of returned
+    // services
+    void pruneBlacklistedAndUnsupported(AvailableServiceList & oList);
 
     // used in T_PlatformVersion case
     bool parsePlatformVersionResponses(
