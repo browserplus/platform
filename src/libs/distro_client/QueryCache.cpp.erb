@@ -366,8 +366,7 @@ QueryCache::mergeResponses()
                 if (m == NULL || 
                     !m->has("name", BPTString) ||
                     !m->has("versionString", BPTString) ||
-                    !m->has("size", BPTInteger) ||
-                    !m->has("CoreletAPIVersion", BPTInteger))
+                    !m->has("size", BPTInteger))
                 {
                     BPLOG_WARN_STRM("malformed server response for "
                                     << "available services");
@@ -384,9 +383,12 @@ QueryCache::mergeResponses()
                 unsigned int size =
                     (unsigned int) (dynamic_cast<const Integer*>(m->get("size")))->value();
 
-                unsigned int apiVersion =
-                    (unsigned int) (dynamic_cast<const Integer*>(m->get("CoreletAPIVersion")))->value();
-
+                // Dependent services don't depend on a specific API version.
+                unsigned int apiVersion = 0;
+                if (m->has("ServiceAPIVersion", BPTInteger)) {
+                    apiVersion = (unsigned int) (dynamic_cast<const Integer*>(m->get("ServiceAPIVersion")))->value();
+                }
+                
                 AvailableService ac;
                 ac.dependentService = false;
                 ac.serverURL = it->first;
@@ -402,35 +404,35 @@ QueryCache::mergeResponses()
 
                 // now extract provider information
                 // now if thist is a dependent service, let's report that
-                if (m->has("CoreletType", BPTString)) {
-                    std::string ctype = dynamic_cast<const String*>(m->get("CoreletType"))->value();
+                if (m->has("ServiceType", BPTString)) {
+                    std::string ctype = dynamic_cast<const String*>(m->get("ServiceType"))->value();
                     if (!ctype.compare("dependent"))
                     {
                         ac.dependentService = true;
 
                         // now we require a name key
-                        if (!m->has("CoreletRequires/Name", BPTString)) {
+                        if (!m->has("ServiceRequires/Name", BPTString)) {
                             continue;
                         }
 
                         // extract service name
                         ac.providerName =
                             (dynamic_cast<const String*>
-                             (m->get("CoreletRequires/Name")))->value();
+                             (m->get("ServiceRequires/Name")))->value();
 
-                        if (m->has("CoreletRequires/Minversion", BPTString))
+                        if (m->has("ServiceRequires/Minversion", BPTString))
                         {
                             ac.providerMinversion = 
                                 (dynamic_cast<const String*>
-                                 (m->get("CoreletRequires/Minversion")))
+                                 (m->get("ServiceRequires/Minversion")))
                                 ->value();
                         }
                 
-                        if (m->has("CoreletRequires/Version", BPTString))
+                        if (m->has("ServiceRequires/Version", BPTString))
                         {
                             ac.providerVersion = 
                                 dynamic_cast<const String*>
-                                (m->get("CoreletRequires/Version"))
+                                (m->get("ServiceRequires/Version"))
                                 ->value();
                         }
                     }
@@ -478,7 +480,8 @@ QueryCache::pruneBlacklistedAndUnsupported(AvailableServiceList & lst)
                             << it->name << " - " << it->version.asString());
             it = lst.erase(it);
         }
-        else if (supportedServiceAPIVersions.find(it->serviceAPIVersion) ==
+        else if (it->serviceAPIVersion != 0 &&
+                 supportedServiceAPIVersions.find(it->serviceAPIVersion) ==
                  supportedServiceAPIVersions.end())
         {
             BPLOG_INFO_STRM("Purging unsupported service from available "
