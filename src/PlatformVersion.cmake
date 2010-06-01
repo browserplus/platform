@@ -94,6 +94,9 @@ FOREACH(v ${BackwardCompatibleMimeTypes})
     ENDIF()
 ENDFOREACH()
 
+# All Service API versions that this platform supports
+SET(ServiceAPIVersionsSupported 4 5)
+
 # All mimetypes that we support
 #
 IF (NOT BackwardCompatibleMimeTypesArray)
@@ -148,14 +151,9 @@ FOREACH(v ${MimeTypes})
         
 ENDFOREACH()
 
-#MESSAGE("BackwardCompatibleMimeTypesArray = ${BackwardCompatibleMimeTypesArray}")
-#MESSAGE("MimeTypesArray = ${MimeTypesArray}")
-#MESSAGE("WindowsNPAPIMimeTypes = ${WindowsNPAPIMimeTypes}")
-#MESSAGE("MacPlistMimeTypes = ${MacPlistMimeTypes}")
-#MESSAGE("MacSTRResources = ${MacSTRResources}")
 MESSAGE("!! Platform ${VersionString} configured to support:")
 MESSAGE("!!    mimetypes: ${MimeTypes}") 
-
+MESSAGE("!!    service API versions: ${ServiceAPIVersionsSupported}") 
 
 
 
