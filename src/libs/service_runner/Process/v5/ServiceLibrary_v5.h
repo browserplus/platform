@@ -147,6 +147,9 @@ namespace ServiceRunner
             const BPElement * args,
             BPUserResponseCallbackFuncPtr responseCallback,
             void * cookie);
+        static void invokeOnMainThreadFunction(BPCMainThreadCallbackPtr cb);
+        // end entry points for services
+
 
         IServiceLibraryListener * m_listener;
 

@@ -55,10 +55,13 @@ namespace bpf = bp::file;
  */
 struct InstanceResponse
 {
-    enum { T_Results, T_Error, T_CallBack, T_Prompt } type;
+    enum { T_Results, T_Error, T_CallBack, T_Prompt, T_MainThreadCallback } type;
 
     // common
     unsigned int tid;
+
+    // threadTransfer
+    BPCMainThreadCallbackPtr mainThreadCallback;
 
     // results
     bp::Object * o;
@@ -277,6 +280,15 @@ ServiceLibrary_v5::invokeCallbackFunction(unsigned int tid,
     s_libObjectPtr->hop(ir);
 }
 
+void
+ServiceLibrary_v5::invokeOnMainThreadFunction(BPCMainThreadCallbackPtr cb)
+{
+    InstanceResponse * ir = new InstanceResponse;
+    ir->type = InstanceResponse::T_MainThreadCallback;
+    ir->mainThreadCallback = cb;
+    s_libObjectPtr->hop(ir);
+}
+
 unsigned int
 ServiceLibrary_v5::promptUserFunction(
     unsigned int tid,
@@ -324,6 +336,7 @@ ServiceLibrary_v5::getFunctionTable()
     tableData.log = logFunction;
     tableData.invoke = invokeCallbackFunction;
     tableData.prompt = promptUserFunction;
+    tableData.invokeOnMainThread = invokeOnMainThreadFunction;
 
     table = &tableData;
     return (void *) table;
@@ -679,6 +692,10 @@ ServiceLibrary_v5::onHop(void * context)
             case InstanceResponse::T_CallBack: {
                 m_listener->onCallback(instance, ir->tid,
                                        ir->callbackId, ir->o);
+                break;
+            }
+            case InstanceResponse::T_MainThreadCallback: {
+                if (ir->mainThreadCallback) ir->mainThreadCallback();
                 break;
             }
             case InstanceResponse::T_Prompt: {
