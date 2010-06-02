@@ -45,6 +45,12 @@ if CONFIG['arch'] =~ /mswin/
     libSuffix = '.dll'
     exeSuffix = '.exe'
     instSuffix = exeSuffix
+elsif CONFIG['arch'] =~ /linux/
+    platform = 'Linux'
+    plat_fname = platform
+    libSuffix = '.so'
+    exeSuffix = ''
+    instSuffix = ""
 else
     platform = 'Darwin'
     plat_fname = platform
