@@ -29,12 +29,18 @@ $beVerbose = defined?($verbose) ? $verbose : false
 $platform = nil
 libSuffix = nil
 exeSuffix = nil
+
 if CONFIG['arch'] =~ /mswin/
   # you have my profound sympathy...
   $platform = 'Windows'
   libSuffix = '.dll'
   staticLibSuffix = '.lib'
   exeSuffix = '.exe'
+elsif CONFIG['arch'] =~ /linux/
+  $platform = 'Linux'
+  libSuffix = '.so'
+  staticLibSuffix = '.a'
+  exeSuffix = ''
 else
   $platform = 'Darwin'
   libSuffix = '.dylib'
@@ -184,8 +190,10 @@ FileUtils.install(runnerExe, "#{sdkDir}/bin", :mode => 0755, :verbose => $beVerb
 npapi = ''
 if $platform == "Darwin"
   npapi = "#{buildDir}/plugins/npapi/#{$intDir}/BrowserPlus.plugin"
-else
+elsif $platform == "Windows"
   npapi = "#{buildDir}/plugins/npapi/#{$intDir}/npybrowserplus.dll"
+else
+  npapi = "#{buildDir}/plugins/npapi/#{$intDir}/libBrowserPlus.so"
 end
 myCP_R(npapi, shippingBinsDir)
 if $platform == "Windows"
@@ -197,8 +205,11 @@ end
 if $platform == "Darwin"
   prefPane = "#{buildDir}/bins/config_panel/src/Darwin/BrowserPlusPrefs.prefPane"
   myCP_R(prefPane, shippingBinsDir)
-else
+elsif $platform == "Windows"
   prefPane = "#{buildDir}/bins/config_panel/src/Windows/#{$intDir}/BrowserPlusPrefs.exe"
+  myCP_R(prefPane, shippingBinsDir)
+else
+  prefPane = "#{buildDir}/bins/config_panel/src/Linux/#{$intDir}/BrowserPlusPrefs"
   myCP_R(prefPane, shippingBinsDir)
 end
 
