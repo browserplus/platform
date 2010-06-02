@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -159,7 +159,7 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::execute)
 void
 CommandExecutor::descriptionCB(BPErrorCode ec,
                                void * cookie,
-                               const BPCoreletDefinition * def,
+                               const BPServiceDefinition * def,
                                const char * error,
                                const char * verboseError)
 {
@@ -173,12 +173,12 @@ CommandExecutor::descriptionCB(BPErrorCode ec,
     }
     else if (def == NULL)
     {
-        std::cout << "null corelet definition" << std::endl;
+        std::cout << "null service definition" << std::endl;
     }
     else
     {
         bp::service::Description d;
-        d.fromBPCoreletDefinition(def);
+        d.fromBPServiceDefinition(def);
         std::cout << d.toHumanReadableString();
     }
 
@@ -200,7 +200,7 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::describe)
 void
 CommandExecutor::requireCB(BPErrorCode ec,
                            void * cookie,
-                           const BPCoreletDefinition ** defs,
+                           const BPServiceDefinition ** defs,
                            unsigned int numDefs,
                            const char * error,
                            const char * verboseError)
@@ -223,14 +223,14 @@ CommandExecutor::requireCB(BPErrorCode ec,
     }
     else if (defs == NULL)
     {
-        std::cout << "null corelet definitions" << std::endl;
+        std::cout << "null service definitions" << std::endl;
     }
     else
     {
         for (unsigned int di = 0; di < numDefs; di++) 
         {
             bp::service::Description d;
-            d.fromBPCoreletDefinition(defs[di]);
+            d.fromBPServiceDefinition(defs[di]);
             std::cout << d.toHumanReadableString();
         }
     }
@@ -283,19 +283,19 @@ getStringValue(const bp::Object * obj)
 void
 CommandExecutor::installedCB(BPErrorCode ec,
                              void * cookie,
-                             const BPElement * corelets)
+                             const BPElement * services)
 {
     CommandExecutor * cmdexec = (CommandExecutor *) cookie;
 
-    // print out the list of corelets.
+    // print out the list of services.
     if (ec != BP_EC_OK) {
         printProtoError(ec);
-    } else if (corelets != NULL && corelets->type == BPTList) {
-        std::cout << corelets->value.listVal.size
-                  << " corelets installed:"  << std::endl;
+    } else if (services != NULL && services->type == BPTList) {
+        std::cout << services->value.listVal.size
+                  << " services installed:"  << std::endl;
 
         bp::List * clets =
-            dynamic_cast<bp::List *>( bp::Object::build(corelets) );
+            dynamic_cast<bp::List *>( bp::Object::build(services) );
 
         for (unsigned int i = 0; i < clets->size(); i++)
         {
@@ -326,7 +326,7 @@ CommandExecutor::stateCB(BPErrorCode ec, void * cookie,
 {
     CommandExecutor * cmdexec = (CommandExecutor *) cookie;
 
-    // print out the list of corelets.
+    // print out the list of services.
     if (ec != BP_EC_OK) {
         printProtoError(ec);
     } else if (response != NULL) {

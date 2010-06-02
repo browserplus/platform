@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -80,11 +80,8 @@ Transaction::defaultTimeoutSecs()
 
         
 void
-Transaction::initiate(IListener* pListener)
+Transaction::initiate(IListenerWeakPtr pListener)
 {
-    if (pListener == NULL) {
-        BP_THROW_FATAL("null listener");
-    }
     // XXX
 }
 

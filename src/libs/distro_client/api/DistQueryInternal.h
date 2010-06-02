@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -30,34 +30,34 @@
 #include "BPUtils/ServiceDescription.h"
 #include "DistributionClient/DistQueryTypes.h"
 
-class CoreletQuery;
+class ServiceQuery;
 
-class ICoreletQueryListener
+class IServiceQueryListener
 {
   public:
-    virtual ~ICoreletQueryListener();
+    virtual ~IServiceQueryListener();
 
-    virtual void onTransactionFailed(const CoreletQuery * cq) = 0;
-    virtual void gotAvailableServices(const CoreletQuery * cq,
-                                      const AvailableCoreletList & list) = 0;    
-    virtual void onServiceFound(const CoreletQuery * cq,
-                                const AvailableCorelet & list) = 0;    
-    virtual void onDownloadProgress(const CoreletQuery * cq,
+    virtual void onTransactionFailed(const ServiceQuery * cq) = 0;
+    virtual void gotAvailableServices(const ServiceQuery * cq,
+                                      const AvailableServiceList & list) = 0;    
+    virtual void onServiceFound(const ServiceQuery * cq,
+                                const AvailableService & list) = 0;    
+    virtual void onDownloadProgress(const ServiceQuery * cq,
                                     unsigned int pct) = 0;    
-    virtual void onDownloadComplete(const CoreletQuery * cq,
+    virtual void onDownloadComplete(const ServiceQuery * cq,
                                     const std::vector<unsigned char> & buf) = 0;    
-    virtual void gotServiceDetails(const CoreletQuery * cq,
+    virtual void gotServiceDetails(const ServiceQuery * cq,
                                    const bp::service::Description & desc) = 0;    
-    virtual void onRequirementsSatisfied(const CoreletQuery * cq,
-                                         const CoreletList & clist) = 0;
-    virtual void onCacheUpdated(const CoreletQuery * cq,
-                                const CoreletList & updates) = 0;
-    virtual void gotServiceSynopsis(const CoreletQuery * cq,
+    virtual void onRequirementsSatisfied(const ServiceQuery * cq,
+                                         const ServiceList & clist) = 0;
+    virtual void onCacheUpdated(const ServiceQuery * cq,
+                                const ServiceList & updates) = 0;
+    virtual void gotServiceSynopsis(const ServiceQuery * cq,
                                     const ServiceSynopsisList & sslist) = 0;
-    virtual void gotLatestPlatformVersion(const CoreletQuery * cq,
+    virtual void gotLatestPlatformVersion(const ServiceQuery * cq,
                                           const std::string & latest) = 0;
     virtual void onLatestPlatformDownloaded(
-        const CoreletQuery * cq,
+        const ServiceQuery * cq,
         const LatestPlatformPkgAndVersion & pkgAndVersion) = 0;
 };
 

@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -25,6 +25,10 @@
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
 #include "BPInstaller/BPInstaller.h"
+#include "BPUtils/bpexitcodes.h"
+
+
+#include <string.h>
 
 using namespace std;
 using namespace bp::file;
@@ -56,18 +60,21 @@ main(int argc, const char** argv)
         }
     
         if (!logLevel.empty()) {
+            bp::log::Level l = bp::log::levelFromString( logLevel );
             if (logFile.empty()) {
-                bp::log::setupLogToConsole(logLevel);
+                bp::log::setupLogToConsole(l);
             } else {
-                bp::log::setupLogToFile(logFile, logLevel,
-                                        bp::log::kSizeRollover);
+                bp::log::setupLogToFile(logFile, l, bp::log::kSizeRollover);
             }
         }
         bp::install::Uninstaller unins;
         unins.run();
-    } catch (const bp::error::Exception& e) {
-        BPLOG_ERROR_STRM("Uninstall failed: " << e.what());
-    } catch (const bp::error::FatalException& e) {
-        BPLOG_ERROR_STRM("Uninstall failed: " << e.what());
+        return bp::exit::kOk;
+    } catch (const std::exception& exc) {
+        BP_REPORTCATCH(exc);
+        return bp::exit::kCaughtException;
+    } catch (...) {
+        BP_REPORTCATCH_UNKNOWN;
+        return bp::exit::kCaughtException;
     }
 }

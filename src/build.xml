@@ -1,39 +1,131 @@
-<project name="BrowserPlusPlatform_src" default="build_make">
-    <target name="clean">
-        <delete dir="build" />
+<project name="BrowserPlusPlatform_src" default="build_release">
+    <condition property="is.windows">
+        <os family="windows" />
+    </condition>
+    <condition property="is.mac">
+        <os family="mac" />
+    </condition>
+    <condition property="is.unix">
+        <os family="unix" />
+    </condition>
+    <target name="clean_make_debug" unless="is.windows">
+        <delete dir="../build_debug" />
     </target>
-    <target name="clean_make" depends="clean" />
-    <target name="clean_xcode" depends="clean" />
-    <target name="clean_vc08" depends="clean" />
-    <target name="build">
-        <mkdir dir="build" />
+    <target name="clean_make_release" unless="is.windows">
+        <delete dir="../build_release" />
     </target>
-    <target name="build_make" depends="build" >
-        <exec executable="cmake" dir="build" failonerror="true">
-            <arg line="-G &quot;Unix Makefiles&quot; .." />
+    <target name="clean_vc08_debug" if="is.windows">
+        <delete dir="../build" />
+    </target>
+    <target name="clean_vc08_release" if="is.windows">
+        <delete dir="../build" />
+    </target>
+    <target name="build_make_debug" unless="is.windows">
+        <mkdir dir="../build_debug" />
+        <exec executable="cmake" dir="../build_debug" failonerror="true">
+            <arg line="-G &quot;Unix Makefiles&quot; -DCMAKE_BUILD_TYPE:STRING=Debug ../src" />
         </exec>
-        <exec executable="make" dir="build" failonerror="true">
+        <exec executable="make" dir="../build_debug" failonerror="true">
             <arg line="-j3" />
         </exec>
     </target>
-    <target name="build_xcode">
-        <exec executable="cmake" dir="build" failonerror="true">
-            <arg line="-G &quot;Xcode&quot; .." />
+    <target name="build_make_release" unless="is.windows">
+        <mkdir dir="../build_release" />
+        <exec executable="cmake" dir="../build_release" failonerror="true">
+            <arg line="-G &quot;Unix Makefiles&quot; -DCMAKE_BUILD_TYPE:STRING=Release ../src" />
         </exec>
-        <exec executable="xcodebuild" dir="build" failonerror="true">
-            <arg line="-project BrowserPlus.xcodeproj -alltargets" />
-        </exec>
-    </target>
-    <target name="build_vc08">
-        <mkdir dir="build" />
-        <exec executable="cmd" dir="build" failonerror="true">
-	    <arg line="/C cmake -G &quot;Visual Studio 9 2008&quot; .." />
-        </exec>
-        <exec executable="cmd" dir="build" failonerror="true">
-            <arg line="/C &quot;C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat&quot; &amp;&amp; devenv BrowserPlus.sln /Build Release" />
-        </exec>
-        <exec executable="cmd" dir="build" failonerror="true">
-            <arg line="/C &quot;C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat&quot; &amp;&amp; devenv BrowserPlus.sln /Build Debug" />
+        <exec executable="make" dir="../build_release" failonerror="true">
+            <arg line="-j3" />
         </exec>
     </target>
+    <target name="build_vc08_debug" if="is.windows">
+        <mkdir dir="../build" />
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+cmake -G "Visual Studio 9 2008" ..\src
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+devenv BrowserPlus.sln /Build Debug /Project ALL_BUILD
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+    </target>
+    <target name="build_vc08_release" if="is.windows">
+        <mkdir dir="../build" />
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+cmake -G "Visual Studio 9 2008" ..\src
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+devenv BrowserPlus.sln /Build Release /Project ALL_BUILD
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+    </target>
+    <target name="test_make_debug" unless="is.windows">
+        <exec executable="make" dir="../build_debug" failonerror="true">
+            <arg line="test" />
+        </exec>
+    </target>
+    <target name="test_make_release" unless="is.windows">
+        <exec executable="make" dir="../build_release" failonerror="true">
+            <arg line="test" />
+        </exec>
+    </target>
+    <target name="test_vc08_debug" if="is.windows">
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+devenv BrowserPlus.sln /Build Debug /Project test
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+    </target>
+    <target name="test_vc08_release" if="is.windows">
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+devenv BrowserPlus.sln /Build Release /Project test
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+    </target>
+    <target name="clean_debug" depends="clean_make_debug,clean_vc08_debug" />
+    <target name="clean_release" depends="clean_make_release,clean_vc08_release" />
+    <target name="build_debug" depends="build_make_debug,build_vc08_debug" />
+    <target name="build_release" depends="build_make_release,build_vc08_release" />
+    <target name="test_debug" depends="test_make_debug,test_vc08_debug" />
+    <target name="test_release" depends="test_make_release,test_vc08_release" />
 </project>

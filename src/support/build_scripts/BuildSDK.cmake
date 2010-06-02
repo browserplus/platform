@@ -12,7 +12,7 @@
 # The Original Code is BrowserPlus (tm).
 # 
 # The Initial Developer of the Original Code is Yahoo!.
-# Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+# Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
 # All rights reserved.
 # 
 # Contributor(s): 
@@ -100,7 +100,7 @@ ADD_DEPENDENCIES(InstallLocally MakeInstaller)
 ##### Zip it up, chris.  I'm about to.
 # define a custom target for the compressing of the SDK
 # this command is not run by default.  A good reason for this is if
-# you want to copy anything else, say.. some corelets, into the
+# you want to copy anything else, say.. some services, into the
 # sdk before compressing 
 ADD_CUSTOM_TARGET(CompressSDK COMMENT "Compressing the BrowserPlus SDK")
 

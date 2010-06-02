@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -25,7 +25,7 @@
 
 #include "ConsoleLib/ConsoleLib.h"
 #include "DistributionClient/DistributionClient.h"
-#include "CoreletManager/CoreletManager.h"
+#include "ServiceManager/ServiceManager.h"
 
 // a class which handles commands typed at the command line client
 class CommandExecutor : public CommandHandler

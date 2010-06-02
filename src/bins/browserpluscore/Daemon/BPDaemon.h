@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -54,15 +54,15 @@ public:
 
     std::tr1::shared_ptr<SessionManager> sessionManager();
     
-    std::tr1::shared_ptr<CoreletRegistry> registry();
+    std::tr1::shared_ptr<ServiceRegistry> registry();
     
 private:
     void startup();
-    void setupCoreletRegistry();
+    void setupServiceRegistry();
     bool setupServer();
     bool getDistroServerList();
-    bool setupCoreletInstaller();
-    bool setupCoreletUpdater();
+    bool setupServiceInstaller();
+    bool setupServiceUpdater();
     bool setupPlatformUpdater();
     bool setupPermissionsUpdater();
     void setupAutoShutdown();
@@ -75,7 +75,7 @@ private:
     bp::config::ConfigReader m_configReader;
     APTArgParse m_argParser;
     std::list<std::string> m_distroServers;
-    std::tr1::shared_ptr<CoreletRegistry> m_registry;
+    std::tr1::shared_ptr<ServiceRegistry> m_registry;
     bp::ipc::ChannelServer m_server;
     std::tr1::shared_ptr<SessionManager> m_sessionManager;
     std::tr1::shared_ptr<AutoShutdownAgent> m_shutdownAgent;

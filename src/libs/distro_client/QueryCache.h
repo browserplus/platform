@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -22,7 +22,7 @@
 
 /**
  * QueryCache - A class responsible for generating a list of available
- *              corelets by querying multiple distribution servers.
+ *              services by querying multiple distribution servers.
  *              This class is also responsible for short term caching
  *              responses to minimize network traffic without requiring
  *              the client keep any sort of context.    
@@ -52,8 +52,8 @@ class LatestPlatformServerAndVersion
 class IQueryCacheListener
 {
   public:
-    virtual void onCoreletList(const AvailableCoreletList & list) = 0;
-    virtual void onCoreletListFailure() = 0;    
+    virtual void onServiceList(const AvailableServiceList & list) = 0;
+    virtual void onServiceListFailure() = 0;    
     virtual void onLatestPlatform(
         const LatestPlatformServerAndVersion & latest) = 0;
     virtual void onLatestPlatformFailure() = 0;    
@@ -69,7 +69,7 @@ class QueryCache : public bp::thread::HoppingClass
 
     void setListener(IQueryCacheListener * l);
     
-    void coreletList(std::string plat);
+    void serviceList(std::string plat);
 
     void latestPlatformVersion(std::string plat);
 
@@ -78,23 +78,24 @@ class QueryCache : public bp::thread::HoppingClass
 
     IQueryCacheListener * m_listener;
 
-    enum { T_None, T_CoreletList, T_PlatformVersion } m_qType;
+    enum { T_None, T_ServiceList, T_PlatformVersion } m_qType;
 
-    class MyListener : public bp::http::client::Listener
+    class MyListener : public bp::http::client::Listener,
+                       public std::tr1::enable_shared_from_this<MyListener>
     {
       public:
-        MyListener(QueryCache& owner,
-                   bp::http::client::Transaction* transaction)
-        : bp::http::client::Listener(), 
-          m_owner(owner), m_transaction(transaction)
+        static std::tr1::shared_ptr<MyListener> alloc(
+                QueryCache& owner,
+                bp::http::client::TransactionPtr transaction)
         {
-            BPLOG_DEBUG_STRM("create MyListener, this = " << this);
+            std::tr1::shared_ptr<MyListener> rval(new MyListener(owner,
+                                                                 transaction));
+            return rval;
         }
-
         virtual ~MyListener() 
         {
+            m_listening = false;
             BPLOG_DEBUG_STRM("delete MyListener, this = " << this);
-            delete m_transaction;
         }
             
         // overrides from Listener
@@ -104,25 +105,39 @@ class QueryCache : public bp::thread::HoppingClass
         virtual void onError(const std::string& msg);
 
         QueryCache& m_owner;
-        bp::http::client::Transaction* m_transaction;
+        bp::http::client::TransactionPtr m_transaction;
 
       private:
+        MyListener(QueryCache& owner,
+                   bp::http::client::TransactionPtr transaction)
+        : bp::http::client::Listener(),
+          m_owner(owner), m_transaction(transaction), m_listening(true)
+        {
+            BPLOG_DEBUG_STRM("create MyListener, this = " << this);
+        }
+
         // no copy/assignment semantics
         MyListener(const Listener&);
         MyListener& operator=(const Listener&);
-    };
 
-    void listenerCompleted(MyListener* l,
+        bool m_listening;
+    };
+    typedef std::tr1::shared_ptr<MyListener> MyListenerPtr;
+
+    void listenerCompleted(MyListenerPtr l,
                            const std::string& error);
     
     std::list<std::string> m_serverURLs;
-    std::map<std::string, MyListener*> m_listeners;
-    std::set<MyListener*> m_listenersToReap;
+    std::map<std::string, MyListenerPtr> m_listeners;
+    std::set<MyListenerPtr> m_listenersToReap;
     unsigned int m_numComplete;
 
-    // used in T_CoreletList case
-    AvailableCoreletList mergeResponses();
-    void pruneBlacklisted(AvailableCoreletList & oList);
+    // used in T_ServiceList case
+    AvailableServiceList mergeResponses();
+    // a utility function to remove blacklisted services and services
+    // with an unsupported service API version from the list of returned
+    // services
+    void pruneBlacklistedAndUnsupported(AvailableServiceList & oList);
 
     // used in T_PlatformVersion case
     bool parsePlatformVersionResponses(
@@ -130,7 +145,7 @@ class QueryCache : public bp::thread::HoppingClass
     
     bp::time::Stopwatch m_sw;
 
-    // the platform for which we're querying corelets
+    // the platform for which we're querying services
     std::string m_plat;
 
     // a filter which prunes services from the server returned list
@@ -140,7 +155,7 @@ class QueryCache : public bp::thread::HoppingClass
     IQueryCacheListener * m_clientListener;
 
     LatestPlatformServerAndVersion m_latest;
-    AvailableCoreletList m_listToReturn;
+    AvailableServiceList m_listToReturn;
 };
 
 #endif

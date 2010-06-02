@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -33,6 +33,7 @@
 
 #include <exception>
 #include <string>
+#include <assert.h>
 
 namespace bp {
 namespace error {
@@ -51,6 +52,7 @@ namespace error {
 std::string lastErrorString(const char * contextStr = NULL);
 std::string lastErrorString(const std::string& contextStr);
 
+
 class Exception : public std::exception
 {
 public:
@@ -64,6 +66,7 @@ public:
 protected:
     std::string m_sDesc;
 };
+
 
 /**
  * A FatalException is just that, fatal.  Don't try to catch and recover.  At 
@@ -85,11 +88,36 @@ protected:
 
 
 
-void ReportThrow( const std::exception& e,
+// Report to the log system that an exception was thrown.
+void reportThrow( const std::exception& e,
                   const std::string& sFile,
                   const std::string& sFunc,
                   int nLine,
                   const std::string& sAddlContext="" );
+
+
+// Report to the log system that an exception was caught.
+void reportCatch( const std::exception& e,
+                  const std::string& sFile,
+                  const std::string& sFunc,
+                  int nLine,
+                  const std::string& sAddlContext="") throw();
+
+
+// Report to the log system that an unknown (...) exception was caught.
+void reportCatchUnknown( const std::string& sFile,
+                         const std::string& sFunc,
+                         int nLine,
+                         const std::string& sAddlContext="") throw();
+
+
+// Returns a string describing thrown exception.
+std::string makeThrowReportString(const std::exception& exc,
+                                  const std::string& sAddlContext="" );
+
+// Returns a string describing caught exception.
+std::string makeCatchReportString(const std::exception& exc,
+                                  const std::string& sAddlContext="" );
 
 
 #if defined(_MSC_VER)
@@ -109,52 +137,45 @@ void ReportThrow( const std::exception& e,
 #endif
 
 
-
 #define BP_THROW( sDesc )                               \
 {                                                       \
     bp::error::Exception e( (sDesc) );                  \
-    ReportThrow( e, __FILE__, __BP_FUNC__, __LINE__ );  \
+    reportThrow( e, __FILE__, __BP_FUNC__, __LINE__ );  \
     throw e;                                            \
 }
 
 #define BP_THROW_FATAL( sDesc )                         \
 {                                                       \
     bp::error::FatalException e( (sDesc) );             \
-    ReportThrow( e, __FILE__, __BP_FUNC__, __LINE__ );  \
+    reportThrow( e, __FILE__, __BP_FUNC__, __LINE__ );  \
     throw e;                                            \
 }
 
 #define BP_THROW_TYPE( type, sDesc )                    \
 {                                                       \
     type e( (sDesc) );                                  \
-    ReportThrow( e, __FILE__, __BP_FUNC__, __LINE__ );  \
+    reportThrow( e, __FILE__, __BP_FUNC__, __LINE__ );  \
     throw e;                                            \
 }
 
 
-// Report to the log system that an exception was caught.
-void ReportCatch( const std::exception& e,
-                  const std::string& sFile,
-                  const std::string& sFunc,
-                  int nLine,
-                  const std::string& sAddlContext="") throw();
+#define BP_REPORTCATCH(e) \
+bp::error::reportCatch( (e), __FILE__, __BP_FUNC__, __LINE__ );  
 
 
-#define BP_REPORTCATCH(e)                               \
-bp::error::ReportCatch( (e), __FILE__, __BP_FUNC__, __LINE__ );  
+#define BP_REPORTCATCH_UNKNOWN \
+bp::error::reportCatchUnknown( __FILE__, __BP_FUNC__, __LINE__ );  
 
 
-// Returns a string describing caught exception.
-std::string makeCatchReportString(const std::exception& exc,
-                                  const std::string& sAddlContext="" );
 
-// XXX re-enable after 2.8 is tagged
+// Now for an assert which causes flaming death in release builds
+// and a plain old assert in debug builds
 #if defined(DEBUG)
-// And now for an assert which also works in release builds
-#define BPASSERT( c ) if (!(c)) BP_THROW_FATAL( "assert failed: " #c );
+#define BPASSERT( c ) assert( c )
 #else
-#define BPASSERT( c )
+#define BPASSERT( c ) if (!(c)) BP_THROW_FATAL( "assert failed: " #c );
 #endif
+
 
 } // namespace error
 } // namespace bp

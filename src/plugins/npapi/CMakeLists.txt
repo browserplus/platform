@@ -12,7 +12,7 @@
 # The Original Code is BrowserPlus (tm).
 # 
 # The Initial Developer of the Original Code is Yahoo!.
-# Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+# Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
 # All rights reserved.
 # 
 # Contributor(s): 
@@ -71,7 +71,8 @@ ELSEIF(WIN32)
 
   INCLUDE_DIRECTORIES(packaging/windows)
 ELSE()
-  SET(OS_LIBS "")
+  ADD_DEFINITIONS(-DXP_UNIX)
+  SET(OS_LIBS ssl_s crypto_s)
 ENDIF()
 
 # headers/sources/resources common to all platforms

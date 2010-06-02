@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -36,6 +36,7 @@
 #include "BPUtils/ProductPaths.h"
 #include "BPUtils/ProcessLock.h"
 
+#include <string.h>
 
 #ifdef MACOSX
 #include <CoreFoundation/CoreFoundation.h>
@@ -360,9 +361,7 @@ ScriptableConfigObject::invoke(const string & functionName,
 #endif
 
         // now run uninstaller
-        bp::process::spawnStatus status;
-        bp::process::spawn(uninstaller, std::string(), Path(), 
-                           uninstArgs, &status);
+        bp::process::spawn(uninstaller, uninstArgs);
 
         if (lock) {
             bp::releaseProcessLock(lock);
@@ -496,9 +495,9 @@ ScriptableConfigObject::invoke(const string & functionName,
             req->headers.add(Headers::ksConnection, "close");
             req->body.fromPath(postBodyPath);
             
-            client::SyncTransaction tran(req);
+            client::SyncTransactionPtr tran = client::SyncTransaction::alloc(req);
             client::SyncTransaction::FinalStatus results;
-            ResponsePtr ptrResp = tran.execute(results);
+            ResponsePtr ptrResp = tran->execute(results);
             if (results.code == client::SyncTransaction::FinalStatus::eOk) {
                 rv = new bp::Bool(true);
             } else {

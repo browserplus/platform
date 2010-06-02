@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -96,8 +96,8 @@ DynamicServiceState::addPendingAllocation(
 shared_ptr<DynamicServiceInstance>
 DynamicServiceState::createInstance(
     DynamicServiceManager * manager,
-    weak_ptr<CoreletExecutionContext> contextWeak,
-    weak_ptr<ICoreletRegistryListener> listener,
+    weak_ptr<ServiceExecutionContext> contextWeak,
+    weak_ptr<IServiceRegistryListener> listener,
     unsigned int instantiateId,
     const bp::service::Summary & summary)
 {

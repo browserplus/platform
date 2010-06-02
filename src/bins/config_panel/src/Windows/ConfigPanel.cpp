@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -33,9 +33,8 @@
 #include <atlwin.h>
 #include <comutil.h>
 #include "BPUtils/bplocalization.h"
-#include "BPUtils/bpconfig.h"
 #include "BPUtils/bpfile.h"
-#include "BPUtils/BPLog.h"
+#include "BPUtils/LogConfigurator.h"
 #include "BPUtils/ProductPaths.h"
 #include "HTMLRender/HTMLDialog_Windows.h"
 #include "HTMLRender/ScriptGateway_Windows.h"
@@ -52,25 +51,10 @@ CAppModule _Module;
 
 void setupLogging()
 {
-    bp::file::Path logPath = bp::paths::getObfuscatedWritableDirectory() /
-                             "ConfigPanel.log";
-    
-    bp::config::ConfigReader reader;
-    (void) reader.load(bp::paths::getConfigFilePath());
-    
-    string level = "info";
-    (void) reader.getStringValue("ConfigPanelLogLevel", level);
-
-    string timeFormat;
-    (void) reader.getStringValue("LogTimeFormat", timeFormat);
-    
-    long long int rolloverKB = 0;
-    (void) reader.getIntegerValue("LogFileRolloverKB", rolloverKB);
-
-    // TODO: layout?
-    
-    bp::log::setupLogToFile(logPath, level, bp::log::kSizeRollover,
-                            timeFormat, (unsigned int) rolloverKB);
+    bp::log::Configurator cfg;
+    cfg.loadConfigFile();
+    cfg.setPath(bp::paths::getObfuscatedWritableDirectory()/"ConfigPanel.log");
+    cfg.configure();
 }
 
 
@@ -90,6 +74,7 @@ int APIENTRY WinMain( HINSTANCE hInst, HINSTANCE /*hinstPrev*/,
     try
     {
         setupLogging();
+        BPLOG_INFO( "Startup." );
 
         string sLocale = getUsersLocale();
         
@@ -126,9 +111,11 @@ int APIENTRY WinMain( HINSTANCE hInst, HINSTANCE /*hinstPrev*/,
 
         BPLOG_INFO( "Normal exit." );
     }
-    catch (bp::error::Exception& e)
-    {
-        BP_REPORTCATCH(e);
+    catch (const std::exception& exc) {
+        BP_REPORTCATCH(exc);
+    }
+    catch (...) {
+        BP_REPORTCATCH_UNKNOWN;
     }
 
     _Module.Term();

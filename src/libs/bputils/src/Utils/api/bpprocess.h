@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -61,38 +61,29 @@ namespace process {
      * \return pid for current process
      */
     long currentPid();
-    
-    /**
-     * Spawn a process
-     * \param  path Full path to executable file
-     * \param  workingDirectory A path which should be the initial
-     *           working directory of the spawned process.  If empty(),
-     *           child inherits CWD.     
-     * \param  status Receives success/fail info (may be NULL)
-     * \return Success or failure
-     */
-    bool spawn(const bp::file::Path& path,
-               const bp::file::Path& workingDirectory,
-               spawnStatus* status);
 
     /**
      * Spawn a process
      * \param  path Full path to executable file
-     * \param  title Alternate process title (which will be displayed by
-     *               'ps' and friends)
+     * \param  args Command-line arguments
+     * \param  status Receives errCode/pid/handle info
      * \param  workingDirectory A path which should be the initial
      *           working directory of the spawned process.  If empty(),
      *           child inherits CWD.     
-     * \param  args Command-line arguments
-     * \param  status Receives success/fail info (may be NULL)
+     * \param  title Alternate process title (e.g. for ps,
+                 not currently implemented on any os).
+     * \param  inheritWin32StdHandles Whether spawned process should
+     *           inherit parents stdin/out/err handles.  (win32 only)
      * \return Success or failure
      */
     bool spawn(const bp::file::Path& path,
-               const std::string& sTitle,
-               const bp::file::Path& workingDirectory,
-               const std::vector<std::string>& vsArgs,
-               spawnStatus* status);
-    
+               const std::vector<std::string>& vsArgs =
+                     std::vector<std::string>(),
+               spawnStatus* status = NULL,
+               const bp::file::Path& workingDirectory = bp::file::Path(),
+               const std::string& sTitle = std::string(),
+               bool inheritWin32StdHandles = false );
+        
     /**
      * Wait for a process
      * \param  status - spawn status returned from spawn()

@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -40,7 +40,7 @@
 namespace ServicesUpdated 
 {
     /**
-     * create a small file in the user scoped "Corelets" dir signifying
+     * create a small file in the user scoped "Services" dir signifying
      * that services on disk have been changed.
      */
     void indicateServicesChanged();

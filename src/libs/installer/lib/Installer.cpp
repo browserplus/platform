@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -374,7 +374,7 @@ Installer::installServices()
                 for (bpf::tDirIter vit(sit->path()); vit != vit_end; ++vit) {
                     bpf::Path version = vit->path().filename();
                     bpf::Path source = sit->path();
-                    bpf::Path dest = getCoreletDirectory() / service / version;
+                    bpf::Path dest = getServiceDirectory() / service / version;
                     try {
                         bfs::create_directories(dest.parent_path());
                     } catch(const bpf::tFileSystemError& e) {

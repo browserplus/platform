@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -91,8 +91,8 @@ Uninstaller::run(bool fromRunonce)
                                            activeXGuid, mtypes)) {
                             if (unRegisterControl(mtypes, typeLibGuid, 
                                                   plugin, activeXGuid,
-                                                  "CBPCtl Object", "Yahoo.BPCtl",
-                                                  "Yahoo.BPCtl." + version) != 0) {
+                                                  axViProgid(),
+                                                  axProgid(version)) != 0) {
                                 BPLOG_WARN_STRM("unable to unregister " << plugin);
                                 m_error = true;
                             }
@@ -116,6 +116,11 @@ Uninstaller::run(bool fromRunonce)
                 }
             }
         }
+    }
+
+    // Just in case we have cruft from earlier installs/updates
+    if (unregisterCruftControls(true) != 0) {
+        m_error = true;
     }
 
     // NPAPI may be in a non-standard place due to firefox and 

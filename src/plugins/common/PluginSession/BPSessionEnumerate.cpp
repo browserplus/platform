@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -43,15 +43,15 @@ struct EnumerateContext
 void
 BPSession::enumerateServicesCallback(BPErrorCode ec,
                                      void * cookie,
-                                     const BPElement * corelets)
+                                     const BPElement * services)
 {
     EnumerateContext * ctx = (EnumerateContext *) cookie;    
     BPASSERT(ctx != NULL);
 
-    if (ec == BP_EC_OK && corelets != NULL) {
+    if (ec == BP_EC_OK && services != NULL) {
         // now we should append the results of the enumerate call to
-        // our bp::List containing combined pluglets and corelets
-        if (!bp::pluginutil::appendEnumerateResultsToList(corelets,
+        // our bp::List containing combined pluglets and services
+        if (!bp::pluginutil::appendEnumerateResultsToList(services,
                                                           ctx->serviceList))
         {
             BPLOG_ERROR("Error in BPEnumerate protcol response");

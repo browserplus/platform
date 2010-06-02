@@ -13,14 +13,13 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
  * ***** END LICENSE BLOCK *****
  */
 
-#include <iostream>
 #include "BPUtils/APTArgParse.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bprunloop.h"
@@ -28,6 +27,12 @@
 
 // here's our implementation of handling commands
 #include "CommandExecutor.h"
+
+#ifndef WIN32
+#include <signal.h>
+#endif
+#include <iostream>
+
 
 using namespace std;
 using namespace std::tr1;
@@ -38,7 +43,7 @@ bp::runloop::RunLoop s_rl;
 static APTArgDefinition g_args[] = {
     { "log", APT::TAKES_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
       APT::NOT_INTEGER, APT::MAY_RECUR,
-      "enable console logging, argument like \"info,ThrdLvlFuncMsg\""
+      "enable console logging, argument is level (info, debug, etc.)"
     },
     { "logfile", APT::TAKES_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
       APT::NOT_INTEGER, APT::MAY_RECUR,
@@ -60,8 +65,9 @@ setupLogging(const APTArgParse& argParser)
     
     if (level.empty()) level = "info";
 
-    if (path.empty()) bp::log::setupLogToConsole(level);
-    else bp::log::setupLogToFile(path, level);
+    bp::log::Level logLevel = bp::log::levelFromString(level);
+    if (path.empty()) bp::log::setupLogToConsole(logLevel);
+    else bp::log::setupLogToFile(path, logLevel);
 }
 
 /** a class to listen for UserQuitEvents and stop the runloop upon

@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -727,23 +727,9 @@ CBPCtl::isJsFunction( const plugin::Object* pObj ) const
 }
 
 
-
 ////////////////////////////////////////////////////////////////////////////////
 // ATL Support
 //
-HRESULT
-CBPCtl::OnDraw(ATL_DRAWINFO& /*di*/)
-{
-    return S_OK;
-}
-
-
-STDMETHODIMP
-CBPCtl::_InternalQueryService(REFGUID /*guidService*/, REFIID /*riid*/,
-                              void** /*ppvObject*/)
-{
-    return E_NOTIMPL;
-}
 
 
 

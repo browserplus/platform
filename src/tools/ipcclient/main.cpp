@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -21,9 +21,17 @@
  */
 
 
+#include "BPUtils/IPCConnection.h"
+
 #include <iostream>
 #include <sstream>
-#include "BPUtils/IPCConnection.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#ifndef WIN32
+#include <signal.h>
+#endif
 
 class MyIPCClient : public bp::ipc::IConnectionListener
 {

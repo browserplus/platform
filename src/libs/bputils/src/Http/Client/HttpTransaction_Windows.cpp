@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -44,7 +44,6 @@
 #include <Wininet.h>
 
 using namespace std;
-
 
 // Threading usage:  Everything except wininetCallback and onWininetCallback 
 // occurs on the thread which invoked execute() or initiate().  
@@ -104,7 +103,7 @@ public:
     virtual void timesUp(bp::time::Timer* t);
 
     // Asynchronously execute the transaction
-    void        initiate(IListener* pListener);
+    void        initiate(IListenerWeakPtr pListener);
 
     // Cancel a transaction.
     void        cancel();
@@ -153,6 +152,17 @@ private:
     // shutdown the connection
     void        closeConnection();
 
+    void        reportSendProgress();
+    void        reportReceiveProgress();
+    void        finalizeSendProgress();
+    void        finalizeReceiveProgress();
+    void        doSendProgressReport(size_t bytesProcessed,
+                                     size_t totalBytes,
+                                     double percent);
+    void        doReceiveProgressReport(size_t bytesProcessed,
+                                         size_t totalBytes,
+                                         double percent);
+    
     // Internal Attributes
 private:
     // A debug-only runtime consistency check to ensure that:
@@ -199,7 +209,7 @@ private:
     }
 
     // progress info
-    IListener*      m_pListener;
+    IListenerWeakPtr m_pListener;
     size_t          m_sendTotalBytes;
     size_t          m_bytesSent;
     size_t          m_receiveTotalBytes;
@@ -208,7 +218,8 @@ private:
     bool            m_zeroReceiveProgressSent;
     bool            m_hundredSendProgressSent;
     bool            m_hundredReceiveProgressSent;
-    double          m_lastProgressSent;
+    double          m_lastSendProgressSent;
+    double          m_lastReceiveProgressSent;
 
     bp::url::Url    m_redirectUrl;
     
@@ -292,8 +303,182 @@ private:
     }
 
     void setError(const std::string& msg) {
+        BPLOG_ERROR_STRM(msg);
         m_eState = eError;
-        m_pListener->onError(msg);
+        IListenerPtr p = m_pListener.lock();
+        if (p) p->onError(msg);
+    }
+
+    std::string wininetErrorString(DWORD error) {
+        std::string rval;
+        switch (error) {
+        case ERROR_INTERNET_INVALID_CA:
+            rval += "SSL error: valid certificate chain, untrusted root";
+            break;
+        case ERROR_INTERNET_SEC_CERT_CN_INVALID:
+            rval += "SSL error: the certificate common name is incorrect";
+            break;
+        case ERROR_INTERNET_SEC_CERT_DATE_INVALID:
+            rval += "SSL error: certificate expired";
+            break;
+        case ERROR_INTERNET_SEC_CERT_REVOKED:
+            rval += "SSL error: certificate revoked";
+            break;
+        case ERROR_INTERNET_OUT_OF_HANDLES:
+            rval = "No more handles could be generated at this time.";
+            break;
+        case ERROR_INTERNET_TIMEOUT:
+            rval = "The request has timed out.";
+            break;
+        case ERROR_INTERNET_EXTENDED_ERROR:
+            rval = "An extended error was returned from the server.";
+            break;
+       case ERROR_INTERNET_INTERNAL_ERROR:
+           rval = "An internal error has occurred.";
+           break;
+        case ERROR_INTERNET_INVALID_URL:
+            rval = "The URL is invalid.";
+            break;
+        case ERROR_INTERNET_UNRECOGNIZED_SCHEME:
+            rval = "The URL scheme could not be recognized or is not supported.";
+            break;
+        case ERROR_INTERNET_NAME_NOT_RESOLVED:
+            rval = "The server name could not be resolved.";
+            break;
+        case ERROR_INTERNET_PROTOCOL_NOT_FOUND:
+            rval = "The requested protocol could not be located.";
+            break;
+        case ERROR_INTERNET_INVALID_OPTION:
+            rval = "A request to InternetQueryOption or InternetSetOption "
+                   "specified an invalid option value.";
+            break;
+        case ERROR_INTERNET_BAD_OPTION_LENGTH:
+            rval = "The length of an option supplied to InternetQueryOption "
+                   "or InternetSetOption is incorrect for the type of option "
+                   "specified.";
+            break;
+        case ERROR_INTERNET_OPTION_NOT_SETTABLE:
+            rval = "The request option cannot be set, only queried.";
+            break;
+        case ERROR_INTERNET_SHUTDOWN:
+            rval = "The Win32 Internet function support is being shut down "
+                   "or unloaded.";
+            break;
+        case ERROR_INTERNET_INVALID_OPERATION:
+            rval = "The requested operation is invalid.";
+            break;
+        case ERROR_INTERNET_OPERATION_CANCELLED:
+            rval = "The operation was canceled, usually because the handle on "
+                   "which the request was operating was closed before the "
+                   "operation completed.";
+            break;
+        case ERROR_INTERNET_INCORRECT_HANDLE_TYPE:
+            rval = "The type of handle supplied is incorrect for this operation";
+            break;
+        case ERROR_INTERNET_INCORRECT_HANDLE_STATE:
+            rval = "The requested operation cannot be carried out because the "
+                   "handle supplied is not in the correct state.";
+            break;
+        case ERROR_INTERNET_NOT_PROXY_REQUEST:
+            rval = "The request cannot be made via a proxy.";
+            break;
+        case ERROR_INTERNET_REGISTRY_VALUE_NOT_FOUND:
+            rval = "A required registry value could not be located.";
+            break;
+        case ERROR_INTERNET_BAD_REGISTRY_PARAMETER:
+            rval = "A required registry value was located but is an incorrect "
+                   "type or has an invalid value.";
+            break;
+        case ERROR_INTERNET_NO_DIRECT_ACCESS:
+            rval = "Direct network access cannot be made at this time.";
+            break;
+        case ERROR_INTERNET_NO_CONTEXT:
+            rval = "An asynchronous request could not be made because a zero "
+                   " context value was supplied.";
+            break;
+        case ERROR_INTERNET_NO_CALLBACK:
+            rval = "An asynchronous request could not be made because a "
+                   "callback function has not been set.";
+            break;
+        case ERROR_INTERNET_REQUEST_PENDING:
+            rval = "The required operation could not be completed because one "
+                   "or more requests are pending.";
+            break;
+        case ERROR_INTERNET_INCORRECT_FORMAT:
+            rval = "The format of the request is invalid.";
+            break;
+        case ERROR_INTERNET_ITEM_NOT_FOUND:
+            rval = "The requested item could not be located.";
+            break;
+        case ERROR_INTERNET_CANNOT_CONNECT:
+            rval = "The attempt to connect to the server failed.";
+            break;
+        case ERROR_INTERNET_CONNECTION_ABORTED:
+            rval = "The connection with the server has been terminated.";
+            break;
+        case ERROR_INTERNET_CONNECTION_RESET:
+            rval = "The connection with the server has been reset.";
+            break;
+        case ERROR_INTERNET_FORCE_RETRY:
+            rval = "Calls for the Win32 Internet function to redo the request.";
+            break;
+        case ERROR_INTERNET_INVALID_PROXY_REQUEST:
+            rval = "The request to the proxy was invalid.";
+            break;
+        case ERROR_INTERNET_HANDLE_EXISTS:
+            rval = "The request failed because the handle already exists.";
+            break;
+        case ERROR_INTERNET_HTTP_TO_HTTPS_ON_REDIR:
+            rval = "The application is moving from a non-SSL to an SSL "
+                   "connection because of a redirect.";
+            break;
+        case ERROR_INTERNET_HTTPS_TO_HTTP_ON_REDIR:
+            rval = "The application is moving from an SSL to an non-SSL "
+                   "connection because of a redirect.";
+            break;
+        case ERROR_INTERNET_MIXED_SECURITY:
+            rval = "Indicates that the content is not entirely secure. "
+                   "Some of the content being viewed may have come from "
+                   "unsecured servers.";
+            break;
+        case ERROR_INTERNET_CHG_POST_IS_NON_SECURE:
+            rval = "The application is posting and attempting to change "
+                   "multiple lines of text on a server that is not secure.";
+            break;
+        case ERROR_INTERNET_POST_IS_NON_SECURE:
+            rval = "The application is posting data to a server that is not secure.";
+            break;
+        case ERROR_HTTP_HEADER_NOT_FOUND:
+            rval = "The requested header could not be located.";
+            break;
+        case ERROR_HTTP_DOWNLEVEL_SERVER:
+            rval = "The server did not return any headers.";
+            break;
+        case ERROR_HTTP_INVALID_SERVER_RESPONSE:
+            rval = "The server response could not be parsed.";
+            break;
+        case ERROR_HTTP_INVALID_HEADER:
+            rval = "The supplied header is invalid.";
+            break;
+        case ERROR_HTTP_INVALID_QUERY_REQUEST:
+            rval = "The request made to HttpQueryInfo is invalid.";
+            break;
+        case ERROR_HTTP_HEADER_ALREADY_EXISTS:
+            rval = "The header could not be added because it already exists.";
+            break;
+        case ERROR_HTTP_REDIRECT_FAILED:
+            rval = "The redirection failed because either the scheme changed "
+                   "(for example, HTTP to FTP) or all attempts made to redirect "
+                   "failed (default is five attempts).";
+            break;
+        default: 
+            {
+            std::stringstream ss;
+            ss << "Unknown wininet error " << error;
+            rval = ss.str(); 
+            }
+        }
+        return rval;
     }
 
     // Prevent copying
@@ -343,7 +528,8 @@ Transaction::Impl::redirectCB(void* ctx)
     if (!findImpl((DWORD) ctx, self)) {
         BPLOG_WARN_STRM("Dropping redirect call, implementation has been free'd");
     } else {
-        self->m_pListener->onRedirect(self->m_redirectUrl);
+        IListenerPtr p = self->m_pListener.lock();
+        if (p) p->onRedirect(self->m_redirectUrl);
     }
 }
 
@@ -355,7 +541,8 @@ Transaction::Impl::closedCB(void* ctx)
     if (!findImpl((DWORD) ctx, self)) {
         BPLOG_WARN_STRM("Dropping closed call, implementation has been free'd");
     } else {
-        self->m_pListener->onClosed();
+        IListenerPtr p = self->m_pListener.lock();
+        if (p) p->onClosed();
     }
 }
 
@@ -376,7 +563,7 @@ Transaction::Impl::Impl(RequestPtr ptrRequest) :
     m_hUploadFile(INVALID_HANDLE_VALUE),
     m_pPostBuffer(NULL),
     m_bytesToPost(0),
-    m_pListener(NULL),
+    m_pListener(),
     m_sendTotalBytes(0),
     m_bytesSent(0),
     m_receiveTotalBytes(0),
@@ -385,7 +572,8 @@ Transaction::Impl::Impl(RequestPtr ptrRequest) :
     m_zeroReceiveProgressSent(false),
     m_hundredSendProgressSent(false),
     m_hundredReceiveProgressSent(false),
-    m_lastProgressSent(0.0),
+    m_lastSendProgressSent(0),
+    m_lastReceiveProgressSent(0),
     m_threadId(bp::thread::Thread::currentThreadID()),
     m_error(ERROR_SUCCESS),
     m_bCancel(false),
@@ -415,7 +603,7 @@ Transaction::Impl::~Impl()
     consistencyCheck();
 
     removeFromImplMap();
-    m_pListener = NULL;
+    m_pListener.reset();
     BPLOG_DEBUG_STRM(m_id << ":  HTTP transaction unregistered");
 
     closeConnection();
@@ -472,7 +660,7 @@ Transaction::Impl::timesUp(bp::time::Timer* t)
 
 
 void
-Transaction::Impl::initiate(IListener* pListener)
+Transaction::Impl::initiate(IListenerWeakPtr pListener)
 {
     consistencyCheck();
 
@@ -566,20 +754,15 @@ Transaction::Impl::processRequest(DWORD error)
         return;
     }
 
-    // handle connection failures (which manifest as an error code
+    // handle failures (which manifest as an error code
     // passed by the REQUEST COMPLETE wininet message 
-    if (error == ERROR_INTERNET_CANNOT_CONNECT) {
+    if (error != ERROR_SUCCESS && error != ERROR_IO_PENDING) {
+        setError(wininetErrorString(error));
         closeConnection();        
-        setError("cannot connect");
-        return;
-    } else if (error != ERROR_SUCCESS && error != ERROR_IO_PENDING) {
-        std::stringstream ss;
-        ss << "unknown wininet error: (" << error << ")";
-        closeConnection();        
-        setError(ss.str());
         return;
     }
 
+    IListenerPtr listener = m_pListener.lock();
     while (!m_bCancel                    // not cancelled
            && m_eState != eTimedOut      // haven't timed out
            && m_eState != eError         // no error
@@ -590,7 +773,7 @@ Transaction::Impl::processRequest(DWORD error)
 
         case eConnect:
             m_eState = eOpenRequest;
-            m_pListener->onConnecting();
+            if (listener) listener->onConnecting();
             openSession();
             error = openConnection();
             break;
@@ -606,36 +789,20 @@ Transaction::Impl::processRequest(DWORD error)
 
         case eSendRequest:
             m_eState = eResponseGetHeaders;
-            m_pListener->onConnected();
+            if (listener) listener->onConnected();
             error = sendRequest();
             break;
 
         case eSendRequestWithBody:
             m_eState = ePostGetData;
-            m_pListener->onConnected();
+            if (listener) listener->onConnected();
             error = sendRequestWithBody();
             break;
             
         case ePostGetData: {
             m_eState = ePostSendData;
             m_bytesSent += m_bytesToPost;  // catch delayed writes
-            double percent = ((double)m_bytesSent / m_sendTotalBytes) * 100.0;
-            if (percent > 100.0) percent = 100.0;
-            // honor our 0% guarantee, 100% will be sent on completion
-            if (!m_zeroSendProgressSent) {
-                m_pListener->onSendProgress(0, m_sendTotalBytes, 0.0);
-                m_zeroSendProgressSent = true;
-                m_lastProgressSent = 0.0;
-            }
-            if (percent > m_lastProgressSent) {
-                m_pListener->onSendProgress(m_bytesSent, m_sendTotalBytes,
-                                            percent);
-                m_lastProgressSent = percent;
-
-                if (percent >= 100.0) {
-                    m_hundredSendProgressSent = true;
-                }
-            }
+            reportSendProgress();
             error = getDataToPost();
             break;
         }
@@ -660,8 +827,10 @@ Transaction::Impl::processRequest(DWORD error)
             Version version = receiveResponseVersion();
             Status status = receiveResponseStatus();
             Headers headers = receiveResponseHeaders();
-            m_pListener->onRequestSent();
-            m_pListener->onResponseStatus(status, headers);
+            if (listener) {
+                listener->onRequestSent();
+                listener->onResponseStatus(status, headers);
+            }
             break;
         }
 
@@ -678,46 +847,20 @@ Transaction::Impl::processRequest(DWORD error)
             // {#139} honor 0% and 100% guarantees for send progress.
             // at the point we're fetching the response, we've
             // already sent the request
-            if (!m_zeroSendProgressSent) {
-                m_pListener->onSendProgress(0, m_sendTotalBytes, 0.0);
-                m_zeroSendProgressSent = true;
-            }
-            if (!m_hundredSendProgressSent) {
-                m_pListener->onSendProgress(m_sendTotalBytes, m_sendTotalBytes,
-                                            100.0);
-                m_hundredSendProgressSent = true;
-            }
+            finalizeSendProgress();
 
             m_eState = eResponseReceiveData;
             bool done = false;
             error = writeResponseData(done);
-            double percent = 0.0;
-            if (m_receiveTotalBytes != 0) {
-                percent = ((double)m_bytesReceived/m_receiveTotalBytes)*100.0;
-            }
-            if (percent > 100.0) percent = 100.0;
 
-            // honor our 0% guarantee, 100% will be sent on completion
-            if (!m_zeroReceiveProgressSent) {
-                m_pListener->onReceiveProgress(0, m_receiveTotalBytes, 0.0);
-                m_zeroReceiveProgressSent = true;
-                m_lastProgressSent = 0.0;
-            }
-            if (percent > m_lastProgressSent) {
-                m_pListener->onReceiveProgress(m_bytesReceived,
-                                               m_receiveTotalBytes,
-                                               percent);
-                m_lastProgressSent = percent;
-            }
-            if (percent >= 100.0) {
-                m_hundredReceiveProgressSent = true;
-            }
-
-            m_pListener->onResponseBodyBytes(m_pReceiveBuffer, 
-                                             m_bytesInReceiveBuffer);
+            reportReceiveProgress();
+            
+            if (listener) listener->onResponseBodyBytes(m_pReceiveBuffer, 
+                                                        m_bytesInReceiveBuffer);
             if (done) {
                 m_eState = eDone;
-                m_pListener->onComplete();
+                finalizeReceiveProgress();
+                if (listener) listener->onComplete();
                 // now we'll invoke closed after an async break so that
                 // if we're deleted on the onClosed call, we don't
                 // go and try to romp around in our memory later.
@@ -731,10 +874,10 @@ Transaction::Impl::processRequest(DWORD error)
     // deal with the terminal stuff
     if (m_bCancel) {
         closeConnection();
-        m_pListener->onCancel();
+        if (listener) listener->onCancel();
     } else if (m_eState == eTimedOut) {
         closeConnection();
-        m_pListener->onTimeout();
+        if (listener) listener->onTimeout();
     }
 }
 
@@ -812,6 +955,9 @@ Transaction::Impl::openRequest()
     DWORD dwRequestFlags = INTERNET_FLAG_RELOAD | 
                            INTERNET_FLAG_NO_CACHE_WRITE |
                            INTERNET_FLAG_NO_COOKIES;
+    if (m_pRequest->url.scheme() == "https") {
+        dwRequestFlags |= INTERNET_FLAG_SECURE;
+    }
 
     wstring wsMethod = bp::strutil::utf8ToWide(m_pRequest->method.toString());
     wstring wsResource = bp::strutil::utf8ToWide(
@@ -1375,10 +1521,118 @@ Transaction::Impl::onWininetCallback(HINTERNET /* hInternet */,
 }
 
 
+static double
+calcPercent( double numerator, double denominator )
+{
+    // Two policy choices: return 0 if denom = 0
+    //                     0 <= return val <= 100
+    double percent = denominator ? (numerator/denominator)*100 : 0;
+    return min(max(percent, 0.), 100.);
+}
+
+
+void
+Transaction::Impl::reportSendProgress()
+{
+    if (!m_zeroSendProgressSent) {
+        doSendProgressReport( 0, m_sendTotalBytes, 0 );
+    }
+
+    double percent = calcPercent( m_bytesSent, m_sendTotalBytes );
+    if (percent > m_lastSendProgressSent) {
+        doSendProgressReport( m_bytesSent, m_sendTotalBytes, percent );
+    }
+}
+
+
+void
+Transaction::Impl::reportReceiveProgress()
+{
+    if (!m_zeroReceiveProgressSent) {
+        doReceiveProgressReport( 0, m_receiveTotalBytes, 0 );
+    }
+
+    // TODO: there's a weirdness here in the chunked encoding case.
+    //       m_receiveTotalBytes will be zero in that case.
+    double percent = calcPercent( m_bytesReceived, m_receiveTotalBytes );
+    if (percent > m_lastReceiveProgressSent) {
+        doReceiveProgressReport( m_bytesReceived, m_receiveTotalBytes,
+                                 percent );
+    }
+}
+
+
+void
+Transaction::Impl::finalizeSendProgress()
+{
+    if (!m_zeroSendProgressSent) {
+        doSendProgressReport( 0, m_sendTotalBytes, 0 );
+    }
+    if (!m_hundredSendProgressSent) {
+        doSendProgressReport( m_sendTotalBytes, m_sendTotalBytes, 100 );
+    }
+}
+
+
+void
+Transaction::Impl::finalizeReceiveProgress()
+{
+    // m_receiveTotalBytes will be zero when Content-Length header is
+    // absent, e.g. for response with chunked encoding.
+    // TODO: normalize this with reportReceiveProgress.
+    size_t totalBytes = (m_receiveTotalBytes > 0) ? m_receiveTotalBytes
+                                                  : m_bytesReceived;
+
+    if (!m_zeroReceiveProgressSent) {
+        doReceiveProgressReport( 0, totalBytes, 0 );
+    }
+    if (!m_hundredReceiveProgressSent) {
+        doReceiveProgressReport( totalBytes, totalBytes, 100 );
+    }
+}
+
+
+void
+Transaction::Impl::doSendProgressReport( size_t bytesProcessed,
+                                         size_t totalBytes,
+                                         double percent )
+{
+    IListenerPtr l = m_pListener.lock();
+    if (l) l->onSendProgress( bytesProcessed, totalBytes, percent );
+
+    m_lastSendProgressSent = percent;
+    
+    if (percent == 0) {
+        m_zeroSendProgressSent = true;
+    } else if (percent == 100) {
+        m_hundredSendProgressSent = true;
+    }
+}
+
+
+void
+Transaction::Impl::doReceiveProgressReport( size_t bytesProcessed,
+                                            size_t totalBytes,
+                                            double percent )
+{
+    IListenerPtr l = m_pListener.lock();
+    if (l) l->onReceiveProgress( bytesProcessed, totalBytes, percent );
+
+    m_lastReceiveProgressSent = percent;
+
+    if (percent == 0) {
+        m_zeroReceiveProgressSent = true;
+    } else if (percent == 100) {
+        m_hundredReceiveProgressSent = true;
+    }
+}
+
+
+
 ///////////////////////////////////////////////////////////////////////////
 // Transaction methods
 //
-// Note here were using the "pImpl" or "Handle-body" idiom to keep
+// Note here we're using the "pImpl" or "Handle-body" idiom to keep
 // os-specific members out of our .h file and instead declare an opaque pointer
 // to impl.
 
@@ -1400,9 +1654,10 @@ double Transaction::defaultTimeoutSecs()
 }
 
         
-void Transaction::initiate(IListener* pListener)
+void Transaction::initiate(IListenerWeakPtr pListener)
 {
-    if (pListener == NULL) {
+    IListenerPtr p = pListener.lock();
+    if (p && p == NULL) {
         BP_THROW_FATAL("null listener");
     }
     m_pImpl->initiate(pListener);

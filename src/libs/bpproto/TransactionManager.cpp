@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -221,20 +221,20 @@ TransactionManager::onResponse(bp::ipc::Channel *,
     else if (!response.command().compare("Require"))
     {
         if (t.requireCB) {        
-            BPCoreletDefinition ** defs = NULL;
+            BPServiceDefinition ** defs = NULL;
             unsigned int numDefs = 0;
     
             std::string e, ve;
     
             if (ec == BP_EC_OK) {
-                // translate "results" into a list of BPCoreletDefinition 
+                // translate "results" into a list of BPServiceDefinition 
                 if (!payload || payload->type() != BPTList) {
                     ec = BP_EC_PROTOCOL_ERROR;
                 } else {
                     std::vector<const bp::Object *> l = *payload;
 
                     numDefs = l.size();
-                    defs = new BPCoreletDefinition*[numDefs];
+                    defs = new BPServiceDefinition*[numDefs];
                     for (unsigned int i = 0; i < numDefs; ++i) {
                         defs[i] = objectToDefinition(l[i]);
                     }
@@ -245,7 +245,7 @@ TransactionManager::onResponse(bp::ipc::Channel *,
     
             // invoke client callback
             t.requireCB(ec, t.cookie,
-                         (const BPCoreletDefinition**) defs,
+                         (const BPServiceDefinition**) defs,
                          numDefs,
                          e.empty() ? NULL : e.c_str(),
                          ve.empty() ? NULL : ve.c_str());
@@ -261,11 +261,11 @@ TransactionManager::onResponse(bp::ipc::Channel *,
     else if (!response.command().compare("Describe") &&
              t.type == Transaction::Describe)
     {
-        BPCoreletDefinition * def = NULL;
+        BPServiceDefinition * def = NULL;
         if (ec == BP_EC_OK) {
             // extract payload
             if (payload) {
-                // translate "results" into a BPCoreletDefinition 
+                // translate "results" into a BPServiceDefinition 
                 def = objectToDefinition(payload);
             }
             if (def == NULL) ec = BP_EC_PROTOCOL_ERROR;

@@ -1,5 +1,0 @@
-Patches
-=======
-
-  * tigerCompat_osx.patch -- inserts 10.4 compatibility
-              link & compile flags into CMakeLists.txt

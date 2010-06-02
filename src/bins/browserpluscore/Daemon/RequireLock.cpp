@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -22,7 +22,7 @@
 
 /**
  * RequireLock, a singleton mechanism which helps gaurantee that only
- * one session at a time is allowed to require corelets. (YIB-1770124)
+ * one session at a time is allowed to require services. (YIB-1770124)
  *
  * Created by Lloyd Hilaiel on Mon Feb 25th 2008.
  * Copyright (c) 2008-2009 Yahoo!, Inc. All rights reserved.

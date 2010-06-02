@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -77,10 +77,12 @@ NPAPIPlugin::setWindow(NPWindow* window)
 #ifdef WIN32
     // this is a HWND
     m_windowPtr = (void *) (window->window);
-#else
+#elif defined(MACOSX)
     // this is a WindowRef (may be null)
     NP_CGContext* ctx = (NP_CGContext*)window->window;
     m_windowPtr = ctx->window;
+#else 
+#warning "Linux NPAPI graphics stuff needsta be implemented!"
 #endif
 }
 

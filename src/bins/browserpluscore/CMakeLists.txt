@@ -12,7 +12,7 @@
 # The Original Code is BrowserPlus (tm).
 # 
 # The Initial Developer of the Original Code is Yahoo!.
-# Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+# Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
 # All rights reserved.
 # 
 # Contributor(s): 
@@ -32,7 +32,7 @@ ELSEIF (LINUX)
 ENDIF(APPLE)
 
 SET(BrowserPlusCore_LINK_STATIC 
-    DistributionClient CoreletManager Permissions
+    DistributionClient ServiceManager Permissions
     ServiceRunnerLib BPUtils I18n)
 
 YBT_BUILD(BINARY BrowserPlusCore)

@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -28,8 +28,8 @@
  *
  */
 #include "AutoShutdown.h"
-#include "CoreletInstaller.h"
-#include "CoreletUpdater.h"
+#include "ServiceInstaller.h"
+#include "ServiceUpdater.h"
 #include "PlatformUpdater.h"
 #include "Permissions/Permissions.h"
 #include "BPDaemon.h"
@@ -91,8 +91,8 @@ AutoShutdownAgent::timesUp(bp::time::Timer * /*t*/)
     // the daemon.
     else if ((m_sessionManager->numCurrentSessions() == 0) &&
              !PlatformUpdater::isBusy() &&
-             !CoreletInstaller::isBusy() &&
-             !CoreletUpdater::isBusy() &&
+             !ServiceInstaller::isBusy() &&
+             !ServiceUpdater::isBusy() &&
              !PermissionsManager::get()->isBusy() &&
              !BPDaemon::getSharedDaemon()->registry()->isBusy())
     {

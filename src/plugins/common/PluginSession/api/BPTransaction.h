@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -41,7 +41,7 @@ class BPTransaction
 
     unsigned int tid();
     
-    // in the case of a transaction using BPProtocol (corelet, not pluglet)
+    // in the case of a transaction using BPProtocol (service, not pluglet)
     // we'll keep the protocol transaction id here, for future cancelation.
     unsigned int m_bpProtoTransactionID;
 

@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -33,7 +33,7 @@
 #include "BPUtils/bprandom.h"
 #include "BPUtils/OS.h"
 #include "BPUtils/ProductPaths.h"
-#include "CoreletInstaller.h"
+#include "ServiceInstaller.h"
 #include "Permissions/Permissions.h"
 #include "PlatformUpdater.h"
 
@@ -50,7 +50,7 @@ const char* RequireRequest::kRequireStatementsKey =
 const char* RequireRequest::kVersionSeparator = "/";
 
 RequireRequest::RequireRequest(
-    const list<CoreletRequireStatement>& requires,
+    const list<ServiceRequireStatement>& requires,
     BPCallBack progressCallback,
     weak_ptr<ActiveSession> activeSession,
     unsigned int tid,
@@ -178,13 +178,13 @@ RequireRequest::silentServiceUpdate(const std::string& service,
                                                                        service);
     if (perm == PermissionsManager::eAllowed) {
         if (m_distQuery->isCached(service, version)) {
-            if (m_distQuery->installCoreletFromCache(service, version)) {
+            if (m_distQuery->installServiceFromCache(service, version)) {
                 BPLOG_INFO_STRM("silent update of " << service
                                 << "/" << version << " for domain " << domain);
                 m_registry->forceRescan();
             } else {
                 stringstream ss;
-                ss << "error updating corelet " << service << " / " << version;
+                ss << "error updating service " << service << " / " << version;
                 BPLOG_WARN_STRM(m_smmTid << " Require fails: " << ss.str());
                 postFailure("core.serverError", ss.str());
             }
@@ -236,20 +236,20 @@ RequireRequest::doRun()
     
     // can we satisfy everything?
     bool haveAllServices = true;
-    list<CoreletRequireStatement>::const_iterator it;
+    list<ServiceRequireStatement>::const_iterator it;
 
     // First check installed services for missing needed provider services.
     // If any providers are missing, add them to the request.
-    list<CoreletRequireStatement> toAdd;
+    list<ServiceRequireStatement> toAdd;
     for (it = m_requires.begin(); it != m_requires.end(); ++it) {
         bp::service::Summary summary;
         if (m_registry->summary(it->m_name, it->m_version,
                                 it->m_minversion, summary)) {
-            string providerName = summary.usesCorelet();
+            string providerName = summary.usesService();
             if (!providerName.empty()) {
                 string providerVersion = summary.usesVersion().asString();
                 string providerMinversion = summary.usesMinversion().asString();
-                CoreletRequireStatement rs = {providerName, providerVersion,
+                ServiceRequireStatement rs = {providerName, providerVersion,
                                               providerMinversion};
                 bp::service::Summary providerSummary;
                 if (!m_registry->summary(providerName, providerVersion,
@@ -288,7 +288,7 @@ RequireRequest::doRun()
             }
         } else {
             // info logging good here, this is not the common case
-            BPLOG_INFO_STRM(m_smmTid << " no active corelet which satisfies: "
+            BPLOG_INFO_STRM(m_smmTid << " no active service which satisfies: "
                             << (it->m_name) << " - "
                             << (it->m_version) << " - "
                             << (it->m_minversion));
@@ -298,7 +298,7 @@ RequireRequest::doRun()
     
     // What's installed?
     list<bp::service::Summary> installed =
-        m_registry->availableCoreletSummaries();
+        m_registry->availableServiceSummaries();
     
     std::string platform = bp::os::PlatformAsString();
     if (haveAllServices) {
@@ -307,7 +307,7 @@ RequireRequest::doRun()
         m_toInstall = m_distQuery->haveUpdates(m_requires, installed);
         
         // silently install approved service updates
-        CoreletList::iterator it = m_toInstall.begin();
+        ServiceList::iterator it = m_toInstall.begin();
         while (it != m_toInstall.end()) {
             if (silentServiceUpdate(it->first, it->second)) {
                 it = m_toInstall.erase(it);
@@ -317,7 +317,7 @@ RequireRequest::doRun()
         }
         
         if (m_toInstall.empty()) {
-            // no corelet updates, may have platform updates
+            // no service updates, may have platform updates
             updateRequireHistory(m_requires);
             if (m_permissions.empty() && m_platformUpdates.empty()) {
                 // we're golden
@@ -332,20 +332,20 @@ RequireRequest::doRun()
 
         if (m_distTid == 0) {
             BPLOG_WARN_STRM(m_smmTid
-                            << " Require fails: getting corelet descriptions");
+                            << " Require fails: getting service descriptions");
             postFailure("core.distConnError",
-                        "error getting corelet descriptions");
+                        "error getting service descriptions");
             return;
         }
     } else {
-        // Gotta download and install some corelets
+        // Gotta download and install some services
         m_distTid = m_distQuery->satisfyRequirements(platform, m_requires,
                                                      installed);
         if (m_distTid == 0) {
             BPLOG_WARN_STRM(m_smmTid << " Require fails: couldn't "
                             << "initiate requirement satisfaction");
             postFailure("core.distConnError",
-                        "error getting corelet requirements");
+                        "error getting service requirements");
             return;
         }
     }
@@ -556,7 +556,7 @@ RequireRequest::checkPlatformUpdates()
 
 
 void
-RequireRequest::installNextCorelet()
+RequireRequest::installNextService()
 {
     // first handle platform updates
     for (unsigned int i = 0; i < m_platformUpdates.size(); i++) {
@@ -565,7 +565,7 @@ RequireRequest::installNextCorelet()
     }
     m_platformUpdates.clear();
     
-    // now work on corelets
+    // now work on services
     if (!m_toInstall.empty()) {
         // initiate next update or download/install
         pair<std::string, std::string> item = m_toInstall.front();
@@ -575,9 +575,9 @@ RequireRequest::installNextCorelet()
 
         if (m_distQuery->isCached(item.first, item.second)) {
             postProgress(item.first, item.second, 0);
-            if (!m_distQuery->installCoreletFromCache(item.first, item.second)) {
+            if (!m_distQuery->installServiceFromCache(item.first, item.second)) {
                 stringstream ss;
-                ss << "error updating corelet " << item.first
+                ss << "error updating service " << item.first
                    << " / " << item.second;
                 BPLOG_WARN_STRM(m_smmTid << " Require fails: " << ss.str());
                 postFailure("core.serverError", ss.str());
@@ -585,14 +585,14 @@ RequireRequest::installNextCorelet()
             }
             postProgress(item.first, item.second, 100);
             m_registry->forceRescan();
-            installNextCorelet();
+            installNextService();
         } else {
-            m_installTid = CoreletInstaller::installCorelet(
-                item.first, item.second, bp::paths::getCoreletDirectory(),
+            m_installTid = ServiceInstaller::installService(
+                item.first, item.second, bp::paths::getServiceDirectory(),
                 shared_from_this());
             if (m_installTid == 0) {
                 stringstream ss;
-                ss << "error installing corelet " << item.first
+                ss << "error installing service " << item.first
                    << " / " << item.second;
                 BPLOG_WARN_STRM(m_smmTid << " Require fails: " << ss.str());
                 postFailure("core.canNotInstall", ss.str());
@@ -631,7 +631,7 @@ RequireRequest::installStatus(unsigned int installId,
     }
         
     // don't post 0/100 percent progress. they are handled by 
-    // installNextCorelet and our receipt of a InstalledEvent
+    // installNextService and our receipt of a InstalledEvent
     if (pct != 0 && pct != 100) postProgress(name, version, pct);
 }
 
@@ -648,9 +648,9 @@ RequireRequest::installed(unsigned int installId,
         return;
     }
         
-    // successful installation! install the next corelet in the queue
+    // successful installation! install the next service in the queue
     postProgress(name, version, 100);
-    installNextCorelet();
+    installNextService();
 }
 
 // invoked when installation fails
@@ -663,8 +663,8 @@ RequireRequest::installationFailed(unsigned int installId)
         return;
     }
         
-    BPLOG_WARN("Require fails, could not install corelet");
-    postFailure("core.serverError", "could not attain corelet");
+    BPLOG_WARN("Require fails, could not install service");
+    postFailure("core.serverError", "could not attain service");
 }
 
 void
@@ -707,7 +707,7 @@ RequireRequest::onUserResponse(unsigned int cookie, const bp::Object & resp)
             pmgr->setAutoUpdatePlatform(domain, perm);
         }
 
-        CoreletList::const_iterator ci;
+        ServiceList::const_iterator ci;
         for (ci = m_toInstall.begin(); ci != m_toInstall.end(); ++ci) {
             pmgr->setAutoUpdateService(domain, ci->first, perm);
         }
@@ -737,7 +737,7 @@ RequireRequest::onUserResponse(unsigned int cookie, const bp::Object & resp)
     }
         
     if (allow) {
-        installNextCorelet();
+        installNextService();
     } else {
         if (m_permissions.size() > 0) {
             BPLOG_WARN("Require fails: permission denied");
@@ -771,7 +771,7 @@ RequireRequest::onTransactionFailed(unsigned int tid)
 
 void
 RequireRequest::onRequirementsSatisfied(unsigned int tid,
-                                        const CoreletList & clist)
+                                        const ServiceList & clist)
 {
     if (tid != m_distTid) {
         BPLOG_WARN_STRM(m_smmTid << " Got SatisfyRequirementsEvent "
@@ -787,7 +787,7 @@ RequireRequest::onRequirementsSatisfied(unsigned int tid,
         return;
     }
         
-    // Got some corelets to update/install.  Get localized descriptions
+    // Got some services to update/install.  Get localized descriptions
     list<pair<std::string, std::string> >::const_iterator li;
     for (li = clist.begin(); li != clist.end(); ++li) {
         if (!silentServiceUpdate(li->first, li->second)) {
@@ -802,7 +802,7 @@ RequireRequest::onRequirementsSatisfied(unsigned int tid,
     if (m_distTid == 0) {
         BPLOG_WARN("Require fails: couldn't localize descriptions");
         postFailure("core.serverError",
-                    "unable to request localized corelet descriptions");
+                    "unable to request localized service descriptions");
         return;     
     }
 }
@@ -816,7 +816,7 @@ RequireRequest::gotServiceSynopsis(unsigned int tid,
                         << " Got LocalizedDescriptionsEvent event with "
                         << "unknown tid: " << tid);  
         postFailure("core.serverError",
-                    "internal error when localizing corelet descriptions");
+                    "internal error when localizing service descriptions");
         return;
     }
 
@@ -830,9 +830,9 @@ RequireRequest::gotServiceSynopsis(unsigned int tid,
 
 void 
 RequireRequest::updateRequireHistory(
-    const std::list<CoreletRequireStatement> & requires)
+    const std::list<ServiceRequireStatement> & requires)
 {
-    std::list<CoreletRequireStatement>::const_iterator it;
+    std::list<ServiceRequireStatement>::const_iterator it;
     for (it = requires.begin(); it != requires.end(); ++it) {
         string name(it->m_name);
         string version(it->m_version);
@@ -953,7 +953,7 @@ RequireRequest::promptUser()
         && servicesToPromptFor.empty())
     {
         if (m_toInstall.empty()) postSuccess();
-        else installNextCorelet();
+        else installNextService();
     } else {
         m_promptCookie = bp::random::generate();
         asp->displayInstallPrompt(shared_from_this(), m_promptCookie, perms,
@@ -967,7 +967,7 @@ void
 RequireRequest::postSuccess()
 {
     bp::List rlist;
-    list<CoreletRequireStatement>::const_iterator li;
+    list<ServiceRequireStatement>::const_iterator li;
     for (li = m_requires.begin(); li != m_requires.end(); ++li) {
         bp::service::Description desc;
         if (!m_registry->describe(li->m_name, li->m_version,
@@ -978,7 +978,7 @@ RequireRequest::postSuccess()
                 "RequireRequest::postSuccess(), no description for "
                 << li->m_name << "/" << li->m_version << "/"
                 << li->m_minversion);
-            postFailure("core.serverError", "could not attain corelet");
+            postFailure("core.serverError", "could not attain service");
             return;
         }
         bp::Object* obj = desc.toBPObject();

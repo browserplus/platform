@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -100,26 +100,26 @@ namespace bp {
                                      int micro = -1);
          
         /**
-         *   Get path to corelet directory.
+         *   Get path to service directory.
          *   Throws a fatal exception on failure.
-         *   \return   path to corelet directory
+         *   \return   path to service directory
          */
-        bp::file::Path getCoreletDirectory();
+        bp::file::Path getServiceDirectory();
         
         /**
-         *   Get path to corelet cache directory.
+         *   Get path to service cache directory.
          *   Throws a fatal exception on failure.
-         *   \return   path to corelet cache directory
+         *   \return   path to service cache directory
          */
-        bp::file::Path getCoreletCacheDirectory();
+        bp::file::Path getServiceCacheDirectory();
         
         /**
-         *   Get path to cached corelet interface (stored on disk in json
+         *   Get path to cached service interface (stored on disk in json
          *   format).
          *   Throws a fatal exception on failure.
          *   \return path to pid file
          */
-        bp::file::Path getCoreletInterfaceCachePath();
+        bp::file::Path getServiceInterfaceCachePath();
         
         /**
          *   Get path to platform cache directory.
@@ -129,18 +129,18 @@ namespace bp {
         bp::file::Path getPlatformCacheDirectory();
         
         /**
-         *   Get path to corelet install log.
+         *   Get path to service install log.
          *   Throws a fatal exception on failure.
-         *   \return   path to corelet install log
+         *   \return   path to service install log
          */
-        bp::file::Path getCoreletLogPath();
+        bp::file::Path getServiceLogPath();
 
         /**
-         *   Get path to corelet data directory.
+         *   Get path to service data directory.
          *   Throws a fatal exception on failure.
-         *   \return   path to corelet data directory
+         *   \return   path to service data directory
          */
-        bp::file::Path getCoreletDataDirectory(std::string name,
+        bp::file::Path getServiceDataDirectory(std::string name,
                                                unsigned int major_ver);
         
         /**

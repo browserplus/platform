@@ -6,14 +6,14 @@ include Config
 
 # Create signing certificates and sign/verify files.  
 # This script is intended for use by the BrowserPlus team.
-# Even though this script can do it, corelet signing should
-# be done using the CoreletPublisher tool, which takes care
+# Even though this script can do it, service signing should
+# be done using the ServicePublisher tool, which takes care
 # of all packaging and publishing.  This scripts true use is
 # to generate certificates and sign/verify Windows executables
 # via signtool.  For testing, it can also be useful to validate
-# and unpack signed corelets.
+# and unpack signed services.
 
-# Corelet developers should use CoreletPublisher in the sdk.
+# Service developers should use ServicePublisher in the sdk.
 
 # On windows, if signing/verifying a .exe, .dll, or .cab then
 # microsoft's signtool is used.  Otherwise, openssl is used.

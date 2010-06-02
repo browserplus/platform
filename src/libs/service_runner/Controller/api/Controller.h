@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -119,7 +119,7 @@ namespace ServiceRunner
         /**
          * Instantiate a Controller for a installed service.  Path
          * to the service will be assumed to be standard installation
-         * path, determined using  bp::paths::getCoreletDirectory()
+         * path, determined using  bp::paths::getServiceDirectory()
          */
         Controller(const std::string & service, const std::string & version);
         /**
@@ -260,7 +260,11 @@ namespace ServiceRunner
         // only set in channelEnded case).
         bp::ipc::IConnectionListener::TerminationReason m_chanTermReason;
         std::string m_chanTermErrorString;
+
+        // Temp dirs that were provided to instances.
+        // We purge at end in case service does not.
+        std::vector<bp::file::Path> m_tempDirs;
     };
-};
+}
 
 #endif

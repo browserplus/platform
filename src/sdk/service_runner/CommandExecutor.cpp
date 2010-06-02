@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -57,7 +57,7 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::allocate)
     std::string uri("bpclient://");
     uri.append(BPCLIENT_UUID);
     bp::file::Path data_dir = 
-        bp::paths::getCoreletDataDirectory(m_desc.name(),
+        bp::paths::getServiceDataDirectory(m_desc.name(),
                                            m_desc.majorVersion());
     bp::file::Path tmpdir = bp::file::getTempDirectory();
     tmpdir = bp::file::getTempPath(tmpdir, m_desc.name());

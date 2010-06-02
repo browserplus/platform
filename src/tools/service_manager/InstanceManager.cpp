@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -39,7 +39,7 @@ InstanceManager::~InstanceManager()
 
 void
 InstanceManager::onAllocationSuccess(unsigned int allocationId,
-                                     shared_ptr<CoreletInstance> instance)
+                                     shared_ptr<ServiceInstance> instance)
 {
     std::cout << "instance allocated: " << allocationId << std::endl;
     instance->setListener(shared_from_this());
@@ -53,11 +53,11 @@ InstanceManager::onAllocationFailure(unsigned int allocationId)
     // TODO: handle
 }
 
-shared_ptr<CoreletInstance>
+shared_ptr<ServiceInstance>
 InstanceManager::findInstance(unsigned int id)
 {
-    shared_ptr<CoreletInstance> ptr;
-    std::map<unsigned int, shared_ptr<CoreletInstance> >::iterator it;
+    shared_ptr<ServiceInstance> ptr;
+    std::map<unsigned int, shared_ptr<ServiceInstance> >::iterator it;
     if ((it = m_instances.find(id)) != m_instances.end()) ptr = it->second;
     return ptr;
 }
@@ -65,7 +65,7 @@ InstanceManager::findInstance(unsigned int id)
 void
 InstanceManager::destroy(unsigned int allocationId)
 {
-    std::map<unsigned int, shared_ptr<CoreletInstance> >::iterator it;
+    std::map<unsigned int, shared_ptr<ServiceInstance> >::iterator it;
     it = m_instances.find(allocationId);
 
     if (it == m_instances.end()) {

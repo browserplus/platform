@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -42,7 +42,7 @@ static bp::runloop::RunLoop s_rl;
 static APTArgDefinition g_args[] = {
     { "log", APT::TAKES_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
       APT::NOT_INTEGER, APT::MAY_RECUR,
-      "enable console logging, argument like \"info,ThrdLvlFuncMsg\""
+      "enable console logging, argument is level (info, debug, etc.)"
     },
     { "logfile", APT::TAKES_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
       APT::NOT_INTEGER, APT::MAY_RECUR,
@@ -161,8 +161,10 @@ setupLogging(shared_ptr<APTArgParse> argParser)
     
     if (level.empty()) level = "info";
 
-    if (path.empty()) bp::log::setupLogToConsole(level);
-    else bp::log::setupLogToFile(path, level);
+    bp::log::Level logLevel = bp::log::levelFromString(level);
+
+    if (path.empty()) bp::log::setupLogToConsole(logLevel);
+    else bp::log::setupLogToFile(path, logLevel);
 }
 
 int main(int argc, const char ** argv)
@@ -228,7 +230,7 @@ int main(int argc, const char ** argv)
                   << "detecting service at: " << absPath << "\n";
     }
     
-    if (!summary.detectCorelet(absPath, error))
+    if (!summary.detectService(absPath, error))
     {
         std::cerr << "Invalid service: "
                   << std::endl << "  " << error << std::endl;
@@ -304,8 +306,8 @@ int main(int argc, const char ** argv)
 
     // attain convenient representation of name and version of service
     // we're publishing
-    std::string coreletName(desc.name());
-    std::string coreletVersion(desc.versionString());
+    std::string serviceName(desc.name());
+    std::string serviceVersion(desc.versionString());
 
     // now switch between local installation and pushing to distribution
     // server
@@ -318,7 +320,7 @@ int main(int argc, const char ** argv)
         }
 
         bool overwrote = false;
-        bp::file::Path destination = bp::paths::getCoreletDirectory() /coreletName / coreletVersion;
+        bp::file::Path destination = bp::paths::getServiceDirectory() /serviceName / serviceVersion;
         if (bp::file::exists(destination)) {
             if (argParser->argumentPresent("f")) {
                 if (!bp::file::remove(destination)) {
@@ -334,8 +336,8 @@ int main(int argc, const char ** argv)
             }
         }
 
-        // for local corelet installation all we do is copy it to the
-        // local corelet directory.
+        // for local service installation all we do is copy it to the
+        // local service directory.
         try {
             boost::filesystem::create_directories(destination);
         } catch(const bp::file::tFileSystemError&) {
@@ -346,8 +348,8 @@ int main(int argc, const char ** argv)
 
         if (argParser->argumentPresent("v")) {
             std::cout << "installing service locally: "
-                      << coreletName << ", ver "
-                      << coreletVersion
+                      << serviceName << ", ver "
+                      << serviceVersion
                       << std::endl;
         }
         
@@ -389,8 +391,8 @@ int main(int argc, const char ** argv)
     
     // all done!
     if (argParser->argumentPresent("v")) {    
-        std::cout << coreletName << " "
-                  << coreletVersion
+        std::cout << serviceName << " "
+                  << serviceVersion
                   << " validated "
                   << (argParser->argumentPresent("n") ? "" : "and installed ")
                   << "in "

@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -21,8 +21,6 @@
  */
 
 #include "BPInstaller/BPInstaller.h"
-#include <string>
-#include <list>
 #include "BPUtils/ARGVConverter.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/bplocalization.h"
@@ -30,11 +28,17 @@
 #include "BPUtils/bprunloop.h"
 #include "BPUtils/ProcessLock.h"
 #include "BPUtils/ProductPaths.h"
+#include "BPUtils/OS.h"
+#include "BPUtils/InstallID.h"
 #include "InstallerSkin.h"
 #include "InstallerSkinVerbose.h"
 #include "InstallerSkinGUI.h"
 #include "InstallerRunner.h"
 #include "InstallProcessRunner.h"
+
+#include <string>
+#include <list>
+#include <string.h>
 
 using namespace std;
 using namespace std::tr1;
@@ -64,7 +68,7 @@ public:
     } tCommand;
 
     AsyncHelper(const Path& keyPath,
-				const list<CoreletRequireStatement>& services,
+				const list<ServiceRequireStatement>& services,
                 const list<string>& distroServers,
                 const Path& destDir,
                 bp::runloop::RunLoop* rl)
@@ -157,7 +161,7 @@ public:
 
 private:
     bp::install::Fetcher m_fetcher;
-    list<CoreletRequireStatement> m_services;
+    list<ServiceRequireStatement> m_services;
     bp::runloop::RunLoop* m_rl;
     weak_ptr<bp::install::IFetcherListener> m_listener;
 
@@ -170,7 +174,7 @@ runIt(AsyncHelper::tCommand command,
 	  const Path& keyPath,
       const list<string>& servers,
       const Path& destDir,
-      list<CoreletRequireStatement> services = list<CoreletRequireStatement>())
+      list<ServiceRequireStatement> services = list<ServiceRequireStatement>())
 { 
     bp::runloop::RunLoop rl;
     rl.init();
@@ -211,7 +215,7 @@ public:
                    const Path& keyPath,
                    const list<string>& servers,
                    const string& version,
-                   const list<CoreletRequireStatement> & services,
+                   const list<ServiceRequireStatement> & services,
                    const string& permissions,
                    const string& autoUpdatePermissions,
                    shared_ptr<InstallerSkin> skin,
@@ -228,7 +232,7 @@ public:
           m_width(width), m_height(height), m_title(title),
           m_installerLock(NULL), m_state(ST_Started),
           m_downloadingServices(false), m_26orLater(false), m_logPath(logPath),
-          m_logLevel(logLevel)
+          m_logLevel(logLevel), m_distQuery()
           
     {
         if (m_skin != NULL) m_skin->setListener(this);
@@ -266,7 +270,7 @@ private:
     list<string> m_servers;
     string m_platformVersion;
     size_t m_platformSize;
-    list<CoreletRequireStatement> m_services;
+    list<ServiceRequireStatement> m_services;
     string m_permissions;
     string m_autoUpdatePermissions;
     shared_ptr<InstallerSkin> m_skin;
@@ -306,11 +310,16 @@ private:
     
     Path m_logPath;
     string m_logLevel;
+    shared_ptr<DistQuery> m_distQuery; // only set for new installs
 
     // do the body of the installation.  This should be broken up into
     // asynchronous steps
     void doInstall()
     {
+        if (exists(bp::paths::getInstallIDPath()) == false) {
+            m_distQuery.reset(new DistQuery(m_servers, NULL));
+        }
+
         // used to format messages for the output skin
         stringstream ss; 
        
@@ -471,9 +480,6 @@ private:
     {
         if (m_state == ST_WaitingToEnd) {
             m_state = ST_AllDone;
-            m_rl->stop();            
-            bp::file::remove(m_destDir);
-            if (m_skin) m_skin->ended();
             doExit(0);
         }
     }
@@ -481,6 +487,11 @@ private:
     void doExit(int status)
     {
         BPLOG_DEBUG_STRM("exit with status " << status);
+
+        m_rl->stop();            
+        bp::file::remove(m_destDir);
+        if (m_skin) m_skin->ended();
+
 #ifdef MACOSX
         if (m_exeDir.utf8().find("/Volumes/BrowserPlusInstaller") == 0) {
             BPLOG_DEBUG("detach /Volumes/BrowserPlusInstaller");
@@ -489,6 +500,16 @@ private:
             BPLOG_DEBUG_STRM(m_exeDir << " not mounted at /Volumes/BrowserPlusInstaller");
         }
 #endif
+        // if all went well and this is a new install (m_distQuery != NULL),
+        // report the install
+        if ((m_state == ST_AllDone) && m_distQuery) {
+            string os = bp::os::PlatformAsString() + " " + bp::os::PlatformVersion();
+            string id = bp::plat::getInstallID();
+            if (m_distQuery->reportInstall(os, m_platformVersion, id) == 0) {
+                BPLOG_ERROR("DistQuery::reportInstall returned tid==0");
+            }
+        }
+
         exit(status);
     }
 
@@ -503,9 +524,6 @@ private:
     void cancelInstallation()
     {
         m_state = ST_Canceled;
-        m_rl->stop();        
-        bp::file::remove(m_destDir);
-        if (m_skin) m_skin->ended();
         doExit(0);
     }
 
@@ -617,7 +635,7 @@ readConfig(const Path& configPath,
 		   list<string>& servers,
            Path& updatePackage,
            string& version,
-           list<CoreletRequireStatement>& services,
+           list<ServiceRequireStatement>& services,
            string& permissions,
            string& autoUpdatePermissions,
            unsigned int& width,
@@ -665,7 +683,7 @@ readConfig(const Path& configPath,
     // Get list of requested services
     if (configMap->getList("services", l)) {
         for (unsigned int i = 0; i < l->size(); i++) {
-            CoreletRequireStatement req;
+            ServiceRequireStatement req;
             const bp::Map* m = dynamic_cast<const bp::Map*>(l->value(i));
             if (!m) {
                 BP_THROW("bad config file format");
@@ -729,9 +747,9 @@ static void
 usage()
 {
     stringstream ss;
-    ss << "usage: BrowserPlusInstaller [-nogui=<anything> [-verbose=<anything>] "
+    ss << "usage: BrowserPlusInstaller [-nogui=<anything>] [-verbose=<anything>] "
        << "[-pkg=<path>] [-log=<loglevel>] [-logfile=<filename>|console] "
-       << "[-appendToLog=<anything>] [-locale=<locale>]";
+       << "[-locale=<locale>]";
     BPLOG_ERROR(ss.str());
     cerr << ss.str() << endl;
     exit(-1);
@@ -788,7 +806,6 @@ main(int argc, const char** argv)
 
         Path updatePkg;
         string version;
-        bool truncateLog = true;
 
         vector<string> args;
         for (int i = 1; i < argc; i++) {
@@ -805,8 +822,6 @@ main(int argc, const char** argv)
                 }
             } else if (!args[0].compare("-log")) {
                 logLevel = args[1];
-            } else if (!args[0].compare("-appendToLog")) {
-                truncateLog = false;
             } else if (!args[0].compare("-verbose")) {
                 skin.reset(new InstallerSkinVerbose);
             } else if (!args[0].compare("-nogui")) {
@@ -836,13 +851,12 @@ main(int argc, const char** argv)
         // set the appropriate locale for strings generated from the Installer
         Path stringsPath = exeDir / "strings.json";
         Installer::setLocalizedStringsPath(stringsPath, locale);
-    
+
+        bp::log::Level bpLogLevel = bp::log::levelFromString(logLevel);
         if (!logFile.empty()) {
-            bp::log::setupLogToFile(logFile, logLevel,
-                                    truncateLog ?
-                                    bp::log::kTruncate : bp::log::kAppend);
+            bp::log::setupLogToFile(logFile, bpLogLevel, bp::log::kAppend);
         } else if (!logLevel.empty()) {
-            bp::log::setupLogToConsole(logLevel);
+            bp::log::setupLogToConsole(bpLogLevel);
         }
 
         BPLOG_INFO_STRM("exeDir = " << exeDir);
@@ -874,7 +888,7 @@ main(int argc, const char** argv)
         (void) remove(destDir);  // doze re-uses same dir.  sigh
 
         list<string> servers;
-        list<CoreletRequireStatement> services;
+        list<ServiceRequireStatement> services;
         string permissions;
         // default width and height
         unsigned int width = 400, height = 440;
@@ -919,22 +933,17 @@ main(int argc, const char** argv)
         rl.run();
         rl.shutdown();
 
-        // Note, we won't get here, InstallerManager will call exit() 
-    } catch (const bp::error::Exception& e) {
-        BPLOG_ERROR(e.what());
+        // Note, we won't normally get here, InstallerManager will call exit() 
+    } catch (const std::exception& e) {
+        BP_REPORTCATCH(e);
         rval = -1;
-    } catch (const bp::error::FatalException& e) {
-        BPLOG_ERROR(e.what());
-        rval = -1;
-    } catch (const bp::file::tFileSystemError& e) {
-        BPLOG_ERROR(e.what());
+    } catch (...) {
+        BP_REPORTCATCH_UNKNOWN;
         rval = -1;
     }
 
-    // Note, we will only get here on exceptions.  Otherwiser, 
+    // Note, we will only get here on exceptions.  Otherwise, 
     // InstallerManager exits
-    if (!destDir.empty()) {
-        bp::file::remove(destDir);
-    }
+    bp::file::remove(destDir);
     exit(rval);
 }

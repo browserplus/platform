@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -45,7 +45,7 @@
 void
 ServicesUpdated::indicateServicesChanged()
 {
-    bp::file::Path path = bp::paths::getCoreletDirectory();
+    bp::file::Path path = bp::paths::getServiceDirectory();
     path /= SERVICES_UPDATED_FILENAME;
     bp::file::touch(path);
 }
@@ -53,7 +53,7 @@ ServicesUpdated::indicateServicesChanged()
 bool
 ServicesUpdated::servicesChanged()
 {
-    bp::file::Path path = bp::paths::getCoreletDirectory();
+    bp::file::Path path = bp::paths::getServiceDirectory();
     path /= SERVICES_UPDATED_FILENAME;
     if (bp::file::exists(path)) {
         (void) bp::file::remove(path);

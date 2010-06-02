@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -59,7 +59,7 @@ public:
     // This call will start the transaction and return immediately.
     // Specifying a NULL listener will cause a fatal exception.
     // Caller should not modify request body until request completes.
-    void initiate( IListener* pListener );
+    void initiate( IListenerWeakPtr pListener );
     
     // Cancel a transaction.  For an asynchronous request, the
     // the listener's onCancel() will be invoked.  For a 
@@ -86,7 +86,7 @@ public:
     // request, the returned FinalStatus will
     // have a code of eTimedOut
     void setTimeoutSec( double fSecs );
-    
+
 // State
 private:    
     class Impl;
@@ -97,6 +97,8 @@ private:
     Transaction( const Transaction& );
     Transaction& operator=( const Transaction& );
 };
+
+typedef std::tr1::shared_ptr<Transaction> TransactionPtr;
 
 
 } // namespace client

@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -21,9 +21,9 @@
  */
 
 /**
- * CoreletDescription
+ * ServiceDescription
  *
- * A Class which describes the functionality provided by a corelet.
+ * A Class which describes the functionality provided by a service.
  */
 
 #ifndef __SERVICEDESCRIPTION_H__
@@ -41,7 +41,7 @@
 namespace bp { namespace service {
 
 /**
- * an in memory representation of an argument to a function on a corelet
+ * an in memory representation of an argument to a function on a service
  */ 
 class Argument
 {
@@ -95,7 +95,7 @@ private:
 };
 
 /**
- * an in memory representation of a function supported by a corelet
+ * an in memory representation of a function supported by a service
  */ 
 class Function
 {
@@ -125,7 +125,7 @@ private:
 };
 
 /**
- * an in memory description of a corelet's interface
+ * an in memory description of a service's interface
  */ 
 class Description
 {
@@ -140,22 +140,25 @@ public:
      *  micro joined with '.' */
     std::string versionString() const;
 
+    /** get a string of the form: "name major.minor.version" */
+    std::string nameVersionString() const;
+    
     bp::ServiceVersion version() const;
 
-    /** get corelet major version */
+    /** get service major version */
     unsigned int majorVersion() const;
 
-    /** set corelet major version */
+    /** set service major version */
     void setMajorVersion(unsigned int majorVersion);    
 
-    /** get corelet minor version */
+    /** get service minor version */
     unsigned int minorVersion() const;
-    /** set corelet minor version */
+    /** set service minor version */
     void setMinorVersion(unsigned int minorVersion);    
 
-    /** get corelet micro version */
+    /** get service micro version */
     unsigned int microVersion() const;
-    /** set corelet micro version */
+    /** set service micro version */
     void setMicroVersion(unsigned int microVersion);    
 
     std::string docString() const;
@@ -169,7 +172,7 @@ public:
     /** get the function description */
     bool getFunction(const char * funcName, Function & oFunc) const;
 
-    /** generate a bp::Object representation of the corelet description.
+    /** generate a bp::Object representation of the service description.
      *  caller assumes ownership of returned value */
     bp::Object* toBPObject() const;
     
@@ -178,12 +181,12 @@ public:
     bool fromBPObject(const bp::Object* bp);
 
     /**
-     * populate the structure from a BPCoreletDefinition memory structure
+     * populate the structure from a BPServiceDefinition memory structure
      * returns false on failure, true on success.
      */
-    bool fromBPCoreletDefinition(const BPCoreletDefinition * bpcd);
+    bool fromBPServiceDefinition(const BPServiceDefinition * bpcd);
 
-    /** Does this corelet description describe a built in corelet? */
+    /** Does this service description describe a built in service? */
     bool isBuiltIn() const;
     void setIsBuiltIn(bool isBuiltIn);
 
@@ -199,8 +202,8 @@ private:
     unsigned int m_microVersion;    
     std::string m_docString;
     std::list<Function> m_functions;
-    // true for built in corelets, added using the
-    // CoreletRegistry::registerCorelet() call
+    // true for built in services, added using the
+    // ServiceRegistry::registerService() call
     bool m_builtIn;
 };
 
@@ -211,7 +214,7 @@ private:
  * NOTE:  "arguments" may be modified, for example when converting double
  *                    arguments to integers (thanks, Safari).
  *
- * this function is used by both the daemon (for corelets) and the
+ * this function is used by both the daemon (for services) and the
  * plugin (for pluglets)
  *
  * returns non-empty string on failure, containing a verbose error message

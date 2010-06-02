@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -163,9 +163,33 @@ ServiceProtocol::onQuery(bp::ipc::Channel *, const bp::ipc::Query & query,
         if (query.payload() && query.payload()->type() == BPTMap) {
             context = *((bp::Map *) query.payload());
         }
-        unsigned int id = m_lib->allocate(context);
-        response.setPayload(new bp::Integer(id));
-        return true;
+
+        if (!context.has("uri", BPTString) ||
+            !context.has("dataDir", BPTString) ||
+            !context.has("tempDir", BPTString) ||
+            !context.has("locale", BPTString) ||
+            !context.has("userAgent", BPTString) ||
+            !context.has("clientPid", BPTInteger))
+        {
+            BPLOG_ERROR_STRM("Malformed IPC payload to " << query.command()
+                             << " query");
+            return false;
+        }
+
+        unsigned int id = m_lib->allocate(
+            (std::string) *(context.get("uri")),
+            (std::string) *(context.get("dataDir")),
+            (std::string) *(context.get("tempDir")),
+            (std::string) *(context.get("locale")),
+            (std::string) *(context.get("userAgent")),
+            (unsigned int) (long long) *(context.get("clientPid")));
+
+        if (id) {
+            response.setPayload(new bp::Integer(id));
+            return true;
+        }
+
+        return false;
     }
     else
     {

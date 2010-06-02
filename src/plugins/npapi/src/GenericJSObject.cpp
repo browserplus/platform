@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -40,6 +40,8 @@
 #include "GenericJSObject.h"
 #include "BPUtils/BPLog.h"
 #include "nputils.h"
+
+#include <string.h>
 
 static std::string
 getStringFromIdentifier(NPIdentifier id)

@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -64,7 +64,7 @@ class BPSession
                        const plugin::Object* callback, 
                        plugin::Variant* result);
 
-    // enumerate the available services, both pluglets and corelets.
+    // enumerate the available services, both pluglets and services.
     bool enumerateServices(const plugin::Object* callback,
                            plugin::Variant* result);
 
@@ -128,13 +128,13 @@ class BPSession
     // Callback invoked by protocol library when enumerate is complete
     static void enumerateServicesCallback(BPErrorCode ec,
                                           void * cookie,
-                                          const BPElement * corelets);
+                                          const BPElement * services);
 
     // functions which implement RequireServices
     static void requireReturn(void * cookie);
     static void requireServicesCallback(BPErrorCode ec,
                                         void * cookie,
-                                        const BPCoreletDefinition ** defs,
+                                        const BPServiceDefinition ** defs,
                                         unsigned int numDefs,
                                         const char * error,
                                         const char * verboseError);
@@ -143,7 +143,7 @@ class BPSession
     static void describeReturn(void * cookie);
     static void describeServiceCallback(BPErrorCode ec,
                                         void * cookie,
-                                        const BPCoreletDefinition * def,
+                                        const BPServiceDefinition * def,
                                         const char * error,
                                         const char * verboseError);
 

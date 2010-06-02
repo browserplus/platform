@@ -13,8 +13,8 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (C) 2006-2009 Yahoo!.
- * All Rights Reserved.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
+ * All rights reserved.
  * 
  * Contributor(s): 
  * ***** END LICENSE BLOCK *****
@@ -1113,47 +1113,65 @@ Path::externalUtf8() const
 string 
 Path::url() const
 {
-    // Split out edges.  Note that if "s" started
-    // with "/", first edge will be empty.
     std::string s = utf8();
     if (s.empty()) {
         return std::string("");
     };
+
+    std::string rval = kFileUrlPrefix;
+
+    // Split out edges.  Must give special treatment
+    // to first and last edges.  On doze, first edge
+    // may be a drive specifier, in which case we don't 
+    // want to urlEncode it (e.g. file:///C:/path). 
+    // On doze, first edge may also be a host, which must
+    // appear as file://host/path.  Must remember if last edge
+    // was null in order to append trailing /.
+#ifdef WIN32
+    bool haveHost = (s.find("//") == 0);
+#endif
+    bool firstEdgeAdded = false;
+    bool lastEdgeNull = false;
     vector<std::string> edges;
     boost::algorithm::split(edges, s, boost::algorithm::is_any_of("/"));
-    std::string rval = kFileUrlPrefix;
-    unsigned int start = 0;
-    if (edges[0].empty()) {
-        start++;
-    }
+    for (vector<std::string>::const_iterator it = edges.begin();
+         it != edges.end(); ++it) {
+        if (it->empty()) {
+            lastEdgeNull = true;
+            continue;
+        }
+        lastEdgeNull = false;
+        if (!firstEdgeAdded) {
 #ifdef WIN32
-    // Windows hosts appear differently in pathname (//host/path)
-    // and must appear in final url as file://host/path.  Also
-    // want drive names, which appear as C:/foo, to appear in
-    // url as file:///C:/foo
-    if (edges[start].length() == 0) {
-        // have a host, e.g. //host/path
-        rval.append(edges[++start]);
-        start++;
-    } else if (edges[start].length() == 2 && edges[start][1] == ':') {
-        // have a drive, e.g. c:/foo
-        rval.append("/" + edges[start]);
-        start++;
-    }
+            size_t colon = it->rfind(":");
+            if (colon != std::string::npos && colon == it->length()-1) {
+                rval += "/" + *it;
+            } else {
+                if (haveHost) {
+                    rval += *it;
+                } else {
+                    rval += "/" + urlEncode(*it);
+                }
+            }
+#else
+            rval += "/" + urlEncode(*it);
 #endif
-
-    // add remaining edges
-    for (unsigned int i = start; i < edges.size(); i++) {
-        if (edges[i].length() > 0) {
-            rval.append("/");
-            rval.append(urlEncode(edges[i]));
+            firstEdgeAdded = true;
+        } else {
+            rval += "/" + urlEncode(*it);
         }
     }
+
+    // add trailing / if needed
+    if (lastEdgeNull) {
+        rval += "/";
+    }
+
     return rval;
 }
 
 
-Path 
+Path
 Path::canonical() const
 {
     tString dot = nativeFromUtf8(".");
@@ -1179,7 +1197,6 @@ Path::canonical() const
     }
     return rval;
 }
-
 
 
 Path
@@ -1240,59 +1257,77 @@ recursiveVisit(const Path& p,
 Path 
 pathFromURL(const string& url)
 {
-    Path rval;
-    
     // file url format is file://host/path
 
-    // check for file://
+    Path rval;
     if (url.substr(0, kFileUrlPrefix.length()) != kFileUrlPrefix) {
         return rval;
     }
 
+    // check for //host
+    bool haveHost = (url.find("file://") == 0) && (url.find("file:///") != 0);
+
     // Rip off file:// and get remaining edges.
-    // Note that if "s" started with "/", 
-    // first edge will be empty.  Also, Windows 
-    // handles hosts with //host/path.  No uniform
-    // way to do hosts on other platforms, so bail.
     string s = url.substr(kFileUrlPrefix.length());
     vector<string> edges;
     boost::algorithm::split(edges, s, boost::algorithm::is_any_of("/"));
-    unsigned int start = 0;
-    if (edges[0].empty()) {
-        start++;
+    bool lastEdgeNull = false;
+    bool firstEdgeHandled = false;
+    for (vector<string>::const_iterator it = edges.begin();
+         it != edges.end(); ++it) {
+        if (it->empty()) {
+            lastEdgeNull = true;
+            continue;
+        }
+        lastEdgeNull = false;
+
+        if (!firstEdgeHandled) {
+            bool haveDrive = false;
+#ifdef WIN32
+            // Windows can have a drive specifier in first edge, 
+            // either as file://C:/ or file:///C:/
+            size_t colon = it->rfind(":");
+            haveDrive = (colon != std::string::npos) && (colon == it->length()-1);
+#endif
+            if (haveHost) {
+                // Everyone groks localhost and 127.0.0.1, which collapses to /
+                if (!it->compare("localhost") || !it->compare("127.0.0.1")) {
+                     rval = Path("/");
+                } else {
+#ifdef WIN32
+                    // Windows also groks //host/path.  No uniform way
+                    // to handle it on other platforms, so bail.  Must
+                    // also be aware that Windows may also have a
+                    // drive specifier here.
+                    if (haveDrive) {
+                        rval = Path(*it + "/");
+                    } else {
+                        rval = Path("//" + *it);
+                    }
+#else
+                    return rval;
+#endif
+                }
+            } else {
+                if (haveDrive) {
+                    rval = Path(*it + "/");
+                } else {
+                    rval = Path("/" + urlDecode(*it));
+                }
+            }
+            firstEdgeHandled = true;
+        } else {
+            rval /= urlDecode(*it);
+        }
     }
 
-    string firstEdge = urlDecode(edges[start]);
-    if (s[0] == '/') {
-#ifdef WIN32
-        // no host, check for drive
-        if (firstEdge.length() == 2 && firstEdge[1] == ':') {
-            rval = Path(firstEdge + "/");
-        } else {
-            rval = Path("/" + firstEdge);
+    // add trailing / if needed
+    if (lastEdgeNull) {
+        tString str = rval.string();
+        size_t slashIndex = str.rfind(nativeFromUtf8("/"));
+        if (slashIndex == string::npos || slashIndex != str.length()-1) {
+            rval /= Path("/");
         }
-#else
-        rval = Path("/" + firstEdge);
-#endif
-        start++;
-    } else {
-        // got a host.  everybody skips localhost and 127.0.0.1,
-        // doze groks //host/path
-        if (!firstEdge.compare("localhost") || !firstEdge.compare("127.0.0.1")) {
-            rval = Path("/");
-        } else {
-#ifdef WIN32
-            rval = Path("//" + firstEdge);
-#else
-            return rval;
-#endif
-        }
-        start++;
-    }
-
-    // add remaining edges
-    for (size_t i = start; i < edges.size(); i++) {
-        rval /= Path(urlDecode(edges[i]));
     }
 
     return rval;

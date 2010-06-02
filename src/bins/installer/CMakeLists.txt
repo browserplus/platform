@@ -12,7 +12,7 @@
 # The Original Code is BrowserPlus (tm).
 # 
 # The Initial Developer of the Original Code is Yahoo!.
-# Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+# Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
 # All rights reserved.
 # 
 # Contributor(s): 
@@ -54,7 +54,7 @@ ELSEIF (APPLE)
         ${CMAKE_SYSTEM_NAME}/InstallerSkinGUI_Darwin.mm)
 
     SET(BrowserPlusUninstaller_SOURCES 
-        BrowserPlusUninstaller_UNIX.cpp)
+        BrowserPlusUninstaller_Darwin.mm)
 ELSE ()
     SET(BrowserPlusInstaller_SOURCES 
         ${installerXplatSources} 
@@ -68,7 +68,7 @@ SET(BrowserPlusUpdater_SOURCES BrowserPlusUpdater.cpp)
 
 
 SET(BrowserPlusInstaller_LINK_STATIC 
-    BPInstaller BPUtils HTMLRender DistributionClient CoreletManager)
+    BPInstaller BPUtils HTMLRender DistributionClient ServiceManager)
 SET(BrowserPlusUninstaller_LINK_STATIC BPInstaller BPUtils)
 SET(BrowserPlusUpdater_LINK_STATIC BPInstaller BPUtils)
 

@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -59,7 +59,7 @@ FileLinkTest::brokenLink()
     bp::file::createLink(src, target);
     Path resolved;
     bool exists = resolveLink(src, resolved);
-    CPPUNIT_ASSERT(!exists && resolved.empty());
+    CPPUNIT_ASSERT_MESSAGE(resolved.utf8().c_str(), !exists && resolved.empty());
 }
 
 

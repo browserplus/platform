@@ -12,7 +12,7 @@
 # The Original Code is BrowserPlus (tm).
 # 
 # The Initial Developer of the Original Code is Yahoo!.
-# Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+# Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
 # All rights reserved.
 # 
 # Contributor(s): 
@@ -41,8 +41,8 @@
 # The major/minor/micro of this version
 #
 SET(BrowserPlusPlatform_MAJOR_VERSION 2)
-SET(BrowserPlusPlatform_MINOR_VERSION 8)
-SET(BrowserPlusPlatform_MICRO_VERSION 1)
+SET(BrowserPlusPlatform_MINOR_VERSION 9)
+SET(BrowserPlusPlatform_MICRO_VERSION 0)
 
 # Previous mimetypes which we also support as a CMAKE list
 # Syntax is:
@@ -53,7 +53,7 @@ SET(BackwardCompatibleMimeTypes)
 
 # activeX control's clsid and typelib guid
 # clsid (ActiveXGuid) should be changed EVERY TIME YOU BUMP PLATFORM VERSION
-SET(ActiveXGuid "4EC3C351-9688-448E-BC3F-7428CB73F3B6")
+SET(ActiveXGuid "A459E66E-7472-4353-A01C-A8234EDE8B66")
 SET(TypeLibGuid "399F26B4-E0C6-4345-8AD6-7AC1D86DAAA5") 
 
 ########################################################################
@@ -93,6 +93,9 @@ FOREACH(v ${BackwardCompatibleMimeTypes})
         SET(BackwardCompatibleMimeTypesArray "${BackwardCompatibleMimeTypesArray}, \"${v}\"")
     ENDIF()
 ENDFOREACH()
+
+# All Service API versions that this platform supports
+SET(ServiceAPIVersionsSupported "4,5")
 
 # All mimetypes that we support
 #
@@ -148,14 +151,9 @@ FOREACH(v ${MimeTypes})
         
 ENDFOREACH()
 
-#MESSAGE("BackwardCompatibleMimeTypesArray = ${BackwardCompatibleMimeTypesArray}")
-#MESSAGE("MimeTypesArray = ${MimeTypesArray}")
-#MESSAGE("WindowsNPAPIMimeTypes = ${WindowsNPAPIMimeTypes}")
-#MESSAGE("MacPlistMimeTypes = ${MacPlistMimeTypes}")
-#MESSAGE("MacSTRResources = ${MacSTRResources}")
 MESSAGE("!! Platform ${VersionString} configured to support:")
 MESSAGE("!!    mimetypes: ${MimeTypes}") 
-
+MESSAGE("!!    service API versions: ${ServiceAPIVersionsSupported}") 
 
 
 

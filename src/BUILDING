@@ -4,11 +4,25 @@ During build time the built BrowserPlus platform will be installed
 (user-scoped) on your machine.  Certain environment variables allow
 you to control how that installed version is configured:
 
-  BP_LOG_LEVEL - one of info, debug, warn, or error.  Controls how vigorously
-                 BrowserPlus logs in its logfiles.  
+  BP_LOG_LEVEL - Controls how vigorously BrowserPlus logs in its logfiles.
+                 (debug|info|warn|error|fatal)
+  BP_LOG_SIZE_KB - size in KB above which to rollover logfiles.
+  BP_LOG_DEST - desired destination for logging (file|console|win32).
+                Not all system components respect this value, but many do.
+                On windows, "win32" will cause OutputDebugString to be used 
+                for logging.
+  BP_LOG_TIME - How to report time in log statements (utc|local|msec).
+                "local" is a convenient setting for developers.
+                "msec" might be useful when profiling.
   BP_DISTRO_SERVERS - a comma separated list of hostnames which are the
                  distribution servers you'd like BrowserPlus to query
                  for permissions, updates, and services.
+
+***************************************************************************
+* NOTE:  Due to limitations with several of the 3rd party packages used   *
+*        by BrowserPlus, the path to the BrowserPlus source (referred to  *
+*        as <path to public_platform> below) cannot contain spaces.       *
+***************************************************************************
 
 Building on OSX:
   Setting up your environment:
@@ -51,7 +65,7 @@ Building on win32:
     6. (optional) Add %WindowsSdkDir%Bin to your path.
        This will allow you to easily invoke tools such as mt.exe from your
        command line.
-    7. install cmake version 2.6.2 or greater from:
+    7. install cmake version 2.8.0 or greater from:
        http://www.cmake.org/cmake/resources/software.html
        during install, select "add cmake to PATH for this user (or all users)"
     8. install ruby from: http://www.ruby-lang.org 

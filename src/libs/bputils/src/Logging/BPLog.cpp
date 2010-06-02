@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -23,6 +23,8 @@
 /*
  *  BPLog.cpp
  *
+ *  Implements convenience functions for setting up the logging system.
+ *  
  *  Created by David Grigsby on 9/20/07.
  *  Copyright 2007 Yahoo! Inc. All rights reserved.
  *
@@ -44,16 +46,9 @@ namespace log {
 static Logger s_rootLogger;
 
 
-std::string levelFromConfig( const std::string& sConfig )
+void removeAllAppenders( Logger& logger )
 {
-    std::vector<std::string> vsVals = bp::strutil::splitAndTrim( sConfig, "," );
-    return vsVals.empty() ? "" : vsVals[0];
-}
-
-
-void removeAllAppenders()
-{
-    rootLogger().removeAllAppenders();
+    logger.removeAllAppenders();
 }
 
 
@@ -63,74 +58,56 @@ Logger& rootLogger()
 }
 
 
-void setLogLevel( const std::string& sLevel,
+void setLogLevel( const Level& level,
                   Logger& logger )
 {
-    logger.setLevel( levelFromString( sLevel ) );
+    logger.setLevel( level );
 }
 
 
-void setupLogToConsole( const std::string& sConfig,
+void setupLogToConsole( const Level& level,
                         const std::string& sConsoleTitle,
-                        const std::string& sTimeFormat,
+                        const TimeFormat& timeFormat,
+                        const std::string& sLayout,
                         Logger& logger )
 {
-    std::vector<std::string> vsVals = bp::strutil::splitAndTrim( sConfig, "," );
-    if (vsVals.empty())
-        return;
-
-    bp::log::Level threshold = bp::log::levelFromString( vsVals[0] );
-
-    std::string sLayout = vsVals.size() >= 2 ? vsVals[1] : "standard";
     LayoutPtr layout( layoutFromString( sLayout ) );
-    layout->setTimeFormat( timeFormatFromString( sTimeFormat ) );
+    layout->setTimeFormat( timeFormat );
 
     ConsoleAppenderPtr apdr( new ConsoleAppender( layout, sConsoleTitle ) );
-    apdr->setThreshold( threshold );
+    apdr->setThreshold( level );
     logger.addAppender( apdr ); 
 }
 
 
-void setupLogToDebugger( const std::string& sConfig,
-                         const std::string& sTimeFormat,
+void setupLogToDebugger( const Level& level,
+                         const TimeFormat& timeFormat,
+                         const std::string& sLayout,
                          Logger& logger )
 {
-    std::vector<std::string> vsVals = bp::strutil::splitAndTrim( sConfig, "," );
-    if (vsVals.empty())
-        return;
-
-    bp::log::Level threshold = bp::log::levelFromString( vsVals[0] );
-
-    std::string sLayout = vsVals.size() >= 2 ? vsVals[1] : "source";
     LayoutPtr layout( layoutFromString( sLayout ) );
-    layout->setTimeFormat( timeFormatFromString( sTimeFormat ) );
+    layout->setTimeFormat( timeFormat );
 
     DebuggerAppenderPtr apdr( new DebuggerAppender( layout ) );
-    apdr->setThreshold( threshold );
+    apdr->setThreshold( level );
     logger.addAppender( apdr ); 
 }
 
 
 void setupLogToFile( const bp::file::Path& logFilePath,
-                     const std::string& sConfig,
-                     FileMode mode,
-                     const std::string& sTimeFormat,
+                     const Level& level,
+                     const FileMode& fileMode,
+                     const TimeFormat& timeFormat,
+                     const std::string& sLayout,
                      unsigned int nRolloverSizeKB,
                      Logger& logger )
 {
-    std::vector<std::string> vsVals = bp::strutil::splitAndTrim( sConfig, "," );
-    if (vsVals.empty())
-        return;
-
-    bp::log::Level threshold = bp::log::levelFromString( vsVals[0] );
-
-    std::string sLayout = vsVals.size() >= 2 ? vsVals[1] : "standard";
     LayoutPtr layout( layoutFromString( sLayout ) );
-    layout->setTimeFormat( timeFormatFromString( sTimeFormat ) );
+    layout->setTimeFormat( timeFormat );
 
     FileAppenderPtr apdr( new FileAppender( logFilePath, layout,
-                                            mode, nRolloverSizeKB ) );
-    apdr->setThreshold( threshold );
+                                            fileMode, nRolloverSizeKB ) );
+    apdr->setThreshold( level );
     logger.addAppender( apdr ); 
 }
 

@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -76,7 +76,7 @@ BPFunctionDefinition s_logFunctions[] =
 
 
 // a description of this pluglet.
-static BPCoreletDefinition s_logPlugletDef =
+static BPServiceDefinition s_logPlugletDef =
 {
     "Log",
     1, 0, 1,
@@ -90,7 +90,7 @@ static BPCoreletDefinition s_logPlugletDef =
 LogPlugletFactory::LogPlugletFactory()
 {
     m_descriptions.push_back(bp::service::Description());
-    m_descriptions.back().fromBPCoreletDefinition(&s_logPlugletDef);
+    m_descriptions.back().fromBPServiceDefinition(&s_logPlugletDef);
 }
 
 

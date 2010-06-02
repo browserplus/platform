@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -35,6 +35,7 @@
 #include <string>
 #include "bperrorutil.h"
 #include "bpstrutil.h"
+#include "bpconvert.h"
 
 
 namespace bp {
@@ -45,7 +46,7 @@ class Version
 {
 // Class-scope Items
 public:
-    enum Code { HTTP1_0, HTTP1_1 };
+    enum Code { HTTP1_0, HTTP1_1, HTTP };
 
     static std::string  toString( Code code )
     {
@@ -53,7 +54,9 @@ public:
         {
             case HTTP1_0:   return "HTTP/1.0";
             case HTTP1_1:   return "HTTP/1.1";
-            default:        BP_THROW( "Unrecognized http Version code." );
+            case HTTP:      return "HTTP";
+            default: BP_THROW( "Unrecognized http Version code: "
+                               + bp::conv::lexical_cast<std::string>(code) );
         }
     }
             
@@ -67,9 +70,13 @@ public:
         {
             return HTTP1_1;
         }
+        else if (sIn == "HTTP")
+        {
+            return HTTP;
+        }
         else
         {
-            BP_THROW( "Unrecognized http Version string" );
+            BP_THROW( "Unrecognized http Version string: " + sIn );
         }
     }
 

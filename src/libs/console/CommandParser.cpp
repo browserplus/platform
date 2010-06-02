@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -46,8 +46,8 @@ using namespace std::tr1;
 
 // use libedit where available for history and command line editing.
 #ifndef WIN32
-#include "editline/readline.h"
-#include "editline/histedit.h"
+#include "libedit/readline.h"
+#include "libedit/histedit.h"
 
 static EditLine *s_el;
 static History *s_history;

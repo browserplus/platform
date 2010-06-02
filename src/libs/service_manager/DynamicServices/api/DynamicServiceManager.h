@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -24,7 +24,7 @@
  * DynamicServiceManager
  *
  * An object responsible for loading and searching of dynamic
- * corelets.
+ * services.
  *
  */
 
@@ -32,8 +32,8 @@
 #define __DYNAMICSERVICEMANAGER_H__
 
 #include "ServiceRunnerLib/ServiceRunnerLib.h"
-#include "CoreletInstance.h"
-#include "CoreletExecutionContext.h"
+#include "ServiceInstance.h"
+#include "ServiceExecutionContext.h"
 #include "DynamicServiceInstance.h"
 #include "DynamicServiceState.h"
 
@@ -130,8 +130,8 @@ class DynamicServiceManager : public ServiceRunner::IControllerListener
     unsigned int instantiate(
         const std::string & name,
         const std::string & version,
-        std::tr1::weak_ptr<CoreletExecutionContext> context,
-        std::tr1::weak_ptr<ICoreletRegistryListener> listener);
+        std::tr1::weak_ptr<ServiceExecutionContext> context,
+        std::tr1::weak_ptr<IServiceRegistryListener> listener);
 
 
     unsigned int getUniqueInstantiateId()

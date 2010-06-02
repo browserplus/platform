@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -69,6 +69,14 @@ string
 bp::paths::getIPCName()
 {
     Path p =  getProductDirectory() / "bp.pipe";
+    return p.utf8();
+}
+
+
+string 
+bp::paths::getEphemeralIPCName()
+{
+    Path p = getTempPath(getTempDirectory(), "BPIPC");
     return p.utf8();
 }
 

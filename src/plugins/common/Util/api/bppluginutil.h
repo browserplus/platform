@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -44,11 +44,11 @@ namespace bp {
 namespace pluginutil {
 
     /**
-     * append the corelet name/version pairs returned from BPEnumerate
+     * append the service name/version pairs returned from BPEnumerate
      * onto a list
      * \returns false if the list is malformed.  true on success.
      */
-    bool appendEnumerateResultsToList(const BPElement * corelets,
+    bool appendEnumerateResultsToList(const BPElement * services,
                                       bp::List &serviceList);
 
     // traverse a return value from BPCore.  perform handle obfuscation

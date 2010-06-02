@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -115,7 +115,7 @@ static bp::file::Path
 getBestProvider(const bp::service::Summary & dep,
                 const std::set<bp::service::Summary> & providers)
 {
-    std::string name = dep.usesCorelet();
+    std::string name = dep.usesService();
     bp::ServiceVersion version = dep.usesVersion();
     bp::ServiceVersion minversion = dep.usesMinversion();
 
@@ -392,7 +392,7 @@ DiskScanner::scanDiskForServices(
         }
         else 
         {
-            unsigned int loadedCorelets = 0;
+            unsigned int loadedServices = 0;
             unsigned int subDirectories = 0;
 
             try {
@@ -407,34 +407,34 @@ DiskScanner::scanDiskForServices(
                     if (!bp::file::isDirectory(subpath))
                         continue;
                     
-                    // check to see if this is a valid corelet
+                    // check to see if this is a valid service
                     std::string error;
                     bp::service::Summary summary;
                         
-                    if (!summary.detectCorelet(subpath, error)) {
+                    if (!summary.detectService(subpath, error)) {
                         dirStack.push(subpath);
                         subDirectories++;
                         continue;
                     }
                     
-                    // if this corelet is blacklisted, nuke it
+                    // if this service is blacklisted, nuke it
 
                     std::string version = bp::file::utf8FromNative(subpath.filename());
                     std::string name = bp::file::utf8FromNative(subpath.parent_path().filename());
                     if (!pmgr->serviceMayRun(name, version))
                     {
                         bp::file::remove(subpath);
-                        BPLOG_WARN_STRM("blacklisted corelet " 
+                        BPLOG_WARN_STRM("blacklisted service " 
                                         << name << "/" << version << " removed");
                         std::ofstream ofs;
                         if (bp::file::openWritableStream(
-                                ofs, bp::paths::getCoreletLogPath(),
+                                ofs, bp::paths::getServiceLogPath(),
                                 std::ios_base::app | std::ios::binary))
                         {
                             
                             BPTime now;
                             ofs << now.asString()
-                                << ": Removed blacklisted corelet " 
+                                << ": Removed blacklisted service " 
                                 << name << ", version " << version << std::endl;
                         }
                     } 
@@ -443,7 +443,7 @@ DiskScanner::scanDiskForServices(
                         // increment the counter that signifies that this is a
                         // directory containing something useful, not to be
                         // cleaned up
-                        loadedCorelets++;
+                        loadedServices++;
 
                         // we've now got a valid summary.  if we have already
                         // loaded it and it is not out of date, then we can
@@ -496,7 +496,7 @@ DiskScanner::scanDiskForServices(
                         }
                     }
                 }
-                if (!loadedCorelets && !subDirectories) {
+                if (!loadedServices && !subDirectories) {
                     bp::file::Path fullPath(bp::file::canonicalPath(path));
 
                     BPLOG_WARN_STRM("removing empty directory: " << fullPath);

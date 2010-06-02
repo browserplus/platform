@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -23,16 +23,16 @@
 /**
 * RequireRequest.h
  *
- * A class which fulfills a corelet require.
+ * A class which fulfills a service require.
  */
 
 #ifndef __REQUIREREQUEST_H__
 #define __REQUIREREQUEST_H__
 
-#include "CoreletManager/CoreletManager.h"
+#include "ServiceManager/ServiceManager.h"
 #include "DistributionClient/DistributionClient.h"
 #include "RequireLock.h"
-#include "CoreletInstaller.h"
+#include "ServiceInstaller.h"
 
 
 // forward declaration, as RequireRequest calls back into ActiveSession,
@@ -40,9 +40,9 @@
 class ActiveSession;
 
 class RequireRequest : virtual public IDistQueryListener,
-                       virtual public ICoreletExecutionContextListener,
+                       virtual public IServiceExecutionContextListener,
                        virtual public RequireLock::ILockListener,
-                       virtual public CoreletInstaller::IListener,
+                       virtual public ServiceInstaller::IListener,
                        public std::tr1::enable_shared_from_this<RequireRequest>
 {
 public:
@@ -54,7 +54,7 @@ public:
     
     static const char* kVersionSeparator;
 	
-    RequireRequest(const std::list<CoreletRequireStatement>& requires,
+    RequireRequest(const std::list<ServiceRequireStatement>& requires,
                    BPCallBack progressCallback,
                    std::tr1::weak_ptr<ActiveSession> activeSession,
                    unsigned int tid,
@@ -88,14 +88,14 @@ public:
 private:
     // implementation of methods from IDistQueryListener interface 
     void onTransactionFailed(unsigned int tid);
-    void onRequirementsSatisfied(unsigned int tid, const CoreletList & clist);
+    void onRequirementsSatisfied(unsigned int tid, const ServiceList & clist);
     void gotServiceSynopsis(unsigned int tid,
                             const ServiceSynopsisList & sslist);
 
     // implementation of methods from RequireLock::ILockListener interface 
     void gotRequireLock();
 
-    // implementation of methods from CoreletInstaller::IListener interface 
+    // implementation of methods from ServiceInstaller::IListener interface 
 
     // invoked to deliver download percentage
     void installStatus(unsigned int installId,
@@ -115,10 +115,10 @@ private:
     void onUserResponse(unsigned int cookie, const bp::Object & resp);
 
     void doNextRequire();    
-    void installNextCorelet();
+    void installNextService();
     void checkPlatformUpdates();
     void updateRequireHistory(
-        const std::list<CoreletRequireStatement> & requires);
+        const std::list<ServiceRequireStatement> & requires);
     void promptUser();
     void postProgress(const std::string & name,
                       const std::string & version,
@@ -139,8 +139,8 @@ private:
                 
     // the original require statements and what must 
     // be installed/updated
-    std::list<CoreletRequireStatement> m_requires;
-    CoreletList m_toInstall;
+    std::list<ServiceRequireStatement> m_requires;
+    ServiceList m_toInstall;
     bool m_updatesOnly;
     
     // any pending platform updates
@@ -168,7 +168,7 @@ private:
     std::tr1::weak_ptr<ActiveSession> m_activeSession;
     
     DistQuery * m_distQuery;
-    std::tr1::shared_ptr<CoreletRegistry> m_registry;
+    std::tr1::shared_ptr<ServiceRegistry> m_registry;
     std::string m_locale;
 
     std::tr1::weak_ptr<IRequireListener> m_listener;

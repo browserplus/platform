@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -95,23 +95,23 @@ bp::paths::getPermissionsDirectory()
 
 
 Path
-bp::paths::getCoreletDirectory()
+bp::paths::getServiceDirectory()
 {
-    return doGetTopDir("Corelets");
+    return doGetTopDir("Services");
 }
 
 
 Path
-bp::paths::getCoreletCacheDirectory()
+bp::paths::getServiceCacheDirectory()
 {
     return doGetTopDir("PendingUpdateCache");
 }
 
 
 Path
-bp::paths::getCoreletInterfaceCachePath()
+bp::paths::getServiceInterfaceCachePath()
 {
-    return doGetTopDir("CoreletInterfaceCache");
+    return doGetTopDir("ServiceInterfaceCache");
 }
 
 
@@ -151,22 +151,22 @@ bp::paths::getUninstallerPath()
 
 
 Path
-bp::paths::getCoreletLogPath()
+bp::paths::getServiceLogPath()
 {
-    Path path = getProductTopDirectory() / "CoreletInstallLog.txt";
+    Path path = getProductTopDirectory() / "ServiceInstallLog.txt";
     return path;
 }
 
 
 Path
-bp::paths::getCoreletDataDirectory(string name,
+bp::paths::getServiceDataDirectory(string name,
                                    unsigned int major_ver)
 {
-    Path coreletDataDir(getProductTopDirectory());
+    Path serviceDataDir(getProductTopDirectory());
     stringstream ss;
     ss << major_ver;
-    coreletDataDir /= Path("CoreletData")/name/ss.str();
-    return coreletDataDir;
+    serviceDataDir /= Path("ServiceData")/name/ss.str();
+    return serviceDataDir;
 }
 
 
@@ -351,10 +351,10 @@ bp::paths::createDirectories(int major,
         bfs::create_directories(getProductTopDirectory());
         bfs::create_directories(getProductDirectory(major, minor, micro));
         bfs::create_directories(getPermissionsDirectory());
-        bfs::create_directories(getCoreletDirectory());
-        bfs::create_directories(getCoreletCacheDirectory());
-        bfs::create_directories(getCoreletInterfaceCachePath());
-        bfs::create_directories(getProductTopDirectory() / "CoreletData");
+        bfs::create_directories(getServiceDirectory());
+        bfs::create_directories(getServiceCacheDirectory());
+        bfs::create_directories(getServiceInterfaceCachePath());
+        bfs::create_directories(getProductTopDirectory() / "ServiceData");
         bfs::create_directories(getPluginWritableDirectory(major, minor, micro));
         bfs::create_directories(getObfuscatedWritableDirectory(major, minor, micro));
         bfs::create_directories(getPlatformCacheDirectory());

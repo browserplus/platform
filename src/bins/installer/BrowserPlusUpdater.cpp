@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -24,7 +24,6 @@
  * BrowserPlusUpdater - a simple binary to manage the update process.
  */
 
-#include <string>
 #include "BPUtils/bpfile.h"
 #include "BPUtils/bplocalization.h"
 #include "BPUtils/BPLog.h"
@@ -32,6 +31,9 @@
 #include "BPUtils/IPCChannel.h"
 #include "BPInstaller/BPInstaller.h"
 
+#include <string>
+#include <string.h>
+ 
 using namespace std;
 using namespace std::tr1;
 using namespace bp::file;
@@ -132,7 +134,7 @@ main(int argc, const char** argv)
 
         // setup logging, may be overridden by -logPath=<path> and/or -logLevel=<level>
         Path logFile = getTempDirectory() / "BrowserPlusUpdater.log";
-        string logLevel = bp::log::levelToString(bp::log::LEVEL_ALL);
+        bp::log::Level logLevel = bp::log::LEVEL_ALL;
 
         // crack argv
         // usage is: BrowserPlusUpdater [-ipcName=<ipcName>] [-logPath=<logPath>] 
@@ -155,7 +157,8 @@ main(int argc, const char** argv)
             curArg = argv[++argIndex];
         }
         if (curArg.find("-logLevel=") == 0) {
-            logLevel = curArg.substr(strlen("-logLevel="));
+            logLevel = bp::log::levelFromString(
+                           curArg.substr(strlen("-logLevel=")));
             curArg = argv[++argIndex];
         }
         Path dir(argv[argIndex++]);
@@ -167,22 +170,21 @@ main(int argc, const char** argv)
             bp::log::setupLogToConsole(logLevel);
         }
     
-        // install out of dir
+        // Install out of dir.  We delete dir at completion if we aren't
+        // being run on behalf of installer (proxy == NULL).  If we are
+        // being run on behalf of installer, it will delete dir.
         shared_ptr<IInstallerListener> p;
-        Installer inst(dir, true);
+        Installer inst(dir, proxy == NULL);
         if (proxy) {
             p.reset(proxy);
             inst.setListener(weak_ptr<IInstallerListener>(p));
         }
         inst.run();
-    } catch (const bp::error::Exception& e) {
-        BPLOG_ERROR(e.what());
+    } catch (const std::exception& e) {
+        BP_REPORTCATCH(e);
         rval = -1;
-    } catch (const bp::error::FatalException& e) {
-        BPLOG_ERROR(e.what());
-        rval = -1;
-    } catch (const tFileSystemError& e) {
-        BPLOG_ERROR(e.what());
+    } catch (...) {
+        BP_REPORTCATCH_UNKNOWN;
         rval = -1;
     }
     exit(rval);

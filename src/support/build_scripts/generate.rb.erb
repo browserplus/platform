@@ -20,8 +20,10 @@
 #   -primary   hostname of primary distribution server
 #   -secondary hostname of secondary distribution server (may be repeated)
 #   -buildType a short buildtype tag, i.e. ymail, prod, dev, or beta.
-#   -logLevel  platform log-level: debug, info, warn, or error
+#   -logLevel  platform log-level: debug|info|warn|error|fatal
 #   -logSizeKB log file rollover size trigger in KB.
+#   -logDest   log output destination (file|console|win32)
+#   -logTime   log time format (utc|local|msec)
 #   -config    a general mechanism which allows for overriding top level
 #              keys in generated installer.config.  for instance, to
 #              override 'permissions': -config=permissions=permissions.json
@@ -72,6 +74,8 @@ $secondary = Array.new if !$secondary
 $buildType = "unknown"
 $logLevel = "info"
 $logSizeKB = "256"
+$logDest = "file"
+$logTime = "utc"
 $instCfgKeys = Hash.new
 
 # authKey only needed for win32 prod signing.
@@ -104,8 +108,11 @@ $certStore = $pubKey if !$certStore
 # verify and output command configuration
 puts
 puts "Verifying configuration:"
-[ "prefix", "buildType", "logLevel", "logSizeKB", "primary", "secondary",
-  "certStore", "pubKey", "privKey", "pass", "outdir"
+[ "prefix", "buildType", 
+  "logLevel", "logSizeKB", "logDest", "logTime", 
+  "primary", "secondary", 
+  "certStore", "pubKey", "privKey", "pass", 
+  "outdir"
 ].each {|k|
   raise "missing required cmdline param: -#{k}" if (!eval("$#{k}"))
   v = JSON.generate(eval("$#{k}"))
@@ -161,7 +168,9 @@ subs = {
   /BP_ALL_DISTRO_SERVERS/ => allServersJson, 
   /BP_BUILD_TYPE/ => "\"#{$buildType}\"",
   /BP_LOG_LEVEL/ => "#{$logLevel}",
-  /BP_LOG_SIZE_KB/ => "#{$logSizeKB}"
+  /BP_LOG_SIZE_KB/ => "#{$logSizeKB}",
+  /BP_LOG_DEST/ => "#{$logDest}",
+  /BP_LOG_TIME/ => "#{$logTime}"
 }
 
 [

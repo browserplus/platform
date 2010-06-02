@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -166,7 +166,7 @@ BPFunctionDefinition s_dndFunctions[] = {
 
 
 // a description of this pluglet.
-static BPCoreletDefinition s_dndPlugletDef = {
+static BPServiceDefinition s_dndPlugletDef = {
     "DragAndDrop",
     1, 0, 1,
     "Allow drag and drop of files from desktop to web browser.",
@@ -223,7 +223,7 @@ BPFunctionDefinition s_dndFunctions2[] = {
 };
 
 // a description of this pluglet.
-static BPCoreletDefinition s_dndPlugletDef2 = {
+static BPServiceDefinition s_dndPlugletDef2 = {
     "DragAndDrop",
     2, 0, 0,
     "Allow drag and drop of files from desktop to web browser.",
@@ -234,8 +234,8 @@ static BPCoreletDefinition s_dndPlugletDef2 = {
 DnDPlugletFactory::DnDPlugletFactory()
 {
     m_descriptions.push_back(bp::service::Description());
-    m_descriptions.back().fromBPCoreletDefinition(&s_dndPlugletDef);
+    m_descriptions.back().fromBPServiceDefinition(&s_dndPlugletDef);
     m_descriptions.push_back(bp::service::Description());
-    m_descriptions.back().fromBPCoreletDefinition(&s_dndPlugletDef2);
+    m_descriptions.back().fromBPServiceDefinition(&s_dndPlugletDef2);
 }
 

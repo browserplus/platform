@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -62,13 +62,13 @@ extern "C" {
         /** The feature is not yet implemented */
         BP_EC_NOT_IMPLEMENTED = 8,
         /** the call referred to a service that does not exist */
-        BP_EC_NO_SUCH_CORELET = 9,
+        BP_EC_NO_SUCH_SERVICE = 9,
         /** the call to a function that doesn't exist on the specified
          *  service */
         BP_EC_NO_SUCH_FUNCTION = 10,
         /** the _service_ experienced an error while servicing your
          *  request */
-        BP_EC_CORELET_EXEC_ERROR = 11,
+        BP_EC_SERVICE_EXEC_ERROR = 11,
         /** The version string is invalid (should by X.Y.Z) */
         BP_EC_INVALID_VERSION_STRING = 12,
         /** An "extended error" is an error that is opaque to the protocol
@@ -213,7 +213,7 @@ extern "C" {
      */
     typedef void (*BPDescribeCallback)(BPErrorCode ec,
                                        void * cookie,
-                                       const BPCoreletDefinition * def,
+                                       const BPServiceDefinition * def,
                                        const char * error,
                                        const char * verboseError);
 
@@ -258,7 +258,7 @@ extern "C" {
      */
     typedef void (*BPRequireCallback)(BPErrorCode ec,
                                       void * cookie,
-                                      const BPCoreletDefinition ** defs,
+                                      const BPServiceDefinition ** defs,
                                       unsigned int numDefs,
                                       const char * error,
                                       const char * verboseError);

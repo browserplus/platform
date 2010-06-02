@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -349,7 +349,7 @@ private:
     // we must fetch from server
     bool m_badPermissionsOnDisk;
     
-    // key is corelet name, value is vector of
+    // key is service name, value is vector of
     // blacklisted versions x.y.z.  pattern
     // matching of version via bp::ServiceVersion::match() 
     std::map<std::string, std::vector<std::string> > m_blacklist; 

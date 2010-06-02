@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -28,12 +28,12 @@ bp::file::Path
 ServiceRunner::determineProviderPath(const bp::service::Summary & s,
                                      std::string & err)
 {
-    std::string name = s.usesCorelet();
+    std::string name = s.usesService();
     bp::ServiceVersion version = s.usesVersion();
     bp::ServiceVersion minversion = s.usesMinversion();
 
     // build directory where versions of this service should be
-    bp::file::Path d = bp::paths::getCoreletDirectory() / name;
+    bp::file::Path d = bp::paths::getServiceDirectory() / name;
 
     if (!bp::file::isDirectory(d)) {
         err.append("No such service installed: ");

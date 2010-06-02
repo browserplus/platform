@@ -2,3 +2,6 @@
 \#*
 .DS_Store
 build
+external/Darwin
+external/Windows
+external/pax_global_header

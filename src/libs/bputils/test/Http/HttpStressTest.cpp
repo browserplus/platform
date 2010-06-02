@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -113,19 +113,20 @@ struct HTRunLoopContext {
     unsigned int failures;
     std::vector<std::string> * contentMD5s;    
     std::map<std::string, std::string> * contents;
-    std::list<class StressHttpClient *> clients;
+    std::list<std::tr1::shared_ptr<class StressHttpClient> > clients;
     unsigned short port;
 };
 
 void addTransactions(HTRunLoopContext * context);
 
-class StressHttpClient : virtual public bp::http::client::IListener
+class StressHttpClient : virtual public bp::http::client::IListener,
+                         virtual public std::tr1::enable_shared_from_this<StressHttpClient>
 {
 public:
     void startTransaction() 
     {
         checkThreadId();
-        m_transaction->initiate(this);
+        m_transaction->initiate(shared_from_this());
     }
     
     StressHttpClient(HTRunLoopContext * context) 
@@ -149,12 +150,12 @@ public:
 
         if (m_isget) {
             m_request.reset(new bp::http::Request(bp::http::Method::HTTP_GET, urlss.str()));
-            m_transaction = new bp::http::client::Transaction(m_request);
+            m_transaction.reset(new bp::http::client::Transaction(m_request));
             m_transaction->setTimeoutSec(5.0);
         } else {
             m_request.reset(new bp::http::Request(bp::http::Method::HTTP_POST, urlss.str()));
             m_request->body.append(m_chosenBody);
-            m_transaction = new bp::http::client::Transaction(m_request);
+            m_transaction.reset(new bp::http::client::Transaction(m_request));
             m_transaction->setTimeoutSec(5.0);
         }
     }
@@ -162,8 +163,6 @@ public:
     virtual ~StressHttpClient() 
     {
         checkThreadId();
-
-        delete m_transaction;
     }
 
     virtual void onResponseBodyBytes(const unsigned char* pBytes, 
@@ -210,17 +209,17 @@ public:
         else m_context->failures++;
 
         // *delete ourselves*, kinda nuts!!  
-        std::list<class StressHttpClient *>::iterator it;
+        std::list<std::tr1::shared_ptr<class StressHttpClient> >::iterator it;
         HTRunLoopContext * context = m_context;
         for (it = context->clients.begin(); it != context->clients.end(); it++)
         {
-            if (*it == this) break;
+            if (it->get() == this) break;
         }
         if (it == context->clients.end()) {
             // FATAL!  we can't find a reference to ourselves.
             abort(); // XXX: we need to fail better here.
-        } 
-        delete *it; // delete self!
+        }
+        it->reset();  // delete self!
         context->clients.erase(it);
 
         // allocate more clients as neccesary
@@ -259,7 +258,7 @@ public:
         }
     }
     
-    bp::http::client::Transaction* m_transaction;
+    bp::http::client::TransactionPtr m_transaction;
     bp::http::RequestPtr m_request;
     bp::http::Body m_body;
     std::string m_chosenMD5;
@@ -286,7 +285,7 @@ void addTransactions(HTRunLoopContext * context)
     while ((context->clients.size() + context->successes + context->failures) < TRANS_PER_THREAD &&
            context->clients.size() < SIMUL_TRANS)
     {
-        StressHttpClient * shc = new StressHttpClient(context);
+        std::tr1::shared_ptr<StressHttpClient> shc(new StressHttpClient(context));
         context->clients.push_back(shc);
         shc->startTransaction();
     }

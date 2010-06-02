@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -64,16 +64,16 @@ fullDescToNameAndVersion(bp::List * fullDescs, bp::List & shortDescs)
 struct RequireContext
 {
     RequireContext()
-        : coreletDescriptions(NULL), ec(BP_EC_OK), callback(NULL),
+        : serviceDescriptions(NULL), ec(BP_EC_OK), callback(NULL),
           transaction(NULL), bp(NULL)
     { }
 
     ~RequireContext() {
-        if (coreletDescriptions) delete coreletDescriptions;
+        if (serviceDescriptions) delete serviceDescriptions;
         if (callback) delete callback;
     }
         
-    bp::List * coreletDescriptions;
+    bp::List * serviceDescriptions;
     bp::List foundServices;
 
     // the result of the require
@@ -115,20 +115,20 @@ BPSession::requireReturn(void * cookie)
             e = BPErrorCodeToString(ctx->ec);
         }
         session->generateErrorReturn(e, ve, arg);
-    } else if (ctx->coreletDescriptions == NULL &&
+    } else if (ctx->serviceDescriptions == NULL &&
                ctx->foundServices.size() == 0) {
         BPLOG_ERROR("Require complete with no available service descriptions");
         session->generateErrorReturn(
             "internalError",
             "Require complete with no available service descriptions", arg);
     } else {
-        // now we should cache coreletDescriptions, _before_ calling the
+        // now we should cache serviceDescriptions, _before_ calling the
         // callback
-        if (ctx->coreletDescriptions) {
-            for (unsigned int i = 0; i < ctx->coreletDescriptions->size(); i++)
+        if (ctx->serviceDescriptions) {
+            for (unsigned int i = 0; i < ctx->serviceDescriptions->size(); i++)
             {
                 bp::service::Description desc;
-                if (desc.fromBPObject(ctx->coreletDescriptions->value(i))) {
+                if (desc.fromBPObject(ctx->serviceDescriptions->value(i))) {
                     ctx->bp->m_loadedServices.push_back(desc);
                 } else {
                     BPLOG_ERROR("Couldn't parse service description return from "
@@ -136,18 +136,18 @@ BPSession::requireReturn(void * cookie)
                 }
             }
         } else {
-            ctx->coreletDescriptions = new bp::List;
+            ctx->serviceDescriptions = new bp::List;
         }
         
-        // now generate return values from new corelets combined with what
+        // now generate return values from new services combined with what
         // we found earlier.
         for (unsigned int i = 0; i < ctx->foundServices.size(); i++) {
-            ctx->coreletDescriptions->append(
+            ctx->serviceDescriptions->append(
                 ctx->foundServices.value(i)->clone());
         }
         
         bp::List returnList;
-        fullDescToNameAndVersion(ctx->coreletDescriptions, returnList);
+        fullDescToNameAndVersion(ctx->serviceDescriptions, returnList);
         if (!session->generateSuccessReturn(returnList, arg))
         {
             // what can we do if this fails?
@@ -166,7 +166,7 @@ BPSession::requireReturn(void * cookie)
 void
 BPSession::requireServicesCallback(BPErrorCode ec,
                                    void * cookie,
-                                   const BPCoreletDefinition ** defs,
+                                   const BPServiceDefinition ** defs,
                                    unsigned int numDefs,
                                    const char * error,
                                    const char * verboseError)
@@ -177,7 +177,7 @@ BPSession::requireServicesCallback(BPErrorCode ec,
     ctx->ec = ec;
     if (error) ctx->error.append(error);
     if (verboseError) ctx->verboseError.append(verboseError);    
-    if (defs) ctx->coreletDescriptions = bp::defutil::defsToJson(defs, numDefs);
+    if (defs) ctx->serviceDescriptions = bp::defutil::defsToJson(defs, numDefs);
     
     requireReturn(ctx);
 }

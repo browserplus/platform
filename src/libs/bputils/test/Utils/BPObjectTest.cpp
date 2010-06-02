@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -138,19 +138,34 @@ BPObjectTest::stringTest()
 void
 BPObjectTest::pathTest()
 {
-    bp::Object * bp = bp::Object::fromJsonString(
-        "{\"t\":\"path\",\"v\":\"file:///some/path\"}");
-    CPPUNIT_ASSERT( !std::string("file:///some/path").compare(*bp) );
-    CPPUNIT_ASSERT( bp->type() == BPTPath);
+#ifdef win32
+	std::string somePath("D:\some\path.exe");
+	std::wstring somePathNative(somePath);
+#else
+	std::string somePath("/some/path");
+	std::string somePathNative = somePath;
+#endif
+	std::string json = "{\"t\":\"path\",\"v\":\"";
+	json += somePath;
+	json += "\"}";
+
+    bp::Object * bp = bp::Object::fromJsonString(json);
+
+    bp::file::Path orig = *((bp::Path *) bp);
+	CPPUNIT_ASSERT( bp::file::Path(somePathNative) == orig );
+    CPPUNIT_ASSERT( bp->type() == BPTNativePath);
 
     bp::Object * clone = bp->clone();
-    CPPUNIT_ASSERT( clone->type() == BPTPath );    
-    CPPUNIT_ASSERT( !std::string(*clone).compare(*bp) );
+	bp::file::Path rhs(somePathNative);
+	bp::file::Path lhs = *((bp::Path *)clone);
+    CPPUNIT_ASSERT( clone->type() == BPTNativePath );    
+	CPPUNIT_ASSERT( rhs.string() == lhs.string() );
     delete clone;
 
-    bp::file::Path p("/some/path");
+    bp::file::Path p(somePathNative);
     bp::Path asp(p);
-    CPPUNIT_ASSERT( !std::string(asp).compare(*bp) );
+    bp::file::Path after = asp;
+	CPPUNIT_ASSERT( p == after );
 
     delete bp;
 }

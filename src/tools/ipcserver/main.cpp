@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -21,11 +21,16 @@
  */
 
 
+#include "BPUtils/IPCServer.h"
+
 #include <iostream>
 #include <set>
 #include <sstream>
-#include "BPUtils/IPCServer.h"
 
+#include <stdio.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
 
 class MyServerListener : public bp::ipc::IServerListener,
                          public bp::ipc::IConnectionListener

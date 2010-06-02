@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -42,20 +42,27 @@ extern "C" {
 
 /**
  * Initialize the service, called once at service load time.
+ *
  * 
  * \param coreFunctionTable  pointer to a structure of pointers to BPC
  *                           functions that the service may call through into
  *                           BPCore.
- * \param parameterMap       A map containing initialization parameters for
- *                           the service.  These parameters include:
- *
- *             'CoreletDirectory': The location on disk where the service
- *                 resides. 
+ * \param serviceDir         The directory in which the service being initialized
+ *                           is installed.
+ * \param dependentDir       In the case of a provider service, the path to the 
+ *                           dependent service being loaded.
+ * \param dependentParams    In the case of a provider service, arguments from
+ *                           the manifest.json of the dependent service.
  *                 
+ * \return  A service definition which describes the interface of the
+ *          service.  This memory should not be freed until the service
+ *          is shutdown.
  */
-typedef const BPCoreletDefinition * (*BPPInitializePtr)(
+typedef const BPServiceDefinition * (*BPPInitializePtr)(
     const BPCFunctionTable * coreFunctionTable,
-    const BPElement * parameterMap);
+    const BPPath serviceDir,
+    const BPPath dependentDir,
+    const BPElement * dependentParams);
 
 /**
  * Shutdown the service.  Called once at service unload time.
@@ -71,32 +78,30 @@ typedef void (*BPPShutdownPtr)(void);
  *                 calls to invoke and destroy.  This is an output parameter
  *                 that services may use to store instance-specific
  *                 context.
- * \param attachID The ID of the attachment this is associated with for
- *                 provider services (set in BPPAttach call), for
- *                 standalone services, always zero and may be ignored.
- * \param contextMap A map containing session specific context.
- *        'uri' is a string containing a URI of the current client. This is
+ * \param uri   a UTF8 encoded string containing a URI of the current client. This is
  *              usually the full URL to the webpage that is interacting
  *              with browserplus.  In the case of a native local application
  *              interacting with browserplus it should be a URI with a
  *              method of 'bpclient' (i.e. bpclient://CLIENTIDENTIFIER').
- *        'corelet_dir' DEPRECATED, use service_dir instead.
- *        'service_dir' is an absolute path to the directory containing the
- *                   files distributed with the service.
- *        'data_dir' is a absolute path to where the service should store
- *                   any data that needs to persist.
- *        'temp_dir' is a directory that may be used for temporary
- *                   data.  it will be unique for every instance, and will
- *                   be purged when the instance is deallocated.
- *        'locale' The locale of the end user to which strings, if any,
- *                 should be localized.
- *        'userAgent' The client user-agent string.
- *        'clientPid' The process ID of the client.
+ * \param serviceDir is an absolute path to the directory containing the
+ *              files distributed with the service.
+ * \param dataDir is an absolute path to where the service should store
+ *                any data that needs to persist.
+ * \param tempDir is an instance-specific directory that may be used for
+ *                temporary data.  Service is responsible for
+ *                creating the directory.  Service should remove the
+ *                directory when the instance is deallocated.
+ * \param locale The locale of the end user to which strings, if any,
+ *               should be localized.
+ * \param userAgent The client user-agent as a UTF8 encoded string.
+ * \param clientPid The process ID of the client program/browser.
  *
  * \return zero on success, non-zero on failure
  */
-typedef int (*BPPAllocatePtr)(void ** instance, unsigned int attachID,
-                              const BPElement * contextMap);
+typedef int (*BPPAllocatePtr)(
+    void ** instance, const BPString uri, const BPPath serviceDir,
+    const BPPath dataDir, const BPPath tempDir, const BPString locale,
+    const BPString userAgent, int clientPid);
     
 /**
  * Destroy a service instance allocated with BPPAllocate.
@@ -108,7 +113,7 @@ typedef void (*BPPDestroyPtr)(void * instance);
 /**
  *  Invoke a service method.
  *
- *  \param instance An instance pointer returned from a BPPAllocate call.
+ *  \param instance The instance pointer returned from a BPPAllocate call.
  *  \param functionName The name of the function being invoked
  *  \param tid The transaction id of this function invocation.  Should
  *             be passed by the service to BPCPostResultsFuncPtr
@@ -124,56 +129,51 @@ typedef void (*BPPInvokePtr)(void * instance, const char * functionName,
                              unsigned int tid, const BPElement * arguments);
 
 /**
- * The "attach" function supports interpreter services.  These are services
- * which can be used by other services.  The primary types of services
- * that will be interested in this functionality are high level language
- * interpretation services which allow the authoring of services in
- * non-compiled languages.
+ *  Cancel a transaction previously started by calling BPPInvokePtr()
  *
- * For most services Attach and Detach may be NULL which indicates that the
- * service may not be "used" by other services.
- *
- * Attach is called after BPPInitialize at the time the dependant service
- * is itself initialize.  Multiple dependant services may use the same
- * provider service, and the provider service may also expose functions
- * directly.  Multiple attached dependant services may be disambiguated
- * using the "attachID".  At the time an instance of a attached service
- * is instantiated, the attachID is passed in.
- *
- * The parameters map contains a set of parameters which describe the
- * dependant service.  These parameters are both set by BrowserPlus, and
- * extracted from the manifest of the dependant service.  
- *
- * The returned service definition describes the interface of the
- * dependent service.  This will likely be dynamically allocated
- * memory, which should not be freed until detach is called
- *
- * \warning this is an exception to the ServiceAPI's memory contract,
- *          and will be fixed in a later version of the ServiceAPI
+ *  \param instance The instance pointer returned from a BPPAllocate call.
+ *  \param tid The transaction id of this function invocation.
  */
-typedef const BPCoreletDefinition * (*BPPAttachPtr)(
-    unsigned int attachID, const BPElement * parameterMap);
+typedef void (*BPPCancelPtr)(void * instance, unsigned int tid);
 
 /**
- * At the time the last instance of a dependant service is deleted, detach
- * is called.  
+ * A callback invoked exactly once immediately after a service is installed
+ * on disk.  This is an opportunity for a service to perform any one-time setup.
+ *
+ * \param serviceDir is an absolute path to the directory containing the
+ *              files distributed with the service.
+ * \param dataDir is an absolute path to where the service should store
+ *                any data that needs to persist.
  */
-typedef void (*BPPDetachPtr)(unsigned int attachID);
+typedef int (*BPPInstallPtr)(const BPPath serviceDir, const BPPath dataDir);
 
-#define BPP_CORELET_API_VERSION 4
+/**
+ * A callback invoked exactly once immediately before a service is purged from
+ * disk.  This is an opportunity for a service to perform any one-time cleanup.
+ *
+ * \param serviceDir is an absolute path to the directory containing the
+ *              files distributed with the service.
+ * \param dataDir is an absolute path to where the service should store
+ *                any data that needs to persist.
+ */
+typedef int (*BPPUninstallPtr)(const BPPath serviceDir, const BPPath dataDir);
+
+
+#define BPP_SERVICE_API_VERSION 5
 
 typedef struct BPPFunctionTable_t 
 {
-    /** The version of the service API to which this service plugin is
-     *  written (use the BPP_CORELET_API_VERSION macro!) */ 
-    unsigned int coreletAPIVersion;
+    /** The version of the service API to which this service is
+     *  written (use the BPP_SERVICE_API_VERSION macro!) */ 
+    unsigned int serviceAPIVersion;
     BPPInitializePtr initializeFunc;
     BPPShutdownPtr shutdownFunc;
     BPPAllocatePtr allocateFunc;
     BPPDestroyPtr destroyFunc;
     BPPInvokePtr invokeFunc;
-    BPPAttachPtr attachFunc;
-    BPPDetachPtr detachFunc;    
+    BPPCancelPtr cancelFunc;
+    BPPInstallPtr installFunc;
+    BPPUninstallPtr uninstallFunc;
 } BPPFunctionTable;
 
 /**

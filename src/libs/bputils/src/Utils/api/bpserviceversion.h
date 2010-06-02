@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -71,7 +71,7 @@ public:
 
     /**
      * A very specific, but common test which occurs all over.
-     * When scanning a list of available corelets, how do we tell if
+     * When scanning a list of available services, how do we tell if
      * the 'current' version both matches the wanted 'version' and
      * 'minversion', AND is newer than the match we've already 'got'
      */

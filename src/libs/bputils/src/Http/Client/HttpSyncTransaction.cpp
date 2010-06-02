@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -41,10 +41,18 @@ namespace http {
 namespace client {
 
 
+std::tr1::shared_ptr<SyncTransaction>
+SyncTransaction::alloc( RequestPtr ptrRequest )
+{
+    std::tr1::shared_ptr<SyncTransaction> rval(new SyncTransaction(ptrRequest));
+    return rval;
+}
+
+
 SyncTransaction::SyncTransaction( RequestPtr ptrRequest ) :
     Listener(),
     m_thrd(),
-    m_pTran( 0 ),
+    m_pTran(),
     m_fTimeoutSecs( Transaction::defaultTimeoutSecs() ),
     m_ptrRequest( ptrRequest ),
     m_results()
@@ -55,7 +63,6 @@ SyncTransaction::SyncTransaction( RequestPtr ptrRequest ) :
 
 SyncTransaction::~SyncTransaction()
 {
-    // TODO: kill running transaction here?
 }
 
 
@@ -79,10 +86,10 @@ SyncTransaction::execute( FinalStatus& results )
 void SyncTransaction::startFunc( void* ctx )
 {
     SyncTransaction* self = (SyncTransaction*) ctx;
-    self->m_pTran = new http::client::Transaction( self->m_ptrRequest );
+    self->m_pTran.reset(new Transaction( self->m_ptrRequest ));
     self->m_pTran->setTimeoutSec( self->m_fTimeoutSecs );
 
-    self->m_pTran->initiate( self );
+    self->m_pTran->initiate( self->shared_from_this() );
 }
 
 
@@ -116,6 +123,11 @@ void SyncTransaction::onError(const std::string& msg)
 
 void SyncTransaction::stopThread( FinalStatus::Code code, std::string sMsg )
 {
+    // Make sure to reset transaction here, so that it
+    // gets destroyed on our thread.  All juicy http
+    // goodness must occur on same thread.
+    m_pTran.reset();
+
     m_results.code = code;
     m_results.message = sMsg;
     m_thrd.stop();

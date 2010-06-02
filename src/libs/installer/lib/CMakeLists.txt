@@ -12,7 +12,7 @@
 # The Original Code is BrowserPlus (tm).
 # 
 # The Initial Developer of the Original Code is Yahoo!.
-# Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+# Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
 # All rights reserved.
 # 
 # Contributor(s): 
@@ -36,7 +36,7 @@ ELSE()
 ENDIF()
 
 SET(BPInstaller_LINK_STATIC BPUtils DistributionClient
-                            CoreletManager ServiceRunnerLib)
+                            ServiceManager ServiceRunnerLib)
 YBT_BUILD(LIBRARY_STATIC BPInstaller)
 ADD_DEPENDENCIES( BPInstaller_s DistributionClient_s BPUtils_s
-                  CoreletManager_s ServiceRunnerLib_s)
+                  ServiceManager_s ServiceRunnerLib_s)

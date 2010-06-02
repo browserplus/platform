@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -61,11 +61,6 @@ static APTArgDefinition s_args[] =
         "xml", APT::TAKES_ARG, "", APT::NOT_REQUIRED, APT::NOT_INTEGER,
         APT::MAY_NOT_RECUR,
         "Format test output in XML"
-    },
-    {
-        "xsl", APT::TAKES_ARG, "", APT::NOT_REQUIRED, APT::NOT_INTEGER,
-        APT::MAY_NOT_RECUR,
-        "XSL transform to apply to test output in XML"
     },
     {
         "logToConsole", APT::TAKES_ARG, "", APT::NOT_REQUIRED,
@@ -144,16 +139,22 @@ int main( int argc, const char ** argv )
         }
 
         if (ap.argumentPresent("logToConsole")) {
-            bp::log::setupLogToConsole(ap.argument("logToConsole"));
+            bp::log::Level level = bp::log::levelFromString(
+                                    ap.argument("logToConsole"));
+            bp::log::setupLogToConsole(level);
         }
 
         if (ap.argumentPresent("logToDebugger")) {
-            bp::log::setupLogToDebugger(ap.argument("logToDebugger"));
+            bp::log::Level level = bp::log::levelFromString(
+                                    ap.argument("logToDebugger"));
+            bp::log::setupLogToDebugger(level);
         }
 
         if (ap.argumentPresent("logToFile")) {
             bp::file::Path logPath("TestHarness.log");
-            bp::log::setupLogToFile(logPath,ap.argument("logToFile"));
+            bp::log::Level level = bp::log::levelFromString(
+                                    ap.argument("logToFile"));
+            bp::log::setupLogToFile(logPath,level);
         }
     
         //--- Create the event manager and test controller
@@ -170,14 +171,12 @@ int main( int argc, const char ** argv )
         CPPUNIT_NS::TextOutputter textOutputter(&result, std::cout);
 
         //--- Add a listener that collects results in XML
-        CPPUNIT_NS::OStream* xmlStream = &CPPUNIT_NS::stdCOut();
+        CPPUNIT_NS::OStream* xmlStream = NULL;
+        CPPUNIT_NS::XmlOutputter* xmlOutputter = NULL;
         if (ap.argumentPresent("xml")) {
             // Set up outputters
-            xmlStream = new CPPUNIT_NS::OFileStream(ap.argument("xml").c_str());
-        }
-        CPPUNIT_NS::XmlOutputter xmlOutputter(&result, *xmlStream/*, parser.getEncoding()*/);
-        if (ap.argumentPresent("xsl")) {
-            xmlOutputter.setStyleSheet(ap.argument("xsl"));
+            xmlStream = new CPPUNIT_NS::OFileStream( ap.argument("xml").c_str() );
+            xmlOutputter = new CPPUNIT_NS::XmlOutputter( &result, *xmlStream );
         }
 
         //--- Add the top suite to the test runner
@@ -185,10 +184,12 @@ int main( int argc, const char ** argv )
         runner.addTest( suite );
         runner.run( controller );
 
-        textOutputter.write();
         if (ap.argumentPresent("xml")) {
-            xmlOutputter.write();
+            xmlOutputter->write();
+            delete xmlStream;
+            delete xmlOutputter;
         }
+        textOutputter.write();
 
         rv = result.wasSuccessful() ? 0 : 1;
     }

@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -37,7 +37,9 @@
 namespace bp {
 namespace usage {
 
-void reportPageUsage( const std::string& sUrl, const std::string& sUserAgent );
+void reportPageUsage( const std::string& sUrl,
+                      const std::string& sUserAgent,
+                      const std::string& sServices );
 
 } // usage
 } // bp

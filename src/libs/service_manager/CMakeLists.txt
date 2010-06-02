@@ -12,14 +12,14 @@
 # The Original Code is BrowserPlus (tm).
 # 
 # The Initial Developer of the Original Code is Yahoo!.
-# Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+# Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
 # All rights reserved.
 # 
 # Contributor(s): 
 # ***** END LICENSE BLOCK *****
-SET(CoreletManager_MAJOR_VERSION 0)
-SET(CoreletManager_MINOR_VERSION 1)
-SET(CoreletManager_LINK_STATIC BPUtils Permissions ServiceRunnerLib)
+SET(ServiceManager_MAJOR_VERSION 0)
+SET(ServiceManager_MINOR_VERSION 1)
+SET(ServiceManager_LINK_STATIC BPUtils Permissions ServiceRunnerLib)
 
-YBT_BUILD(LIBRARY_STATIC CoreletManager)
-ADD_DEPENDENCIES(CoreletManager_s BPUtils_s Permissions_s ServiceRunnerLib_s) 
+YBT_BUILD(LIBRARY_STATIC ServiceManager)
+ADD_DEPENDENCIES(ServiceManager_s BPUtils_s Permissions_s ServiceRunnerLib_s) 

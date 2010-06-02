@@ -12,7 +12,7 @@
 # The Original Code is BrowserPlus (tm).
 # 
 # The Initial Developer of the Original Code is Yahoo!.
-# Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+# Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
 # All rights reserved.
 # 
 # Contributor(s): 
@@ -57,5 +57,5 @@ ADD_DEPENDENCIES(${libName}_s BPUtils_s)
 # This is (currently) the place to specify .libs upon which we depend whose
 # names do not end in *_s
 IF (UNIX)
-    TARGET_LINK_LIBRARIES(${libName}_s sicudata sicuuc sicui18n)
+    TARGET_LINK_LIBRARIES(${libName}_s sicui18n sicuuc sicudata)
 ENDIF ()

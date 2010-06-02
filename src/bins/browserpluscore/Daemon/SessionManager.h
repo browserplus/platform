@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -22,7 +22,7 @@
 
 #include "ActiveSession.h"
 #include "BPUtils/IPCChannelServer.h"
-#include "CoreletManager/CoreletManager.h"
+#include "ServiceManager/ServiceManager.h"
 
 #ifndef __SESSIONMANAGER_H__
 #define __SESSIONMANAGER_H__
@@ -32,7 +32,7 @@ class SessionManager : public virtual bp::ipc::IChannelServerListener,
                        public virtual IActiveSessionListener
 {
 public:
-    SessionManager(std::tr1::shared_ptr<CoreletRegistry> registry);
+    SessionManager(std::tr1::shared_ptr<ServiceRegistry> registry);
     ~SessionManager();
 
     unsigned int numCurrentSessions();
@@ -57,7 +57,7 @@ private:
     std::map<bp::ipc::Channel *, std::tr1::shared_ptr<ActiveSession> >
         m_sessionList;
 
-    std::tr1::shared_ptr<CoreletRegistry> m_coreletRegistry;
+    std::tr1::shared_ptr<ServiceRegistry> m_serviceRegistry;
 
     std::string m_primaryDistroServer;
     std::list<std::string> m_secondaryDistroServers;

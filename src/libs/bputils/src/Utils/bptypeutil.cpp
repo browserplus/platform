@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -23,8 +23,8 @@
 /**
  * bputil.hh -- c++ utilities to make building hierarchies of BPElements
  *              eaiser.  A tool that may be consumed in source form
- *              by a corelet author to simplify mapping into and out of
- *              introspectable corelet API types.
+ *              by a service author to simplify mapping into and out of
+ *              introspectable service API types.
  */
 
 #include "bptypeutil.h"
@@ -51,7 +51,7 @@ bp::typeAsString(BPType t)
         case BPTMap: return "map";
         case BPTList: return "list";
         case BPTCallBack: return "callback";
-        case BPTPath: return "path";
+        case BPTNativePath: return "path";
         case BPTAny: return "any";
     }
     return "unknown";
@@ -151,10 +151,9 @@ bp::Object::build(const BPElement * elem)
             case BPTString:
                 obj = new bp::String(elem->value.stringVal);
                 break;
-            case BPTPath: 
+            case BPTNativePath: 
             {
-                bp::file::Path p = bp::file::pathFromURL(elem->value.pathVal);
-                obj = new bp::Path(p);
+                obj = new bp::Path(bp::file::Path(elem->value.pathVal));
                 break;
             }
             case BPTMap:
@@ -212,6 +211,11 @@ bp::Object::operator bool() const
 bp::Object::operator std::string() const 
 {
     throw ConversionException("cannot convert to string");
+}
+
+bp::Object::operator bp::file::Path() const 
+{
+    throw ConversionException("cannot convert to path");
 }
 
 bp::Object::operator long long() const 
@@ -348,25 +352,35 @@ bp::String::operator std::string() const
 }
 
 bp::Path::Path(const bp::file::Path & path)
-    : bp::String(path.utf8())
+    : bp::Object(BPTNativePath), m_path(path.external_file_string())
 {
-    e.type = BPTPath;
-    this->str = path.url();
-    e.value.pathVal = (char *)this->str.c_str();
+    e.value.pathVal = (BPPath) m_path.c_str();
 }
 
 bp::Path::Path(const Path & other)
-    : bp::String(other.str)
+    :  bp::Object(BPTNativePath), m_path(other.m_path)
 {
-    e.type = BPTPath;
+    e.type = BPTNativePath;
+    e.value.pathVal = (BPPath) m_path.c_str();
+}
+
+const BPPath
+bp::Path::value() const
+{
+    return e.value.pathVal;
 }
 
 bp::Path &
 bp::Path::operator= (const Path & other)
 {
-    str = other.str;
-    e.value.pathVal = (char *) str.c_str();
+    m_path = other.m_path;
+    e.value.pathVal = (BPPath) m_path.c_str();
     return *this;
+}
+
+bp::Path::operator bp::file::Path() const 
+{
+	return bp::file::Path(m_path);
 }
 
 bp::Path::~Path()
@@ -386,6 +400,7 @@ bp::Map::Map() : bp::Object(BPTMap)
     e.value.mapVal.size = 0;
     e.value.mapVal.elements = NULL;
 }
+
 
 bp::Map::Map(const Map & o) : bp::Object(BPTMap) 
 {

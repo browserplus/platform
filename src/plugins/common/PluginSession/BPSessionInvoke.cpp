@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -270,7 +270,7 @@ BPSession::executeMethod(const std::string &service,
     
     // now let's add the transaction to the list
     if (ctx->ec == BP_EC_OK) {
-        // we must either invoke the pluglet or the corelet
+        // we must either invoke the pluglet or the service
 
         // first, check if this is a pluglet
         Pluglet * pluglet = m_plugletRegistry->find(service, version, "");

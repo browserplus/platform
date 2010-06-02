@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -38,7 +38,7 @@ ServiceSummaryTest::standaloneTest()
     static const char * manifestJson =
         "{"
         "    \"type\": \"standalone\","
-        "    \"CoreletLibrary\": \"lib.dll\","
+        "    \"ServiceLibrary\": \"lib.dll\","
         "    \"strings\": { "
         "        \"en\": { "
         "            \"title\": \"Image Manipulation Plugin\", "
@@ -65,7 +65,7 @@ ServiceSummaryTest::standaloneTest()
     // now load it
     bp::service::Summary s;
     std::string error;
-    CPPUNIT_ASSERT( s.detectCorelet(m_testServiceDir, error) );
+    CPPUNIT_ASSERT( s.detectService(m_testServiceDir, error) );
 
     //  --- now check everything is as expected --- 
     CPPUNIT_ASSERT( s.type() == bp::service::Summary::Standalone );
@@ -76,8 +76,8 @@ ServiceSummaryTest::standaloneTest()
 
     // instantiated from a non name/version dir.  they should be left
     // empty
-    CPPUNIT_ASSERT( s.name().empty() );
-    CPPUNIT_ASSERT( s.version().empty() );
+    CPPUNIT_ASSERT_MESSAGE( s.name().c_str(), s.name().empty() );
+    CPPUNIT_ASSERT_MESSAGE( s.version().c_str(), s.version().empty() );
 
     // should NOT be out of date
     CPPUNIT_ASSERT( !s.outOfDate() );
@@ -97,8 +97,8 @@ ServiceSummaryTest::standaloneTest()
     CPPUNIT_ASSERT( s.localization("de", title, summary) );
     CPPUNIT_ASSERT( !title.compare("Image Manipulation Plugin") );    
 
-    // empty dependent corelet stuff
-    CPPUNIT_ASSERT( s.usesCorelet().empty() );
+    // empty dependent service stuff
+    CPPUNIT_ASSERT_MESSAGE( s.usesService().c_str(), s.usesService().empty() );
 
     CPPUNIT_ASSERT( s.isInitialized() );
 
@@ -125,7 +125,7 @@ ServiceSummaryTest::shutdownDelayTest()
     static const char * manifestJson =
         "{"
         "    \"type\": \"standalone\","
-        "    \"CoreletLibrary\": \"lib.dll\","
+        "    \"ServiceLibrary\": \"lib.dll\","
         "    \"strings\": { "
         "        \"en\": { "
         "            \"title\": \"foo\", "
@@ -144,7 +144,7 @@ ServiceSummaryTest::shutdownDelayTest()
     // now load it
     bp::service::Summary s;
     std::string error;
-    bool detectedService = s.detectCorelet(m_testServiceDir, error);
+    bool detectedService = s.detectService(m_testServiceDir, error);
     CPPUNIT_ASSERT_MESSAGE( error, detectedService );
 
     // now check that shutdownDelaySecs is set properly

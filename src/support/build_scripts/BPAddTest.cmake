@@ -12,7 +12,7 @@
 # The Original Code is BrowserPlus (tm).
 # 
 # The Initial Developer of the Original Code is Yahoo!.
-# Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+# Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
 # All rights reserved.
 # 
 # Contributor(s): 
@@ -39,18 +39,22 @@ MACRO (BPAddTest binName)
     SET_TARGET_PROPERTIES(${binName} PROPERTIES COMPILE_FLAGS "/wd4127")
   ENDIF ()
 
-  MESSAGE("++ Adding Test: ${binName}")
-  ADD_CUSTOM_COMMAND(TARGET ${binName} POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy "${origPath}" "${testOutputDirectory}"
+  ADD_CUSTOM_TARGET(${binName}Execution
+      ${CMAKE_COMMAND} -E copy "${origPath}" "${testOutputDirectory}"
       COMMAND ${CMAKE_COMMAND} -E echo "++ Running Test: ${baseName}"
-      COMMAND "./${baseName}"
+      COMMAND ./${baseName} -xml ${baseName}.xml
       WORKING_DIRECTORY "${testOutputDirectory}")
-# This could replace the previous line, if we want to always emit XML reports
-# for unit test execution
-#  ADD_CUSTOM_COMMAND(TARGET ${binName} POST_BUILD
-#      COMMAND ${CMAKE_COMMAND} -E copy "${origPath}" "${testOutputDirectory}"
-#      COMMAND ${CMAKE_COMMAND} -E echo "++ Running Test: ${baseName}"
-#      COMMAND ./${baseName} -xml ${baseName}.xml
-#      WORKING_DIRECTORY "${testOutputDirectory}")
+  # Custom targets have no deps and do not dep on anything.
+  # So make the execution depend on the build of the test
+  ADD_DEPENDENCIES(${binName}Execution ${binName})
+  # Create the top-level test target, if needed.
+  GET_TARGET_PROPERTY(TESTLOCATION test LOCATION)
+  IF ("${TESTLOCATION}" STREQUAL "TESTLOCATION-NOTFOUND")
+    ADD_CUSTOM_TARGET(test)
+    SET_TARGET_PROPERTIES(test
+      PROPERTIES LOCATION test)
+  ENDIF ()
+  # Make the test target depend on the execution of this test.
+  ADD_DEPENDENCIES(test ${binName}Execution)
 ENDMACRO ()
 

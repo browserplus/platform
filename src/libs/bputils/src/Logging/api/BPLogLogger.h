@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -111,14 +111,14 @@ public:
     double elapsedSec();
     
     /**
-     * Fire an event without checking level
+     * Fire an event if level is enabled.
      * This method is primarily for internal use but needs to be public.
      */
     void _conditionalLog( const Level& level,
                           const std::string& message,
                           const LocationInfo& location );
     /**
-     * Fire an event without checking level
+     * Fire an event without checking level.
      * This method is primarily for internal use but needs to be public.
      */
     void _forcedLog( const Level& level,

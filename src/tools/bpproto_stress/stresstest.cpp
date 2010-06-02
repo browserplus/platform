@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -41,7 +41,7 @@ static void startConnection(BPProtoHand * pph);
 
 static void requireCallback(BPErrorCode ec,
                             void * cookie,
-                            const BPCoreletDefinition ** ,
+                            const BPServiceDefinition ** ,
                             unsigned int ,
                             const char *, const char *)
 {

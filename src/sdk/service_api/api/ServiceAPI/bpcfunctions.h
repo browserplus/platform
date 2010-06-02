@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -23,7 +23,7 @@
 /**
  * Written by Lloyd Hilaiel, on or around Fri May 18 17:06:54 MDT 2007 
  *
- * BPC* functions are provided by BPCore and called by the corelet 
+ * BPC* functions are provided by BPCore and called by the service
  */
 
 #ifndef __BPCFUNCTIONS_H__
@@ -55,7 +55,7 @@ typedef void (*BPCPostResultsFuncPtr)(unsigned int tid,
  * service function may be called.  This indicates the completion of the
  * function invocation or transaction.
  *
- * \param tid a transaction id passed into the corelet via the invocation
+ * \param tid a transaction id passed into the service via the invocation
  *        of a BPPFunctionPtr
  * \param error A string representation of an error.  If NULL, a generic
  *              error will be raised.  These strings should be camel
@@ -122,7 +122,7 @@ typedef void (*BPUserResponseCallbackFuncPtr)(
  *
  * \param tid a transaction id passed into the service via the invocation
  *        of a BPPFunctionPtr
- * \param utf8PathToHTMLDialog A utf8 string holding the absolute path
+ * \param pathToHTMLDialog A native "wide" string holding the absolute path
  *          to the dialog you wish to display.  
  * \param arguments The arguments to make available to the dialog
  *          via the BPDialog.args() call
@@ -135,10 +135,27 @@ typedef void (*BPUserResponseCallbackFuncPtr)(
  */
 typedef unsigned int (*BPCPromptUserFuncPtr)(
     unsigned int tid,
-    const char * utf8PathToHTMLDialog,
+    const BPPath pathToHTMLDialog,
     const BPElement * arguments,
     BPUserResponseCallbackFuncPtr responseCallback,
     void * context);
+
+/**
+ * The signature of a callback as used by the BPCInvokeOnMainThreadPtr function.
+ */
+typedef void (*BPCMainThreadCallbackPtr)(void);
+
+/**
+ * A thread safe way to request that BrowserPlus invoke your service from the
+ * "main" thread, which is the thread which invokes all functions on the service.
+ *
+ * This is a mechanism to allow a service to safely use the event pump of the
+ * parent process (A BrowserPlus "service" process).
+ *
+ * There is no gaurantee that a callback will be delivered (especially in the
+ * shutdown case).
+ */
+typedef void (*BPCInvokeOnMainThreadPtr)(BPCMainThreadCallbackPtr cb);
 
 /**
  * A table containing function pointers for functions available to be
@@ -150,6 +167,7 @@ typedef struct {
     BPCLogFuncPtr log;
     BPCInvokeCallBackFuncPtr invoke;
     BPCPromptUserFuncPtr prompt;
+    BPCInvokeOnMainThreadPtr invokeOnMainThread;
 } BPCFunctionTable;
 
 #ifdef __cplusplus

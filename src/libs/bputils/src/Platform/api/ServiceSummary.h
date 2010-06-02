@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -25,9 +25,9 @@
  *
  * A class capable of providing high level information about a service on
  * disk.  Essentially ServiceSummary exposes all of the information available
- * in the manifest.json file of a corelet.
+ * in the manifest.json file of a service.
  *
- * ServiceSummary also contains the name and version of the corelet.  This
+ * ServiceSummary also contains the name and version of the service.  This
  * can be determined from path (<name>/<version> or can be set explicitly).
  *
  * ServiceSummary does _not_ load nor unload dynamic libraries.
@@ -60,10 +60,10 @@ public:
     ~Summary();  
     
     /**
-     *  parse a directory to determine whether a valid corelet resides
+     *  parse a directory to determine whether a valid service resides
      *  beneath.
      */
-    bool detectCorelet(const bp::file::Path &path, std::string &error);
+    bool detectService(const bp::file::Path &path, std::string &error);
     
     typedef enum {
         None,
@@ -71,18 +71,18 @@ public:
         Dependent,
         Provider,
         BuiltIn
-    } CoreletType;
+    } ServiceType;
 
     std::string name() const;
     std::string version() const;
     
-    CoreletType type() const;
+    ServiceType type() const;
     std::string typeAsString() const;
 
-    /** Path to the corelet directory */
+    /** Path to the service directory */
     const bp::file::Path& path() const;
 
-    /** last modification of the corelet */
+    /** last modification of the service */
     BPTime modDate() const;
 
     /** check if the on disk manifest is newer than when the summary
@@ -94,7 +94,7 @@ public:
      *  no such option was specified */
     int shutdownDelaySecs() const;
     
-    /** get the locales for which this corelet is localized */
+    /** get the locales for which this service is localized */
     std::list<std::string> localizations() const;
 
     /** get the localization for a specific locale */
@@ -105,18 +105,18 @@ public:
     void setLocalizations(std::map<std::string,
                                    std::pair<std::string, std::string> > l);
 
-    /** for a provider or standalone corelet, get the path to the
-     *  dynamic library that implements the corelet */
-    bp::file::Path coreletLibraryPath() const;
+    /** for a provider or standalone service, get the path to the
+     *  dynamic library that implements the service */
+    bp::file::Path serviceLibraryPath() const;
 
-    /** for a dependent corelet, who does the corelet depend on? */
-    std::string usesCorelet() const;
-    /** for a dependent corelet, what version does the corelet depend on? */
+    /** for a dependent service, who does the service depend on? */
+    std::string usesService() const;
+    /** for a dependent service, what version does the service depend on? */
     bp::ServiceVersion usesVersion() const;
-    /** for a dependent corelet, what minVersion does the corelet depend on? */
+    /** for a dependent service, what minVersion does the service depend on? */
     bp::ServiceVersion usesMinversion() const;
 
-    /** for a dependent corelet, ??? */
+    /** for a dependent service, ??? */
     std::map<std::string, std::string> arguments() const;
 
     /** has this summary been initialized? */
@@ -132,7 +132,7 @@ public:
     std::string toHumanReadableString() const;
 
   protected:
-    CoreletType m_type;
+    ServiceType m_type;
 
     std::string m_name;
     std::string m_version;
@@ -142,11 +142,11 @@ public:
     BPTime m_modDate;
     int m_shutdownDelaySecs;
 
-    // specific to standalone or provider corelets
-    bp::file::Path m_coreletLibraryPath;    
+    // specific to standalone or provider services
+    bp::file::Path m_serviceLibraryPath;    
 
-    // specific to dependent corelets
-    std::string m_usesCorelet;
+    // specific to dependent services
+    std::string m_usesService;
     bp::ServiceVersion m_usesVersion;
     bp::ServiceVersion m_usesMinversion;
     std::map<std::string, std::string> m_arguments;
@@ -156,15 +156,15 @@ public:
 
 /**
  * Test if lhs is bitwise less than rhs.
- * this function allows CoreletSummaries to be used as keys in STL data
+ * this function allows ServiceSummaries to be used as keys in STL data
  * structures.  Comparison is based on path.
  */
 bool operator<(const bp::service::Summary &lhs,
                const bp::service::Summary &rhs);
 
 /**
- * A class used by the CoreletManager library to generate summaries for
- * built-in corelets
+ * A class used by the ServiceManager library to generate summaries for
+ * built-in services
  */
 class BuiltInSummary : public Summary
 {

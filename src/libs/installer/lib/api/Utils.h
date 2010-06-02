@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -42,6 +42,16 @@ namespace utils {
 #endif
 
 #ifdef WIN32
+    // Return coclass name of our activex control.
+    std::string axName();
+    
+    // Return version-independent progid of our activex control.
+    std::string axViProgid();
+
+    // Return progid of our activex control.
+    std::string axProgid(const std::string& version);
+    std::string axProgid(const bp::ServiceVersion& version);
+    
     // Return dir into which to install npapi plugin.
     // For users with non-ascii usernames, Firefox can't
     // find the npapi plugin if it is installed under their
@@ -80,11 +90,18 @@ namespace utils {
                           const std::string& sModuleUuid,
                           const bp::file::Path& sModulePath,
                           const std::string& sCoClassUuid,
-                          const std::string& sCoClassName,
                           const std::string& sViProgid,
                           const std::string& sProgid);
 
-    // Delete a registry key and all of it's subkeys.
+    // Unregister "cruft" YBPAddon_xxx.dll controls, meaning
+    // controls found in the registry but not on the filesystem.
+    // Alas, this can happen because of a bug we had.  If "force"
+    // is true, removal will happen even if control is found
+    // on the filesystem (used during uninstall).
+    // Returns 0 on success, non-zero otherwise
+    int unregisterCruftControls(bool force);
+
+    // Delete a registry key and all of its subkeys.
     //
     // BE VERY, VERY CAREFUL USING THIS METHOD, IT CAN DESTROY A SYSTEM.
     // CHECK, DOUBLE CHECK, AND THEN TRIPLE CHECK THE KEY THAT YOU PASS.

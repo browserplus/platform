@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -61,7 +61,7 @@ Controller::Controller(const std::string & service,
 {
     // TODO: set m_service & m_version?
     
-    m_path = bp::paths::getCoreletDirectory() / service / version;
+    m_path = bp::paths::getServiceDirectory() / service / version;
 }
 
 Controller::Controller(const bpf::Path & path) :
@@ -98,6 +98,9 @@ Controller::~Controller()
     m_spawnCheckTimer.cancel();
 
     m_serviceConnector.reset();
+
+    // Delete any temp dirs that may have been left around by the service.
+    std::for_each(m_tempDirs.begin(), m_tempDirs.end(), bp::file::remove);
 }
 
 void
@@ -172,8 +175,8 @@ Controller::run(const bpf::Path & pathToHarness,
     m_sw.start();    
 
 	// spawn the little dude
-    if (bp::process::spawn(executable, serviceTitle, m_path, args,
-                           &m_spawnStatus))
+    if (bp::process::spawn(executable, args, &m_spawnStatus, m_path, 
+                           serviceTitle))
     {
         BPLOG_INFO_STRM("successfully spawned service process for "
                         << m_path << ", pid: " << m_spawnStatus.pid <<
@@ -232,6 +235,7 @@ Controller::describe()
     }
 }
 
+
 unsigned int
 Controller::allocate(const std::string & uri,
                      const bpf::Path & data_dir,
@@ -240,26 +244,30 @@ Controller::allocate(const std::string & uri,
                      const std::string & userAgent,
                      unsigned int clientPid)
 {
-    bp::ipc::Query q;
-
     if (m_chan != NULL)
     {
         bp::Map context;
         context.add("uri", new bp::String(
                         uri.empty() ? std::string("bpclient://unknown") : uri));
-        context.add("data_dir", new bp::String(data_dir.externalUtf8()));
-        context.add("temp_dir", new bp::String(temp_dir.externalUtf8()));
+        context.add("dataDir", new bp::String(data_dir.externalUtf8()));
+        context.add("tempDir", new bp::String(temp_dir.externalUtf8()));
         context.add("locale", new bp::String(locale));
         context.add("userAgent", new bp::String(userAgent));
         context.add("clientPid", new bp::Integer(clientPid));
+
+        bp::ipc::Query q;
         q.setCommand("allocate");
         q.setPayload(context.clone());
-        if (m_chan->sendQuery(q)) return q.id();
-        // if send fails, return -1
+        if (!m_chan->sendQuery(q)) {
+            return (unsigned int) -1;
+        }
+        m_tempDirs.push_back(temp_dir);
+        return q.id();
+    } else {
+        return (unsigned int) -1;
     }
-
-    return (unsigned int) -1;
 }
+
 
 void
 Controller::destroy(unsigned int id)
@@ -268,6 +276,9 @@ Controller::destroy(unsigned int id)
         bp::ipc::Message m;
         m.setCommand("destroy");
         m.setPayload(new bp::Integer(id));
+
+        // TODO: should this be a sendQuery so we can know when
+        // service is unloaded?
         (void) m_chan->sendMessage(m);
     } else {
         // TODO: we do not convey this condition to the client

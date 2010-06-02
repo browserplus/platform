@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -24,7 +24,7 @@
 #define __COMMANDEXECUTOR_H__
 
 #include "ConsoleLib/ConsoleLib.h"
-#include "CoreletManager/CoreletManager.h"
+#include "ServiceManager/ServiceManager.h"
 #include "BPUtils/bpfile.h"
 #include "InstanceManager.h"
 

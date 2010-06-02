@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -44,14 +44,16 @@
 #include "BPLog.h"
 #include "bpstrutil.h"
 
+using namespace std;
+
 
 namespace bp {
 namespace error {
 
-std::string 
-lastErrorString(const char * contextStr)
+
+string lastErrorString(const char * contextStr)
 {
-    std::stringstream ss;
+    stringstream ss;
 
     if (NULL != contextStr) ss << contextStr << " ";
 
@@ -80,14 +82,13 @@ lastErrorString(const char * contextStr)
 }
 
 
-std::string
-lastErrorString(const std::string& contextStr)
+string lastErrorString(const string& contextStr)
 {
     return lastErrorString(contextStr.c_str());
 }
 
 
-Exception::Exception( const std::string& sDesc ) :
+Exception::Exception( const string& sDesc ) :
 m_sDesc( sDesc )
 {
 }
@@ -118,14 +119,13 @@ Exception* Exception::clone() const
 }
     
 
-const char*
-Exception::what() const throw()
+const char* Exception::what() const throw()
 {
     return m_sDesc.c_str();
 }
 
 
-FatalException::FatalException( const std::string& sDesc ) :
+FatalException::FatalException( const string& sDesc ) :
 m_sDesc( sDesc )
 {
 }
@@ -156,65 +156,106 @@ FatalException* FatalException::clone() const
 }
     
     
-const char*
-FatalException::what() const throw()
+const char* FatalException::what() const throw()
 {
     return m_sDesc.c_str();
 }
 
 
-void ReportThrow( const std::exception& e,
-                  const std::string& sFile,
-                  const std::string& sFunc,
-                  int nLine,
-                  const std::string& sAddlContext )
+static string
+makeExceptionEventString( const string sAction,
+                          const exception& exc,
+                          const string& sAddlContext )
 {
-    std::stringstream ssReport;
-    ssReport << "Throwing a " << typeid(e).name() << ": " << e.what();
-    if (!sAddlContext.empty())
-    {
-        ssReport << "info: " << sAddlContext;
-    }
-    
-    if (bp::log::rootLogger().isLevelEnabled( bp::log::LEVEL_ERROR ))
-    {
-        bp::log::rootLogger()._forcedLog( bp::log::LEVEL_ERROR, ssReport.str(),
-                                          bp::log::LocationInfo( sFile,
-                                                                 sFunc,
-                                                                 nLine ) );
-    }
-}
-
-
-void
-ReportCatch( const std::exception& e,
-             const std::string& sFile,
-             const std::string& sFunc,
-             int nLine,
-             const std::string& sAddlContext ) throw()
-{
-    if (bp::log::rootLogger().isLevelEnabled(bp::log::LEVEL_ERROR))
-    {
-        bp::log::rootLogger()._forcedLog(bp::log::LEVEL_ERROR,
-                                         makeCatchReportString(e, sAddlContext),
-                                         bp::log::LocationInfo(sFile,
-                                                               sFunc,
-                                                               nLine));
-    }
-}
-
-
-std::string makeCatchReportString( const std::exception& exc,
-                                   const std::string& sAddlContext )
-{
-    std::stringstream ssReport;
-    ssReport << "Caught a " << typeid(exc).name() << ": " << exc.what();
-    if (!sAddlContext.empty())
-    {
-        ssReport << "info: " << sAddlContext;
+    stringstream ssReport;
+    ssReport << sAction << " a " << typeid(exc).name() << ": " << exc.what();
+    if (!sAddlContext.empty()) {
+        ssReport << " (" << sAddlContext << ")";
     }
 
     return ssReport.str();
+}
+
+
+static void
+reportExceptionEvent( const string sAction,
+                      const exception& e,
+                      const string& sFile,
+                      const string& sFunc,
+                      int nLine,
+                      const string& sAddlContext ) throw()
+{
+    using namespace bp::log;
+
+    const Level kExcLogLevel = LEVEL_ERROR;
+    
+    if (rootLogger().isLevelEnabled( kExcLogLevel ))
+    {
+        string sLog = makeExceptionEventString( sAction, e, sAddlContext );
+        LocationInfo loc( sFile, sFunc, nLine );
+        rootLogger()._forcedLog( kExcLogLevel, sLog, loc );
+    }
+}
+
+
+void reportThrow( const exception& e,
+                  const string& sFile,
+                  const string& sFunc,
+                  int nLine,
+                  const string& sAddlContext )
+{
+    reportExceptionEvent( "Throwing", e, sFile, sFunc, nLine, sAddlContext );
+}
+
+
+void reportCatch( const exception& e,
+                  const string& sFile,
+                  const string& sFunc,
+                  int nLine,
+                  const string& sAddlContext ) throw()
+{
+    reportExceptionEvent( "Caught", e, sFile, sFunc, nLine, sAddlContext );
+}
+
+
+void reportCatchUnknown( const string& sFile,
+                         const string& sFunc,
+                         int nLine,
+                         const string& sAddlContext ) throw()
+{
+    using namespace bp::log;
+
+    const Level kExcLogLevel = LEVEL_ERROR;
+
+    if (rootLogger().isLevelEnabled( kExcLogLevel ))
+    {
+        stringstream ssReport;
+        ssReport << "Caught an unknown exception.";
+        if (!sAddlContext.empty()) {
+            ssReport << " (" << sAddlContext << ")";
+        }
+
+        LocationInfo loc( sFile, sFunc, nLine );
+        rootLogger()._forcedLog( kExcLogLevel, ssReport.str(), loc );
+    }
+}
+
+
+
+// These next two are for external users who want the raw string,
+// (e.g. for sending to cout).
+
+string makeThrowReportString( const exception& exc,
+                              const string& sAddlContext )
+{
+    return makeExceptionEventString( "Throwing", exc, sAddlContext );
+}
+
+
+string makeCatchReportString( const exception& exc,
+                              const string& sAddlContext )
+{
+    return makeExceptionEventString( "Caught", exc, sAddlContext );
 }
 
 

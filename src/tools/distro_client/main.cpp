@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -38,7 +38,7 @@ bp::runloop::RunLoop s_rl;
 static APTArgDefinition g_args[] = {
     { "l", APT::TAKES_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
       APT::NOT_INTEGER, APT::MAY_RECUR,
-      "enable console logging, argument like \"info,ThrdLvlFuncMsg\""
+      "enable console logging, argument is level (info, debug, etc.)"
     },
     { "s", APT::TAKES_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
       APT::NOT_INTEGER, APT::MAY_RECUR,
@@ -55,7 +55,7 @@ setupLogging(const APTArgParse& argParser)
     bp::log::removeAllAppenders();
     if (argParser.argumentPresent("l")) {
         // Setup the system-wide minimum log level.
-        std::string level = argParser.argument("l");
+        bp::log::Level level = bp::log::levelFromString(argParser.argument("l"));
         bp::log::setupLogToConsole(level);
     }
 }
@@ -122,7 +122,7 @@ main(int argc, const char ** argv)
             "available", chp,
             BP_COMMAND_HANDLER(CommandExecutor::available),
             0, 1,
-            "List all avaiilable corelets on the distribution server."
+            "List all avaiilable services on the distribution server."
             "Accepts an option argument which is the platform.");
 
         parser->registerHandler(
@@ -141,17 +141,17 @@ main(int argc, const char ** argv)
             "details", chp,
             BP_COMMAND_HANDLER(CommandExecutor::details),
             3, 3,
-            "Acquire information about a specific corelet.  Three arguments "
-            "corelet name, corelet version, and platform.");
+            "Acquire information about a specific service.  Three arguments "
+            "service name, service version, and platform.");
 
         parser->registerHandler(
             "find", chp,
             BP_COMMAND_HANDLER(CommandExecutor::find),
             2, 4,
-            "Determine if a corelet exists matching the specified parameters."
+            "Determine if a service exists matching the specified parameters."
             "  Parameters are \n"
             "  1. platform (osx or win32)\n"
-            "  2. corelet name\n"
+            "  2. service name\n"
             "  3. [version]\n"
             "  4. [minversion]");
 
@@ -159,9 +159,9 @@ main(int argc, const char ** argv)
             "satisfy", chp,
             BP_COMMAND_HANDLER(CommandExecutor::satisfy),
             1, 2,
-            "Given a list of require statements, generate a list of corelets "
+            "Given a list of require statements, generate a list of services "
             "that would satisfy these require statments and all require " 
-            "statements expressed by dependent corelets.  The first argument "
+            "statements expressed by dependent services.  The first argument "
             "is optional arguments.  The arguments option is a map with "
             "any of the keys 'platform' (value 'osx'|'win32'), "
             "'wantNewest' (true|false), or 'useInstalled (true|false) ."
@@ -176,26 +176,26 @@ main(int argc, const char ** argv)
             "installed", chp,
             BP_COMMAND_HANDLER(CommandExecutor::installed),
             0, 0,
-            "List installed corelets.");
+            "List installed services.");
 
         parser->registerHandler(
             "cached", chp,
             BP_COMMAND_HANDLER(CommandExecutor::cached),
             0, 0,
-            "List corelets in cache.");
+            "List services in cache.");
 
         parser->registerHandler(
             "isCached", chp,
             BP_COMMAND_HANDLER(CommandExecutor::isCached),
             2, 2,
-            "Given a corelet name and version, check if it's available in "
+            "Given a service name and version, check if it's available in "
             "the update cache.");
 
         parser->registerHandler(
             "updateCache", chp,
             BP_COMMAND_HANDLER(CommandExecutor::updateCache),
             1, 1,
-            "Update cache, downloading corelet updates if available.  "
+            "Update cache, downloading service updates if available.  "
             "Argument is a JSON string of require statements, which will "
             "be considered to be the 'require history'");
 
@@ -203,14 +203,14 @@ main(int argc, const char ** argv)
             "purgeCache", chp,
             BP_COMMAND_HANDLER(CommandExecutor::purgeCache),
             0, 0,
-            "Purge all corelets from the corelet cache.");
+            "Purge all services from the service cache.");
 
         parser->registerHandler(
             "installFromCache", chp,
             BP_COMMAND_HANDLER(CommandExecutor::installFromCache),
             2, 2,
-            "Install a corelet from the cache.  Two arguments required, "
-            "corelet name and version respectively.");
+            "Install a service from the cache.  Two arguments required, "
+            "service name and version respectively.");
 
         parser->registerHandler(
             "haveUpdates", chp,
@@ -224,9 +224,9 @@ main(int argc, const char ** argv)
             "strings", chp,
             BP_COMMAND_HANDLER(CommandExecutor::strings),
             3, 3,
-            "Get localized names and descriptions for a list of corelets.  "
+            "Get localized names and descriptions for a list of services.  "
             "first argument is platform, second is locale, third is json "
-            "list of maps of corelet 'name' and 'version'.");
+            "list of maps of service 'name' and 'version'.");
 
         parser->registerHandler(
             "latestPlatformVersion", chp,

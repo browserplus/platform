@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -288,16 +288,16 @@ BPErrorCode BPRequire(BPProtoHand hand,
 }
 
 BPErrorCode BPDescribe(BPProtoHand hand,
-                       const char * coreletName,
-                       const char * coreletVersion,
-                       const char * coreletMinversion,
+                       const char * serviceName,
+                       const char * serviceVersion,
+                       const char * serviceMinversion,
                        BPDescribeCallback describeCB,
                        void * cookie)
 {
     CHECK_HAND_STATE(hand);
 
     // if no callback is provided, the call is useless
-    if (describeCB == NULL || coreletName == NULL) {
+    if (describeCB == NULL || serviceName == NULL) {
         return BP_EC_INVALID_PARAMETER;
     }
     
@@ -307,12 +307,12 @@ BPErrorCode BPDescribe(BPProtoHand hand,
 
     {
         bp::Map m;
-        m.add("name", new bp::String(coreletName));
-        if (coreletVersion) {
-            m.add("version", new bp::String(coreletVersion));
+        m.add("name", new bp::String(serviceName));
+        if (serviceVersion) {
+            m.add("version", new bp::String(serviceVersion));
         }
-        if (coreletMinversion) {
-            m.add("minversion", new bp::String(coreletMinversion));
+        if (serviceMinversion) {
+            m.add("minversion", new bp::String(serviceMinversion));
         }
         q.setPayload(m);
     }

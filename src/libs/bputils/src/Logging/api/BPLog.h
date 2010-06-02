@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -113,23 +113,6 @@ namespace log {
 
 
 /**
- * Returns the level component of a string in the (current) bp log
- * configuration syntax.
- *
- * Examples: levelFromConfig( "info, standard" ) returns "info"
- *           levelFromConfig( "debug" ) returns "debug"
- *
- * This function is useful for sending level strings to setLogLevel().           
- */
-std::string levelFromConfig( const std::string& sConfig );
-
-
-/**
- * Removes all current appenders (file, console, etc) from the logging system.
- */
-void removeAllAppenders();
-
-/**
  * Get reference to the root logger.
  * This is normally only needed for internal operations.
  */
@@ -137,20 +120,26 @@ Logger& rootLogger();
 
 
 /**
+ * Removes all current appenders (file, console, etc) from the logging system.
+ */
+void removeAllAppenders( Logger& logger=rootLogger() );
+
+
+/**
  * As a performance optimization, sets the logger's log level,
  * below which logging events receive minimal (almost no) processing.
  *
  * If the event's level meets or exceeds the logger's level, the
- * event will be sent to each appender, and will be emitted if it
+ * event will be sent to each appender, where it will be emitted if it
  * exceeds that appender's threshold.
  *
  * The logger's default level is "debug" so if this function is *not*
  * called, by default all events will be sent to each appender for
  * further processing.
  *
- * sLevel: fatal|error|warn|info|debug
+ * level: events at and above this level will be processed
  */
-void setLogLevel( const std::string& sLevel,
+void setLogLevel( const Level& level,
                   Logger& logger=rootLogger() );
 
 
@@ -158,28 +147,22 @@ void setLogLevel( const std::string& sLevel,
  * Helper to setup logging to console.
  * Adds a ConsoleAppender to the specified logger.
  *
- * sConfig: apppender configuration string of the following format:
- *              "level[, layout]"
- *          where level is: fatal|error|warn|info|debug
- *          and layout is: standard|source|ThrdLvlFuncMsg
- *          
- *          level sets the appender's threshold.
- *          If no layout is specified, "standard" will be used.
+ * level:  events at and above this level will be logged
  *
- * sConsoleTitle: title to display in the console
+ * sConsoleTitle: console title
  *
- * sTimeFormat: ""|"utc"|"local"|"msec"
- *              "" or "utc": report time in UTC
- *              "local":     report local time
- *              "msec":      report elapsed msec since root logger creation
+ * timeFormat: time format
+ *
+ * sLayout: layout name, typical values "standard"|"source"|"raw" 
  *
  * logger: logger to which appender is added
  * 
  * Note: the setupLogTo... functions may be invoked cumulatively.
  */
-void setupLogToConsole( const std::string& sConfig,
+void setupLogToConsole( const Level& level,
                         const std::string& sConsoleTitle="",
-                        const std::string& sTimeFormat="",
+                        const TimeFormat& timeFormat=TIME_UTC,
+                        const std::string& sLayout="standard",
                         Logger& logger=rootLogger() );
 
 
@@ -188,30 +171,26 @@ void setupLogToConsole( const std::string& sConfig,
  * sysinternals DebugView).
  * Adds a DebuggerAppender to the specified logger.
  *
- * sConfig: apppender configuration string of the following format:
- *              "level[, layout]"
- *          where level is: fatal|error|warn|info|debug
- *          and layout is: standard|source|ThrdLvlFuncMsg
+ * level:  events at and above this level will be logged
  *
- *          level sets the appender's threshold.
- *          If no layout is specified, "source" will be used.
+ * timeFormat: time format
+ *
+ * sLayout: layout name, typical values "standard"|"source"|"raw" 
  * 
- * sTimeFormat: ""|"utc"|"local"|"msec"
- *              "" or "utc": report time in UTC
- *              "local":     report local time
- *              "msec":      report elapsed msec since root logger creation
- *
  * logger: logger to which appender is added
  * 
- * Note: DebuggerAppender currently only emits events for win32.
- *       The events may be easily seen in the VC output window or by running
- *       sysinternals Dbgview.exe
- * Note: the "source" layout will format event messages such that
- *       double-clicking them in VC will navigate the editor to the source line.      
- * Note: the setupLogTo... functions may be invoked cumulatively.
+ * Notes: DebuggerAppender currently only emits events for win32.
+ *        The events may be easily seen in the VC output window or by running
+ *        sysinternals Dbgview.exe
+ *        
+ *        The "source" layout will format event messages such that
+ *        double-clicking them in VC will navigate the editor to the source line.      
+ *
+ *        The setupLogTo... functions may be invoked cumulatively.
  */
-void setupLogToDebugger( const std::string& sConfig,
-                         const std::string& sTimeFormat="",
+void setupLogToDebugger( const Level& level,
+                         const TimeFormat& timeFormat=TIME_UTC,
+                         const std::string& sLayout="source",
                          Logger& logger=rootLogger() );
 
 
@@ -222,41 +201,35 @@ void setupLogToDebugger( const std::string& sConfig,
  *
  * sLogFilePath: log file path
  * 
- * sConfig: appender configuration string of the following format:
- *              "level[, layout]"
- *          where level is: fatal|error|warn|info|debug
- *          and layout is: standard|source|ThrdLvlFuncMsg
- * 
- *          level sets the appender's threshold.
- *          If no layout is specified, "standard" will be used.
+ * level:  events at and above this level will be logged
  *
- * mode: controls truncate/append/rollover of existing log file
+ * sLayout: layout name, typical values "standard"|"source"|"raw" 
+ *
+ * fileMode: controls truncate/append/rollover of existing log file
  * 
- * sTimeFormat: ""|"utc"|"local"|"msec"
- *              "" or "utc": report time in UTC
- *              "local":     report local time
- *              "msec":      report elapsed msec since root logger creation
+ * timeFormat: time format
  *
  * nRolloverSizeKB: If log file exists and is greater than this size in
  *                  KB, truncate the file at first append.
  *                  
  * logger: logger to which appender is added
  * 
- * Note: the setupLogTo... functions may be invoked cumulatively.
+ * Notes: If you are going to have multiple processes writing to the
+ *        same log file, the typical pattern is to have a "master"
+ *        process open the file in truncate/rollover mode and have one
+ *        or more "slaves" open the file in append mode.  Since the
+ *        actual truncate/rollover is performed lazily at first append,
+ *        it is probably best to ensure the master does at least one
+ *        append before any slaves do.
  *
- * Note: If you are going to have multiple processes writing to the
- *       same log file, the typical pattern is to have a "master"
- *       process open the file in truncate/rollover mode and have one
- *       or more "slaves" open the file in append mode.  Since the
- *       actual truncate/rollover is performed lazily at first append,
- *       it is probably best to ensure the master does at least one
- *       append before any slaves do.
+ *        The setupLogTo... functions may be invoked cumulatively.
  */
 void setupLogToFile( const bp::file::Path& logFilePath,
-                     const std::string& sConfig,
-                     FileMode mode=kTruncate,
-                     const std::string& sTimeFormat="",
-                     unsigned int nRolloverSizeKB=256,
+                     const Level& level,
+                     const FileMode& fileMode=kTruncate,
+                     const TimeFormat& timeFormat=TIME_UTC,
+                     const std::string& sLayout="standard",
+                     unsigned int nRolloverSizeKB=kDefaultRolloverKB,
                      Logger& logger=rootLogger() );
 
 

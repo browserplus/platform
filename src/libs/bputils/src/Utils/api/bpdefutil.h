@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -22,13 +22,13 @@
 
 /**
  * bpdefutil.h -- utilities to aid in working with BPDefinition structures
- *                from the Corelet API
+ *                from the Service API
  */
 
 #ifndef __BPDEFUTIL_H__
 #define __BPDEFUTIL_H__
 
-// when you compile this file, the corelet SDK include directory must
+// when you compile this file, the service SDK include directory must
 // be in the include path
 #include <ServiceAPI/bpdefinition.h>
 #include <string>
@@ -37,10 +37,10 @@
 namespace bp { namespace defutil {
 
 /** build a dynamically allocated json object from a definition */
-bp::Map * defToJson(const BPCoreletDefinition * def);
+bp::Map * defToJson(const BPServiceDefinition * def);
 
 /** build a dynamically allocated json object from a definition list */
-bp::List * defsToJson(const BPCoreletDefinition ** defs,
+bp::List * defsToJson(const BPServiceDefinition ** defs,
                       unsigned int numDefs);
 
 }; };

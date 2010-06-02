@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -428,7 +428,7 @@ CarbonDropManager::getDragItems(WindowRef theWindow,
         if (err == noErr) {
             err = specToPath(&targetFile.fileSpec, path);
             if (err == noErr) {
-                bp::file::Path p(bp::file::nativeFromUtf8((const char*)path));
+                bp::file::Path p((const char*)path);;
                 results.push_back(p);
             }
         } else {
@@ -440,7 +440,7 @@ CarbonDropManager::getDragItems(WindowRef theWindow,
             if (err == noErr) {
                 err = specToPath(&targetFile.fileSpec, path);
                 if (err == noErr) {
-                    bp::file::Path p(bp::file::nativeFromUtf8((const char*)path));
+                    bp::file::Path p((const char*)path);
                     results.push_back(p);
                 }
             }

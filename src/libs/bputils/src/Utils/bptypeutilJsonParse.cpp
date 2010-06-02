@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -229,8 +229,7 @@ bp::createBPObject(const Map * map)
         // Make a Path from the String value
         sObj = dynamic_cast<const String*>(valObj);
         if (sObj == NULL) return NULL;
-        bp::file::Path p = bp::file::pathFromURL(sObj->value());
-        rval = new bp::Path(p);
+        rval = new bp::Path(bp::file::Path(sObj->value()));
     } else if (bpType.compare("callback") == 0) {
         // Make a Callback from the Integer value
         const Integer * iObj = dynamic_cast<const Integer*>(valObj);

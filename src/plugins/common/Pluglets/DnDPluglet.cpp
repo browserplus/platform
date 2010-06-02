@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -24,6 +24,7 @@
 #include "BPUtils/BPLog.h"
 #include "PluginCommonLib/CommonErrors.h"
 
+#include <string.h>
 
 #define DEFAULT_DROP_LIMIT 1000
 
@@ -67,6 +68,9 @@ DnDPluglet::execute(unsigned int tid,
 
     if (m_dropMgr == NULL) {
         BPLOG_WARN_STRM("DnDPluglet::execute " << function << " with NULL m_dropMgr");
+        failureCB(callbackArgument, tid, "DnD.unsupported",
+                  "DragDrop unsupported on this platform/browser combination");
+        return;
     }
 
     if (!strcmp("AddDropTarget", function) ||

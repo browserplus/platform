@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -103,11 +103,10 @@ toJsonRecurse(const Object* obj,
             stat = yajl_gen_integer(ghand, static_cast<long>(i->value()));
             break;
         }
-        case BPTPath: {
-            Path* s = (Path*) obj;
-            stat = yajl_gen_string(ghand,
-                                   (const unsigned char*) s->value(),
-                                   (strlen(s->value())));
+        case BPTNativePath: {
+            bp::file::Path p = *((bp::Path *) obj);
+			std::string str(p.utf8());
+            stat = yajl_gen_string(ghand, (const unsigned char *) str.c_str(), str.length());
             break;
         }
         case BPTAny: {

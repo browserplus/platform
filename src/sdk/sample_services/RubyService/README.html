@@ -84,7 +84,7 @@ function displayNeedInstallText()
     setContentAreaText(target);
 }
 
-function startRubyCoreletInstall()
+function startRubyServiceInstall()
 {
     function requireComplete(rez) 
     {
@@ -96,7 +96,7 @@ function startRubyCoreletInstall()
             target.appendChild(document.createTextNode(txt));
         } else {
             target.appendChild(document.createTextNode(
-                "Problem attaining ruby corelet!  reload to try again?"));
+                "Problem attaining ruby service!  reload to try again?"));
         }
     }
     var target = document.getElementById("gotruby");    
@@ -119,7 +119,7 @@ function checkForBP()
                 if (rez.success) {
                     bpLoaded = true;
                     displayInstalledText(YAHOO.bp.getPlatformInfo());
-                    startRubyCoreletInstall();
+                    startRubyServiceInstall();
                 } else {
                     displayNeedInstallText();
                 }

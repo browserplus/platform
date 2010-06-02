@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -126,29 +126,17 @@ __interface _IBPCtlEvents
 class ATL_NO_VTABLE CBPCtl :
     // TODO: Use IDispatchImpl<IBPCtl> instead of IBPCtl?
     public IBPCtl,
-    public IPersistStreamInitImpl<CBPCtl>,
     public IOleControlImpl<CBPCtl>,
     public IOleObjectImpl<CBPCtl>,
-    public IOleInPlaceActiveObjectImpl<CBPCtl>,
-    public IViewObjectExImpl<CBPCtl>,
     public IOleInPlaceObjectWindowlessImpl<CBPCtl>,
     public IObjectWithSiteImpl<CBPCtl>,
-    public IQuickActivateImpl<CBPCtl>,
-    public IDataObjectImpl<CBPCtl>,
-    
     // TODO: Implement CustomObjectSafety
-    public IObjectSafetyImpl<CBPCtl, INTERFACESAFE_FOR_UNTRUSTED_CALLER|
-                                     INTERFACESAFE_FOR_UNTRUSTED_DATA>,
+    public IObjectSafetyImpl<CBPCtl, INTERFACESAFE_FOR_UNTRUSTED_CALLER>,
     public CComControl<CBPCtl>,
     public BPPlugin,
     public AxDropManager
 {
 public:
-    BEGIN_PROP_MAP(CBPCtl)
-        PROP_DATA_ENTRY("_cx", m_sizeExtent.cx, VT_UI4)
-        PROP_DATA_ENTRY("_cy", m_sizeExtent.cy, VT_UI4)
-    END_PROP_MAP()
-
     BEGIN_MSG_MAP(CBPCtl)
         CHAIN_MSG_MAP(CComControl<CBPCtl>)
         DEFAULT_REFLECTION_HANDLER()
@@ -173,16 +161,8 @@ public:
     STDMETHOD(SetClientSite)(IOleClientSite* pClientSite);
             
             
-// Handler prototypes:
-//  LRESULT MessageHandler(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
-//  LRESULT CommandHandler(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
-//  LRESULT NotifyHandler(int idCtrl, LPNMHDR pnmh, BOOL& bHandled);
-
     __event __interface _IBPCtlEvents;
     
-    // IViewObjectEx
-    DECLARE_VIEW_STATUS(VIEWSTATUS_SOLIDBKGND | VIEWSTATUS_OPAQUE)
-
             
     //////////////////////////            
     // IBPCtl
@@ -212,15 +192,6 @@ public:
                                 VARIANT* pvtResult );
 
     STDMETHOD(Info)( VARIANT* pvtResult );
-
-
-    
-    /////////////////////////////////
-    // Misc
-    HRESULT OnDraw(ATL_DRAWINFO& di);
-    
-    STDMETHOD(_InternalQueryService)(REFGUID guidService, REFIID riid,
-                                     void** ppvObject);
 
 
     /////////////////////////////////

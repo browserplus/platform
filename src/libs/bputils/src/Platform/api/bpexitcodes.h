@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -40,8 +40,8 @@ const int kNoPermissionsManager         = -1;
 const int kCantLoadConfigFile           = -2;
 const int kCantProcessCommandLine       = -3;
 const int kCantSetupIpcServer           = -4;
-const int kCantSetupCoreletInstaller    = -5;
-const int kCantSetupCoreletUpdater      = -6;
+const int kCantSetupServiceInstaller    = -5;
+const int kCantSetupServiceUpdater      = -6;
 const int kCantSetupPlatformUpdater     = -7;
 const int kCantSetupPermissionsUpdater  = -8;
 const int kDuplicateProcess             = -9;
@@ -49,6 +49,7 @@ const int kCantRunServiceProcess        = -10;
 const int kCantGetUpToDatePerms         = -11;
 const int kCaughtBpException            = -12;
 const int kUserCancel                   = -13;
+const int kCaughtException              = -14;
 const int kKillswitch                   = -666;
 
 }

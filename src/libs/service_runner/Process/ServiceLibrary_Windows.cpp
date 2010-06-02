@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -35,7 +35,7 @@ void *
 ServiceLibrary::dlopenNP(const bp::file::Path & path)
 {
     // At the time we load a library, it must be able to find
-    // DLLs that it uses.  Additionally, the corelet should not be
+    // DLLs that it uses.  Additionally, the service should not be
     // able to find any dlls that BrowserPlusCore uses.  To attain
     // this goal, we use LoadLibraryEx with the
     // LOAD_WITH_ALTERED_SEARCH_PATH argument

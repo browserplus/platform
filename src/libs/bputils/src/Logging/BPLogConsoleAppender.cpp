@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -59,6 +59,10 @@ ConsoleAppender::ConsoleAppender( LayoutPtr layout,
     m_sConsoleTitle( sConsoleTitle )
 {
 #ifdef WIN32
+    // This is for scenario 3 above (gui app).
+    // It should fail benignly for the other scenarios.
+    (void) AllocConsole();
+
     // For Scenario 2 above (console app spawns windowless console app
     // (using CREATE_NO_WINDOW)), the child process will have an
     // invisible console that cannot be made visible (because no window).

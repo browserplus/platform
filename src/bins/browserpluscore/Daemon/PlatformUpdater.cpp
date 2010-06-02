@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -245,7 +245,7 @@ PlatformUpdaterSingleton::spawnUpdate(const string& version)
     vector<string> args;
     args.push_back(cacheDir.utf8());
     args.push_back(daemonLock);
-    bool rval = spawn(updater, std::string(), Path(), args, &status);
+    bool rval = spawn(updater, args, &status);
     m_busy = false;
     return rval;
 }

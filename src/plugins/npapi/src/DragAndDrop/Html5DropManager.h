@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -40,7 +40,9 @@ class Html5DropManager : public virtual IDropManager
 public:
     static IDropManager* allocate(NPP instance, 
                                   NPWindow* window,
-                                  IDropListener* listener);
+                                  IDropListener* listener,
+                                  const std::string& platform,
+                                  const std::string& browser);
     virtual ~Html5DropManager();
 
     // IDropManager interface
@@ -60,7 +62,9 @@ protected:
     // the correct platform version of the DropManager
     Html5DropManager(NPP instance, 
                      NPWindow* window, 
-                     IDropListener* listener);
+                     IDropListener* listener,
+                     const std::string& platform,
+                     const std::string& browser);
 
     // not implemented, you may not copy.
     Html5DropManager(const Html5DropManager& dm);
@@ -75,6 +79,9 @@ protected:
 
     // the listener that gets called when interesting events occur
     IDropListener* m_listener;
+
+    std::string m_platform;
+    std::string m_browser;
 
     // how a drop target is represented
     class DropTargetContext : public virtual DropTargetBase,

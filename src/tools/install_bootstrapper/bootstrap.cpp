@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -42,50 +42,70 @@
 #define BS_ERROR_OUTPUT( x ) BPLOG_ERROR_STRM(x)
 
 bp::file::Path g_exePath;
-std::wstring g_sCmdLine;
-bool        g_bVerbose = false;
 const static std::string endOfPayloadMarker(
     "Yahoo!BrowserPlusEndOfInstallerPayloadMarker");
 
 
+// Given that this is a gui app, we don't provide "usage" behavior.
+// Supported cmd-line args documented here:
+//   [-logfile=<filename>|console]
+//     override default log file and log to specified file or console
+//     this is also passed to spawned installer
+//   [-pause=<anything>]
+//     prompt for a keystroke at end of installation process
+//     only supported when logfile=console
+//   all other cmd-line args passed to spawned installer
+
+
 int APIENTRY WinMain( HINSTANCE, HINSTANCE, LPSTR, int )
 {
-    std::vector<std::string> args;
-
+    bool pauseAtEnd = false;
+    
     // Scan argv for logfile flag and build up a vector of args we'll
     // relay into the spawned installer.  We always log, but 
     // different logfile can be specified via command line.
     // debug logging on be default
-
+    std::vector<std::string> args;
     bp::file::Path logFile = bp::file::getTempDirectory()/"BrowserPlusInstaller.log";
-    (void) bp::file::remove(logFile);
 
     for (int i = 1; i < __argc; i++) {
         std::vector<std::string> arg = bp::strutil::split(__argv[i], "=");
-        if (arg.size() == 2 && !arg[0].compare("-logfile"))
-        {
-            logFile = arg[1];
-        } else {
+        if (arg.size() == 2 && !arg[0].compare("-logfile")) {
+            if (!arg[1].compare("console")) {
+                logFile.clear();
+            } else {
+                logFile = arg[1];
+            }
+        } else if (!arg[0].compare("-pause")) {
+            pauseAtEnd = true;
+        }
+        else {
             args.push_back(std::string(__argv[i]));
         }
     }
-	bp::log::setupLogToFile(logFile, "debug", bp::log::kTruncate);
+
+    if (!logFile.empty()) {
+        // Both the "bootstrap" process and the spawned "installer" process
+        // may write to the same file.
+        // bootstrap will be master and handle rollover, spawned
+        // installer will just append.
+        bp::log::setupLogToFile(logFile, bp::log::LEVEL_DEBUG, 
+                                bp::log::kSizeRollover);
+    } else {
+        bp::log::setupLogToConsole(bp::log::LEVEL_DEBUG);
+    }
+
     std::string logArg("-logfile=");
     logArg.append(logFile.utf8());
     args.push_back(logArg);
-    args.push_back("-appendToLog=true");
 
     wchar_t szPath[_MAX_PATH];
     GetModuleFileNameW( NULL, szPath, sizeof(szPath)/sizeof(wchar_t) );
     g_exePath = szPath;
-
-    g_sCmdLine = GetCommandLineW();
-
     BS_INFO_OUTPUT( "Path to binary:" << g_exePath );
 
     // now let's find the embedded payload
     std::ifstream f;
-
     if (!bp::file::openReadableStream(f, g_exePath,
                                       std::ios_base::binary |
                                       std::ios_base::in))
@@ -186,8 +206,7 @@ int APIENTRY WinMain( HINSTANCE, HINSTANCE, LPSTR, int )
         bp::process::spawnStatus status;
 
         // (relay arguments through to spawned process)
-        if (!bp::process::spawn(instExe, "", extractTo,
-                                args, &status))
+        if (!bp::process::spawn(instExe, args, &status, extractTo, "", true))
         {
             BS_ERROR_OUTPUT( "Couldn't spawn installer executable: " << instExe );
             return 1;
@@ -221,10 +240,20 @@ int APIENTRY WinMain( HINSTANCE, HINSTANCE, LPSTR, int )
 
     BS_INFO_OUTPUT( "Removed temporary directory: " << extractTo );
 
-    // TODO: only delete log if no errors were hit
-    // Currently we *always* leave the log.
-    // (void) bp::file::remove(logFile);
+    // Support pause before killing spawned console.
+    if (logFile.empty() && pauseAtEnd) {
+        HANDLE hOut = GetStdHandle( STD_OUTPUT_HANDLE );
+        std::wstring ws = bp::strutil::utf8ToWide("Press ENTER to continue...");
+        DWORD numWritten = 0;
+        WriteConsoleW( hOut, (void *) ws.c_str(), ws.length(),
+                       &numWritten, NULL);
 
+        HANDLE hIn = GetStdHandle( STD_INPUT_HANDLE );
+        char in[80];
+        DWORD numRead;
+        ReadConsole( hIn, in, 1, &numRead, NULL );
+    }
+    
     return 0;
 }
 

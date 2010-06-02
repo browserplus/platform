@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -75,10 +75,10 @@ populateSuccessResponse(bp::ipc::Response & oResponse,
 }
 
 ActiveSession::ActiveSession(bp::ipc::Channel * session,
-                             shared_ptr<CoreletRegistry> registry,
+                             shared_ptr<ServiceRegistry> registry,
                              const std::string & primaryDistroServer,
                              const std::list<std::string> secondaryDistroServers)
-    : CoreletExecutionContext(), m_sessionMessage(NULL),
+    : ServiceExecutionContext(), m_sessionMessage(NULL),
       m_createSessionCalled(false), m_listener(NULL),
       m_primaryDistroServer(primaryDistroServer),
       m_secondaryDistroServers(secondaryDistroServers)
@@ -111,7 +111,7 @@ ActiveSession::~ActiveSession()
     }
     
     std::map<unsigned int,
-        std::pair<weak_ptr<ICoreletExecutionContextListener>,
+        std::pair<weak_ptr<IServiceExecutionContextListener>,
                   unsigned int> >::iterator it;
 
     // all outstanding user prompt requests now are failures.
@@ -121,7 +121,7 @@ ActiveSession::~ActiveSession()
                         << "] prompt user request ("
                         << it->second.second
                         << ") fails, session is being torn down");
-        shared_ptr<ICoreletExecutionContextListener>
+        shared_ptr<IServiceExecutionContextListener>
             ptr = it->second.first.lock();
         if (ptr) ptr->onUserResponse(it->second.second, bp::Null());
     }
@@ -129,7 +129,17 @@ ActiveSession::~ActiveSession()
 
     // Report page usage now at session termination time so we do not add
     // any latency
-    bp::usage::reportPageUsage( m_URI, m_userAgent );
+    string services;
+    set<pair<string, string> >::const_iterator sit;
+    for (sit = m_servicesUsed.begin(); sit != m_servicesUsed.end(); ++sit) {
+        services += sit->first + "|" + sit->second + ",";
+    }
+    if (!services.empty()) {
+        // strip trailing ","
+        services = services.substr(0, services.length()-1);
+    }
+
+    bp::usage::reportPageUsage( m_URI, m_userAgent, services );
     
     // just in case, release our hold on the require lock
     // noop if we don't have it
@@ -192,7 +202,7 @@ ActiveSession::domain()
 
 void
 ActiveSession::displayInstallPrompt(
-    weak_ptr<ICoreletExecutionContextListener> listener,
+    weak_ptr<IServiceExecutionContextListener> listener,
     unsigned int cookie,
     const std::vector<std::string>& permissions,
     const ServiceSynopsisList & platformUpdates,
@@ -280,7 +290,7 @@ ActiveSession::displayInstallPrompt(
 }
 
 
-shared_ptr<CoreletRegistry> 
+shared_ptr<ServiceRegistry> 
 ActiveSession::registry() 
 {
 	return m_registry;
@@ -289,7 +299,7 @@ ActiveSession::registry()
 
 void
 ActiveSession::promptUser(
-    weak_ptr<ICoreletExecutionContextListener> listener,
+    weak_ptr<IServiceExecutionContextListener> listener,
     unsigned int cookie,
     const bp::file::Path& pathToHTMLDialog,
     const bp::Object * arguments)
@@ -352,7 +362,7 @@ ActiveSession::doInvoke(MessageContext* ctx)
         m.reset((bp::Map *) q.payload()->get("arguments")->clone());
     }
 
-    // at this point we have the corelet name, version, function, and
+    // at this point we have the service name, version, function, and
     // arguments to that function.
 
     BPLOG_DEBUG_STRM("[" << m_session << "] (" << q.id() << 
@@ -364,7 +374,7 @@ ActiveSession::doInvoke(MessageContext* ctx)
     
     if (!m_registry->describe(service, version, std::string(), desc))
     {
-        populateErrorResponse(r, "BP.noSuchCorelet");            
+        populateErrorResponse(r, "BP.noSuchService");            
         return true;
     }
 
@@ -399,7 +409,7 @@ ActiveSession::doInvoke(MessageContext* ctx)
     // two cases exist:
     // 1. we have already allocated an instance of this service
     // 2. we have to asynchronously allocate an instance of this service
-    shared_ptr<CoreletInstance> instance =
+    shared_ptr<ServiceInstance> instance =
         attainInstance(service, version);
 
     if (instance != NULL)
@@ -435,8 +445,8 @@ ActiveSession::doInvoke(MessageContext* ctx)
         unsigned int allocationId =
             m_registry->instantiate(
                 service, version, 
-                weak_ptr<CoreletExecutionContext>(shared_from_this()),
-                weak_ptr<ICoreletRegistryListener>(shared_from_this()));
+                weak_ptr<ServiceExecutionContext>(shared_from_this()),
+                weak_ptr<IServiceRegistryListener>(shared_from_this()));
 
         if (allocationId == 0) {
             // case #3
@@ -473,7 +483,7 @@ ActiveSession::doInvoke(MessageContext* ctx)
 
 void
 ActiveSession::onAllocationSuccess(unsigned int allocationId,
-                                   shared_ptr<CoreletInstance> instance)
+                                   shared_ptr<ServiceInstance> instance)
 {
     // first we'll iterate to find this allocation by id
     std::map<std::pair<std::string, std::string>,
@@ -512,7 +522,7 @@ ActiveSession::onAllocationSuccess(unsigned int allocationId,
 }
 
 void
-ActiveSession::doExecution(shared_ptr<CoreletInstance> instance,
+ActiveSession::doExecution(shared_ptr<ServiceInstance> instance,
                            unsigned int tid,
                            const std::string & function,
                            const bp::Object * args)
@@ -571,7 +581,7 @@ ActiveSession::doRequire(MessageContext* ctx)
 
     std::vector<const bp::Object *> services = *(q.payload()->get("services"));
     
-    std::list<CoreletRequireStatement> requires;
+    std::list<ServiceRequireStatement> requires;
 
     for (unsigned int i = 0; i < services.size(); i++)
     {
@@ -583,7 +593,7 @@ ActiveSession::doRequire(MessageContext* ctx)
             continue;
         }
         
-        CoreletRequireStatement s;
+        ServiceRequireStatement s;
         s.m_name = std::string(*(o->get("service")));
         if (o->has("version", BPTString)) {
             s.m_version = std::string(*(o->get("version")));
@@ -650,7 +660,7 @@ ActiveSession::doDescribe(MessageContext* ctx)
     bp::Object* obj = NULL;
 
     if (!haveService || NULL == (obj = desc.toBPObject())) {
-        populateErrorResponse(r, "BP.noSuchCorelet");    
+        populateErrorResponse(r, "BP.noSuchService");    
     } else {
         populateSuccessResponse(r, obj);
         delete obj;
@@ -676,8 +686,8 @@ ActiveSession::doActiveServices(MessageContext* ctx)
     std::list<bp::service::Description> clts;
     std::list<bp::service::Description>::iterator it;
 
-    clts = m_registry->availableCorelets();    
-    bp::List corelets;
+    clts = m_registry->availableServices();    
+    bp::List services;
 
     for (it = clts.begin(); it != clts.end(); it++) {
         bp::Map* m = new bp::Map;
@@ -701,11 +711,11 @@ ActiveSession::doActiveServices(MessageContext* ctx)
         
         m->add("type", new bp::String(serviceType));
 
-        corelets.append(m);
+        services.append(m);
     }
     
     // populate the response
-    populateSuccessResponse(r, &corelets);
+    populateSuccessResponse(r, &services);
     
     return true;    
 }
@@ -1060,6 +1070,18 @@ ActiveSession::onComplete(unsigned int tid,
                         << "RequireCompletedEvent received with unknown tid = "
                         << tid);
     }  
+
+    // keep track of services we use
+    for (size_t i = 0; i < satisfyingServices.size(); ++i) {
+        const bp::Map* m = dynamic_cast<const bp::Map*>(satisfyingServices.value(i));
+        if (m) {
+            string name, version;
+            if (m->getString("name", name)
+                    && m->getString("versionString", version)) {
+                m_servicesUsed.insert(pair<string, string>(name, version));
+            }
+        }
+    }
 }
 
 void
@@ -1140,7 +1162,7 @@ ActiveSession::executionFailure(
     bp::ipc::Response response(tid);
     response.setCommand("Invoke");
 
-    std::string s = (error.empty() ? "BP.coreletExecError" : error);
+    std::string s = (error.empty() ? "BP.serviceExecError" : error);
 
     populateErrorResponse(response, s, verboseError);
         
@@ -1215,17 +1237,17 @@ TwoStringCompare::operator()(
     return false;
 }
 
-shared_ptr<CoreletInstance>
-ActiveSession::attainInstance(const std::string & corelet,
+shared_ptr<ServiceInstance>
+ActiveSession::attainInstance(const std::string & service,
                               const std::string & version)
 {
-    shared_ptr<CoreletInstance> instance;
+    shared_ptr<ServiceInstance> instance;
     
     std::map<std::pair<std::string, std::string>,
-        shared_ptr<CoreletInstance>,
+        shared_ptr<ServiceInstance>,
         TwoStringCompare>::iterator it;
 
-    std::pair<std::string, std::string> key(corelet, version);
+    std::pair<std::string, std::string> key(service, version);
     
     it = m_instanceMap.find(key);
     if (it != m_instanceMap.end())
@@ -1242,7 +1264,7 @@ ActiveSession::instances()
     std::vector< std::pair<std::string, std::string> > rv;
     
     std::map<std::pair<std::string, std::string>,
-        shared_ptr<CoreletInstance>,
+        shared_ptr<ServiceInstance>,
         TwoStringCompare>::iterator it;
 
     for (it = m_instanceMap.begin(); it != m_instanceMap.end(); it++)
@@ -1452,7 +1474,7 @@ ActiveSession::doNextDispatch()
 
 unsigned int
 ActiveSession::sendPromptUserMessage(
-    weak_ptr<ICoreletExecutionContextListener> listener,
+    weak_ptr<IServiceExecutionContextListener> listener,
     unsigned int cookie,
     const bp::Object * o)
 {
@@ -1469,7 +1491,7 @@ ActiveSession::sendPromptUserMessage(
     } else {
         // add this tid and listener to map
         m_promptRequests[tid] =
-            std::pair<weak_ptr<ICoreletExecutionContextListener>,
+            std::pair<weak_ptr<IServiceExecutionContextListener>,
                       unsigned int>(listener, cookie);
 
         BPLOG_WARN_STRM("[" << m_session << "] " << "sent user prompt");
@@ -1485,7 +1507,7 @@ ActiveSession::handlePromptUserResponse(const bp::ipc::Response & resp)
     unsigned int sid = resp.responseTo();
 
     std::map<unsigned int,
-        std::pair<weak_ptr<ICoreletExecutionContextListener>,
+        std::pair<weak_ptr<IServiceExecutionContextListener>,
                   unsigned int> >::iterator it;
 
     it = m_promptRequests.find(sid);
@@ -1501,7 +1523,7 @@ ActiveSession::handlePromptUserResponse(const bp::ipc::Response & resp)
     const bp::Object * userResp = &n;
     if (resp.payload() != NULL) userResp = resp.payload();
 
-    shared_ptr<ICoreletExecutionContextListener>
+    shared_ptr<IServiceExecutionContextListener>
         ptr = it->second.first.lock();
     if (ptr) ptr->onUserResponse(it->second.second, *userResp);    
 

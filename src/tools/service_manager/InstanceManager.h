@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -23,11 +23,11 @@
 #ifndef __INSTANCEMANAGER_H__
 #define __INSTANCEMANAGER_H__
 
-#include "CoreletManager/CoreletManager.h"
+#include "ServiceManager/ServiceManager.h"
 
-class InstanceManager : public CoreletExecutionContext,
-                        public ICoreletRegistryListener,
-                        public ICoreletInstanceListener,
+class InstanceManager : public ServiceExecutionContext,
+                        public IServiceRegistryListener,
+                        public IServiceInstanceListener,
                         public std::tr1::enable_shared_from_this<InstanceManager>
 {
   public:
@@ -36,11 +36,11 @@ class InstanceManager : public CoreletExecutionContext,
     
     void destroy(unsigned int allocationId);
 
-    std::tr1::shared_ptr<CoreletInstance> findInstance(unsigned int id);
+    std::tr1::shared_ptr<ServiceInstance> findInstance(unsigned int id);
 
   private:
     void onAllocationSuccess(unsigned int allocationId,
-                             std::tr1::shared_ptr<CoreletInstance> instance);
+                             std::tr1::shared_ptr<ServiceInstance> instance);
     
     void onAllocationFailure(unsigned int allocationId);
 
@@ -49,7 +49,7 @@ class InstanceManager : public CoreletExecutionContext,
     void executionFailure( unsigned int tid, const std::string & error,
                            const std::string & verboseError);
 
-    std::map<unsigned int, std::tr1::shared_ptr<CoreletInstance> > m_instances;
+    std::map<unsigned int, std::tr1::shared_ptr<ServiceInstance> > m_instances;
     CommandExecutor * m_cmdExec;
 };
 

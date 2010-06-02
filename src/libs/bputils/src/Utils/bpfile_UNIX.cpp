@@ -13,8 +13,8 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (C) 2006-2009 Yahoo!.
- * All Rights Reserved.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
+ * All rights reserved.
  * 
  * Contributor(s): 
  * ***** END LICENSE BLOCK *****
@@ -152,7 +152,7 @@ canonicalPath(const Path& path,
             
         char buf[PATH_MAX+1];
         if (::realpath(path.external_file_string().c_str(), buf) == NULL) {
-            throw string("realpath failed on " + string(buf));
+            throw string("realpath failed");
         }
         rval = buf;
     } catch(const string& s) {

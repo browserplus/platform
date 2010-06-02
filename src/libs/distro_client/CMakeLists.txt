@@ -12,7 +12,7 @@
 # The Original Code is BrowserPlus (tm).
 # 
 # The Initial Developer of the Original Code is Yahoo!.
-# Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+# Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
 # All rights reserved.
 # 
 # Contributor(s): 
@@ -22,6 +22,9 @@ SET(libName "DistributionClient")
 SET(${libName}_MAJOR_VERSION 0)
 SET(${libName}_MINOR_VERSION 1)
 SET(${libName}_LINK_STATIC BPUtils ArchiveLib yajl)
+
+# explicitly set sources to include QueryCache.cpp which is erb substituted
+FILE (GLOB ${libName}_SOURCES *.cpp ${CMAKE_CURRENT_BINARY_DIR}/*.cpp )
 
 LINK_DIRECTORIES("${BP_EXTERNALS}/lib")
 

@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -55,6 +55,36 @@ bp::install::utils::getFolderPath(int selector)
     bpf::Path rval(path);
     BPLOG_DEBUG_STRM("getFolderPath(" << selector << ") returns " << rval);
     return rval;
+}
+
+
+std::string
+bp::install::utils::axName()
+{
+    // Note: This string is exposed to the user via the "Manage Add-ons" screen.
+    //       It is also used in some registry key names and data.
+    return "Yahoo! BrowserPlus";
+}
+
+
+std::string
+bp::install::utils::axViProgid()
+{
+    return "Yahoo.BPCtl";
+}
+
+
+std::string
+bp::install::utils::axProgid(const std::string& version)
+{
+    return axViProgid() + "." + version;
+}
+
+
+std::string
+bp::install::utils::axProgid(const bp::ServiceVersion& version)
+{
+    return axProgid(version.asString());
 }
 
 
@@ -120,14 +150,14 @@ bp::install::utils::getControlInfo(const bpf::Path& path,
         size_t start = name.find('_') + 1;
         version = name.substr(start);
 
-        // get typeLibGuid from registry HKCU\Software\Classes\AppId\<filename>
-        string key = "HKCU\\Software\\Classes\\AppId\\" + filename;
+        // get typeLibGuid from registry HKCU\Software\Classes\AppID\<filename>
+        string key = "HKCU\\Software\\Classes\\AppID\\" + filename;
         if (keyExists(key)) {
             typeLibGuid = readString(key, "AppID");
         }
           
         // get activeXGuid from HKCU\\Yahoo.BPCtl.<version>\CLSID\(Default)
-        key = "HKCU\\Software\\Classes\\Yahoo.BPCtl." + version + "\\CLSID";
+        key = "HKCU\\Software\\Classes\\" + axProgid(version) + "\\CLSID";
         if (keyExists(key)) {
             activeXGuid = readString(key);
         }
@@ -276,7 +306,6 @@ bp::install::utils::unRegisterControl(const std::vector<std::string>& vsMimetype
                                       const string& sModuleUuid,
                                       const bpf::Path& modulePath,
                                       const string& sCoClassUuid,
-                                      const string& sCoClassName,
                                       const string& sViProgid,
                                       const string& sProgid)
 {
@@ -353,6 +382,77 @@ bp::install::utils::unRegisterControl(const std::vector<std::string>& vsMimetype
         }
     }
 
+    return rval;
+}
+
+
+int
+bp::install::utils::unregisterCruftControls(bool force)
+{
+    int rval = 0;
+
+    Key appIdKey("HKCU\\Software\\Classes\\AppID");
+    vector<Key> subkeys = appIdKey.subKeys();
+    for (size_t i = 0; i < subkeys.size(); i++) {
+        string keyPath = subkeys[i].fullPath();
+        vector<string> vec = bp::strutil::split(keyPath, "\\");
+        if (vec.size() < 5) {
+            BPLOG_DEBUG_STRM("hrm, " << keyPath << " split into "
+                             << vec.size() << " pieces, skipping");
+            continue;
+        }
+        const string& edge = vec[vec.size() - 1];
+        size_t startIndex = edge.find("YBPAddon_");
+        size_t endIndex = edge.find(".dll");
+        if (startIndex != string::npos && endIndex != string::npos
+            && startIndex < endIndex) {
+            size_t versionIndex = edge.find("_") + 1;
+            string versionStr = edge.substr(versionIndex, endIndex - versionIndex);
+            bp::ServiceVersion version;
+            if (!version.parse(versionStr)) {
+                BPLOG_DEBUG_STRM(versionStr << " not a valid version, skipping");
+                continue;
+            }
+            bpf::Path path =  getProductDirectory(version.majorVer(),
+                                                  version.minorVer(),
+                                                  version.microVer())
+                              / "Plugins" / edge;
+            if (!force && bpf::exists(path)) {
+                continue;
+            }
+
+            // kill the control
+            BPLOG_DEBUG_STRM("try to remove registry cruft for version " 
+                             << versionStr << ", key = " << keyPath);
+            string vers, typeLibGuid, activeXGuid;
+            vector<string> mtypes;
+            if (getControlInfo(path, vers, typeLibGuid, activeXGuid, mtypes)) {
+                if (unRegisterControl(mtypes, typeLibGuid, path, activeXGuid,
+                                      axViProgid(), axProgid(vers)) != 0) {
+                    BPLOG_WARN_STRM("unable to unregister " << path);
+                    rval = 1;
+                }
+
+                // Remove "supress activex nattergram" entry and vista
+                // daemon elevation gunk, not fatal if it fails
+                if (force || activeXGuid != utils::activeXGuid()) {
+                    try {
+                        bool isVistaOrLater = bp::os::PlatformVersion().compare("6") >= 0;
+                        recursiveDeleteKey("HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Ext\\Stats\\"
+                                           + activeXGuid);
+                        if (isVistaOrLater) {
+                            recursiveDeleteKey("HKCU\\SOFTWARE\\Microsoft\\Internet Explorer\\Low Rights\\ElevationPolicy\\"
+                                               + activeXGuid);
+                        }
+                    } catch (const Exception& e) {
+                        BPLOG_WARN_STRM("unable to remove nattergram/uac registry entries for "
+                                        << activeXGuid << ": " << e.what());
+                        rval = 1;
+                    }
+                }
+            }
+        }
+    }
     return rval;
 }
 

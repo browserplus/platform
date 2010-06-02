@@ -13,7 +13,7 @@
  * The Original Code is BrowserPlus (tm).
  * 
  * The Initial Developer of the Original Code is Yahoo!.
- * Portions created by Yahoo! are Copyright (c) 2009 Yahoo! Inc.
+ * Portions created by Yahoo! are Copyright (c) 2010 Yahoo! Inc.
  * All rights reserved.
  * 
  * Contributor(s): 
@@ -57,7 +57,8 @@ public:
     ~UsageReporter();
 
     void reportPageUsage( const std::string& sUri,
-                          const std::string& sUserAgent );
+                          const std::string& sUserAgent,
+                          const std::string& sServices );
        
 private:
     UsageReporter();
@@ -188,7 +189,8 @@ bool UsageReporter::configure()
 
 
 void UsageReporter::reportPageUsage( const std::string& sUrl,
-                                     const std::string& sUserAgent )
+                                     const std::string& sUserAgent,
+                                     const std::string& sServices )
 {
     if (!m_bEnabled)
     {
@@ -208,7 +210,8 @@ void UsageReporter::reportPageUsage( const std::string& sUrl,
 
     unsigned int tid = m_distQuery->reportPageUsage(
         m_sOS, m_sBP, (m_bReportUrl ? sUrl : ""),
-        (m_bReportId ? bp::plat::getInstallID() : ""), sUserAgent);
+        (m_bReportId ? bp::plat::getInstallID() : ""), sUserAgent,
+        sServices );
 
     if (tid == 0)
     {
@@ -238,9 +241,10 @@ namespace bp {
 namespace usage {
 
 void reportPageUsage( const std::string& sUrl,
-                      const std::string& sUserAgent )
+                      const std::string& sUserAgent,
+                      const std::string& sServices )
 {
-    UsageReporter::instance()->reportPageUsage( sUrl, sUserAgent );
+    UsageReporter::instance()->reportPageUsage( sUrl, sUserAgent, sServices );
 }
 
 } // usage
