@@ -233,9 +233,9 @@ namespace bp {
          *   approriate to use when establishing an IPC listening
          *   server (using bp::ipc::Server, or the higher level abstraction,
          *   using bp::ipc::ChannelServer).  This string is used by both
-         *   the listenin and the connecting processes.
+         *   the listening and the connecting processes.
          *   
-         *   This string is platform dependant.  On UNIX its a path in
+         *   This string is platform dependent.  On UNIX its a path in
          *   the product directory.  On windows it's a named pipe 
          *   without '\\.\pipe\'
          *   
@@ -259,7 +259,7 @@ namespace bp {
 
         /**
          *   "IPC Lock Name" is a user & platform scoped name which is
-         *   approriate to use when establishing a lock to gaurantee
+         *   approriate to use when establishing a lock to guarantee
          *   that no other BrowserPlusCore processes are running.
          *   On Windows this is a Mutex name BrowserPlusCore_<USER>_<platform>
          *   On darwin this is the path to the BrowserPlusCore binary
