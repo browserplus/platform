@@ -42,7 +42,7 @@
 #
 SET(BrowserPlusPlatform_MAJOR_VERSION 2)
 SET(BrowserPlusPlatform_MINOR_VERSION 9)
-SET(BrowserPlusPlatform_MICRO_VERSION 0)
+SET(BrowserPlusPlatform_MICRO_VERSION 1)
 
 # Previous mimetypes which we also support as a CMAKE list
 # Syntax is:
@@ -53,7 +53,7 @@ SET(BackwardCompatibleMimeTypes)
 
 # activeX control's clsid and typelib guid
 # clsid (ActiveXGuid) should be changed EVERY TIME YOU BUMP PLATFORM VERSION
-SET(ActiveXGuid "A459E66E-7472-4353-A01C-A8234EDE8B66")
+SET(ActiveXGuid "36B2872D-6DFE-11DF-9038-001422210E8C")
 SET(TypeLibGuid "399F26B4-E0C6-4345-8AD6-7AC1D86DAAA5") 
 
 ########################################################################
