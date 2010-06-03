@@ -97,13 +97,10 @@ class GlobalRunLoopCollection
 public:
     GlobalRunLoopCollection() 
     {
-        printf("Global run loop collection allocated\n");
     }
 
     ~GlobalRunLoopCollection() 
     {
-        printf("Global run loop collection shut down (%d left)\n",
-               (int) m_runloops.size());
     }
     
     void addRunLoop(bp::runloop::RunLoop * rl) 
