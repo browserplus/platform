@@ -26,7 +26,7 @@
 #include "BPUtils/HttpRequest.h"
 #include "BPUtils/HttpSyncTransaction.h"
 
-#define PUBLISH_BASE_PATH "/v3/internal/service/"
+#define PUBLISH_BASE_PATH "/v4/internal/service/"
 
 using namespace bp;
 using namespace bp::http;
