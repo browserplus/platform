@@ -45,7 +45,7 @@
 
 #define CONFIGPANEL_UUID "E366D7CF-5C6E-4C1D-9BA4-2E4A5BD29605"
 #define CONFIGPANEL_APPNAME "BrowserPlus Config Panel"
-#define BUGS_URI_PATH "/api/v2/bugs"
+#define BUGS_URI_PATH "/api/v4/bugs"
 
 using namespace std;
 using namespace bp::file;
