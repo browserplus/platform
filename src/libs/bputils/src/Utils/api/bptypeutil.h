@@ -215,7 +215,7 @@ namespace bp {
         std::string str;
     };
     
-    // Path represents a pathname in URI form.
+    // Path represents a pathname in native form.
     class Path : public Object
     {
     public:
