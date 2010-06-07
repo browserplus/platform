@@ -222,9 +222,12 @@ DistQuery::reportPageUsage(const std::string & ysOSVersion,
     }
     lpsFields.push_back(std::make_pair("id", ysID));
     lpsFields.push_back(std::make_pair("ua", ysUA));
+#ifdef NOTDEF
+    // TODO awaiting privacy approval
     if (!ysServices.empty()) {
         lpsFields.push_back(std::make_pair("s", ysServices));
     }
+#endif
     std::string sQuery = bp::url::makeQueryString(lpsFields);
     url.append(sQuery);
     BPLOG_DEBUG_STRM(this << ": Reporting page usage: " << url);
