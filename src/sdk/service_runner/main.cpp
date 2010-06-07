@@ -28,6 +28,7 @@
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bprunloop.h"
 #include "ConsoleLib/ConsoleLib.h"
+#include "Output.h"
 
 // here's our implementation of handling commands
 #include "CommandExecutor.h"
@@ -42,6 +43,11 @@ static APTArgDefinition g_args[] = {
     { "log", APT::TAKES_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
       APT::NOT_INTEGER, APT::MAY_RECUR,
       "enable console logging, argument like \"info\" or \"debug\""
+    },
+    { "slave", APT::NO_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
+      APT::NOT_INTEGER, APT::MAY_NOT_RECUR,
+      "\"slave\" mode causes all output from service runner to be JSON formatted "
+      "this is useful for driving service runner from a host process."
     },
     { "logfile", APT::TAKES_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
       APT::NOT_INTEGER, APT::MAY_RECUR,
@@ -103,7 +109,7 @@ public:
     }
 private:   
     void onUserQuit() {
-        std::cerr << "shutting down..." << std::endl;
+        output::puts(output::T_INFO, "shutting down...");
         s_rl.stop();
     }
     void initialized(ServiceRunner::Controller * c,
@@ -111,16 +117,15 @@ private:
                      const std::string & version,
                      unsigned int) 
     {
-        std::cout << "service initialized: "
-                  << service << " v" << version << std::endl;        
+        std::stringstream ss;
+        ss << "service initialized: " << service << " v" << version;        
+        output::puts(output::T_INFO, ss.str());
         c->describe();
     }
     void onEnded(ServiceRunner::Controller * c) 
     {
-        std::cerr << "Spawned service exited!  (enable logging for more "
-                  << "detailed diagnostics - '-log debug')."
-                  << std::endl;        
-        // hard exit
+        output::puts(output::T_ERROR, "Spawned service exited!  (enable logging for more "
+                     "detailed diagnostics - '-log debug').");
         exit(1);
     }
     CommandParserPtr m_parser;
@@ -195,15 +200,17 @@ main(int argc, const char ** argv)
         "usage: ServiceRunner [options] [ <service> <version> | <path> ]");
     int x = argParser.parse(sizeof(g_args)/sizeof(g_args[0]), g_args,
                             argc, argv);
+
+    if (argParser.argumentPresent("slave")) output::setSlaveMode();
+
     if (x < 0) {
-        std::cerr << argParser.error() << std::endl;
+        output::puts(output::T_ERROR, argParser.error());
         exit(1);
     } else if (argParser.argumentPresent("version")) {
-        std::cout << BPVERSION << std::endl;
+        output::puts(output::T_RESULTS, std::string(BPVERSION));
         exit(0);
     } else if (x != argc - 2 && x != argc - 1) {
-        std::cerr << "missing service & version or path argument\n"
-                  << std::endl;
+        output::puts(output::T_ERROR, "missing service & version or path argument");
         exit(1);
     }
 
@@ -225,7 +232,9 @@ main(int argc, const char ** argv)
         bp::service::Summary s;
         std::string err;
         if (!s.detectService(controller->path(), err)) {
-            std::cerr << "couldn't load service: " << err << std::endl;
+            std::stringstream ss;
+            ss << "couldn't load service: " << err;
+            output::puts(output::T_ERROR, ss.str());
             exit(1);
         }
 
@@ -244,17 +253,19 @@ main(int argc, const char ** argv)
                 // determine the path without using service manager
                 providerPath = ServiceRunner::determineProviderPath(s, err);
                 if (!err.empty()) {
-                    std::cerr << "Couldn't run service because I couldn't "
-                              << "find an appropriate installed " << std::endl
-                              << "provider service satisfying: "  << std::endl
-                              << "  name:       " << s.usesService()
-                              << std::endl
-                              << "  version:    " << s.usesVersion().asString()
-                              << std::endl
-                              << "  minversion: "
-                              << s.usesMinversion().asString()
-                              << std::endl
-                              << "(" << err << ")" << std::endl;
+                    std::stringstream ss;
+                    ss << "Couldn't run service because I couldn't "
+                       << "find an appropriate installed " << std::endl
+                       << "provider service satisfying: "  << std::endl
+                       << "  name:       " << s.usesService()
+                       << std::endl
+                       << "  version:    " << s.usesVersion().asString()
+                       << std::endl
+                       << "  minversion: "
+                       << s.usesMinversion().asString()
+                       << std::endl
+                       << "(" << err << ")";
+                    output::puts(output::T_ERROR, ss.str());
                     exit(1);
                 }
             }
@@ -282,12 +293,12 @@ main(int argc, const char ** argv)
                              bp::file::Path(argParser.argument("logfile")),
                              err))
         {
-            std::cerr << "couldn't spawn service at: "
-                      << controller->path() << " - "
-                      << err << std::endl;
+            std::stringstream ss;
+            ss << "couldn't spawn service at: " << controller->path() << " - "
+               << err << std::endl;
+            output::puts(output::T_ERROR, ss.str());
             exit(1);
         }
-
         
         // allocate a command parser
         CommandParserPtr parser(new CommandParser);

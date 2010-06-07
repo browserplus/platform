@@ -20,11 +20,15 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include "CommandExecutor.h"
 #include <iostream>
+
 #include "BPUtils/bpfile.h"
 #include "BPUtils/bpurl.h"
 #include "BPUtils/ProductPaths.h"
+
+#include "Output.h"
+#include "CommandExecutor.h"
+
 
 using namespace std;
 using namespace std::tr1;
@@ -89,13 +93,13 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::invoke)
         std::string err;
         bp::Object * args = bp::Object::fromPlainJsonString(tokens[1], &err);
         if (!args) {
-            std::cout << "couldn't parse json:" << std::endl
-                      << err.c_str() << std::endl;
+            std::stringstream ss;
+            ss << "couldn't parse json:" << err.c_str();
+            output::puts(output::T_ERROR, ss.str());
             onFailure();        
             return;
         } else if (args->type() != BPTMap) {
-            std::cout << "provided json must specify a map (aka 'object')"
-                      << std::endl;
+            output::puts(output::T_ERROR, "provided json must specify a map (aka 'object')");
             onFailure();        
             return;
         }
@@ -108,7 +112,9 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::invoke)
     // urls or native paths into BPPaths
     bp::service::Function f;
     if (!m_desc.getFunction(tokens[0].c_str(), f)) {
-        std::cout << "no such function: " << tokens[0] << std::endl;
+        std::stringstream ss;
+        ss << "no such function: " << tokens[0];
+        output::puts(output::T_ERROR, ss.str());
         onFailure();        
         return;
     }
