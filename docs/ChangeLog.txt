@@ -1,3 +1,33 @@
+06/07/2010 - Changes from 2.8.1 to 2.9.1
+  * {#94} OSX chrome support 
+  * {#188} Fix drag and drop semantics on firefox when both HTML5 and BrowserPlus DnD
+    are being used in a single page
+  * {#153} Fix osx crash related to slow HTTP responses from distribution
+           servers
+  * {#180} win32 uninstall does a better job of cleaning up registry
+  * {#155} add /quiet flag for uninstaller for headless uninstall
+  * {#166} fix osx specific crash at shutdown related to outstanding http requests
+  * {#147} Usage reporting now includes services, currently disabled
+  * {#152} Add n=1 to first run after install in usage reporting
+  * {#56} rolling logfiles in more places
+  * {#25} all permissions are now visible in control panel (including the
+    results of "make my decision permenant")
+  * now use the bakery (http://github.com/lloyd/bakery) to manage 3rd party
+    source code
+  * {#69} simplify logging setup (in config file and other places)
+  * {#162} Windows configpanel now logs to consol when passed appropriate
+    flags.
+  * move to openssl 1.0.0
+  * {#167} 100% progress returned properly when HTTP request executed with
+    chunked encoding
+  * {#154} use weak pointers in http implementation
+  * {#179} HTTPS support
+  * {#183} Fix argument handling in windows installer, allow for headless installer
+    driving with output over IPC (as in java installation bootstrapper)
+  * {#99} improve user visible title of ActiveX addon 
+  * ensure service temporary directories are cleaned up in a timely fashion
+    (at service unload time)  
+
 04/20/2010 - Changes from 2.8.0 to 2.8.1
   * Forward port changes in 2.7.1 (authenticode signing {#8} and silent update
     perm visibility {#25})
