@@ -75,6 +75,12 @@ public:
      *  via user interaction (^D or quit) */
     void setListener(ICommandHandlerListener * listener);
 
+    /** set the prompt that the user will see when the command parser is awaiting input.
+     *  if NULL, no prompt will be printed.  This setting is process wide and
+     *  sets a static variable.  'prompt' itself is not copied and must be valid until
+     *  the last CommandParser instance is shut down */ 
+    static void setPrompt(const char * prompt);
+    
     /**
      * register a handler to handle a specific type of command
      *

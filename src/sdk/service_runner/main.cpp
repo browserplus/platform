@@ -201,7 +201,13 @@ main(int argc, const char ** argv)
     int x = argParser.parse(sizeof(g_args)/sizeof(g_args[0]), g_args,
                             argc, argv);
 
-    if (argParser.argumentPresent("slave")) output::setSlaveMode();
+    if (argParser.argumentPresent("slave")) {
+        // in slave mode all output is json formatted and prompt printing
+        // is surpressed
+        output::setSlaveMode();
+        CommandParser::setPrompt(NULL);
+    }
+    
 
     if (x < 0) {
         output::puts(output::T_ERROR, argParser.error());

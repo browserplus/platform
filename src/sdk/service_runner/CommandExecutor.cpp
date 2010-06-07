@@ -167,17 +167,18 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::show)
     std::set<unsigned int> s = m_controlMan->instances();
     std::set<unsigned int>::iterator it;
     unsigned int c = m_controlMan->currentInstance();
-
-    std::cout << s.size() << " instance(s) allocated: ";
+    std::stringstream ss;
+    
+    ss << s.size() << " instance(s) allocated: ";
     bool firstRun = true;
     for (it = s.begin(); it != s.end(); it++) {
-        if (!firstRun) std::cout << ",";
-        std::cout << " " << (c == *it ? "(" : " ")
-                  << *it
-                  << (c == *it ? ")" : "");
+        if (!firstRun) ss << ",";
+        ss << " " << (c == *it ? "(" : " ")
+           << *it
+           << (c == *it ? ")" : "");
         firstRun = false;
     }
-    std::cout << std::endl;
+    output::puts(output::T_RESULTS, ss.str());
     onSuccess();
 }
 
@@ -185,15 +186,16 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::prompts)
 {
     std::set<unsigned int> s = m_controlMan->prompts();
     std::set<unsigned int>::iterator it;
+    std::stringstream ss;
 
-    std::cout << s.size() << " outstanding prompt(s): ";
+    ss << s.size() << " outstanding prompt(s): ";
     bool firstRun = true;
     for (it = s.begin(); it != s.end(); it++) {
-        if (!firstRun) std::cout << ",";
-        std::cout << " " << *it;
+        if (!firstRun) ss << ",";
+        ss << " " << *it;
         firstRun = false;
     }
-    std::cout << std::endl;
+    output::puts(output::T_RESULTS, ss.str());
     onSuccess();
 }
 
@@ -204,8 +206,9 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::respond)
         std::string err;
         args = bp::Object::fromPlainJsonString(tokens[1], &err);
         if (!args) {
-            std::cout << "couldn't parse json:" << std::endl
-                      << err.c_str() << std::endl;
+            std::stringstream ss;
+            ss << "couldn't parse json: " << err.c_str();
+            output::puts(output::T_ERROR, ss.str());
             onFailure();        
             return;
         }
@@ -214,8 +217,9 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::respond)
     unsigned int promptId = (unsigned int) atoi(tokens[0].c_str());
 
     if (!m_controlMan->responded(promptId)) {
-        std::cout << "Warning: responding to unknown prompt Id: "
-                  << promptId << std::endl;
+        std::stringstream ss;
+        ss << "Warning: responding to unknown prompt Id: " << promptId;
+        output::puts(output::T_WARNING, ss.str());
     }
     
     (void) m_controller->sendResponse(promptId, args);

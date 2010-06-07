@@ -39,7 +39,8 @@ using namespace std;
 using namespace std::tr1;
 
 #define CMDLINEMAX 2047
-#define PROMPT "> "
+#define DEFAULT_PROMPT "> "
+const char * s_prompt = DEFAULT_PROMPT;
 
 #define MY_MAX(a,b) ((a>b) ? a : b)   
 #define MY_MIN(a,b) ((a<b) ? a : b)   
@@ -52,7 +53,7 @@ using namespace std::tr1;
 static EditLine *s_el;
 static History *s_history;
 
-static const char * prompt(EditLine *) { return "> "; }
+static const char * prompt(EditLine *) { return s_prompt ? s_prompt : ""; }
 
 static void editline_init()
 {
@@ -106,8 +107,10 @@ static bool myGets(std::string & line)
     char buf[CMDLINEMAX];
     char *ret;
 
-    fprintf(stdout, PROMPT);
-    fflush(stdout);
+    if (s_prompt != NULL) {
+        fprintf(stdout, s_prompt);
+        fflush(stdout);
+    }
     ret = fgets(buf, CMDLINEMAX, stdin);
     if (!ret) return false;
     line = bp::strutil::trim(std::string(buf));
@@ -226,6 +229,13 @@ struct ParserEvent
     std::string command;        
     std::vector<std::string> toks;
 };
+
+
+void
+CommandParser::setPrompt(const char * prompt)
+{
+    s_prompt = prompt;
+}
 
 /** parse commands from the command line until we get either
  *  EOF or a legitimate command */

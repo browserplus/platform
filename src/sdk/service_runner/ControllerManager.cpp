@@ -23,6 +23,8 @@
 #include "ControllerManager.h"
 #include "CommandExecutor.h"
 
+#include "Output.h"
+
 #define NO_INSTANCE ((unsigned int) -1)
 
 ControllerManager::ControllerManager(CommandExecutor * callback)
@@ -38,7 +40,7 @@ void
 ControllerManager::onDescribe(ServiceRunner::Controller *,
                               const bp::service::Description & desc)
 {
-    std::cout << desc.toHumanReadableString();
+    output::puts(output::T_RESULTS, desc);
     m_callback->onSuccess();
 }
 
@@ -47,7 +49,8 @@ ControllerManager::onAllocated(ServiceRunner::Controller *,
                                unsigned int aid, unsigned int id)
 {
     m_instances.insert(id);
-    std::cout << "allocated: " << id << std::endl;
+    bp::Integer i(id);
+    output::puts(output::T_RESULTS, &i);
     if (m_currentInstance == NO_INSTANCE) m_currentInstance = id;
 
     m_callback->onSuccess();    
@@ -60,8 +63,7 @@ ControllerManager::onInvokeResults(ServiceRunner::Controller *,
                                    const bp::Object * results)
 {
     if (results) {
-        std::cout << results->toPlainJsonString(true);
-        std::cout.flush();
+        output::puts(output::T_RESULTS, results);
     }
     m_callback->onSuccess();        
 }
@@ -73,7 +75,9 @@ ControllerManager::onInvokeError(ServiceRunner::Controller *,
                                  const std::string & error,
                                  const std::string & verboseError)
 {
-    std::cout << "error: (" << error << ") " << verboseError << std::endl;
+    std::stringstream ss;
+    ss << "error: (" << error << ") " << verboseError;
+    output::puts(output::T_ERROR, ss.str());
     m_callback->onFailure();
 }
 
@@ -84,8 +88,14 @@ ControllerManager::onCallback(ServiceRunner::Controller *,
                               const bp::Object * v)
 {
     // TODO: We should trun the cid into a human readable name
-    std::cout << "callback argument "<< cid <<" invoked: "<< std::endl;
-    if (v) std::cout << v->toPlainJsonString(true);
+    {
+        // informational output about invocation of callback
+        std::stringstream ss;
+        ss << "callback argument "<< cid <<" invoked.";
+        output::puts(output::T_INFO, ss.str());
+    }
+    
+    if (v) output::puts(output::T_CALLBACK, v);
 }
 
 void
@@ -95,17 +105,18 @@ ControllerManager::onPrompt(ServiceRunner::Controller *,
                             const bp::file::Path & pathToDialog,
                             const bp::Object * arguments)
 {
-    std::cout << "Prompt received (" << promptId
-              << "), html at: " << pathToDialog << std::endl;    
-    if (arguments) {
-        std::cout << "arguments: " << arguments->toPlainJsonString(true);
+    bp::Map m;
+    {
+        std::stringstream ss;
+        ss << "Prompt received (" << promptId << "), html at: " << pathToDialog;    
+        ss << " (use 'respond' command to send a response to this prompt)";
+        m.add("msg", new bp::String(ss.str()));
     }
-
-    std::cout << "(use 'respond' command to send a response to this prompt)"
-              << std::endl;
-
+    if (arguments) {
+        m.add("args", arguments->clone());
+    }
     m_prompts.insert(promptId);
-
+    output::puts(output::T_PROMPT, &m);
     m_callback->onSuccess();
 }
 
@@ -169,5 +180,5 @@ ControllerManager::prompts()
 void
 ControllerManager::onEnded(ServiceRunner::Controller *)
 {
-    std::cout << "spawned process ended" << std::endl;
+    output::puts(output::T_ERROR, "spawned process ended");
 }

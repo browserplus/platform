@@ -22,6 +22,8 @@ output::puts(output::type msgType, const bp::Object * obj)
             case T_ERROR:    t = "error"; break;
             case T_RESULTS:  t = "results"; break;              
             case T_CALLBACK: t = "callback"; break;
+            case T_WARNING:  t = "warning"; break;
+            case T_PROMPT:   t = "warning"; break;
         }
         bp::Map m;
         m.add("type", new bp::String(t));
@@ -44,6 +46,22 @@ output::puts(output::type msgType, const bp::Object * obj)
         }
     }
 }
+
+void
+output::puts(output::type msgType, bp::service::Description const& desc)
+{
+    if (s_slaveMode) {    
+        // in slave mode we'll output a description as json
+        bp::Object* o = desc.toBPObject();
+        puts(msgType, o);
+        delete o;
+    } else {
+        // in slave mode we'll output a description as json
+        std::string s = desc.toHumanReadableString();
+        puts(msgType, s);
+    }
+}
+
 
 void
 output::puts(output::type msgType, const std::string & msg)
