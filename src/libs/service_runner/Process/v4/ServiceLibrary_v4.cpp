@@ -55,7 +55,7 @@ namespace bpf = bp::file;
  * a structure holding data from instance runloop back to 
  * main runloop
  */
-struct InstanceResponse
+struct InstanceResponse_v4
 {
     enum { T_Results, T_Error, T_CallBack, T_Prompt } type;
 
@@ -78,11 +78,11 @@ struct InstanceResponse
     void * responseCookie;
     unsigned int promptId;
 
-    InstanceResponse()
+    InstanceResponse_v4()
         : type(T_Results), tid(0), o(NULL), callbackId(0),
           dialogPath(), responseCallback(NULL),
           responseCookie(NULL), promptId(0)  {  }
-    ~InstanceResponse() { if (o) delete o; }
+    ~InstanceResponse_v4() { if (o) delete o; }
 };
 
 static ServiceLibrary_v4 * s_libObjectPtr = NULL;
@@ -91,8 +91,8 @@ void
 ServiceLibrary_v4::postResultsFunction(unsigned int tid,
                                        const struct sapi_v4::BPElement_t * results)
 {
-    InstanceResponse * ir = new InstanceResponse;
-    ir->type = InstanceResponse::T_Results;
+    InstanceResponse_v4 * ir = new InstanceResponse_v4;
+    ir->type = InstanceResponse_v4::T_Results;
     ir->tid = tid;
     ir->o = (results ? sapi_v4::v4ToBPObject(results) : NULL);
     s_libObjectPtr->hop(ir);
@@ -100,11 +100,11 @@ ServiceLibrary_v4::postResultsFunction(unsigned int tid,
 
 void
 ServiceLibrary_v4::postErrorFunction(unsigned int tid,
-                                  const char * error,
-                                  const char * verboseError)
+                                     const char * error,
+                                     const char * verboseError)
 {
-    InstanceResponse * ir = new InstanceResponse;
-    ir->type = InstanceResponse::T_Error;
+    InstanceResponse_v4 * ir = new InstanceResponse_v4;
+    ir->type = InstanceResponse_v4::T_Error;
     ir->tid = tid;
     if (error) ir->error.append(error);
     if (verboseError) ir->verboseError.append(verboseError);    
@@ -271,8 +271,8 @@ ServiceLibrary_v4::invokeCallbackFunction(unsigned int tid,
                                        long long int callbackHandle,
                                        const struct sapi_v4::BPElement_t * results)
 {
-    InstanceResponse * ir = new InstanceResponse;
-    ir->type = InstanceResponse::T_CallBack;
+    InstanceResponse_v4 * ir = new InstanceResponse_v4;
+    ir->type = InstanceResponse_v4::T_CallBack;
     ir->tid = tid;
     ir->callbackId = callbackHandle;
     ir->o = (results ? sapi_v4::v4ToBPObject(results) : NULL);
@@ -298,8 +298,8 @@ ServiceLibrary_v4::promptUserFunction(
         cpid = s_promptId++;
     }
 
-    InstanceResponse * ir = new InstanceResponse;
-    ir->type = InstanceResponse::T_Prompt;
+    InstanceResponse_v4 * ir = new InstanceResponse_v4;
+    ir->type = InstanceResponse_v4::T_Prompt;
     ir->tid = tid;
     if (utf8PathToHTMLDialog) ir->dialogPath.append(utf8PathToHTMLDialog);
     ir->o = (args ? sapi_v4::v4ToBPObject(args) : NULL);
@@ -315,7 +315,7 @@ ServiceLibrary_v4::promptUserFunction(
 
 
 // BEGIN runloop hooks for instance threads
-struct InstanceState 
+struct InstanceState_v4 
 {
     // arguments to allocate
     bp::Map context;
@@ -335,7 +335,7 @@ struct InstanceState
 static void
 onThreadStartFunc(void * c)
 {
-    InstanceState * is = (InstanceState *) c;
+    InstanceState_v4 * is = (InstanceState_v4 *) c;
 
     if (is->funcTable->allocateFunc != NULL)
     {
@@ -367,7 +367,7 @@ onThreadStartFunc(void * c)
  * 1. function invocation
  * 2. prompt user results
  */
-struct InstanceEvent
+struct InstanceEvent_v4
 {
     enum { T_Invoke, T_PromptResults } type;
     
@@ -386,11 +386,11 @@ struct InstanceEvent
 static void
 processEventFunc(void * c, bp::runloop::Event e)
 {
-    InstanceState * is = (InstanceState *) c;
-    InstanceEvent * ie = (InstanceEvent *) e.payload();
+    InstanceState_v4 * is = (InstanceState_v4 *) c;
+    InstanceEvent_v4 * ie = (InstanceEvent_v4 *) e.payload();
     BPASSERT(ie != NULL);
     
-    if (ie->type == InstanceEvent::T_Invoke) {
+    if (ie->type == InstanceEvent_v4::T_Invoke) {
         if (is->funcTable->invokeFunc != NULL)
         {
             sapi_v4::BPElement * e = sapi_v4::v5ElementToV4(ie->args.elemPtr());
@@ -402,7 +402,7 @@ processEventFunc(void * c, bp::runloop::Event e)
 
             sapi_v4::freeDynamicV4Element(e);
         }
-    } else if (ie->type == InstanceEvent::T_PromptResults) {
+    } else if (ie->type == InstanceEvent_v4::T_PromptResults) {
         if (ie->callback) {
             sapi_v4::BPElement * r = NULL;
             if (ie->results) r = sapi_v4::v5ElementToV4(ie->results->elemPtr());
@@ -417,7 +417,7 @@ processEventFunc(void * c, bp::runloop::Event e)
 static void
 onThreadEndFunc(void * c)
 {
-    InstanceState * is = (InstanceState *) c;
+    InstanceState_v4 * is = (InstanceState_v4 *) c;
 
     if (is->funcTable->destroyFunc != NULL)
     {
@@ -670,7 +670,7 @@ ServiceLibrary_v4::allocate(std::string uri, bp::file::Path dataDir,
 
     // now let's allocate and populate the instance's state structure
     // this will be freed by the thread in the onThreadEndFunc
-    InstanceState * is = new InstanceState;
+    InstanceState_v4 * is = new InstanceState_v4;
     is->name = m_summary.name();
     is->version = m_summary.version();
 
@@ -765,8 +765,8 @@ ServiceLibrary_v4::invoke(unsigned int id, unsigned int tid,
     
     // good to go!  now we're ready to actually invoke the function!
 
-    InstanceEvent * ie = new InstanceEvent;
-    ie->type = InstanceEvent::T_Invoke;
+    InstanceEvent_v4 * ie = new InstanceEvent_v4;
+    ie->type = InstanceEvent_v4::T_Invoke;
     ie->tid = tid;
     ie->name = function;
     if (arguments && arguments->type() == BPTMap) {
@@ -803,8 +803,8 @@ ServiceLibrary_v4::promptResponse(unsigned int promptId,
     } else {
         // we got all we need! let's pass it to the correct instance
         // runloop
-        InstanceEvent * ie = new InstanceEvent;
-        ie->type = InstanceEvent::T_PromptResults;
+        InstanceEvent_v4 * ie = new InstanceEvent_v4;
+        ie->type = InstanceEvent_v4::T_PromptResults;
         ie->callback = ctx.cb;
         ie->cookie = ctx.cookie;
         ie->promptId = promptId;
@@ -827,7 +827,7 @@ ServiceLibrary_v4::promptResponse(unsigned int promptId,
 void
 ServiceLibrary_v4::onHop(void * context)
 {
-    InstanceResponse * ir = (InstanceResponse *) context;
+    InstanceResponse_v4 * ir = (InstanceResponse_v4 *) context;
     BPASSERT(ir != NULL);
 
     // all InstanceResponses have a populated tid, all need an
@@ -843,14 +843,14 @@ ServiceLibrary_v4::onHop(void * context)
     
     if (m_listener) {    
         switch (ir->type) {
-            case InstanceResponse::T_Results: {
+            case InstanceResponse_v4::T_Results: {
                 m_listener->onResults(instance, ir->tid, ir->o);
 
                 // remove the transaction
                 endTransaction(ir->tid);
                 break;
             }
-            case InstanceResponse::T_Error: {
+            case InstanceResponse_v4::T_Error: {
                 m_listener->onError(instance, ir->tid, ir->error,
                                     ir->verboseError);
 
@@ -858,12 +858,12 @@ ServiceLibrary_v4::onHop(void * context)
                 endTransaction(ir->tid);
                 break;
             }
-            case InstanceResponse::T_CallBack: {
+            case InstanceResponse_v4::T_CallBack: {
                 m_listener->onCallback(instance, ir->tid,
                                        ir->callbackId, ir->o);
                 break;
             }
-            case InstanceResponse::T_Prompt: {
+            case InstanceResponse_v4::T_Prompt: {
                 if (!transactionKnown(ir->tid)) {
                     BPLOG_ERROR_STRM("can't send prompt from, unknown "
                                      "transaction: " << ir->tid);
