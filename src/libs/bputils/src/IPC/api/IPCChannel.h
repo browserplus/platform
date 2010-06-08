@@ -30,14 +30,14 @@
 #ifndef __IPCCHANNEL_H__
 #define __IPCCHANNEL_H__
 
-#include "BPUtils/IPCConnection.h"
-#include "BPUtils/IPCChannel.h"
-#include "BPUtils/IPCMessage.h"
-#include "BPUtils/bpthread.h"
-#include "BPUtils/bptypeutil.h"
-#include "BPUtils/bpthreadhopper.h"
-
 #include <string>
+
+#include "BPUtils/bpthread.h"
+#include "BPUtils/bpthreadhopper.h"
+#include "BPUtils/bptypeutil.h"
+#include "BPUtils/IPCConnection.h"
+#include "BPUtils/IPCMessage.h"
+
 
 namespace bp { namespace ipc
 {
