@@ -11,11 +11,11 @@
   * {#152} Add n=1 to first run after install in usage reporting
   * {#56} rolling logfiles in more places
   * {#25} all permissions are now visible in control panel (including the
-    results of "make my decision permenant")
+    results of "make my decision permanent")
   * now use the bakery (http://github.com/lloyd/bakery) to manage 3rd party
     source code
   * {#69} simplify logging setup (in config file and other places)
-  * {#162} Windows configpanel now logs to consol when passed appropriate
+  * {#162} Windows configpanel now logs to console when passed appropriate
     flags.
   * move to openssl 1.0.0
   * {#167} 100% progress returned properly when HTTP request executed with
@@ -24,8 +24,8 @@
   * {#179} HTTPS support
   * {#183} Fix argument handling in windows installer, allow for headless installer
     driving with output over IPC (as in java installation bootstrapper)
-  * {#99} improve user visible title of ActiveX addon 
-  * ensure service temporary directories are cleaned up in a timely fashion
+  * {#99} improve user-visible title of ActiveX addon 
+  * [yib 3634169] ensure service temporary directories are cleaned up in a timely fashion
     (at service unload time)  
 
 04/20/2010 - Changes from 2.8.0 to 2.8.1
@@ -35,7 +35,7 @@
 04/12/2010 - Changes from 2.7.0 to 2.8.0
   * {#9} numerous potential defects reported by coverity fixed.
   * {#11} - prefpanel no longer crashes on windows with non-ascii username
-  * fix [YIB-3461791] - file sizes and other data were being cached and
+  * fix [yib 3461791] - file sizes and other data were being cached and
     hence falsely reported when a file was selected, changed, and re-selected
     in a single session
   * {#8} - all binaries now authenticode signed again on win32 (at build
