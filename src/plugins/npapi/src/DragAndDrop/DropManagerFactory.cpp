@@ -44,67 +44,50 @@ DropManagerFactory::create(NPP instance,
                            NPWindow* window,
                            IDropListener* listener)
 {
-    // Curent Html5 users:
-    //  - Firefox 3.6.3 or greater on Windows
-    //  - Safari 4.0.3 or greater on OSX
-    // Everybody else uses Intercept.
-    // Chrome on OSX doesn't support DnD.
+    // Currently, Safari 4.0.3 or greater on OSX uses Html5, everybody
+    // else uses Intercept.  Chrome on OSX doesn't support DnD.
 
     // access user agent
     NPAPIPlugin* plugin = (NPAPIPlugin*)instance->pdata;
-    string userAgent = plugin->getUserAgent();
+    std::string userAgent = plugin->getUserAgent();
     BPLOG_DEBUG_STRM("DropManagerFactory userAgent: '" << userAgent << "'");
 
-    // A sample Windows Firefox 3.6.3 userAgent
-    //    'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.2.3) Gecko/20100401 Firefox/3.6.3'
     // A sample OSX Safari 4.0.3 userAgent that we're snorting thru
-    //    'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6; en-us) AppleWebKit/531.9 (KHTML, like Gecko) Version/4.0.3 Safari/531.9'
+    // 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6; en-us) AppleWebKit/531.9 (KHTML, like Gecko) Version/4.0.3 Safari/531.9'
     // A sample OSX Chrome userAgent string
-    //    'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; en-US) AppleWebKit/533.4 (KHTML, like Gecko) Chrome/5.0.375.38 Safari/533.4'
+    // 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; en-US) AppleWebKit/533.4 (KHTML, like Gecko) Chrome/5.0.375.38 Safari/533.4'
+    bool useIntercept = true;
     bool unsupported = false;
-    bool useHtml5 = false;
-    bool isWindows = userAgent.find("Windows") != string::npos;
-    bool isOSX = userAgent.find("Mac OS X") != string::npos;
     do {
-        string browser;
-        bp::ServiceVersion baseVersion;
-        if (isOSX && userAgent.find("Chrome")) {
+        if (userAgent.find("Mac OS X") == string::npos) break;
+        if (userAgent.find("Chrome") != string::npos) {
             unsupported = true;
             break;
         }
-        if (isOSX && userAgent.find("Safari")) {
-            browser = "Safari";
-            (void) baseVersion.parse("4.0.3");
-        }
-        if (isWindows && userAgent.find("Firefox")) {
-            (void) baseVersion.parse("3.6.3");
-            browser = "Firefox";
-            // add a trailing " " so that parsing code below will work
-            userAgent += " ";
-        }
-        std::string vstr = browser == "Safari" ? "Version/" : browser + "/";
-        size_t start = userAgent.find(vstr);
+        if (userAgent.find("Safari") == string::npos) break;
+        size_t start = userAgent.find("Version/");
         if (start == string::npos) break;
         size_t end = userAgent.find(" ", start);
         if (end == string::npos) break;
         string s = userAgent.substr(start, end - start);
         vector<string> v = bp::strutil::split(s, "/");
         if (v.size() < 2) break;
+        string version = v[1];
+        bp::ServiceVersion baseVersion;
+        baseVersion.parse("4.0.3");
         bp::ServiceVersion thisVersion;
-        if (thisVersion.parse(v[1])) {
-            useHtml5 = thisVersion.compare(baseVersion) >= 0;
-        }
+        if (!thisVersion.parse(version)) break;
+        useIntercept = thisVersion.compare(baseVersion) < 0;
     } while (false);
 
     if (unsupported) {
-        BPLOG_WARN_STRM("DnD unsupported for " << userAgent);
+        BPLOG_WARN("DnD unsupported on platform/browser");
         return NULL;
     }
-
-    BPLOG_INFO_STRM("using " << string(useHtml5 ? "html5" : "intercept")
-                    << " drop manager for " << userAgent);
-    return useHtml5 ? Html5DropManager::allocate(instance, window, listener):
-                      InterceptDropManager::allocate(instance, window, listener);
+    if (useIntercept) {
+        return InterceptDropManager::allocate(instance, window, listener);
+    }
+    return Html5DropManager::allocate(instance, window, listener);
 }
 
 
