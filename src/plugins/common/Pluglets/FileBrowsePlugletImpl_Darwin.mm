@@ -156,7 +156,6 @@ FileBrowsePluglet::execute(unsigned int tid,
     [panel setCanChooseFiles:YES];
     string title = getBrowseTitle(FileBrowsePluglet::kSelectFilesFoldersKey,                            
                                   currentUrl, m_locale);
-    [panel setTitle: [NSString stringWithUTF8String: title.c_str()]];
     if (m_desc.majorVersion() > 1) {
         [panel setResolvesAliases: NO];
     }
@@ -174,6 +173,7 @@ FileBrowsePluglet::execute(unsigned int tid,
             }
         }
     }
+    [panel setTitle: [NSString stringWithUTF8String: title.c_str()]];
 
     // Run the panel and get the results
     std::vector<bp::file::Path> selection;
