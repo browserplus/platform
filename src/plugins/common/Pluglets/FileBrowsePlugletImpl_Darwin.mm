@@ -50,47 +50,6 @@ getBrowseTitle(const char* key,
     return title;
 }
 
-// When run from an out-of-process Safari plugin, NSOpenPanel's runModal
-// always returns NSFileHandlingPanelCancelButton, even if OK was selected.
-// Works fine in-process (Firefox and 32-bit Safari).  Thus, we subclass
-// NSOpenPanel and override the ok/cancel methods.  Jeez.
-
-@interface MyOpenPanel : NSOpenPanel {
-    bool m_ok;
-}
-- (id) init;
-- (IBAction) ok: (id)sender;
-- (IBAction) cancel: (id)sender;
-- (bool) okSelected;
-@end
-
-@implementation MyOpenPanel
-- (id) init
-{
-    if ((self = [super init])) {
-        m_ok = false;
-    }
-    return self;
-}
-
-- (IBAction) ok: (id)sender
-{
-    m_ok = true;
-    return [super ok:sender];
-}
-
-- (IBAction) cancel: (id)sender 
-{
-    m_ok = false;
-    return [super cancel:sender];
-}
-
-- (bool) okSelected 
-{
-    return m_ok;
-}
-@end
-
 
 // A delegate to apply mimetype filtering for the MyOpenPanel used below
 @interface MyDelegate : NSObject {
@@ -191,7 +150,7 @@ FileBrowsePluglet::execute(unsigned int tid,
     // Create our panel
     MyDelegate* delegate = [[MyDelegate alloc] init];
     [delegate setMimetypes: &mimetypes];
-    MyOpenPanel* panel = [[MyOpenPanel alloc] init];
+    NSOpenPanel* panel = [NSOpenPanel openPanel];
     [panel setDelegate:delegate];
     [panel setAllowsMultipleSelection:YES];
     [panel setCanChooseFiles:YES];
@@ -218,8 +177,7 @@ FileBrowsePluglet::execute(unsigned int tid,
 
     // Run the panel and get the results
     std::vector<bp::file::Path> selection;
-    (void) [panel runModal];
-    if ([panel okSelected]) {
+    if ([panel runModal] == NSFileHandlingPanelOKButton) {
         NSArray* urls = [panel URLs];
         int count = [urls count];
         for (int i = 0; i < count; i++) {
@@ -233,7 +191,6 @@ FileBrowsePluglet::execute(unsigned int tid,
     }
     [panel setDelegate:nil];
     [delegate release];
-    [panel release];
 
     bp::Object* obj = NULL;
     if (m_desc.majorVersion() == 1) {
