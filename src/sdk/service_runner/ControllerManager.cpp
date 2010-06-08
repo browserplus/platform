@@ -87,15 +87,11 @@ ControllerManager::onCallback(ServiceRunner::Controller *,
                               unsigned int, long long int cid,
                               const bp::Object * v)
 {
-    // TODO: We should trun the cid into a human readable name
-    {
-        // informational output about invocation of callback
-        std::stringstream ss;
-        ss << "callback argument "<< cid <<" invoked.";
-        output::puts(output::T_INFO, ss.str());
-    }
-    
-    if (v) output::puts(output::T_CALLBACK, v);
+    // TODO: We should turn the cid into a human readable name
+    bp::Map m;
+    m.add("callback", new bp::Integer(cid));
+    if (v) m.add("args", v->clone());
+    output::puts(output::T_CALLBACK, &m);
 }
 
 void
