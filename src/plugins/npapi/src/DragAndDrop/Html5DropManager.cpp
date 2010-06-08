@@ -453,6 +453,11 @@ extractPathArguments(NPP npp,
         
         CHECK_RETURN(fileVar.type == NPVariantType_Object, "file not object");
         
+        // remove trailing slashes from URI if present
+        if (url.size() && url[url.size() - 1] == '/') {
+            url.erase(url.size()-1);
+        }
+
         // verify that url is a file:// url
         bp::file::Path path = bp::file::pathFromURL(url);
         if (path.empty()) {
