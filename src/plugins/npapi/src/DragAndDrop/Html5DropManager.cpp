@@ -43,49 +43,47 @@ using namespace std;
 
 // a JavaScript function to add HTML5 style handlers to a supplied dom id, which call back into the supplied 
 static const char * s_addDropTargetFunc =
-"function (id, cbObj)\n"
-"{\n"
-"  if (!cbObj || !cbObj.onEnter || !cbObj.onExit || !cbObj.onDrop)\n"
-"  { \n"
+"function (platformArg, browserArg, id, cbObj) {\n"
+"  if (!cbObj || !cbObj.onEnter || !cbObj.onExit || !cbObj.onDrop) { \n"
 "    throw 'error adding target, bogus callback object!';\n"
 "  }\n"
 "\n"
 "  var elem = document.getElementById(id);\n"
+"  var platform = platformArg;\n"
+"  var browser = browserArg;\n"
 "\n"
-"  if (elem == null) \n"
-"  {\n"
+"  if (elem == null) {\n"
 "    throw 'can\\'t find element with id: \\'' + id + '\\'';\n"
 "  }\n"
 "\n"
-"  if (elem.ondragenter || elem.ondragleave || elem.ondrop)\n"
-"  {\n"
+"  if (elem.ondragenter || elem.ondragleave || elem.ondrop) {\n"
 "    throw 'element already has non-nil value for .ondragenter/.ondragleave/.ondrop -- BrowserPlus cannot attach drop target: \\'' + id + '\\'';\n"
 "  }\n"
 "\n"
-"  var isRealFile = function(f)\n"
-"  {\n"
-"    var hasFileName = false, hasFileSize = false, numMembers = 0,\n"
-"      mutableMembers = false;\n"
+"  var isRealFile = function(f) {\n"
+"    var hasFileName = false, hasFileSize = false, mutableMembers = false;\n"
 "\n"
 "    for (var m in f) {\n"
-"      numMembers++;\n"
 "      if (m === 'fileName') hasFileName = true;\n"
 "      else if (m === 'fileSize') hasFileSize = true;\n"
-"      var before = f[m];\n"
-"      f[m] = '__IMutedYou__';\n"
-"      if (before !== f[m]) mutableMembers = true;\n"
 "    }\n"
-"\n"
+"    try {\n"
+"      var before = f['fileName'];\n"
+"      f['fileName'] = '__IMutedYou__';\n"
+"      if (before !== f['fileName']) mutableMembers = true;\n"
+"      before = f['fileSize'];\n"
+"      f['fileSize'] = '__IMutedYou__';\n"
+"      if (before !== f['fileSize']) mutableMembers = true;\n"
+"    } catch (e) {\n"
+"    }\n"
 "    if (typeof(f) !== 'object' ||\n"
-"      !f.toString || f.toString.constructor !==  Function ||\n"
+"        !f.toString || f.toString.constructor !==  Function ||\n"
 "        f.toString() !== '[object File]' ||\n"
-"      f.constructor != File ||\n"
-"      f.protype != undefined ||\n"
-"      numMembers != 2 ||\n"
-"      !hasFileName ||\n"
-"      !hasFileSize ||\n"
-"        mutableMembers)\n"
-"    {\n"
+"        f.constructor != File ||\n"
+"        f.protype != undefined ||\n"
+"        !hasFileName ||\n"
+"        !hasFileSize ||\n"
+"        mutableMembers) {\n"
 "      return false;\n"
 "    }\n"
 "\n"
@@ -93,10 +91,17 @@ static const char * s_addDropTargetFunc =
 "  };\n"
 "\n"
 "  var extractDragItems = function(event) {\n"
-"    var files = event.dataTransfer.files;\n"
+"    var dt = event.dataTransfer;\n"
+"    var files = dt.files;\n"
 "    var uris = [ ];\n"
-"    var uriText = event.dataTransfer.getData('text/uri-list');\n"
-"    if (uriText) uris = uriText.split('\\n');\n"
+"    if (platform == 'Windows' && browser == 'Firefox') {\n"
+"      for (var i = 0; i < dt.mozItemCount; i++) {\n"
+"        uris[i] = dt.mozGetDataAt('text/x-moz-url', i);\n"
+"      }\n"
+"    } else if (platform == 'OSX' && browser == 'Safari') {\n"
+"      var uriText = dt.getData('text/uri-list');\n"
+"      if (uriText) uris = uriText.split('\\n');\n"
+"    }\n"
 "\n"
 "    if (uris.length != files.length) {\n"
 "      throw 'uri/files size mismatch, aborting drop';\n"
@@ -107,8 +112,8 @@ static const char * s_addDropTargetFunc =
 "      if (!isRealFile(files[i])) {\n"
 "          throw 'bogus user File data found, possible attack detected!';\n"
 "      }\n"
-"      arr.push([ files[i], uris[i] ]); \n"
-"    }                      \n"
+"      arr.push([ files[i], uris[i] ]);\n"
+"    }\n"
 "    return arr;\n"
 "  };\n"
 "\n"
@@ -133,8 +138,7 @@ static const char * s_addDropTargetFunc =
 "    parentNode = el.parentNode;\n"
 "    \n"
 "    // account for any scrolled ancestors\n"
-"    while (parentNode && parentNode.tagName.toUpperCase() != 'HTML')\n"
-"    {\n"
+"    while (parentNode && parentNode.tagName.toUpperCase() != 'HTML') {\n"
 "      pos[0] -= parentNode.scrollLeft;\n"
 "      pos[1] -= parentNode.scrollTop;\n"
 "      parentNode = parentNode.parentNode;\n"
@@ -148,10 +152,9 @@ static const char * s_addDropTargetFunc =
 "    };\n"
 "  }\n"
 "  \n"
-"  function eventInsideTarget(target, event)\n"
-"  {\n"
+"  function eventInsideTarget(target, event) {\n"
 "    var cs = getDimensions(target);\n"
-"    return (cs.x <= event.x && event.x <= cs.x1 && cs.y <= event.y && event.y <= cs.y1);\n"
+"    return (cs.x <= event.clientX && event.clientX <= cs.x1 && cs.y <= event.clientY && event.clientY <= cs.y1);\n"
 "  } \n"
 "  \n"
 "  elem.ondragenter = function(event) {\n"
@@ -205,15 +208,20 @@ static const char * s_removeDropTargetFunc =
 IDropManager*
 Html5DropManager::allocate(NPP instance,
                            NPWindow* window,
-                           IDropListener* dl)
+                           IDropListener* dl,
+                           const string& platform,
+                           const string& browser)
 {
-    return new Html5DropManager(instance, window, dl);
+    return new Html5DropManager(instance, window, dl, platform, browser);
 }
 
 Html5DropManager::Html5DropManager(NPP npp,
                                    NPWindow* window,
-                                   IDropListener* dl)
-    : m_npp(npp), m_addDropTargetFunc(NULL), m_removeDropTargetFunc(NULL), m_listener(dl) 
+                                   IDropListener* dl,
+                                   const string& platform,
+                                   const string& browser)
+    : m_npp(npp), m_addDropTargetFunc(NULL), m_removeDropTargetFunc(NULL),
+      m_listener(dl), m_platform(platform), m_browser(browser)
 {
     BPLOG_DEBUG_STRM("new Html5DropManager");
 
@@ -245,22 +253,31 @@ Html5DropManager::addTarget(const std::string& element,
     // check if this is already registered on m_targets
     if (m_targets.find(element) != m_targets.end()) return false;
 
+    size_t argNum = 0;
+    NPVariant args[4];
+    STRINGZ_TO_NPVARIANT(m_platform.c_str(), args[argNum]);
+    argNum++;
+    STRINGZ_TO_NPVARIANT(m_browser.c_str(), args[argNum]);
+    argNum++;
+
     // Ask browser for bounds of element associated with drop target
-    NPVariant args[2];
-    STRINGZ_TO_NPVARIANT(element.c_str(), args[0]);
-    args[1].type = NPVariantType_Void;
+    STRINGZ_TO_NPVARIANT(element.c_str(), args[argNum]);
+    argNum++;
 
     NPVariant result;
     result.type = NPVariantType_Void;
 
     // now allocate the context for this drop target
-    DropTargetContext * ctx =
-        new DropTargetContext(m_npp, element, mimeTypes, includeGestureInfo, limit, this);
+    DropTargetContext * ctx = new DropTargetContext(m_npp, element,
+                                                    mimeTypes,
+                                                    includeGestureInfo,
+                                                    limit, this);
 
-    args[1].type = NPVariantType_Object;
-    args[1].value.objectValue = ctx->callbackObject();
+    args[argNum].type = NPVariantType_Object;
+    args[argNum].value.objectValue = ctx->callbackObject();
+    argNum++;
         
-    if (npu::callFunction(m_npp, m_addDropTargetFunc, args, 2, &result))
+    if (npu::callFunction(m_npp, m_addDropTargetFunc, args, argNum, &result))
     {
         // if the function is successfully invoked, then we'll add this target
         m_targets[element] = ctx;
@@ -285,21 +302,29 @@ Html5DropManager::addTarget(const std::string& element,
     // check if this is already registered on m_targets
     if (m_targets.find(element) != m_targets.end()) return false;
 
+    size_t argNum = 0;
+    NPVariant args[4];
+    STRINGZ_TO_NPVARIANT(m_platform.c_str(), args[argNum]);
+    argNum++;
+    STRINGZ_TO_NPVARIANT(m_browser.c_str(), args[argNum]);
+    argNum++;
+
     // Ask browser for bounds of element associated with drop target
-    NPVariant args[2];
-    STRINGZ_TO_NPVARIANT(element.c_str(), args[0]);
-    args[1].type = NPVariantType_Void;
+    STRINGZ_TO_NPVARIANT(element.c_str(), args[argNum]);
+    argNum++;
 
     NPVariant result;
     result.type = NPVariantType_Void;
 
     // now allocate the context for this drop target
-    DropTargetContext * ctx = new DropTargetContext(m_npp, element, version, this);
+    DropTargetContext * ctx = new DropTargetContext(m_npp, element,
+                                                    version, this);
 
-    args[1].type = NPVariantType_Object;
-    args[1].value.objectValue = ctx->callbackObject();
+    args[argNum].type = NPVariantType_Object;
+    args[argNum].value.objectValue = ctx->callbackObject();
+    argNum++;
         
-    if (npu::callFunction(m_npp, m_addDropTargetFunc, args, 2, &result))
+    if (npu::callFunction(m_npp, m_addDropTargetFunc, args, argNum, &result))
     {
         // if the function is successfully invoked, then we'll add this target
         m_targets[element] = ctx;
