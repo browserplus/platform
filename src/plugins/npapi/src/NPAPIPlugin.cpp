@@ -39,6 +39,7 @@
 #include "NPAPIVariant.h"
 #include "nputils.h"
 #include "PluginCommonLib/FileBrowsePlugletFactory.h"
+#include "PluginCommonLib/FileSavePlugletFactory.h"
 #include "PluginCommonLib/LogPlugletFactory.h"
 #include "WindowedPluglet.h"
 
@@ -141,6 +142,9 @@ NPAPIPlugin::createPluglets( const std::string& sName ) const
         rval = factory.createPluglets(m_npp, (BPPlugin *) this);
     } else if (!sName.compare("FileBrowser")) {
         FileBrowsePlugletFactory factory;
+        rval = factory.createPluglets((BPPlugin *) this);
+    } else if (!sName.compare("FileSave")) {
+        FileSavePlugletFactory factory;
         rval = factory.createPluglets((BPPlugin *) this);
     } else if (!sName.compare("Log")) {
         LogPlugletFactory factory;
