@@ -49,13 +49,28 @@ class FileBrowsePluglet : public Pluglet
 
     /** defined per plugin per platform */
     void execute(unsigned int tid,
-                 const char * function,
-                 const bp::Object * arguments,
+                 const char* function,
+                 const bp::Object* arguments,
                  bool syncInvocation,
                  plugletExecutionSuccessCB successCB,
                  plugletExecutionFailureCB failureCB,
                  plugletInvokeCallbackCB   callbackCB,
-                 void * callbackArgument);
+                 void* callbackArgument);
+ protected:
+    void v1Browse(unsigned int tid,
+                  const bp::Object* arguments,
+                  plugletExecutionSuccessCB successCB,
+                  plugletExecutionFailureCB failureCB,
+                  void* callbackArgument);
+    void browse(unsigned int tid,
+                plugletExecutionSuccessCB successCB,
+                plugletExecutionFailureCB failureCB,
+                void* callbackArgument);
+    void save(unsigned int tid,
+              const bp::Object* arguments,
+              plugletExecutionSuccessCB successCB,
+              plugletExecutionFailureCB failureCB,
+              void* callbackArgument);
 };
 
 #endif

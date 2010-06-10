@@ -109,6 +109,47 @@ static BPServiceDefinition s_fileBrowsePlugletDef2 = {
     s_browseFunctions2
 };
 
+// ------------ version 3
+
+BPArgumentDefinition s_saveArguments[] =
+{
+    {
+        "name",
+        "The default filename.",
+        BPTString,
+        false
+    }
+};
+
+BPFunctionDefinition s_browseFunctions3[] = {
+    {
+        "selectFiles",
+        "Present the user with a native browse dialog.  On OSX and Windows XP, "
+		"multiple files and folders may be selected.  On Windows Vista and "
+        "Windows 7, multiple files or a single folder may be selected.  "
+        "Return value has key \"files\" which contains a list of filehandles "
+        "for the selected items.",
+        0, NULL
+    },
+    {
+        "saveAs",
+        "Present the user with a native save dialog.  Return value has "
+        "key \"file\" which contains a filehandle for the filename "
+        "to save to.",
+        sizeof(s_saveArguments)/sizeof(s_saveArguments[0]),
+        s_saveArguments
+    },
+};
+
+// a description of this service.
+static BPServiceDefinition s_fileBrowsePlugletDef3 = {
+    "FileBrowse",
+    3, 0, 0,
+    "Present the user with a file browse dialog.",
+    sizeof(s_browseFunctions3)/sizeof(s_browseFunctions3[0]),
+    s_browseFunctions3
+};
+
 
 FileBrowsePlugletFactory::FileBrowsePlugletFactory()
 {
@@ -116,6 +157,8 @@ FileBrowsePlugletFactory::FileBrowsePlugletFactory()
     m_descriptions.back().fromBPServiceDefinition(&s_fileBrowsePlugletDef);
     m_descriptions.push_back(bp::service::Description());
     m_descriptions.back().fromBPServiceDefinition(&s_fileBrowsePlugletDef2);
+    m_descriptions.push_back(bp::service::Description());
+    m_descriptions.back().fromBPServiceDefinition(&s_fileBrowsePlugletDef3);
 }
 
 

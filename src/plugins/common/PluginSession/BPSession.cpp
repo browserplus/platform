@@ -51,7 +51,6 @@ BPSession::BPSession(BPPlugin* pPlugin)
     // register all the pluglets
     m_plugletRegistry->registerPluglets(m_plugin->createPluglets("DragAndDrop"));
     m_plugletRegistry->registerPluglets(m_plugin->createPluglets("FileBrowser"));
-    m_plugletRegistry->registerPluglets(m_plugin->createPluglets("FileSave"));
     m_plugletRegistry->registerPluglets(m_plugin->createPluglets("Log"));
 
     // allocate a protocol handle 
