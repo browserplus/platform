@@ -97,33 +97,33 @@ sapi_v4::v5ElementToV4(const ::BPElement * elemPtr)
     sapi_v4::BPElement * rv = NULL;
 
     switch (elemPtr->type) {
-        case BPTNull:
+        case ::BPTNull:
             rv = (sapi_v4::BPElement *) calloc(1, sizeof(struct sapi_v4::BPElement_t));
             rv->type = sapi_v4::BPTNull;
             break;
-        case BPTBoolean:
+        case ::BPTBoolean:
             rv = (sapi_v4::BPElement *) calloc(1, sizeof(struct sapi_v4::BPElement_t));
             rv->type = sapi_v4::BPTBoolean;
             rv->value.booleanVal = elemPtr->value.booleanVal;
             break;
-        case BPTInteger:
+        case ::BPTInteger:
             rv = (sapi_v4::BPElement *) calloc(1, sizeof(struct sapi_v4::BPElement_t));
             rv->type = sapi_v4::BPTInteger;
             rv->value.integerVal = elemPtr->value.integerVal;
             break;
-        case BPTDouble:
+        case ::BPTDouble:
             rv = (sapi_v4::BPElement *) calloc(1, sizeof(struct sapi_v4::BPElement_t));
             rv->type = sapi_v4::BPTDouble;
             rv->value.doubleVal = elemPtr->value.doubleVal;
             break;
-        case BPTString:
+        case ::BPTString:
             rv = (sapi_v4::BPElement *) calloc(1, sizeof(struct sapi_v4::BPElement_t));
             rv->type = sapi_v4::BPTString;
             if (elemPtr->value.stringVal) {
                 rv->value.stringVal = strdup(elemPtr->value.stringVal);
             }
             break;
-        case BPTMap: {
+        case ::BPTMap: {
             rv = (sapi_v4::BPElement *) calloc(1, sizeof(struct sapi_v4::BPElement_t));
             rv->type = sapi_v4::BPTMap;
             rv->value.mapVal.size = elemPtr->value.mapVal.size;
@@ -138,7 +138,7 @@ sapi_v4::v5ElementToV4(const ::BPElement * elemPtr)
             }
             break;
         }
-        case BPTList: {
+        case ::BPTList: {
             rv = (sapi_v4::BPElement *) calloc(1, sizeof(struct sapi_v4::BPElement_t));
             rv->type = sapi_v4::BPTList;
             rv->value.listVal.size = elemPtr->value.listVal.size;
@@ -151,12 +151,13 @@ sapi_v4::v5ElementToV4(const ::BPElement * elemPtr)
             }
             break;
         }
-        case BPTCallBack:
+        case ::BPTCallBack:
             rv = (struct sapi_v4::BPElement_t *) calloc(1, sizeof(struct sapi_v4::BPElement_t));
             rv->type = sapi_v4::BPTCallBack;
             rv->value.callbackVal = elemPtr->value.callbackVal;
             break;
-        case BPTPath:
+        case ::BPTNativePath:
+        case ::BPTWritableNativePath: // we'll slam a writable path (v5) into a normal ol' path (v4)
             // a v5 path is native, a v4 Path is a utf8 encoded url, here we convert. 
             rv = (struct sapi_v4::BPElement_t *) calloc(1, sizeof(struct sapi_v4::BPElement_t));
             rv->type = sapi_v4::BPTPath;
@@ -164,7 +165,7 @@ sapi_v4::v5ElementToV4(const ::BPElement * elemPtr)
                 rv->value.pathVal = strdup(bp::file::Path(elemPtr->value.pathVal).url().c_str());
             }
             break;
-        case BPTAny:
+        case ::BPTAny:
             // noop!
             break;
     }

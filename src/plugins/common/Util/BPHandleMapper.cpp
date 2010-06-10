@@ -38,26 +38,55 @@ namespace bpf = bp::file;
 
 map<bpf::Path, BPHandle> s_pathMap;
 map<BPHandle, bpf::Path> s_handleMap;
+map<bpf::Path, BPHandle> s_writablePathMap;
+map<BPHandle, bpf::Path> s_writableHandleMap;
+
+static BPHandle 
+pathToHandleImpl(const bpf::Path& path, bool writable)
+{
+    string safeName = bpf::utf8FromNative(path.filename());
+    set<string> mimeTypes = bpf::mimeTypes(path);
+    BPHandle h((writable ? "writablePath" : "path"),
+               bp::random::generate(), safeName, bpf::size(path), mimeTypes, writable);
+    if (writable) {
+        s_writablePathMap.insert(make_pair(path, h));
+        s_writableHandleMap.insert(make_pair(h, path));
+    } else {
+        s_pathMap.insert(make_pair(path, h));
+        s_handleMap.insert(make_pair(h, path));
+    }
+
+    return h;
+}
+
+// Static as a precautionary measure.  this is the only place
+// that a writable handle can be created, that's in traversing
+// service return values
+BPHandle 
+BPHandleMapper::pathToWritableHandle(const bpf::Path& path)
+{
+    map<bpf::Path, BPHandle>::iterator it = s_writablePathMap.find(path);
+    if (it != s_writablePathMap.end()) {
+        // allegedly found handle, update size and return.
+        it->second.m_size = bpf::size(path);
+        return it->second;
+    }
+
+    return pathToHandleImpl(path, true);
+}
+
 
 BPHandle 
 BPHandleMapper::pathToHandle(const bpf::Path& path)
 {
-    boost::uintmax_t size = bpf::size(path);
-
     map<bpf::Path, BPHandle>::iterator it = s_pathMap.find(path);
     if (it != s_pathMap.end()) {
         // allegedly found handle, update size and return.
-        it->second.m_size = size;
+        it->second.m_size = bpf::size(path);
         return it->second;
     }
 
-    // no known handle, add one
-    string safeName = bpf::utf8FromNative(path.filename());
-    set<string> mimeTypes = bpf::mimeTypes(path);
-    BPHandle h("BPTPath", bp::random::generate(), safeName, size, mimeTypes);
-    s_pathMap.insert(make_pair(path, h));
-    s_handleMap.insert(make_pair(h, path));
-    return h;
+    return pathToHandleImpl(path, false);
 }
 
 
@@ -67,6 +96,20 @@ BPHandleMapper::handleValue(const BPHandle& handle)
     bpf::Path rval;
     map<BPHandle, bpf::Path>::iterator it = s_handleMap.find(handle);
     if (it != s_handleMap.end()) {
+        if (it->first.type().compare(handle.type()) == 0
+            && it->first.name().compare(handle.name()) == 0) {
+            rval = it->second;
+        }
+    } 
+    return rval;
+}
+
+bpf::Path
+BPHandleMapper::writableHandleValue(const BPHandle& handle)
+{
+    bpf::Path rval;
+    map<BPHandle, bpf::Path>::iterator it = s_writableHandleMap.find(handle);
+    if (it != s_writableHandleMap.end()) {
         if (it->first.type().compare(handle.type()) == 0
             && it->first.name().compare(handle.name()) == 0) {
             rval = it->second;
@@ -102,11 +145,14 @@ BPHandleMapper::insertHandles(const bp::Object* bpObj)
             rval = new Double(dynamic_cast<const Double*>(bpObj)->value());
             break;
         case BPTNativePath:
+        case BPTWritableNativePath:
         {
             // Path must become a map containing id/name keys
             const Path* pObj = dynamic_cast<const Path*>(bpObj);
             bpf::Path path = *pObj;
-            BPHandle handle = pathToHandle(path);
+            BPHandle handle = (bpObj->type() == BPTNativePath ?
+                               pathToHandle(path) :
+                               pathToWritableHandle(path));
             Map* m = new Map;
             m->add(BROWSERPLUS_HANDLETYPE_KEY, new String(handle.type()));
             m->add(BROWSERPLUS_HANDLEID_KEY, new Integer(handle.id()));
@@ -205,12 +251,17 @@ BPHandleMapper::expandHandles(const bp::Object* bpObj)
                         mt.insert(s->value());
                     }
                 }
+                bool writable = (0 == std::string("writablePath").compare(typeObj->value()));
+                
                 BPHandle h(typeObj->value(), (int) idObj->value(),
                            nameObj->value(), (long) sizeObj->value(),
-                           mt);
-                bpf::Path val = handleValue(h);
-                if (!val.empty()) {
-                    rval = new Path(val);
+                           mt, writable);
+                if (writable) {
+                    bpf::Path val = writableHandleValue(h);
+                    if (!val.empty()) rval = new WritablePath(val);
+                } else {
+                    bpf::Path val = handleValue(h);                    
+                    if (!val.empty()) rval = new Path(val);                        
                 }
             } else {
                 // just a vanilla map, recurse into it
@@ -227,6 +278,7 @@ BPHandleMapper::expandHandles(const bp::Object* bpObj)
             break;
         }
         case BPTNativePath:
+        case BPTWritableNativePath:
         case BPTAny:
             break;
     }

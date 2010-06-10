@@ -27,9 +27,11 @@ BPHandle::BPHandle(const std::string& type,
                    int id,
                    const std::string& safeName,
                    boost::uintmax_t size,
-                   const std::set<std::string>& mimeTypes) 
+                   const std::set<std::string>& mimeTypes,
+                   bool writable) 
     : m_type(type), m_id(id), m_name(safeName),
-      m_size(size), m_mimeTypes(mimeTypes)
+      m_size(size), m_mimeTypes(mimeTypes),
+      m_writable(writable)
 {
 }
 
@@ -69,6 +71,12 @@ std::set<std::string>
 BPHandle::mimeTypes() const
 {
     return m_mimeTypes;
+}
+
+bool
+BPHandle::writable() const
+{
+    return m_writable;
 }
 
 bool 

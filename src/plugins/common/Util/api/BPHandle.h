@@ -50,16 +50,15 @@ namespace bp {
 // Currently, only bp::Path maps to a BPHandle.
 //
 
-#define BROWSERPLUS_HANDLETYPE_KEY "BrowserPlusType"
-#define BROWSERPLUS_HANDLEID_KEY "BrowserPlusHandleID"
+#define BROWSERPLUS_HANDLETYPE_KEY "type"
+#define BROWSERPLUS_HANDLEID_KEY "id"
+#define BROWSERPLUS_HANDLENAME_KEY "name"
+#define BROWSERPLUS_HANDLESIZE_KEY "size"
+#define BROWSERPLUS_HANDLEMIMETYPE_KEY "mimeType"
 
 // deprecated (overly verbose)
 #define DEPRECATED_BROWSERPLUS_HANDLENAME_KEY "BrowserPlusHandleName"
 
-// moving forward
-#define BROWSERPLUS_HANDLENAME_KEY "name"
-#define BROWSERPLUS_HANDLESIZE_KEY "size"
-#define BROWSERPLUS_HANDLEMIMETYPE_KEY "mimeType"
 
 class BPHandle
 {
@@ -68,7 +67,8 @@ public:
              int id,
              const std::string& safeName,
              boost::uintmax_t size,
-             const std::set<std::string>& mimeTypes);
+             const std::set<std::string>& mimeTypes,
+             bool writable);
     ~BPHandle();
     
     std::string type() const;
@@ -76,6 +76,7 @@ public:
     std::string name() const;
     boost::uintmax_t size() const;
     std::set<std::string> mimeTypes() const;    
+    bool writable() const;
 
     bool operator<(const BPHandle& other) const;
     
@@ -90,6 +91,7 @@ private:
     std::string m_name;
     boost::uintmax_t m_size;
     std::set<std::string> m_mimeTypes;
+    bool m_writable;
 };
 
 #endif

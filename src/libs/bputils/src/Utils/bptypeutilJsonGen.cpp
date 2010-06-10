@@ -46,12 +46,12 @@ toJsonRecurse(const Object* obj,
     
     stat = yajl_gen_map_open(ghand);
     yajl_gen_string(ghand, typeKey, typeKeyLen);
-    
+    const unsigned char * typeStr = (const unsigned char *) bp::typeAsString(obj->type());
+    yajl_gen_string(ghand, typeStr, strlen((const char *) typeStr));
+    yajl_gen_string(ghand, valueKey, valueKeyLen);    
+
     switch (obj->type()) {
         case BPTMap: {
-            yajl_gen_string(ghand, (const unsigned char*) "map",
-                            strlen("map"));
-            yajl_gen_string(ghand, valueKey, valueKeyLen);
             yajl_gen_map_open(ghand);
             Map* m = (Map *) obj;
             Map::Iterator it(*m);
@@ -65,9 +65,6 @@ toJsonRecurse(const Object* obj,
             break;
         }
         case BPTList: {
-            yajl_gen_string(ghand, (const unsigned char*) "list",
-                            strlen("list"));
-            yajl_gen_string(ghand, valueKey, valueKeyLen);
             stat = yajl_gen_array_open(ghand);
             List* l = (List*) obj;
             for (unsigned int i = 0; i < l->size(); i++) {
@@ -77,24 +74,15 @@ toJsonRecurse(const Object* obj,
             break;
         }
         case BPTNull: {
-            yajl_gen_string(ghand, (const unsigned char*) "null", 
-                            strlen("null"));
-            yajl_gen_string(ghand, valueKey, valueKeyLen);
             yajl_gen_null(ghand);
             break;
         }
         case BPTBoolean: {
-            yajl_gen_string(ghand, (const unsigned char*) "boolean",
-                            strlen("boolean"));
-            yajl_gen_string(ghand, valueKey, valueKeyLen);
             Bool* b = (Bool*) obj;
             yajl_gen_bool(ghand, b->value() ? 1 : 0);
             break;
         }
         case BPTString: {
-            yajl_gen_string(ghand, (const unsigned char*) "string", 
-                            strlen("string"));
-            yajl_gen_string(ghand, valueKey, valueKeyLen);
             String* s = (String*) obj;
             yajl_gen_string(ghand,
                             (const unsigned char*) s->value(),
@@ -102,37 +90,25 @@ toJsonRecurse(const Object* obj,
             break;
         }
         case BPTDouble: {
-            yajl_gen_string(ghand, (const unsigned char*) "double", 
-                            strlen("double"));
-            yajl_gen_string(ghand, valueKey, valueKeyLen);
             Double* d = (Double*) obj;
             yajl_gen_double(ghand, d->value());
             break;
         }
         case BPTInteger: {
-            yajl_gen_string(ghand, (const unsigned char*) "integer",
-                            strlen("integer"));
-            yajl_gen_string(ghand, valueKey, valueKeyLen);
             Integer* i = (Integer*) obj;
             yajl_gen_integer(ghand, static_cast<long>(i->value()));
             break;
         }
         case BPTCallBack: {
-            yajl_gen_string(ghand, (const unsigned char*) "callback",
-                            strlen("callback"));
-            yajl_gen_string(ghand, valueKey, valueKeyLen);
             CallBack* i = (CallBack*) obj;
             yajl_gen_integer(ghand, static_cast<long>(i->value()));
             break;
         }
-        case BPTNativePath: {
-            yajl_gen_string(ghand, (const unsigned char*) "path", 
-                            strlen("path"));
-            yajl_gen_string(ghand, valueKey, valueKeyLen);
+        case BPTNativePath:
+        case BPTWritableNativePath: {
 			bp::file::Path p = *((Path*) obj);
 			std::string str = p.utf8();
-            yajl_gen_string(ghand,
-                            (const unsigned char*) str.c_str(),
+            yajl_gen_string(ghand, (const unsigned char*) str.c_str(),
                             str.length()); 
             break;
         }

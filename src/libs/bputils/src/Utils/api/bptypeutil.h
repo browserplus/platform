@@ -232,6 +232,17 @@ namespace bp {
         bp::file::tString m_path;
     };
 
+    class WritablePath : public Path
+    {
+      public:
+        WritablePath(const bp::file::Path & path);
+        WritablePath(const WritablePath & other);
+        WritablePath & operator= (const WritablePath & other);
+        virtual Object * clone() const;        
+    };
+    
+    
+
     class Integer : public Object
     {
     public:

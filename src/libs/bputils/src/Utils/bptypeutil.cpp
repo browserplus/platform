@@ -52,6 +52,7 @@ bp::typeAsString(BPType t)
         case BPTList: return "list";
         case BPTCallBack: return "callback";
         case BPTNativePath: return "path";
+        case BPTWritableNativePath: return "writable_path";
         case BPTAny: return "any";
     }
     return "unknown";
@@ -154,6 +155,11 @@ bp::Object::build(const BPElement * elem)
             case BPTNativePath: 
             {
                 obj = new bp::Path(bp::file::Path(elem->value.pathVal));
+                break;
+            }
+            case BPTWritableNativePath: 
+            {
+                obj = new bp::WritablePath(bp::file::Path(elem->value.pathVal));
                 break;
             }
             case BPTMap:
@@ -350,6 +356,33 @@ bp::String::operator std::string() const
 {
     return std::string(value());
 }
+
+bp::WritablePath::WritablePath(const bp::file::Path & path)
+    : bp::Path(path)
+{
+    e.type = BPTWritableNativePath;
+}
+
+bp::WritablePath::WritablePath(const WritablePath & other)
+    :  bp::Path(other)
+{
+    e.type = BPTWritableNativePath;
+}
+
+bp::WritablePath &
+bp::WritablePath::operator= (const WritablePath & other)
+{
+    m_path = other.m_path;
+    e.value.pathVal = (BPPath) m_path.c_str();
+    return *this;
+}
+
+bp::Object * 
+bp::WritablePath::clone() const
+{
+    return new WritablePath(*this);
+}
+
 
 bp::Path::Path(const bp::file::Path & path)
     : bp::Object(BPTNativePath), m_path(path.external_file_string())

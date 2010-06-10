@@ -608,7 +608,7 @@ ServiceLibrary_v4::load(const bp::service::Summary &summary,
 #ifdef WIN32
         wchar_t* cwd = _wgetcwd(NULL, 0);
 #else
-        char* cwd = getwd(NULL);
+        char* cwd = getcwd(NULL,0);
 #endif
         if (cwd) {
             curdir = cwd;

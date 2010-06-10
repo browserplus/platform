@@ -103,7 +103,8 @@ toJsonRecurse(const Object* obj,
             stat = yajl_gen_integer(ghand, static_cast<long>(i->value()));
             break;
         }
-        case BPTNativePath: {
+        case BPTNativePath: 
+        case BPTWritableNativePath: {
             bp::file::Path p = *((bp::Path *) obj);
 			std::string str(p.utf8());
             stat = yajl_gen_string(ghand, (const unsigned char *) str.c_str(), str.length());
