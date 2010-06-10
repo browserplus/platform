@@ -1,7 +1,9 @@
-06/XX/2010 - Changes from 2.9.1 to 2.9.2
-  * Fixes to "HTML5" DnD support on Safari 5 - dropping of directories broken and
-    javascript errors
-
+06/10/2010 - Changes from 2.9.1 to 2.9.2
+  * Workaround modality issue (browser lockup) when using FileBrowse
+    dialog on Safari 5 + 64 bit snow leopard (in which case our NPAPI
+    is running out of process).
+  * Fixes to "HTML5" DnD support on Safari 5 - dropping of directories
+    fixed and javascript errors addressed.
 
 06/07/2010 - Changes from 2.8.1 to 2.9.1
   * {#94} OSX chrome support 
