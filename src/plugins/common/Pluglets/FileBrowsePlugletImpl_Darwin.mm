@@ -490,7 +490,7 @@ FileBrowsePluglet::save(unsigned int tid,
     // return results
     bp::Map* m = new bp::Map;
     if (selection.size() > 0) {
-        m->add("file", new bp::Path(selection[0]));
+        m->add("file", new bp::WritablePath(selection[0]));
     }
     successCB(callbackArgument, tid, m);
     delete m;
