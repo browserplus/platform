@@ -27,11 +27,54 @@
 #import "BPUtils/bplocalization.h"
 #import "BPUtils/bpurl.h"
 #import "BPUtils/BPLog.h"
+#import "BPUtils/OS.h"
 #import <sstream>
 #import <Cocoa/Cocoa.h>
 
 using namespace bp::localization;
 using namespace std;
+
+static bool 
+isSafari5OnSnowLeopard(std::string userAgent)
+{
+    bp::ServiceVersion osVersion, leastOSVersion;
+    leastOSVersion.parse("10.6.0");
+    osVersion.parse(bp::os::PlatformVersion());
+    
+    if (osVersion.compare(leastOSVersion) >= 0) {
+        if (userAgent.find("Safari") != string::npos)
+        {
+            bp::ServiceVersion baseVersion;
+            baseVersion.parse("5.0.0");
+
+            std::string vstr = "Version/";
+            size_t start = userAgent.find(vstr);
+            if (start == string::npos) return false;
+            size_t end = userAgent.find(" ", start);
+            if (end == string::npos) return false;
+            string s = userAgent.substr(start, end - start);
+            vector<string> v = bp::strutil::split(s, "/");
+            if (v.size() < 2) return false;
+        
+            bp::ServiceVersion thisVersion;
+            // get around a bug in the serviceversion class where 5.0 would be less than
+            // 5.0.0
+            thisVersion.setMajor(0);
+            thisVersion.setMinor(0);
+            thisVersion.setMicro(0);
+            
+            if (thisVersion.parse(v[1])) {
+                if (thisVersion.compare(baseVersion) >= 0) {
+                    return true;
+                }
+            }
+        
+        }
+    }
+
+    return false;
+}
+
 
 static string
 getBrowseTitle(const char* key,
@@ -125,7 +168,6 @@ getBrowseTitle(const char* key,
 }
 @end
 
-
 void
 FileBrowsePluglet::execute(unsigned int tid,
                            const char * function,
@@ -218,7 +260,36 @@ FileBrowsePluglet::execute(unsigned int tid,
 
     // Run the panel and get the results
     std::vector<bp::file::Path> selection;
-    (void) [panel runModal];
+    
+    if (isSafari5OnSnowLeopard(m_plugin->getUserAgent())) {
+        BPLOG_WARN_STRM("Using 10.6+ Safari 5+ modality workaround for file browse");
+        
+        // let's get the PSN of the current active application for later re-activation
+        struct ProcessSerialNumber psn;
+        {
+            NSDictionary * dict = 
+                [[NSWorkspace sharedWorkspace] activeApplication];
+            psn.highLongOfPSN = [[dict objectForKey: @"NSApplicationProcessSerialNumberHigh"] unsignedLongValue];
+            psn.lowLongOfPSN = [[dict objectForKey: @"NSApplicationProcessSerialNumberLow"] unsignedLongValue];
+        }
+
+        [panel _loadPreviousModeAndLayout];
+        [panel setDirectoryURL: nil];
+        [NSApp activateIgnoringOtherApps: YES];
+
+        NSModalSession session = [NSApp beginModalSessionForWindow:panel];
+        for (;;) {
+            if ([NSApp runModalSession:session] != NSRunContinuesResponse) break;
+        }
+        [NSApp endModalSession:session];
+
+        // now re-activate whoever was active before us
+        SetFrontProcess(&psn);
+    } else {
+        BPLOG_WARN_STRM("Using NSOpenPanel.runModal for panel display");
+        [panel runModal];
+    }
+        
     if ([panel okSelected]) {
         NSArray* urls = [panel URLs];
         int count = [urls count];
@@ -232,8 +303,9 @@ FileBrowsePluglet::execute(unsigned int tid,
         }
     }
     [panel setDelegate:nil];
-    [delegate release];
+    [panel orderOut: nil];
     [panel release];
+    [delegate release];
 
     bp::Object* obj = NULL;
     if (m_desc.majorVersion() == 1) {
