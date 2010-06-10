@@ -57,6 +57,7 @@ public:
         List,
         CallBack,
         Path,
+        WritablePath,
         Any
     };
 

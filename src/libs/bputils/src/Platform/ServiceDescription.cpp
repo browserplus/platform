@@ -115,6 +115,7 @@ service::Argument::typeAsString(Type type)
         case Map: return "map";
         case List: return "list";
         case CallBack: return "callback";
+        case WritablePath: return "writablePath";
         case Path: return "path";
         case Any: return "any";
     }
@@ -135,6 +136,7 @@ service::Argument::stringAsType(const char * str)
         else if (!strcmp(str, "list")) t = List;
         else if (!strcmp(str, "callback")) t = CallBack;
         else if (!strcmp(str, "path")) t = Path;
+        else if (!strcmp(str, "writablePath")) t = WritablePath;
         else if (!strcmp(str, "any")) t = Any;
     }
     return t;
@@ -166,6 +168,7 @@ service::Argument::fromBPArgumentDefinition(const BPArgumentDefinition * def)
         case BPTList: m_type = List; break;
         case BPTCallBack: m_type = CallBack; break;
         case BPTNativePath: m_type = Path; break;
+        case BPTWritableNativePath: m_type = WritablePath; break;
         case BPTAny: m_type = Any; break;
         default: m_type = None; break;
     }
@@ -690,6 +693,12 @@ bp::service::validateArguments(const bp::service::Function & desc,
                         if (adesc.type() != bp::service::Argument::Path)
                         {
                             gottype = "path";
+                        }
+                        break;
+                    case BPTWritableNativePath:
+                        if (adesc.type() != bp::service::Argument::WritablePath)
+                        {
+                            gottype = "writablePath";
                         }
                         break;
                     case BPTNull:
