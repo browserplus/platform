@@ -122,12 +122,14 @@ getTempPath(const Path& tempDir,
     Path p = tempDir / Path(prefix + "XXXXXX");
     char* tmpl = new char[p.string().size() + 1];
     strcpy(tmpl, p.string().c_str());
-    char* s = ::mktemp(tmpl);
+    char* s = ::mkdtemp(tmpl);
     if (!s) {
         boost::system::error_code ec(errno, boost::system::system_category);
         throw tFileSystemError("::mktemp fails", tempDir, Path(prefix), ec);
     }
     rval = s;
+    // now append the filename
+    p /= "file.tmp";
     delete[] s;
     return rval;
 }

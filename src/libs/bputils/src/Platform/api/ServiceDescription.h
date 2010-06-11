@@ -87,12 +87,20 @@ public:
     void clear();
 
     bool fromBPArgumentDefinition(const BPArgumentDefinition * bpcd);
+
+    /**
+     * generate a BPArgumentDefinition representation of this function.
+     * This pointer will point to memory managed by this class,
+     * that will not change until toBPServiceDefinition is called again,
+     * or the instance is deleted.
+     */
+    void toBPArgumentDefinition(BPArgumentDefinition * argDef);
+
 private:
     std::string m_name;    
     std::string m_docString;
     Type m_type;
     bool m_required;
-    
 };
 
 /**
@@ -102,6 +110,8 @@ class Function
 {
 public:
     Function();
+    Function(const Function & f);
+    Function & operator=(const Function & f);
     ~Function();    
 
     std::string name() const;
@@ -119,10 +129,21 @@ public:
     void clear();
 
     bool fromBPFunctionDefinition(const BPFunctionDefinition * bpcd);
+
+    /**
+     * populate a pointer to a BPFunctionDefinition with pointers into
+     * internal memory that will not change until
+     * toBPServiceDefinition is called again, or the instance is
+     * deleted.
+     */
+    void toBPFunctionDefinition(BPFunctionDefinition * func);
+
 private:
     std::string m_name;
     std::string m_docString;    
     std::list<Argument> m_arguments;
+
+    BPArgumentDefinition * m_adefs;
 };
 
 /**
@@ -132,6 +153,8 @@ class Description
 {
 public:
     Description();
+    Description(const Description & f);
+    Description & operator=(const Description & f);
     ~Description();    
 
     std::string name() const;
@@ -187,6 +210,14 @@ public:
      */
     bool fromBPServiceDefinition(const BPServiceDefinition * bpcd);
 
+    /**
+     * generate a BPServiceDefinition representation of this service's
+     * interface.  This pointer will point to memory managed by this class,
+     * that will not change until toBPServiceDefinition is called again,
+     * or the instance is deleted.
+     */
+    const BPServiceDefinition * toBPServiceDefinition(void);
+
     /** Does this service description describe a built in service? */
     bool isBuiltIn() const;
     void setIsBuiltIn(bool isBuiltIn);
@@ -206,6 +237,9 @@ private:
     // true for built in services, added using the
     // ServiceRegistry::registerService() call
     bool m_builtIn;
+
+    BPServiceDefinition * m_def;
+    void freeDef();
 };
 
 /**

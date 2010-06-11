@@ -177,12 +177,58 @@ service::Argument::fromBPArgumentDefinition(const BPArgumentDefinition * def)
     return true;
 }
 
-service::Function::Function()
+void
+service::Argument::toBPArgumentDefinition(BPArgumentDefinition * argDef)
 {
+    argDef->name = (char *) m_name.c_str();
+    argDef->docString = (char *) m_docString.c_str();
+    switch (m_type) {
+        case None: // collapse None -> Null
+        case Null: argDef->type = BPTNull; break;
+        case Boolean: argDef->type = BPTBoolean; break;
+        case Integer: argDef->type = BPTInteger; break;
+        case Double: argDef->type = BPTDouble; break; 
+        case String: argDef->type = BPTString; break;
+        case Map: argDef->type = BPTMap; break;
+        case List: argDef->type = BPTList; break;
+        case CallBack: argDef->type = BPTCallBack; break;
+        case Path: argDef->type = BPTNativePath; break;
+        case WritablePath: argDef->type = BPTWritableNativePath; break;
+        case Any: argDef->type = BPTAny; break;
+    }
+    argDef->required = m_required;
+}
+
+service::Function::Function()
+    : m_adefs(NULL)
+{
+}
+
+service::Function::Function(const service::Function & f)
+    : m_name(f.m_name),
+      m_docString(f.m_docString),
+      m_arguments(f.m_arguments),
+      m_adefs(NULL) // generated on demand, don't copy
+{
+}
+
+service::Function &
+service::Function::operator=(const service::Function & f)
+{
+    m_name = f.m_name;
+    m_docString = f.m_docString;
+    m_arguments = f.m_arguments;
+    if (m_adefs) free(m_adefs);
+    m_adefs = NULL;
+    return *this;
 }
 
 service::Function::~Function()
 {
+    if (m_adefs) {
+        free(m_adefs);
+        m_adefs = NULL;
+    }
 }
 
 std::string
@@ -269,16 +315,45 @@ service::Function::fromBPFunctionDefinition(const BPFunctionDefinition * def)
     return true;
 }
 
+void
+service::Function::toBPFunctionDefinition(BPFunctionDefinition * func)
+{
+    if (m_adefs) {
+        free(m_adefs);
+        m_adefs = NULL;
+    }
+    func->functionName = (char *) m_name.c_str();
+    func->docString = (char *) m_docString.c_str();
+
+    // now arguments
+    if (m_arguments.size()) {
+        func->numArguments = m_arguments.size();
+        func->arguments = m_adefs = (BPArgumentDefinition *)
+            calloc(m_arguments.size(), sizeof(BPArgumentDefinition));    
+
+        std::list<Argument>::iterator i;
+
+        unsigned int x;
+        for (x = 0, i = m_arguments.begin(); i != m_arguments.end(); x++, i++)
+        {
+            i->toBPArgumentDefinition(m_adefs + x);
+        }
+    }
+    
+}
+
 service::Description::Description()
     : m_majorVersion(0),
       m_minorVersion(0),
       m_microVersion(0),
-      m_builtIn(false)
+      m_builtIn(false),
+      m_def(NULL)
 {
 }
 
 service::Description::~Description()
 {
+    freeDef();
 }
 
 bool
@@ -865,3 +940,71 @@ bp::service::Description::toHumanReadableString() const
 }
 
 
+void
+bp::service::Description::freeDef()
+{
+    if (m_def) {
+        if (m_def->functions) free(m_def->functions);
+        free(m_def);
+        m_def = NULL;
+    }
+}
+
+const BPServiceDefinition *
+bp::service::Description::toBPServiceDefinition(void)
+{
+    freeDef();
+    m_def = (BPServiceDefinition *) calloc(1, sizeof(BPServiceDefinition));
+    assert(m_def != NULL);
+
+    m_def->serviceName = (char *) m_name.c_str();
+    m_def->majorVersion = m_majorVersion;
+    m_def->minorVersion = m_minorVersion;    
+    m_def->microVersion = m_microVersion;    
+    m_def->docString = (char *) m_docString.c_str();
+
+    // functions
+    if (m_functions.size()) {
+        m_def->numFunctions = m_functions.size();
+        m_def->functions = (BPFunctionDefinition *)
+            calloc(m_functions.size(), sizeof(BPFunctionDefinition));    
+
+        std::list<Function>::iterator i;
+
+        unsigned int x;
+        for (x = 0, i = m_functions.begin(); i != m_functions.end(); x++, i++) {
+            i->toBPFunctionDefinition(m_def->functions + x);
+        }
+    }
+    
+    return m_def;
+}
+
+service::Description::Description(const service::Description & d)
+    : m_name(d.m_name), 
+      m_majorVersion(d.m_majorVersion),    
+      m_minorVersion(d.m_minorVersion),    
+      m_microVersion(d.m_microVersion),
+      m_docString(d.m_docString), 
+      m_functions(d.m_functions),
+      m_builtIn(d.m_builtIn),
+      m_def(NULL)  // generated on demand, don't copy
+{
+}
+
+service::Description &
+service::Description::operator=(const service::Description & d)
+{
+    m_name = d.m_name;
+    m_majorVersion = d.m_majorVersion;
+    m_minorVersion = d.m_minorVersion;
+    m_microVersion = d.m_microVersion;
+    m_docString= d.m_docString;
+    m_functions = d.m_functions;
+    m_builtIn = d.m_builtIn;
+
+    if (m_def) free(m_def); // m_def is demand generated!
+    m_def = NULL;
+
+    return *this;
+}
