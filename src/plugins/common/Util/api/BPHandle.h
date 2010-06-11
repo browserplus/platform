@@ -30,7 +30,7 @@
 #ifndef __BPHANDLE_H__
 #define __BPHANDLE_H__
 
-#include <set>
+#include <vector>
 #include <string>
 #include "BPUtils/bpfile.h"   // for boost::uintmax_t
 
@@ -67,7 +67,7 @@ public:
              int id,
              const std::string& safeName,
              boost::uintmax_t size,
-             const std::set<std::string>& mimeTypes,
+             const std::vector<std::string>& mimeTypes,
              bool writable);
     ~BPHandle();
     
@@ -75,7 +75,7 @@ public:
     int id() const;
     std::string name() const;
     boost::uintmax_t size() const;
-    std::set<std::string> mimeTypes() const;    
+    std::vector<std::string> mimeTypes() const;
     bool writable() const;
 
     bool operator<(const BPHandle& other) const;
@@ -90,7 +90,7 @@ private:
     int m_id;
     std::string m_name;
     boost::uintmax_t m_size;
-    std::set<std::string> m_mimeTypes;
+    std::vector<std::string> m_mimeTypes;
     bool m_writable;
 };
 

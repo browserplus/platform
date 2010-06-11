@@ -44,6 +44,7 @@ class MimeTypeTest : public CPPUNIT_NS::TestCase
     CPPUNIT_TEST(badType);
     CPPUNIT_TEST(noType);
     CPPUNIT_TEST(chaseLink);
+    CPPUNIT_TEST(registeredType);
     CPPUNIT_TEST_SUITE_END();
     
   protected:
@@ -54,6 +55,7 @@ class MimeTypeTest : public CPPUNIT_NS::TestCase
     void badType();
     void noType();
     void chaseLink();
+    void registeredType();
 };
 
 #endif

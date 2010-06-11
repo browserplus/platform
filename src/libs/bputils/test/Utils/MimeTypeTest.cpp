@@ -20,6 +20,7 @@
  * ***** END LICENSE BLOCK *****
  */
 
+#include <algorithm>
 #include "MimeTypeTest.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/bpstrutil.h"
@@ -31,17 +32,17 @@ void
 MimeTypeTest::goodExt()
 {
     bp::file::Path p("/Users/foo/bar.jpe");
-    std::set<std::string> t = bp::file::mimeTypes(p);
-    CPPUNIT_ASSERT(t.count("image/jpeg") > 0); 
+    std::vector<std::string> t = bp::file::mimeTypes(p);
+    CPPUNIT_ASSERT(count(t.begin(), t.end(), "image/jpeg") > 0);
     p = "/Users/foo/bar.jpeg";
     t = bp::file::mimeTypes(p);
-    CPPUNIT_ASSERT(t.count("image/jpeg") > 0);
+    CPPUNIT_ASSERT(count(t.begin(), t.end(), "image/jpeg") > 0);
     p = "/Users/foo/bar.jpeg";
     t = bp::file::mimeTypes(p);
-    CPPUNIT_ASSERT(t.count("image/jpeg") > 0);
+    CPPUNIT_ASSERT(count(t.begin(), t.end(), "image/jpeg") > 0);
     p = "/Users/foo/bar.jPeG";
     t = bp::file::mimeTypes(p);
-    CPPUNIT_ASSERT(t.count("image/jpeg") > 0);
+    CPPUNIT_ASSERT(count(t.begin(), t.end(), "image/jpeg") > 0);
 }
 
 
@@ -49,8 +50,8 @@ void
 MimeTypeTest::badExt()
 {
     bp::file::Path p("/Users/foo/bar.wtf");
-    std::set<std::string> t = bp::file::mimeTypes(p);
-    CPPUNIT_ASSERT(t.count("application/unknown") > 0); 
+    std::vector<std::string> t = bp::file::mimeTypes(p);
+    CPPUNIT_ASSERT(count(t.begin(), t.end(), "application/unknown") > 0);
 }
 
 
@@ -58,8 +59,8 @@ void
 MimeTypeTest::noExt()
 {
     bp::file::Path p("/Users/foo/bar");
-    std::set<std::string> t = bp::file::mimeTypes(p);
-    CPPUNIT_ASSERT(t.count("application/unknown") > 0); 
+    std::vector<std::string> t = bp::file::mimeTypes(p);
+    CPPUNIT_ASSERT(count(t.begin(), t.end(), "application/unknown") > 0);
 }
 
 
@@ -106,13 +107,13 @@ MimeTypeTest::chaseLink()
     bp::file::Path path = dir / "foo.jpg";
     CPPUNIT_ASSERT(bp::strutil::storeToFile(path, "hello world"));
     CPPUNIT_ASSERT(bp::file::createLink(linkPath, path));
-    std::set<std::string> t = bp::file::mimeTypes(linkPath);
-    CPPUNIT_ASSERT(t.count(bp::file::kLinkMimeType) > 0);
+    std::vector<std::string> t = bp::file::mimeTypes(linkPath);
+    CPPUNIT_ASSERT(count(t.begin(), t.end(), bp::file::kLinkMimeType) > 0);
     bp::file::Path resolved;
     CPPUNIT_ASSERT(bp::file::resolveLink(linkPath, resolved));
     CPPUNIT_ASSERT(boost::filesystem::equivalent(resolved, path));
     t = bp::file::mimeTypes(resolved);
-    CPPUNIT_ASSERT(t.count("image/jpeg") > 0);
+    CPPUNIT_ASSERT(count(t.begin(), t.end(), "image/jpeg") > 0);
     
     // link to folder should be application/x-link,
     // chasing link should give application/x-folder
@@ -121,17 +122,33 @@ MimeTypeTest::chaseLink()
     CPPUNIT_ASSERT(bp::file::remove(linkPath));
     CPPUNIT_ASSERT(bp::file::createLink(linkPath, newDir));
     t = bp::file::mimeTypes(linkPath);
-    CPPUNIT_ASSERT(t.count(bp::file::kLinkMimeType) > 0);
+    CPPUNIT_ASSERT(count(t.begin(), t.end(), bp::file::kLinkMimeType) > 0);
     CPPUNIT_ASSERT(bp::file::resolveLink(linkPath, resolved));
     CPPUNIT_ASSERT(boost::filesystem::equivalent(resolved, newDir));
     t = bp::file::mimeTypes(resolved);
-    CPPUNIT_ASSERT(t.count(bp::file::kFolderMimeType) > 0); 
+    CPPUNIT_ASSERT(count(t.begin(), t.end(), bp::file::kFolderMimeType) > 0);
     
     // broken link should be application/x-badlink
     bp::file::remove(linkPath);
     CPPUNIT_ASSERT(bp::file::createLink(linkPath, dir/"i_do_not_exist"));
     t = bp::file::mimeTypes(linkPath);
-    CPPUNIT_ASSERT(t.count(bp::file::kBadLinkMimeType) > 0);
+    CPPUNIT_ASSERT(count(t.begin(), t.end(), bp::file::kBadLinkMimeType) > 0);
     
     bp::file::remove(dir);
 }
+
+
+void
+MimeTypeTest::registeredType()
+{
+    bp::file::Path p("/Users/foo/foo.xls");
+    std::vector<std::string> t = bp::file::mimeTypes(p);
+    CPPUNIT_ASSERT(t[0] == "application/vnd.ms-excel");
+    p = "/Users/foo/foo.ppt";
+    t = bp::file::mimeTypes(p);
+    CPPUNIT_ASSERT(t[0] == "application/vnd.ms-powerpoint");
+    p = "/Users/foo/foo.pcl";
+    t = bp::file::mimeTypes(p);
+    CPPUNIT_ASSERT(t[0] == "application/vnd.hp-pcl");
+}
+
