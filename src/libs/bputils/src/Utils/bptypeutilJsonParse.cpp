@@ -230,6 +230,11 @@ bp::createBPObject(const Map * map)
         sObj = dynamic_cast<const String*>(valObj);
         if (sObj == NULL) return NULL;
         rval = new bp::Path(bp::file::Path(sObj->value()));
+    } else if (bpType.compare("writablePath") == 0) {
+        // Make a Path from the String value
+        sObj = dynamic_cast<const String*>(valObj);
+        if (sObj == NULL) return NULL;
+        rval = new bp::WritablePath(bp::file::Path(sObj->value()));
     } else if (bpType.compare("callback") == 0) {
         // Make a Callback from the Integer value
         const Integer * iObj = dynamic_cast<const Integer*>(valObj);

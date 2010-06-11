@@ -24,6 +24,7 @@
 #include "BPProtoUtil.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bpfile.h"
+#include "BPUtils/ServiceDescription.h"
 
 TransactionManager::TransactionManager()
     : m_promptCB(NULL), m_promptCookie(NULL), m_peerEnded(NULL)
@@ -221,7 +222,9 @@ TransactionManager::onResponse(bp::ipc::Channel *,
     else if (!response.command().compare("Require"))
     {
         if (t.requireCB) {        
-            BPServiceDefinition ** defs = NULL;
+            // an array of definitions
+            bp::service::Description * descs = NULL;
+            const BPServiceDefinition ** defs = NULL;
             unsigned int numDefs = 0;
     
             std::string e, ve;
@@ -234,9 +237,11 @@ TransactionManager::onResponse(bp::ipc::Channel *,
                     std::vector<const bp::Object *> l = *payload;
 
                     numDefs = l.size();
-                    defs = new BPServiceDefinition*[numDefs];
+                    defs = new const BPServiceDefinition*[numDefs];
+                    descs = new bp::service::Description[numDefs];
                     for (unsigned int i = 0; i < numDefs; ++i) {
-                        defs[i] = objectToDefinition(l[i]);
+                        descs[i].fromBPObject(l[i]);
+                        defs[i] = descs[i].toBPServiceDefinition();
                     }
                 }
             } else if (ec == BP_EC_EXTENDED_ERROR) {
@@ -251,24 +256,20 @@ TransactionManager::onResponse(bp::ipc::Channel *,
                          ve.empty() ? NULL : ve.c_str());
             
             if (ec == BP_EC_OK) {
-                for (unsigned int i = 0; i < numDefs; ++i) {
-                    freeDefinition(defs[i]);
-                }
                 delete [] defs;
+                delete [] descs;
             }
         }
     }
     else if (!response.command().compare("Describe") &&
              t.type == Transaction::Describe)
     {
-        BPServiceDefinition * def = NULL;
+        bp::service::Description desc;
         if (ec == BP_EC_OK) {
             // extract payload
-            if (payload) {
-                // translate "results" into a BPServiceDefinition 
-                def = objectToDefinition(payload);
+            if (!payload || !desc.fromBPObject(payload)) {
+                ec = BP_EC_PROTOCOL_ERROR;
             }
-            if (def == NULL) ec = BP_EC_PROTOCOL_ERROR;
         }
     
         // for extended errors, let's extract error and verbose eror 
@@ -286,7 +287,7 @@ TransactionManager::onResponse(bp::ipc::Channel *,
     
         // invoke client callback
         if (t.describeCB) {
-            t.describeCB(ec, t.cookie, def,
+            t.describeCB(ec, t.cookie, desc.toBPServiceDefinition(),
                           e.empty() ? NULL : e.c_str(),
                           ve.empty() ? NULL : ve.c_str());
         }

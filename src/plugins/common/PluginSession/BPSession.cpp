@@ -401,15 +401,18 @@ BPSession::variantToBPObject( const plugin::Variant* input,
                     }
                 }
 
-                bp::file::Path path;
                 if (0 == std::string("writablePath").compare(type)) {
-                    path = BPHandleMapper::writableHandleValue(
+                    bp::file::Path path = BPHandleMapper::writableHandleValue(
                         BPHandle(type, id, name, size, mimeTypes, true));
-                    if (!path.empty()) output = new bp::WritablePath(path);
+                    if (!path.empty()) {
+                        output = new bp::WritablePath(path);
+                    }
                 } else {
-                    path = BPHandleMapper::handleValue(
+                    bp::file::Path path = BPHandleMapper::handleValue(
                         BPHandle(type, id, name, size, mimeTypes, false));
-                    if (!path.empty()) output = new bp::Path(path);
+                    if (!path.empty()) {
+                        output = new bp::Path(path);
+                    }
                 }
 
                 delete m;                

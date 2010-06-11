@@ -488,10 +488,10 @@ FileBrowsePluglet::save(unsigned int tid,
     [panel release];
         
     // return results
-    bp::Map* m = new bp::Map;
     if (selection.size() > 0) {
-        m->add("file", new bp::WritablePath(selection[0]));
+        successCB(callbackArgument, tid, new bp::WritablePath(selection[0]));
+    } else {
+        failureCB(callbackArgument, tid, "FileBrowse.userCanceled",
+                  "user canceled browse");
     }
-    successCB(callbackArgument, tid, m);
-    delete m;
 }

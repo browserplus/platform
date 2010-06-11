@@ -38,15 +38,6 @@
 // free a pointer returned from drvToBPElement
 void freeBPElement(BPElement * elem);
 
-// map the results from describe into a bpdescription.
-// Minimal memory copying is performed, so the resultant definition has
-// pointers to data stored inside the bp::Object structure.  This means
-// the BPDescription should not be used once the bp::Object is freed.
-BPServiceDefinition * objectToDefinition(const bp::Object * obj);
-
-// free a pointer returned from drvToBPDescription
-void freeDefinition(BPServiceDefinition * definition);
-
 // Attempt to start the daemon
 bool startupDaemon(bp::process::spawnStatus& spawnStatus);
 

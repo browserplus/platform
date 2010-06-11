@@ -52,7 +52,7 @@ bp::typeAsString(BPType t)
         case BPTList: return "list";
         case BPTCallBack: return "callback";
         case BPTNativePath: return "path";
-        case BPTWritableNativePath: return "writable_path";
+        case BPTWritableNativePath: return "writablePath";
         case BPTAny: return "any";
     }
     return "unknown";
