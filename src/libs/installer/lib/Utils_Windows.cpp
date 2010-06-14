@@ -174,8 +174,13 @@ bp::install::utils::getControlInfo(const bpf::Path& path,
                     // ok if exception
                 }
                 if (guid.compare(activeXGuid) == 0) {
-                    bpf::Path p(keys[i].path());
-                    mimeTypes.push_back(bpf::utf8FromNative(p.filename()));
+                    // the stuff after the last \ is our mimetype
+                    string p = keys[i].path();
+                    size_t n = p.rfind("\\");
+                    if (n != string::npos) {
+                        string s = p.substr(n+1);
+                        mimeTypes.push_back(s);
+                    }
                 }
             }
         }
@@ -391,6 +396,7 @@ bp::install::utils::unregisterCruftControls(bool force)
 {
     int rval = 0;
 
+    // Bug #180 left cruft controls registered.  Hunt them down
     Key appIdKey("HKCU\\Software\\Classes\\AppID");
     vector<Key> subkeys = appIdKey.subKeys();
     for (size_t i = 0; i < subkeys.size(); i++) {
@@ -453,6 +459,46 @@ bp::install::utils::unregisterCruftControls(bool force)
             }
         }
     }
+
+    // Bug #192 left cruft mimetypes registered.  Hunt them down
+    Key mimeKey("HKCU\\Software\\Classes\\MIME\\Database\\Content Type");
+    subkeys = mimeKey.subKeys();
+    for (size_t i = 0; i < subkeys.size(); i++) {
+        string keyPath = subkeys[i].fullPath();
+        vector<string> vec = bp::strutil::split(keyPath, "\\");
+        if (vec.size() < 7) {
+            BPLOG_DEBUG_STRM("hrm, " << keyPath << " split into "
+                             << vec.size() << " pieces, skipping");
+            continue;
+        }
+        const string& edge = vec[vec.size() - 1];
+        string mimePrefix("application/x-yahoo-browserplus_");
+        if (edge.find(mimePrefix) != 0 || edge.find(".") == string::npos) {
+            continue;
+        }
+        string versionStr = edge.substr(mimePrefix.length());
+        bp::ServiceVersion version;
+        if (!version.parse(versionStr)) {
+            BPLOG_DEBUG_STRM(versionStr << " not a valid version, skipping");
+            continue;
+        }
+
+        bpf::Path pluginName = string("YBPAddon_") + versionStr + ".dll";
+        bpf::Path pluginPath =  getProductDirectory(version.majorVer(),
+                                                    version.minorVer(),
+                                                    version.microVer())
+                                / "Plugins" / pluginName;
+        if (!force && bpf::exists(pluginPath)) {
+            continue;
+        }
+        try {
+            recursiveDeleteKey(keyPath);
+        } catch (const bp::error::Exception& e) {
+            BPLOG_WARN_STRM("unable to delete key " << keyPath << ": " << e.what());
+            rval = 1;
+        } 
+    }
+
     return rval;
 }
 

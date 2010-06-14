@@ -264,7 +264,7 @@ Installer::postflight()
     // some files are open and ntfs can't handle that.
     (void) remove(m_dir);
 
-    // Alas, due to a previous bug ({#180}), we may have left registry cruft
+    // Alas, due to previous bugs (#180 and #192), we may have left registry cruft
     // on previous updates.  We must now atone for our sins and clean it up.
     (void) unregisterCruftControls(false);
 
