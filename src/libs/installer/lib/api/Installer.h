@@ -88,6 +88,7 @@ class IInstallerListener
 class Installer 
 {
  public:
+    static const char* kProductName;
     static const char* kProductNameShort;
     static const char* kInstallerTitle;
     static const char* kNotAdmin; 

@@ -46,6 +46,7 @@ namespace bfs = boost::filesystem;
 
 // Localization keys
 //
+const char* Installer::kProductName = "kProductName";
 const char* Installer::kProductNameShort = "kProductNameShort";
 const char* Installer::kInstallerTitle = "kInstallerTitle";
 const char* Installer::kNotAdmin = "kNotAdmin"; 

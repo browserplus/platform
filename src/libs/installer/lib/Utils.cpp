@@ -36,6 +36,7 @@ static vector<bp::ServiceVersion> s_installedVersions;
 #ifdef WIN32
 static string s_activeXGuid;
 static string s_typeLibGuid;
+static string s_controlPanelGuid;
 #endif
 
 
@@ -62,6 +63,9 @@ bp::install::utils::readPlatformInfo(const bpf::Path& path)
     }
     if (!reader.getStringValue("typeLibGuid", s_typeLibGuid)) {
         BP_THROW("Unable to read typeLibGuid from " + path.externalUtf8());
+    }
+    if (!reader.getStringValue("controlPanelGuid", s_controlPanelGuid)) {
+        BP_THROW("Unable to read controlPanelGuid from " + path.externalUtf8());
     }
 #endif
 
@@ -118,6 +122,13 @@ string
 bp::install::utils::typeLibGuid()
 {
     return s_typeLibGuid;
+}
+
+
+string
+bp::install::utils::controlPanelGuid()
+{
+    return s_controlPanelGuid;
 }
 
 #endif

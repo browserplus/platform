@@ -153,29 +153,83 @@ Installer::installPrefPanel()
 }
 
 
-// Make start menu links to configpanel, uninstaller 
+// Make start menu links to configpanel, uninstaller on xp.
+// On vista and up, we make configpanel appear as a control panel
+// and just let uninstall come from add/remove programs
 //
 void
 Installer::makeLinks()
 {
     BPLOG_DEBUG_STRM("begin Installer::makeLinks()");
-    bpf::Path dir = getFolderPath(CSIDL_PROGRAMS) / getString(kProductNameShort);
-    (void) remove(dir);
-    try {
-        bfs::create_directories(dir);
-    } catch(const bpf::tFileSystemError&) {
-        BP_THROW(lastErrorString("unable to create " + dir.externalUtf8()));
-    }
-    bpf::Path lnk = dir / bpf::Path(getString(kConfigLink) + ".lnk");
-    bpf::Path target = getProductDirectory(m_version.majorVer(),
-                                           m_version.minorVer(),
-                                           m_version.microVer()) / "BrowserPlusPrefs.exe";
-    if (!createLink(lnk, target)) {
-        BP_THROW(lastErrorString("unable to create " +lnk.externalUtf8()));
-    }
-    lnk = lnk.parent_path() / bpf::Path(getString(kUninstallLink) + ".lnk");
-    if (!createLink(lnk, getUninstallerPath())) {
-        BP_THROW(lastErrorString("unable to create " + lnk.externalUtf8()));
+    string configName = getString(kConfigLink);
+    std::string osVersion = bp::os::PlatformVersion();
+    bool isVistaOrLater = osVersion.compare("6") >= 0;
+    bpf::Path configExe = getProductDirectory(m_version.majorVer(),
+                                              m_version.minorVer(),
+                                              m_version.microVer()) / "BrowserPlusPrefs.exe";
+    if (isVistaOrLater) {
+        try {
+            // this registry foo comes from 
+            // http://msdn.microsoft.com/en-us/library/cc144195(v=VS.85).aspx,
+            // modified to be user-scoped
+            string productName = getString(kProductName);
+            size_t i = productName.find("&trade;");
+            if (i != string::npos) {
+                productName = productName.substr(0, i);
+            }
+            string guid = controlPanelGuid();
+            string key = string("HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\")
+                + "Explorer\\ControlPanel\\NameSpace\\" + guid;
+            createKey(key);
+            writeString(key, "(Default)", productName);
+
+            key = "HKCU\\SOFTWARE\\Classes\\CLSID\\" + guid;
+            createKey(key);
+            writeString(key, productName);
+            writeString(key, "LocalizedString", productName);
+            writeString(key, "InfoTip", configName);
+            writeString(key, "System.ApplicationName", "Yahoo.ConfigureBrowserPlus");
+            writeString(key, "System.ControlPanel.Category", "8");
+
+            createKey(key + "\\DefaultIcon");
+            writeString(key + "\\DefaultIcon", configExe.externalUtf8() + ",-128");
+
+            createKey(key + "\\Shell\\Open\\Command");
+            writeString(key + "\\Shell\\Open\\Command", configExe.externalUtf8());
+        } catch (const Exception& e) {
+            // ugh, clean up
+            BPLOG_WARN(e.what());
+            string guid = controlPanelGuid();
+            try {
+                string key = string("HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\")
+                    + "Explorer\\ControlPanel\\NameSpace\\" + guid;
+                recursiveDeleteKey(key);
+            } catch (const Exception& e) {
+                BPLOG_WARN(e.what());
+            }
+            try {
+                string key = string("HKCU\\SOFTWARE\\Classes\\CLSID\\") + guid;
+                recursiveDeleteKey(key);
+            } catch (const Exception& e) {
+                BPLOG_WARN(e.what());
+            }
+        }
+    } else {
+        bpf::Path dir = getFolderPath(CSIDL_PROGRAMS) / getString(kProductNameShort);
+        (void) remove(dir);
+        try {
+            bfs::create_directories(dir);
+        } catch(const bpf::tFileSystemError&) {
+            BP_THROW(lastErrorString("unable to create " + dir.externalUtf8()));
+        }
+        bpf::Path lnk = dir / bpf::Path(configName + ".lnk");
+        if (!createLink(lnk, configExe)) {
+            BP_THROW(lastErrorString("unable to create " +lnk.externalUtf8()));
+        }
+        lnk = lnk.parent_path() / bpf::Path(getString(kUninstallLink) + ".lnk");
+        if (!createLink(lnk, getUninstallerPath())) {
+            BP_THROW(lastErrorString("unable to create " + lnk.externalUtf8()));
+        }
     }
     BPLOG_DEBUG_STRM("begin Installer::makeLinks()");
 }
@@ -268,7 +322,7 @@ void
 Installer::disablePlugins(const bp::ServiceVersion& version)
 {
     string osVersion = bp::os::PlatformVersion();
-    bool isVistaOrLater = (osVersion.compare("6") >= 0);
+    bool isVistaOrLater = osVersion.compare("6") >= 0;
     string versionStr = version.asString();
 
     // Disable npapi plugin by zapping the registry, not fatal if it fails
