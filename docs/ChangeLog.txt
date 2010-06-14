@@ -1,3 +1,18 @@
+06/14/2010 - Changes from 2.9.2 to 2.10.0
+  * Implement service API version 5, which includes simplified
+    threading semantics, Install and Uninstall hooks, switches from
+    file:// URIs to native paths, and includes a new type,
+    BPTWritablePath.
+  * [yib 3711677] rework mime/type detection logic to favor "offical"
+    mimetypes, addressing some complaints about uploader passing
+    unexpected mime types for certain files
+  * FileBrowse 3.0.0 which includes the .saveAs() function for letting
+    a user pick a (writable) path where a file should be saved.
+  * ServiceRunner "slave" mode implemented, causing the process to
+    output JSON formatted messages making it possible to write 
+    testing harnesses on top of it.
+  * Fix non-recursive folder selection in FileBrowse (v2)
+
 06/10/2010 - Changes from 2.9.1 to 2.9.2
   * Workaround modality issue (browser lockup) when using FileBrowse
     dialog on Safari 5 + 64 bit snow leopard (in which case our NPAPI
