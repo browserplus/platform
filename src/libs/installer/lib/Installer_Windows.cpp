@@ -186,7 +186,8 @@ Installer::makeLinks()
         writeString(key, "LocalizedString", productName);
         writeString(key, "InfoTip", configName);
         writeString(key, "System.ApplicationName", "Yahoo.ConfigureBrowserPlus");
-        writeString(key, "System.ControlPanel.Category", "8");
+        string category = osVersion.compare("6") >= 0 ? "8" : "0";
+        writeString(key, "System.ControlPanel.Category", category);
 
         createKey(key + "\\DefaultIcon");
         writeString(key + "\\DefaultIcon", configExe.externalUtf8() + ",-128");
