@@ -59,13 +59,13 @@ void Configurator::loadConfigFile( const bp::file::Path& path )
     bp::config::ConfigReader reader;
     if (!reader.load( path )) 
     {
-        cerr << "couldn't read config file at: " << path << endl;
+//        cerr << "couldn't read config file at: " << path << endl;
         return;
     }
 
     const bp::Map* map;
     if (!reader.getJsonMap( "Logging", map )) {
-        cerr << "couldn't find 'Logging' map in config file." << endl;
+//        cerr << "couldn't find 'Logging' map in config file." << endl;
         return;
     }
 
