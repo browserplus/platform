@@ -47,7 +47,7 @@ extern const char * NotInstalled;
 extern const char * ConnectionError;
 
 // A different kind of internal error as far as the js programmer is
-// concerned, but means that BPProtocol violated it's contract, and
+// concerned, but means that BPProtocol violated its contract, and
 // conveys that information up.
 extern const char * ProtocolError;
 
