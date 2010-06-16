@@ -440,7 +440,7 @@ FileBrowsePluglet::save(unsigned int tid,
     // return results
     if (selection.size() > 0) {
         bp::Object* obj = new bp::WritablePath(selection[0]);
-        successCB(callbackArgument, tid, obj));
+        successCB(callbackArgument, tid, obj);
         delete obj;
     } else {
         failureCB(callbackArgument, tid, "FileBrowse.userCanceled",
