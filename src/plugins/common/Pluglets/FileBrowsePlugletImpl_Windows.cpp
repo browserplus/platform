@@ -215,7 +215,6 @@ void FileBrowsePluglet::browse(unsigned int tid,
     }
     
     // version 2 and above just return what was selected
-    bp::Object* pObj = NULL;
     bp::Map* m = new bp::Map;
     bp::List* l = new bp::List;
     vector<bpf::Path>::const_iterator it;
@@ -224,8 +223,7 @@ void FileBrowsePluglet::browse(unsigned int tid,
         l->append(new bp::Path(path));
     }
     m->add("files", l);
-    pObj = m;
-
+    bp::Object* pObj = m;
     successCB(callbackArgument, tid, pObj);
     delete pObj;
 }
