@@ -21,6 +21,9 @@
  */
 
 #include "FileBrowsePluglet.h"
+#include "BPUtils/BPLog.h"
+#include "PluginCommonLib/CommonErrors.h"
+
 
 const char* FileBrowsePluglet::kSelectKey = "FileBrowsePluglet::kSelectKey";
 const char* FileBrowsePluglet::kFileFolderNameKey = "FileBrowsePluglet::kFileFolderNameKey";
@@ -40,3 +43,54 @@ FileBrowsePluglet::FileBrowsePluglet(BPPlugin * plugin,
 FileBrowsePluglet::~FileBrowsePluglet()
 {
 }
+
+
+void
+FileBrowsePluglet::execute(unsigned int tid,
+                           const char* function,
+                           const bp::Object* arguments,
+                           bool /* syncInvocation */, 
+                           plugletExecutionSuccessCB successCB,
+                           plugletExecutionFailureCB failureCB,
+                           plugletInvokeCallbackCB   callbackCB,
+                           void* callbackArgument)
+{
+    // validate function
+    if (!function) {
+        BPLOG_WARN_STRM("execute called will NULL function");
+        failureCB(callbackArgument, tid, pluginerrors::InvalidParameters, NULL);
+        return;
+    }
+    if (m_desc.majorVersion() == 1) {
+        if (strcmp(function, "OpenBrowseDialog")) {
+            std::string s("unknown FileBrowse function " 
+                          + std::string(function) + " called");
+            failureCB(callbackArgument, tid, pluginerrors::InvalidParameters,
+                      s.c_str());
+            return;
+        }
+        v1Browse(tid, arguments, successCB, failureCB, callbackArgument);
+    } else if (m_desc.majorVersion() == 2) {
+        if (strcmp(function, "OpenBrowseDialog")) {
+            std::string s("unknown FileBrowse function " 
+                          + std::string(function) + " called");
+            failureCB(callbackArgument, tid, pluginerrors::InvalidParameters,
+                      s.c_str());
+            return;
+        }
+        browse(tid, successCB, failureCB, callbackArgument);
+    } else if (m_desc.majorVersion() >= 3) {
+        if (!strcmp(function, "selectFiles")) {
+            browse(tid, successCB, failureCB, callbackArgument);
+        } else if (!strcmp(function, "saveAs")) {
+            save(tid, arguments, successCB, failureCB, callbackArgument);
+        } else {
+            std::string s("unknown FileBrowse function " 
+                          + std::string(function) + " called");
+            failureCB(callbackArgument, tid, pluginerrors::InvalidParameters,
+                      s.c_str());
+            return;
+        }
+    }
+}
+
