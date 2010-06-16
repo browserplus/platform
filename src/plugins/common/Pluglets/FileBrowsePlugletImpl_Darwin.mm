@@ -34,7 +34,7 @@
 using namespace bp::localization;
 using namespace std;
 
-// Ugh, do to a modality bug in 64 bit safari 5 on snow leopard,
+// Ugh, due to a modality bug in 64 bit safari 5 on snow leopard,
 // we must play some ugly games to get modality to work.  Hence,
 // we need two little subclasses just to keep track of whether
 // the "OK" button was pressed on a browse/save dialog.
