@@ -258,3 +258,54 @@ bool runFileOpenDialog(const FileOpenDialogParms& parms,
     return true;
 }
 
+
+
+bool runFileSaveDialog(const FileSaveDialogParms& parms,
+                       bp::file::Path& path)
+{
+    // Setup the openfilename structure.
+    OPENFILENAMEW ofn;
+    ZeroMemory(&ofn, sizeof(ofn));
+    ofn.lStructSize = sizeof(ofn);
+
+    ofn.hwndOwner = (HWND) parms.parentWnd;
+    // hInstance - ignored
+    ofn.lpstrFilter = NULL;
+    ofn.lpstrCustomFilter = NULL;
+    // nMaxCustFilter - ignored
+    ofn.nFilterIndex = 0;
+
+    wchar_t szFile[32768];
+    ofn.lpstrFile = szFile;
+    wcscpy_s(szFile, parms.initialName.c_str());
+    
+    ofn.nMaxFile = sizeof(szFile) / sizeof(wchar_t);
+
+    ofn.lpstrFileTitle = NULL;
+    // nMaxFileTitle - ignored
+    
+    // TODO: review
+    ofn.lpstrInitialDir = NULL;
+    
+    ofn.lpstrTitle = parms.title.c_str();
+    ofn.Flags = OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY;
+    // nFileOffset - output
+    // nFileExtension - output
+    ofn.lpstrDefExt = NULL;
+    ofn.lCustData = 0;
+    ofn.lpfnHook = NULL;
+    ofn.lpTemplateName = NULL;
+
+
+    // Run the dialog.
+    BOOL bStat = GetSaveFileNameW(&ofn);
+    if (!bStat && CommDlgExtendedError()) {
+        BPLOG_ERROR("GetSaveFileNameW failed.");;
+        return false;
+    }
+
+    path = ofn.lpstrFile;
+    
+    return true;
+}
+

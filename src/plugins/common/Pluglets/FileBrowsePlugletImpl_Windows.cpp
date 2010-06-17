@@ -235,10 +235,34 @@ void FileBrowsePluglet::save(unsigned int tid,
                              plugletExecutionFailureCB failureCB,
                              void* callbackArgument)
 {
-    // TODO: run dialog
-    failureCB(callbackArgument, tid,
-              "FileBrowse.error", "save unimplemented.");
+    // TODO: title.
+    wstring title;
 
+    wstring wsInitialName;
+    if (arguments && arguments->has("name", BPTString)) {
+        string initialName = ((bp::String*) arguments->get("name"))->value();
+        wsInitialName = bp::strutil::utf8ToWide( initialName );
+    }
+    
+    FileSaveDialogParms parms = { (HWND)m_plugin->getWindow(), m_locale, title,
+                                   wsInitialName };
+    bp::file::Path path;
+
+    if (!runFileSaveDialog(parms, path)) {
+        failureCB(callbackArgument, tid,
+                  "FileBrowse.error", "FileSaveDialog error.");
+        return;
+    }
+
+    if (path.empty()) {
+        failureCB(callbackArgument, tid, "FileBrowse.userCanceled",
+                  "user canceled browse");
+        return;
+    }
+    
+    bp::Object* pObj = new bp::WritablePath(path);
+    successCB(callbackArgument, tid, pObj);
+    delete pObj;
 }
 
 
