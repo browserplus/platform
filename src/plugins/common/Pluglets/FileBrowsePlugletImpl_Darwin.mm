@@ -412,7 +412,7 @@ FileBrowsePluglet::save(unsigned int tid,
 {
     // dig out arguments
     string fileName;
-    if (arguments->has("name", BPTString)) {
+    if (arguments && arguments->has("name", BPTString)) {
         fileName = ((bp::String*) arguments->get("name"))->value();
     }
 
