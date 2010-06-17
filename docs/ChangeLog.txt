@@ -1,4 +1,11 @@
-06/14/2010 - Changes from 2.9.2 to 2.10.0
+XX/YY/2010 - Changes from 2.10.0 to 2.10.1
+  * (cherry picked from 2.9 branch) Disable safari 5 on 10.6 for
+    platforms < 2.9.2 in browserplus.js.  push users back into a
+    "not installed" state so that they can re-install rather than
+    being subject to browser lockup caused by FileBrowse's modal
+    dialog under Safari 5.
+
+06/14/2010 - Changes from 2.9.3 to 2.10.0
   * Implement service API version 5, which includes simplified
     threading semantics, Install and Uninstall hooks, switches from
     file:// URIs to native paths, and includes a new type,
@@ -12,6 +19,12 @@
     output JSON formatted messages making it possible to write 
     testing harnesses on top of it.
   * Fix non-recursive folder selection in FileBrowse (v2)
+
+06/17/2010 - Changes from 2.9.2 to 2.9.3
+  * Disable safari 5 on 10.6 for platforms < 2.9.2 in browserplus.js.
+    push users back into a "not installed" state so that they can
+    re-install rather than being subject to browser lockup caused by
+    FileBrowse's modal dialog under Safari 5.
 
 06/10/2010 - Changes from 2.9.1 to 2.9.2
   * Workaround modality issue (browser lockup) when using FileBrowse
