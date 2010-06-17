@@ -39,6 +39,7 @@
 #include <string>
 #include <list>
 #include <string.h>
+#include "boost/tuple/tuple.hpp"
 
 using namespace std;
 using namespace std::tr1;
@@ -73,7 +74,7 @@ public:
                 const Path& destDir,
                 bp::runloop::RunLoop* rl)
     : m_fetcher(keyPath, distroServers, destDir),
-      m_services(services), m_rl(rl) 
+      m_services(services), m_rl(rl), m_errorMsg()
     {
     }
     
@@ -84,18 +85,21 @@ public:
     
     void getPlatformVersionAndSize() 
     {
+        m_errorMsg.clear();
         m_fetcher.setListener(weak_ptr<IFetcherListener>(shared_from_this()));
         m_fetcher.getPlatformVersionAndSize();
     }
 
     void downloadPlatform() 
     {
+        m_errorMsg.clear();
         m_fetcher.setListener(weak_ptr<IFetcherListener>(shared_from_this()));
         m_fetcher.getPlatform();
     }
 
     void downloadServices() 
     {
+        m_errorMsg.clear();
         m_fetcher.setListener(weak_ptr<IFetcherListener>(shared_from_this()));
         m_fetcher.getServices(m_services);
     }
@@ -116,6 +120,11 @@ public:
         shared_ptr<IFetcherListener> l = m_listener.lock();
         if (l) {
             l->onTransactionFailed(tid, msg);
+        }
+        if (!msg.empty()) {
+            m_errorMsg = msg;
+        } else {
+            m_errorMsg = "transaction failed";
         }
         m_rl->stop();
     }
@@ -159,16 +168,21 @@ public:
         m_rl->stop();
     }
 
+    virtual string errorMsg() const
+    {
+        return m_errorMsg;
+    }
+
 private:
     bp::install::Fetcher m_fetcher;
     list<ServiceRequireStatement> m_services;
     bp::runloop::RunLoop* m_rl;
     weak_ptr<bp::install::IFetcherListener> m_listener;
-
+    string m_errorMsg;
 };
 
 
-static pair<string, size_t>
+static boost::tuple<string, size_t, string>
 runIt(AsyncHelper::tCommand command,
       weak_ptr<IFetcherListener> listener,
 	  const Path& keyPath,
@@ -196,8 +210,9 @@ runIt(AsyncHelper::tCommand command,
         BP_THROW("invalid command in runIt");
     }
     rl.run();
-    pair<string, size_t> rval(async->platformVersion(),
-                              async->platformSize());
+    boost::tuple<string, size_t, string> rval(async->platformVersion(),
+                                              async->platformSize(),
+                                              async->errorMsg());
     async.reset();
     return rval;
 }
@@ -249,8 +264,7 @@ public:
     void run() 
     {
         // verify another instance of the installer is not running
-        m_installerLock =
-            bp::acquireProcessLock(false, string("BrowserPlusInstaller"));
+        m_installerLock = bp::acquireProcessLock(false, string("BrowserPlusInstaller"));
         if (m_installerLock == NULL) {
             m_skin->errorMessage(Installer::getString(Installer::kInstallerAlreadyRunning));
         }
@@ -296,7 +310,7 @@ private:
         // all done, yum.
         ST_AllDone,
         // we got canceled :(
-        ST_Canceled 
+        ST_Canceled
     } m_state;
     bool m_downloadingServices;
 
@@ -316,6 +330,9 @@ private:
     // asynchronous steps
     void doInstall()
     {
+        boost::tuple<string, size_t, string> runItResult;
+        string errMsg;
+
         if (exists(bp::paths::getInstallIDPath()) == false) {
             m_distQuery.reset(new DistQuery(m_servers, NULL));
         }
@@ -340,20 +357,29 @@ private:
             }
             
             // Get latest platform info
-            pair<string, size_t> p = runIt(AsyncHelper::eGetPlatformVersionAndSize,
-                                           shared_from_this(), m_keyPath, m_servers,
-                                           m_destDir);
-            m_platformVersion = p.first;
-            m_platformSize = p.second;
+            runItResult = runIt(AsyncHelper::eGetPlatformVersionAndSize,
+                                shared_from_this(), m_keyPath, m_servers,
+                                m_destDir);
+            errMsg = runItResult.get<2>();
+            if (!errMsg.empty()) {
+                BP_THROW(Installer::getString(Installer::kErrorEncountered)
+                         + ": " + errMsg);
+            }
+            m_platformVersion = runItResult.get<0>();
+            m_platformSize = runItResult.get<1>();
             platformDir /= m_platformVersion;
 
             if (m_skin) m_skin->progress(2);
 
             // download latest platform
-            (void) runIt(AsyncHelper::eDownloadPlatform,
-                         shared_from_this(), m_keyPath, m_servers,
-                         m_destDir);
-
+            runItResult = runIt(AsyncHelper::eDownloadPlatform,
+                                shared_from_this(), m_keyPath, m_servers,
+                                m_destDir);
+            errMsg = runItResult.get<2>();
+            if (!errMsg.empty()) {
+                BP_THROW(Installer::getString(Installer::kErrorEncountered)
+                         + ": " + errMsg);
+            }
 
         } else {
             if (m_skin) m_skin->progress(5);
@@ -380,14 +406,13 @@ private:
             if (m_skin) m_skin->progress(15);
             PlatformUnpacker unpacker(destPkg, m_destDir,
                                       m_platformVersion, m_keyPath);
-            string errMsg;
             if (!unpacker.unpack(errMsg)) {
                 BP_THROW("unpack failed: " + errMsg);
             }
             if (m_skin) m_skin->progress(25);
             if (!unpacker.install(errMsg)) {
                 BP_THROW(Installer::getString(Installer::kErrorEncountered)
-                         + errMsg);
+                         + ": " + errMsg);
             }
             remove(destPkg);
             if (m_skin) m_skin->progress(35);
@@ -403,9 +428,14 @@ private:
             if (m_skin) {
                 m_skin->statusMessage(Installer::getString(kServicesDownloading));
             }
-            (void) runIt(AsyncHelper::eDownloadServices,
-                         shared_from_this(), m_keyPath, m_servers,
-                         platformDir, m_services);
+            runItResult = runIt(AsyncHelper::eDownloadServices,
+                                shared_from_this(), m_keyPath, m_servers,
+                                platformDir, m_services);
+            errMsg = runItResult.get<2>();
+            if (!errMsg.empty()) {
+                BP_THROW(Installer::getString(Installer::kErrorEncountered)
+                         + ": " + errMsg);
+            }
         }
 
         if (m_skin) m_skin->progress(66);    
@@ -517,7 +547,15 @@ private:
     {
         if (m_state == ST_WaitingToBegin) {
             m_state = ST_Installing;
-            doInstall();        
+            try {
+                doInstall();
+            } catch (const std::exception& e) {
+                BP_REPORTCATCH(e);
+                if (m_skin) m_skin->errorMessage(e.what());
+            } catch (...) {
+                BP_REPORTCATCH_UNKNOWN;
+                if (m_skin) m_skin->errorMessage("unknown error");
+            }
         }
     }
 
@@ -531,7 +569,8 @@ private:
                                      const string& msg)
     {
         if (m_skin) {
-            m_skin->errorMessage(Installer::getString(Installer::kErrorEncountered));
+            m_skin->errorMessage(Installer::getString(Installer::kErrorEncountered)
+                + ": " + msg);
         }
     }
     
