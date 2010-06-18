@@ -965,8 +965,10 @@ PermissionsManager::domainPatternValid(const string& pattern) const
 
 
 void
-PermissionsManager::onTransactionFailed(unsigned int tid)
+PermissionsManager::onTransactionFailed(unsigned int tid,
+                                        const std::string& msg)
 {
+    BPLOG_WARN_STRM("PermissionsManager transaction failed: " << msg);
     map<unsigned int, IPermissionsManagerListener *>::iterator it =
         m_listeners.find(tid);
     if (it == m_listeners.end()) {

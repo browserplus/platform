@@ -70,7 +70,8 @@ public:
     
 private:
     // implementation of methods from IDistQueryListener
-    virtual void onTransactionFailed(unsigned int tid);
+    virtual void onTransactionFailed(unsigned int tid,
+                                     const std::string& msg);
     virtual void onDownloadProgress(unsigned int tid, unsigned int pct);
     virtual void onDownloadComplete(unsigned int tid,
                                     const std::vector<unsigned char> & buf);
@@ -359,8 +360,10 @@ SingleServiceInstaller::installService(const std::vector<unsigned char> buf)
 }
 
 void
-SingleServiceInstaller::onTransactionFailed(unsigned int)
+SingleServiceInstaller::onTransactionFailed(unsigned int,
+                                            const std::string& msg)
 {
+    BPLOG_WARN_STRM("service install failed: " << msg);
     postToAllListeners(false);
     removeSelfFromQueue();
 }

@@ -371,7 +371,8 @@ private:
     // key/localizations
     std::map<std::string, std::map<std::string, std::string> > m_permLocalizations;
     
-    virtual void onTransactionFailed(unsigned int tid);
+    virtual void onTransactionFailed(unsigned int tid,
+                                     const std::string& msg);
     virtual void gotPermissions(unsigned int tid,
                                 std::vector<unsigned char> permBundle);
 

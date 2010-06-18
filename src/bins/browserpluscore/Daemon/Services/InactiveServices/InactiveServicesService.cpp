@@ -221,7 +221,8 @@ InactiveServicesService::getDescription()
 }
 
 void
-InactiveServicesService::onTransactionFailed(unsigned int tid)
+InactiveServicesService::onTransactionFailed(unsigned int tid,
+                                             const std::string& msg)
 {
     using namespace bp;
     
@@ -234,8 +235,7 @@ InactiveServicesService::onTransactionFailed(unsigned int tid)
     } else {
         unsigned int smmTid = it->second;
         m_distToTransMap.erase(it);
-        sendFailure(smmTid, std::string("bp.transactionError"),
-                    std::string());
+        sendFailure(smmTid, std::string("bp.transactionError"), msg);
     }
 }
 

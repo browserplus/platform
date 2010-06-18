@@ -142,9 +142,12 @@ ServiceQuery::onClosed()
                             << " v" << m_currentUpdate->version.asString());
 
             if (!PendingUpdateCache::save(m_currentUpdate->name,
-                                          m_currentUpdate->version.asString(),
-                                          m_cletBuf)) {
-                transactionFailed();
+                                                      m_currentUpdate->version.asString(),
+                                                      m_cletBuf)) {
+                std::string msg("unable to save " + m_currentUpdate->name
+                                + "/" + m_currentUpdate->version.asString()
+                                + " to pending update cache");
+                transactionFailed(msg);
                 return;
             }
             m_cletBuf.clear();
@@ -200,7 +203,7 @@ ServiceQuery::onClosed()
 
         } else if (m_type == DownloadLatestPlatform) {
             if (response()->body.size() == 0) {
-                transactionFailed();
+                transactionFailed("downloaded platform has empty body");
             } else if (m_listener) {
                 LatestPlatformPkgAndVersion pkgAndVersion;
                 pkgAndVersion.m_pkg.insert(pkgAndVersion.m_pkg.begin(),
@@ -216,7 +219,7 @@ ServiceQuery::onClosed()
         }
     } catch (const std::string& s) {
         BPLOG_WARN_STRM(this << ": error (" << s << ") handling response");
-        transactionFailed();
+        transactionFailed(s);
     }
 }
 
@@ -224,26 +227,29 @@ ServiceQuery::onClosed()
 void 
 ServiceQuery::onTimeout()
 {
-    BPLOG_WARN_STRM(this << ": transaction timed out");
+    std::string msg("transaction timed out");
+    BPLOG_WARN_STRM(this << ": " << msg);
     bp::http::client::Listener::onTimeout();
-    transactionFailed();
+    transactionFailed(msg);
 }
 
 void 
 ServiceQuery::onCancel() 
 {
-    BPLOG_WARN_STRM(this << ": transaction cancelled");
+    std::string msg("transaction canceled");
+    BPLOG_WARN_STRM(this << ": " << msg);
     bp::http::client::Listener::onCancel();
-    transactionFailed();
+    transactionFailed(msg);
 }
 
 
 void 
 ServiceQuery::onError(const std::string& msg) 
 {
-    BPLOG_WARN_STRM(this << ": transaction error " << msg);
+    std::string errMsg("transaction error " + msg);
+    BPLOG_WARN_STRM(this << ": " << errMsg);
     bp::http::client::Listener::onError(msg);
-    transactionFailed();
+    transactionFailed(errMsg);
 }
 
 
@@ -351,9 +357,11 @@ ServiceQuery::getNextLocalization()
         
         if (!sum.localization(m_locale, title, summary)) {
             if (!sum.localization(std::string("en"), title, summary)) {
-                BPLOG_ERROR_STRM(this << ": Couldn't localize " << name
-                                 << "/" << version << " from cache!");
-                transactionFailed();
+                std::stringstream ss;
+                ss << "Couldn't localize " << name
+                        << "/" << version << " from cache!";
+                BPLOG_ERROR_STRM(this << ": " << ss.str());
+                transactionFailed(ss.str());
                 return;
             }
         }
@@ -387,9 +395,10 @@ ServiceQuery::getNextLocalization()
                                                 std::string(), m_services,
                                                 acp))
             {
-                BPLOG_ERROR_STRM(this << ": Couldn't localize " << name << "/"
-                                 << version);
-                transactionFailed();
+                std::stringstream ss;
+                ss << "Couldn't localize " << name << "/" << version;
+                BPLOG_ERROR_STRM(this << ": " << ss.str());
+                transactionFailed(ss.str());
                 return;
             }
             
@@ -418,10 +427,11 @@ ServiceQuery::parseLocalization(const unsigned char* buf,
                                 size_t len)
 {
     if (m_locDescs.size() == 0) {
-        BPLOG_ERROR_STRM(this << ": internal error during localization, "
-                         << "parseLocalization called with an "
-                         << "empty localized list");
-        transactionFailed();
+        std::string msg("internal error during localization, "
+                         "parseLocalization called with an "
+                         "empty localized list");
+        BPLOG_ERROR_STRM(this << ": " << msg);
+        transactionFailed(msg);
         return;
     }
 
@@ -435,18 +445,21 @@ ServiceQuery::parseLocalization(const unsigned char* buf,
     std::string tmpStr((const char*) buf, len);
     bpf::Path pkg = bpf::getTempPath(bpf::getTempDirectory(), "synopsisPkg");
     if (!bp::strutil::storeToFile(pkg, tmpStr)) {
-        BPLOG_ERROR_STRM(this << ": couldn't save synopsis to temp file: "
-                         << pkg);
-        transactionFailed();
+        std::stringstream ss;
+        ss << "couldn't save synopsis to temp file: " << pkg;
+        BPLOG_ERROR_STRM(this << ": " << ss.str());
+        transactionFailed(ss.str());
         return;
     }
     std::string synopsisStr;
     std::string errMsg;
     BPTime ts;
     if (!bp::pkg::unpackToString(pkg, synopsisStr, ts, errMsg)) {
-        BPLOG_ERROR_STRM(this << ": couldn't unpack synopsis: " << errMsg);
+        std::stringstream ss;
+        ss << "couldn't unpack synopsis: " << errMsg;
+        BPLOG_ERROR_STRM(this << ": " << ss.str());
         (void) bpf::remove(pkg);
-        transactionFailed();
+        transactionFailed(ss.str());
         return;
     }
     (void) bpf::remove(pkg);
@@ -456,7 +469,7 @@ ServiceQuery::parseLocalization(const unsigned char* buf,
     if (o == NULL) {
         BPLOG_ERROR_STRM(this << ": couldn't parse synopsis JSON");
         (void) bpf::remove(pkg);
-        transactionFailed();
+        transactionFailed("couldn't parse synopsis JSON");
         return;
     }
 
@@ -633,7 +646,7 @@ ServiceQuery::onServiceList(const AvailableServiceList & list)
             if (!ServiceQueryUtil::findSatisfyingServices(
                     m_requirements, m_installed, list, false, need))
             {
-                transactionFailed();
+                transactionFailed("unable to find satisfying services");
             }
             else
             {
@@ -674,7 +687,7 @@ ServiceQuery::onServiceList(const AvailableServiceList & list)
             if (!ServiceQueryUtil::findBestMatch(m_name, m_version,
                                                  m_minversion, list, acp))
             {
-                transactionFailed();
+                transactionFailed("unable to find best match");
             }
             else if (m_listener != NULL)
             {
@@ -688,7 +701,7 @@ ServiceQuery::onServiceList(const AvailableServiceList & list)
             if (!ServiceQueryUtil::findBestMatch(m_name, m_version,
                                                  m_minversion, list, acp))
             {
-                transactionFailed();
+                transactionFailed("unable to find best match");
             }
             else 
             {
@@ -705,7 +718,7 @@ ServiceQuery::onServiceList(const AvailableServiceList & list)
             if (!ServiceQueryUtil::findBestMatch(m_name, m_version,
                                                  m_minversion, list, acp))
             {
-                transactionFailed();
+                transactionFailed("unable to find best match");
             }
             else 
             {
@@ -750,13 +763,13 @@ ServiceQuery::onServiceList(const AvailableServiceList & list)
 void
 ServiceQuery::onServiceListFailure()
 {
-    transactionFailed();
+    transactionFailed("service list failure");
 }
 
 void
-ServiceQuery::transactionFailed()
+ServiceQuery::transactionFailed(const std::string& msg)
 {
-    if (m_listener) m_listener->onTransactionFailed(this);
+    if (m_listener) m_listener->onTransactionFailed(this, msg);
 }
 
 void
@@ -785,14 +798,14 @@ ServiceQuery::onLatestPlatform(const LatestPlatformServerAndVersion & latest)
                         << m_platform);
         m_httpTransaction->initiate(shared_from_this());
     } else {
-        BPLOG_ERROR_STRM(this << ": Internal error, uexpected m_type for "
-                         << "LatestPlatformVersion event!?");
-        transactionFailed();
+        std::string msg("Internal error, unexpected m_type for LatestPlatformVersion event!?");
+        BPLOG_ERROR_STRM(this << ": " << msg);
+        transactionFailed(msg);
     }
 }
 
 void
 ServiceQuery::onLatestPlatformFailure()
 {
-    transactionFailed();
+    transactionFailed("failed to get latest platform");
 }

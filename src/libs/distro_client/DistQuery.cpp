@@ -429,12 +429,13 @@ DistQuery::downloadLatestPlatform(const std::string & platform)
 }
 
 void
-DistQuery::onTransactionFailed(const ServiceQuery * cq)
+DistQuery::onTransactionFailed(const ServiceQuery * cq,
+                               const std::string& msg)
 {
     TransactionContextPtr ctx = findTransactionByServiceQuery(cq);
     BPASSERT(ctx != NULL);
     if (m_listener) {
-        m_listener->onTransactionFailed(ctx->m_tid);
+        m_listener->onTransactionFailed(ctx->m_tid, msg);
     }
 }
 
@@ -599,12 +600,13 @@ DistQuery::TransactionContext::onResponseStatus(const bp::http::Status& status,
 {
     bp::http::client::Listener::onResponseStatus(status, headers);
     if (status.code() != bp::http::Status::OK) {
-        BPLOG_ERROR_STRM("HTTP error " << status.code() 
-                         << "(" << status.toString() << ")");
+        std::stringstream ss;
+        ss << "HTTP error " << status.code() << "(" << status.toString() << ")";
+        BPLOG_ERROR(ss.str());
         logTransactionCompletion(false);
         
         if (m_owner.m_listener) {
-            m_owner.m_listener->onTransactionFailed(m_tid);
+            m_owner.m_listener->onTransactionFailed(m_tid, ss.str());
         }
         return;
     }
@@ -614,11 +616,12 @@ DistQuery::TransactionContext::onResponseStatus(const bp::http::Status& status,
 void
 DistQuery::TransactionContext::onTimeout()
 {
-    BPLOG_ERROR_STRM("HTTP timeout");
+    std::string msg("HTTP timeout");
+    BPLOG_ERROR(msg);
     bp::http::client::Listener::onTimeout();
     logTransactionCompletion(false);
     if (m_owner.m_listener) {
-        m_owner.m_listener->onTransactionFailed(m_tid);
+        m_owner.m_listener->onTransactionFailed(m_tid, msg);
     }
     m_owner.removeTransaction(m_tid);
 }
@@ -651,10 +654,11 @@ DistQuery::TransactionContext::onClosed()
 void 
 DistQuery::TransactionContext::onCancel()
 {
-    BPLOG_ERROR_STRM("HTTP transaction cancelled");
+    std::string msg("HTTP transaction canceled");
+    BPLOG_WARN(msg);
     bp::http::client::Listener::onCancel();
     logTransactionCompletion(false);
-    if (m_owner.m_listener) m_owner.m_listener->onTransactionFailed(m_tid);
+    if (m_owner.m_listener) m_owner.m_listener->onTransactionFailed(m_tid, msg);
     m_owner.removeTransaction(m_tid);
 }
 
@@ -662,10 +666,12 @@ DistQuery::TransactionContext::onCancel()
 void
 DistQuery::TransactionContext::onError(const std::string& msg)
 {
-    BPLOG_ERROR_STRM("HTTP error " << msg);
+    std::string errMsg("HTTP error " + msg);
+    BPLOG_ERROR(errMsg);
     bp::http::client::Listener::onError(msg);
     logTransactionCompletion(false);
-    if (m_owner.m_listener) m_owner.m_listener->onTransactionFailed(m_tid);
+    if (m_owner.m_listener) m_owner.m_listener->onTransactionFailed(m_tid,
+                                                                    errMsg);
     m_owner.removeTransaction(m_tid);
 }
 

@@ -55,7 +55,8 @@ public:
     DistQuery m_dqHand;
     shared_ptr<ServiceRegistry> m_registry;
 
-    virtual void onTransactionFailed(unsigned int tid);
+    virtual void onTransactionFailed(unsigned int tid,
+                                     const std::string& msg);
     virtual void gotAvailableServices(unsigned int tid,
                                       const ServiceList & list);
     virtual void onServiceFound(unsigned int tid,
@@ -444,9 +445,10 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::updateCache)
 }
 
 void
-CommandExecutorRunner::onTransactionFailed(unsigned int tid)
+CommandExecutorRunner::onTransactionFailed(unsigned int tid,
+                                           const std::string& msg)
 {
-    std::cout << "transaction failed" << std::endl;
+    std::cout << "transaction failed: " << msg << std::endl;
     onFailure();
 }
 

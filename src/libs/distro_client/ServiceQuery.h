@@ -150,7 +150,7 @@ class ServiceQuery : public bp::http::client::Listener,
     IServiceQueryListener * m_listener;
 
     // invoke listener failure callback if listener is defined
-    void transactionFailed();
+    void transactionFailed(const std::string& msg);
 
     // used for localizations to gaurantee we don't invoke client's callback
     // before function return.

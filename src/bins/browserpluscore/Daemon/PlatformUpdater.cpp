@@ -67,7 +67,8 @@ private:
     void onLatestPlatformDownloaded(
         unsigned int tid,
         const LatestPlatformPkgAndVersion & pkgAndVersion);
-    void onTransactionFailed(unsigned int tid);
+    void onTransactionFailed(unsigned int tid,
+                             const std::string& msg);
 
     bool installToCache(const LatestPlatformPkgAndVersion & platformInfo);
     unsigned int m_pollPeriod;
@@ -325,11 +326,12 @@ PlatformUpdaterSingleton::onLatestPlatformDownloaded(
 }
 
 void
-PlatformUpdaterSingleton::onTransactionFailed(unsigned int)
+PlatformUpdaterSingleton::onTransactionFailed(unsigned int,
+                                              const std::string& msg)
 {
     // TODO: aside from logging, what might be an appropriate
     // response here?
-    BPLOG_ERROR("platform update check failed");
+    BPLOG_ERROR_STRM("platform update check failed: " << msg);
     m_tid = 0;
 }
 

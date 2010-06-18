@@ -70,7 +70,8 @@ private:
                             bp::StrList& sUrls );
 
     // implementations of methods from IDistQueryListener interface
-    void onTransactionFailed(unsigned int tid);
+    void onTransactionFailed(unsigned int tid,
+                             const std::string& msg);
     void onPageUsageReported(unsigned int tid);
 
     // hold reference to self to keep boost smart pointer
@@ -221,9 +222,10 @@ void UsageReporter::reportPageUsage( const std::string& sUrl,
 }
 
 void
-UsageReporter::onTransactionFailed(unsigned int)
+UsageReporter::onTransactionFailed(unsigned int,
+                                   const std::string& msg)
 {
-    BPLOG_INFO("Usage reporting failed.");
+    BPLOG_INFO_STRM("Usage reporting failed: " << msg);
 }
 
 void

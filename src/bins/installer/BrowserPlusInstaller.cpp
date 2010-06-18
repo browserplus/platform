@@ -570,7 +570,7 @@ private:
     {
         if (m_skin) {
             m_skin->errorMessage(Installer::getString(Installer::kErrorEncountered)
-                + ": " + msg);
+                                 + ": " + msg);
         }
     }
     

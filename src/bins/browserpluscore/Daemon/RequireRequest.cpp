@@ -757,11 +757,12 @@ RequireRequest::onUserResponse(unsigned int cookie, const bp::Object & resp)
 
 
 void
-RequireRequest::onTransactionFailed(unsigned int tid)
+RequireRequest::onTransactionFailed(unsigned int tid,
+                                    const std::string& msg)
 {
     if (tid == m_distTid) {
         BPLOG_WARN_STRM(m_smmTid << " Require fails: DistQuery error");
-        postFailure("BP.requireError", "");
+        postFailure("BP.requireError", msg);
     } else {
         BPLOG_WARN_STRM(m_smmTid << " transaction failed with unknown tid "
                         << tid);

@@ -37,7 +37,8 @@ class IServiceQueryListener
   public:
     virtual ~IServiceQueryListener();
 
-    virtual void onTransactionFailed(const ServiceQuery * cq) = 0;
+    virtual void onTransactionFailed(const ServiceQuery * cq,
+                                     const std::string& msg) = 0;
     virtual void gotAvailableServices(const ServiceQuery * cq,
                                       const AvailableServiceList & list) = 0;    
     virtual void onServiceFound(const ServiceQuery * cq,

@@ -86,7 +86,8 @@ class Fetcher : virtual public IDistQueryListener
 
     // IDistQueryListener interface
     //
-    virtual void onTransactionFailed(unsigned int tid);
+    virtual void onTransactionFailed(unsigned int tid,
+                                     const std::string& msg);
     virtual void onServiceFound(unsigned int tid,
                                 const AvailableService& list);
     virtual void onDownloadProgress(unsigned int tid,

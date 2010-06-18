@@ -60,7 +60,8 @@ public:
     bool busy();
 private:
     // implemented methods from IDistQueryListener interface
-    void onTransactionFailed(unsigned int tid);
+    void onTransactionFailed(unsigned int tid,
+                             const std::string& msg);
     void onCacheUpdated(unsigned int tid, const ServiceList & updates);
 
     void timesUp(bp::time::Timer * t);
@@ -245,9 +246,10 @@ UpdaterSingleton::timesUp(bp::time::Timer *)
 }
 
 void
-UpdaterSingleton::onTransactionFailed(unsigned int)
+UpdaterSingleton::onTransactionFailed(unsigned int,
+                                      const std::string& msg)
 {
-    BPLOG_WARN("update failed.  purging require history.");
+    BPLOG_WARN_STRM("update failed: " << msg << ", purging require history.");
     bp::phash::set(RequireRequest::kRequireStatementsKey, std::string());
     m_tid = 0;
 }

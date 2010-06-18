@@ -58,7 +58,8 @@ class IDistQueryListener
   public:
     virtual ~IDistQueryListener() { }
 
-    virtual void onTransactionFailed(unsigned int tid) = 0;
+    virtual void onTransactionFailed(unsigned int tid,
+                                     const std::string& msg) = 0;
     virtual void gotAvailableServices(unsigned int tid,
                                       const ServiceList & list);
     virtual void onServiceFound(unsigned int tid,
@@ -316,7 +317,8 @@ class DistQuery : virtual public IServiceQueryListener
 
     const IServiceFilter * m_serviceFilter;
 
-    virtual void onTransactionFailed(const ServiceQuery * cq);
+    virtual void onTransactionFailed(const ServiceQuery * cq,
+                                     const std::string& msg);
     virtual void gotAvailableServices(const ServiceQuery * cq,
                                       const AvailableServiceList & list);    
     virtual void onServiceFound(const ServiceQuery * cq,

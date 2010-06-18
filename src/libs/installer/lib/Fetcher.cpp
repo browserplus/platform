@@ -88,11 +88,12 @@ namespace bp {
         //  IDistQueryListener interface 
 
         void
-        Fetcher::onTransactionFailed(unsigned int tid)
+        Fetcher::onTransactionFailed(unsigned int tid,
+                                     const std::string& msg)
         {
             shared_ptr<IFetcherListener> l = m_listener.lock();
             if (l) {
-                l->onTransactionFailed(m_tid);
+                l->onTransactionFailed(m_tid, msg);
             }
             m_state = eIdle;
         }

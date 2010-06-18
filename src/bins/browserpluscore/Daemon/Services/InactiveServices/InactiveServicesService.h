@@ -56,7 +56,8 @@ public:
     
   private:
     // implemented methods from IDistQueryListener interface
-    void onTransactionFailed(unsigned int tid);
+    void onTransactionFailed(unsigned int tid,
+                             const std::string& msg);
     void gotServiceDetails(unsigned int tid,
                            const bp::service::Description & desc);
     void gotAvailableServices(unsigned int tid,
