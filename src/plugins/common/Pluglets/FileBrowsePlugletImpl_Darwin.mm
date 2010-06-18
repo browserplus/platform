@@ -299,10 +299,6 @@ FileBrowsePluglet::v1Browse(unsigned int tid,
         limit = ((bp::Integer*) arguments->get("limit"))->value();
     }
 
-    // extract current Url for window title
-    std::string currentUrl;
-    if (m_plugin) (void) m_plugin->getCurrentURL(currentUrl);
-
     // Create our panel
     MyDelegate* delegate = [[MyDelegate alloc] init];
     [delegate setMimetypes: &mimetypes];
@@ -351,10 +347,6 @@ FileBrowsePluglet::browse(unsigned int tid,
                           plugletExecutionFailureCB failureCB,
                           void* callbackArgument)
 {
-    // extract current Url for window title
-    std::string currentUrl;
-    if (m_plugin) (void) m_plugin->getCurrentURL(currentUrl);
-
     // Create our panel
     MyOpenPanel* panel = [[MyOpenPanel alloc] init];
     [panel setAllowsMultipleSelection:YES];
