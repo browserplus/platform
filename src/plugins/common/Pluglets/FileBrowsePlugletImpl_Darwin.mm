@@ -260,24 +260,6 @@ runPanel(NSSavePanel* panel,
 }
 
 
-static string
-getBrowseTitle(const char* key,
-               const string &sUrl,
-               const string& locale)
-{
-    string title;
-    (void) getLocalizedString(key, locale, title);
-    
-    bp::url::Url url;
-    if (url.parse(sUrl)) {
-        title += " (";
-        title += url.friendlyHostPortString();
-        title += ")";
-    }
-    return title;
-}
-
-
 void
 FileBrowsePluglet::v1Browse(unsigned int tid,
                             const bp::Object* arguments,
@@ -328,8 +310,7 @@ FileBrowsePluglet::v1Browse(unsigned int tid,
     [panel setDelegate:delegate];
     [panel setAllowsMultipleSelection:YES];
     [panel setCanChooseFiles:YES];
-    string title = getBrowseTitle(FileBrowsePluglet::kSelectFilesFoldersKey,
-                                  currentUrl, m_locale);
+    string title = dialogTitle(FileBrowsePluglet::kSelectFilesFoldersKey);
     
     // Can folders be selected?
     if (recurse) {
@@ -339,8 +320,7 @@ FileBrowsePluglet::v1Browse(unsigned int tid,
             [panel setCanChooseDirectories:YES];
             if (mimetypes.size() == 1) {
                 [panel setCanChooseFiles:NO];
-                title = getBrowseTitle(FileBrowsePluglet::kSelectFolderKey,                            
-                                       currentUrl, m_locale);
+                title = dialogTitle(FileBrowsePluglet::kSelectFolderKey);
             }
         }
     }
@@ -380,8 +360,7 @@ FileBrowsePluglet::browse(unsigned int tid,
     [panel setAllowsMultipleSelection:YES];
     [panel setCanChooseFiles:YES];
     [panel setCanChooseDirectories:YES];
-    string title = getBrowseTitle(FileBrowsePluglet::kSelectFilesFoldersKey,
-                                  currentUrl, m_locale);
+    string title = dialogTitle(FileBrowsePluglet::kSelectFilesFoldersKey);
     [panel setTitle: [NSString stringWithUTF8String: title.c_str()]];
 
     // Run the panel and get the results
@@ -419,15 +398,10 @@ FileBrowsePluglet::save(unsigned int tid,
     // Create our panel
     MySavePanel* panel = [[MySavePanel alloc] init];
     [panel setCanCreateDirectories: YES];
+
+    // Append current url to default title.
     string title([[panel title] UTF8String]);
-    std::string currentUrl;
-    if (m_plugin) (void) m_plugin->getCurrentURL(currentUrl);
-    bp::url::Url url;
-    if (url.parse(currentUrl)) {
-        title += " (";
-        title += url.friendlyHostPortString();
-        title += ")";
-    }
+    title += string(" (") + currentUrlString() + ")";
     [panel setTitle: [NSString stringWithUTF8String: title.c_str()]];
 
     // Run the panel and get the results
