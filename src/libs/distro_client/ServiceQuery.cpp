@@ -807,5 +807,5 @@ ServiceQuery::onLatestPlatform(const LatestPlatformServerAndVersion & latest)
 void
 ServiceQuery::onLatestPlatformFailure()
 {
-    transactionFailed("failed to get latest platform");
+    transactionFailed("failed to get latest platform version");
 }
