@@ -1,3 +1,10 @@
+06/18/2010 - Changes from 2.9.3 to 2.9.4
+  * Another small fix for Safari 5 on 10.6 64-bit.  in browserplus.js
+    when we detect and block BrowserPlus < 2.9.2 from runninng on
+    Safari 5, we'll also invoke require (for a platform built-in service)
+    to trigger update logic and install a newer platform which addresses
+    the bugs causing us to block in the first place.
+
 06/17/2010 - Changes from 2.9.2 to 2.9.3
   * Disable safari 5 on 10.6 for platforms < 2.9.2 in browserplus.js.
     push users back into a "not installed" state so that they can
