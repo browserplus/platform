@@ -46,28 +46,10 @@
 
 
 using namespace std;
-using namespace bp::localization;
 namespace bpf = bp::file;
+namespace bpl = bp::localization;
+namespace bps = bp::strutil;
 
-
-static wstring getBrowseTitle( const std::string& sUrl,
-                               const std::string& sLocale )
-{
-    std::string sTitle;
-    getLocalizedString( FileBrowsePluglet::kSelectFilesFoldersKey, sLocale,
-                        sTitle );
-
-    // For security, append the host name.
-    bp::url::Url url;
-    if (url.parse( sUrl ))
-    {
-        sTitle += " (";
-        sTitle += url.friendlyHostPortString();
-        sTitle += ")";
-    }
-
-    return bp::strutil::utf8ToWide( sTitle );
-}
 
 
 static bool isXP()
@@ -132,15 +114,15 @@ void FileBrowsePluglet::v1Browse(unsigned int tid,
     // Get extensions for mimetypes and set filter from them
     if (mimetypes.empty()) {
         string lstr;
-        (void) getLocalizedString(FileBrowsePluglet::kAllFilesFoldersKey,
-                                  m_locale, lstr);
-        filterName = bp::strutil::utf8ToWide(lstr);
+        (void) bpl::getLocalizedString(FileBrowsePluglet::kAllFilesFoldersKey,
+                                       m_locale, lstr);
+        filterName = bps::utf8ToWide(lstr);
         filterPattern.append(L"*.*");
     } else {
         set<string> extensions;
         set<string>::const_iterator iter;
         for (iter = mimetypes.begin(); iter != mimetypes.end(); ++iter) {
-            filterName.append(bp::strutil::utf8ToWide(*iter));
+            filterName.append(bps::utf8ToWide(*iter));
             filterName.append(L", ");
             vector<string> e = bpf::extensionsFromMimeType(*iter);
             for (unsigned int i  = 0; i < e.size(); ++i) {
@@ -152,7 +134,7 @@ void FileBrowsePluglet::v1Browse(unsigned int tid,
         if (!extensions.empty()) {
             for (iter = extensions.begin(); iter != extensions.end(); ++iter) {
                 filterPattern.append(L"*.");
-                filterPattern.append(bp::strutil::utf8ToWide(*iter));
+                filterPattern.append(bps::utf8ToWide(*iter));
                 filterPattern.append(1, L';');
             }
             filterPattern.erase(filterPattern.length()-1);  // nuke trailing ;
@@ -165,7 +147,7 @@ void FileBrowsePluglet::v1Browse(unsigned int tid,
     string currUrl;
     // TODO: handle failure of this call, also IDNA on FF?
     m_plugin->getCurrentURL(currUrl);
-    wstring title = getBrowseTitle(currUrl, m_locale);
+    wstring title = bps::utf8ToWide(dialogTitle(kSelectFilesFoldersKey));
     
     ///
     // Run the dialog.
@@ -184,7 +166,8 @@ void FileBrowsePluglet::v1Browse(unsigned int tid,
     unsigned int flags = 0;
     if (recurse) flags |= bp::pluginutil::kRecurse;
     if (includeGestureInfo) flags |= bp::pluginutil::kIncludeGestureInfo;
-    bp::Object* pObj = bp::pluginutil::applyFilters(vPaths, mimetypes, flags, limit);
+    bp::Object* pObj = bp::pluginutil::applyFilters(vPaths, mimetypes,
+                                                    flags, limit);
     successCB(callbackArgument, tid, pObj);
     delete pObj;
 }
@@ -195,11 +178,7 @@ void FileBrowsePluglet::browse(unsigned int tid,
                                plugletExecutionFailureCB failureCB,
                                void* callbackArgument)
 {
-    // Setup dialog title.
-    string currUrl;
-    // TODO: handle failure of this call, also IDNA on FF?
-    m_plugin->getCurrentURL(currUrl);
-    wstring title = getBrowseTitle(currUrl, m_locale);
+    wstring title = bps::utf8ToWide(dialogTitle(kSelectFilesFoldersKey));
     
     ///
     // Run the dialog.
@@ -235,13 +214,13 @@ void FileBrowsePluglet::save(unsigned int tid,
                              plugletExecutionFailureCB failureCB,
                              void* callbackArgument)
 {
-    // TODO: title.
-    wstring title;
-
+    // Setup title.  We show the user the source url for security.
+    wstring title = bps::utf8ToWide(dialogTitle(kSaveAsKey));
+    
     wstring wsInitialName;
     if (arguments && arguments->has("name", BPTString)) {
         string initialName = ((bp::String*) arguments->get("name"))->value();
-        wsInitialName = bp::strutil::utf8ToWide( initialName );
+        wsInitialName = bps::utf8ToWide(initialName);
     }
     
     FileSaveDialogParms parms = { (HWND)m_plugin->getWindow(), m_locale, title,

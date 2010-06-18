@@ -33,7 +33,7 @@
 
 class FileBrowsePluglet : public Pluglet
 {
-  public:
+public:
     /** localization keys */
     static const char* kSelectKey;
     static const char* kFileFolderNameKey;
@@ -42,6 +42,7 @@ class FileBrowsePluglet : public Pluglet
     static const char* kSelectFilesFoldersKey;
     static const char* kSelectFilesKey;
     static const char* kSelectFolderKey;
+    static const char* kSaveAsKey;
 
     FileBrowsePluglet(BPPlugin * plugin,
                       const bp::service::Description& desc);
@@ -56,7 +57,11 @@ class FileBrowsePluglet : public Pluglet
                  plugletExecutionFailureCB failureCB,
                  plugletInvokeCallbackCB   callbackCB,
                  void* callbackArgument);
- protected:
+
+protected:
+    std::string currentUrlString();
+    std::string dialogTitle(const std::string& key);
+    
     void v1Browse(unsigned int tid,
                   const bp::Object* arguments,
                   plugletExecutionSuccessCB successCB,
