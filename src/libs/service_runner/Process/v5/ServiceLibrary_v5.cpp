@@ -410,7 +410,7 @@ ServiceLibrary_v5::load(const bp::service::Summary &summary,
     bpf::Path dependentPath;
     const BPElement * dependentParams = NULL;    
     bp::Map dependentParamsStorage;
-    
+
     if (m_summary.type() == bp::service::Summary::Dependent)
     {
         dependentPath = m_summary.path();
@@ -430,8 +430,11 @@ ServiceLibrary_v5::load(const bp::service::Summary &summary,
         // leave dependent path empty()
         servicePath = m_summary.path();
     }
+
     servicePath = bpf::canonicalPath(servicePath);
-    dependentPath = bpf::canonicalPath(dependentPath);
+    if (!dependentPath.empty()) {
+        dependentPath = bpf::canonicalPath(dependentPath);
+    }
     
     funcTable = (const BPPFunctionTable *) m_funcTable;
 
@@ -449,13 +452,13 @@ ServiceLibrary_v5::load(const bp::service::Summary &summary,
         BPASSERT(m_serviceAPIVersion == 5);
             
         const BPServiceDefinition * def = NULL;
-        
+
         def = funcTable->initializeFunc(
             (const BPCFunctionTable *) getFunctionTable(),
             (const BPPath) (servicePath.external_file_string().c_str()),
             (const BPPath) (dependentPath.empty() ? NULL : dependentPath.external_file_string().c_str()),
             dependentParams);
-            
+
         if (def == NULL)
         {
             BPLOG_WARN_STRM("invalid service, NULL return from "
