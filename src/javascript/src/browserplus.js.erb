@@ -320,6 +320,17 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
                                     error: 'bp.notInstalled',
                                     verboseError: 'BrowserPlus cannot run on this browser reliably, you must upgrade'
                                 };
+                                
+                                // in this case, we still want platform update
+                                // logic to run to update this user so they can
+                                // use browserplus.  We'll make a single
+                                // require call which will cause BrowserPlus
+                                // to download or install an update if
+                                // available.  We require a built-in that's
+                                // always there and won't require prompting
+                                try {
+                                    BrowserPlus.require({services:[{service:"InactiveServices"}]}, function() {});
+                                } catch (e) {}
                             }
                             
                             _initState = res.success ? 'succeeded' : 'uninitialized';
