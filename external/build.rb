@@ -12,7 +12,7 @@
 
 # if you want to update to a newer version of the bakery, fiddle this
 # sha256 to point to the commit you want
-bakery_commit = "a6487629cb04704eaee167b8a9c25f26cee44b76"
+bakery_commit = "89438c47a7c60c5aaac3725359679c1405892c6b"
 # END user serviceable parts
 
 require 'rbconfig'
@@ -38,7 +38,7 @@ else
 end
 
 TOPDIR = File.dirname(File.expand_path(__FILE__))
-url = "http://github.com/lloyd/bakery/tarball/#{bakery_commit}"
+url = "http://github.com/browserplus/bakery/tarball/#{bakery_commit}"
 bakeryVersionFile = File.join(TOPDIR, "bakery_version.txt")
 bakeryUnpackPath = File.join(TOPDIR, "bakery")
 
@@ -194,7 +194,7 @@ fetch("bakery.tgz", url)
 unpack("bakery.tgz")
 
 # rename the bakery 
-whackyName = Dir.glob("lloyd-bakery-*")[0]
+whackyName = Dir.glob("browserplus-bakery-*")[0]
 if whackyName && File.directory?(whackyName)
   FileUtils.rm_rf("bakery.tgz")
   FileUtils.mv(whackyName, bakeryUnpackPath)
