@@ -162,6 +162,12 @@ void FileBrowsePluglet::v1Browse(unsigned int tid,
         return;
     }
 
+    if (vPaths.empty()) {
+        failureCB(callbackArgument, tid, "FileBrowse.userCanceled",
+                  "user canceled browse");
+        return;
+    }
+    
     // version 1 applies filtering, recurses, etc
     unsigned int flags = 0;
     if (recurse) flags |= bp::pluginutil::kRecurse;
@@ -190,6 +196,12 @@ void FileBrowsePluglet::browse(unsigned int tid,
     {
         failureCB(callbackArgument, tid,
                   "FileBrowse.error", "FileOpenDialog error");
+        return;
+    }
+
+    if (vPaths.empty()) {
+        failureCB(callbackArgument, tid, "FileBrowse.userCanceled",
+                  "user canceled browse");
         return;
     }
     
