@@ -39,6 +39,7 @@ namespace utils {
 #ifdef WIN32
     std::string activeXGuid();
     std::string typeLibGuid();
+    std::string controlPanelGuid();
 #endif
 
 #ifdef WIN32

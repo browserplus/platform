@@ -56,6 +56,9 @@ SET(BackwardCompatibleMimeTypes)
 SET(ActiveXGuid "704886B0-03A6-4D15-B0B0-4FAB589FA94F")
 SET(TypeLibGuid "399F26B4-E0C6-4345-8AD6-7AC1D86DAAA5") 
 
+# guid for control panel item on vista and later
+SET(ControlPanelGuid "30E4F6D0-8773-492d-9AB6-444A4F671459")
+
 ########################################################################
 # From here down, you shouldn't have to change anything.  Should you decide to change something,
 # be forewarned that the quoting to satifsy ruby, sh, and the Windows shell is very tricky.  You will waste

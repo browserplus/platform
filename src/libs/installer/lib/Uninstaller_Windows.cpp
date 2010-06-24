@@ -187,20 +187,25 @@ Uninstaller::run(bool fromRunonce)
         }
     }
 
-    // remove start menu stuff
-    string locale = bp::localization::getUsersLocale();
-    string productName;
-    bp::localization::getLocalizedString("productNameShort",
-                                         locale, productName);
-    bpf::Path path = getFolderPath(CSIDL_PROGRAMS) / productName;
-    BPLOG_DEBUG_STRM("remove " << path);
-    if (!bpf::remove(path)) {
-        BPLOG_WARN(lastErrorString("unable to delete " + path.externalUtf8()));
+    string guid = controlPanelGuid();
+    try {
+        string key = string("HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\")
+            + "Explorer\\ControlPanel\\NameSpace\\" + guid;
+        recursiveDeleteKey(key);
+    } catch (const Exception& e) {
+        BPLOG_WARN(e.what());
+        m_error = true;
+    }
+    try {
+        string key = "HKCU\\SOFTWARE\\Classes\\CLSID\\" + guid;
+        recursiveDeleteKey(key);
+    } catch (const Exception& e) {
+        BPLOG_WARN(e.what());
         m_error = true;
     }
 
     // remove non-localized start menu stuff
-    path = getFolderPath(CSIDL_PROGRAMS) / "Yahoo! BrowserPlus";
+    bpf::Path path = getFolderPath(CSIDL_PROGRAMS) / "Yahoo! BrowserPlus";
     BPLOG_DEBUG_STRM("remove " << path);
     if (!bpf::remove(path)) {
         BPLOG_WARN(lastErrorString("unable to delete " + path.externalUtf8()));
