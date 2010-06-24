@@ -84,13 +84,18 @@ DropManagerFactory::create(NPP instance,
             unsupported = true;
             break;
         }
+
+        // Now see if this is a platform/browser combo whose version
+        // we care about.
         if (platform == "OSX" && browser == "Safari") {
             (void) baseVersion.parse("4.0.3");
-        }
-        if (platform == "Windows" && browser == "Firefox") {
+        } else if (platform == "Windows" && browser == "Firefox") {
             (void) baseVersion.parse("3.6.3");
             // add a trailing " " so that parsing code below will work
             userAgent += " ";
+        } else {
+            // gonna use intercept
+            break;
         }
         std::string vstr = browser == "Safari" ? "Version/" : browser + "/";
         size_t start = userAgent.find(vstr);
