@@ -329,6 +329,12 @@ FileBrowsePluglet::v1Browse(unsigned int tid,
     [panel release];
     [delegate release];
 
+    if (selection.empty()) {
+        failureCB(callbackArgument, tid, "FileBrowse.userCanceled",
+                  "user canceled browse");
+        return;
+    }
+
     bp::Object* obj = NULL;
     unsigned int flags = 0;
     if (recurse) flags |= bp::pluginutil::kRecurse;
@@ -360,6 +366,12 @@ FileBrowsePluglet::browse(unsigned int tid,
     [panel orderOut: nil];
     [panel release];
 
+    if (selection.empty()) {
+        failureCB(callbackArgument, tid, "FileBrowse.userCanceled",
+                  "user canceled browse");
+        return;
+    }
+    
     // return results
     bp::Map* m = new bp::Map;
     bp::List* l = new bp::List;
