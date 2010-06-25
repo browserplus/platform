@@ -32,7 +32,7 @@ Building on OSX:
  
   Building the tree:    
     1. cd <path to public_platform>/external
-    2. ruby build.rb keepSource (will take a while, only needs to be done once)
+    2. ruby build.rb (will take a while, only needs to be done once)
     3. cd <path to public_platform>
     4. mkdir build
     5. cd build
@@ -95,7 +95,7 @@ Building on win32:
     1. start a windows command prompt with visual studio env set 
        (e.g. invoke vsvars32.bat)
     2. cd <path to public_platform>\external
-    3. ruby build.rb keepSource (will take a while, only needs to be done once)
+    3. ruby build.rb (will take a while, only needs to be done once)
     4. cd <path to public_platform>
     5. mkdir build
     6. cd build
