@@ -4468,7 +4468,8 @@
             "FileBrowsePluglet::kAllFilesFoldersKey":"All Files/Folders",
             "FileBrowsePluglet::kSelectKey":"Select",
             "FileBrowsePluglet::kFileFolderNameKey":"File/Folder:",
-            "FileBrowsePluglet::kSelectFilesFoldersKey":"Select Files/Folders"
+            "FileBrowsePluglet::kSelectFilesFoldersKey":"Select Files/Folders",
+            "FileBrowsePluglet::kSaveAsKey":"Save As"
         },
         "config":{
             "troubleshootSentYes":"Report sent",
