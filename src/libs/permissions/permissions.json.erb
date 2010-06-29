@@ -33,6 +33,28 @@ end
         <%= $cmake["BP_PLATFORM_BLACKLIST"] %>
     ],
      
+    // autoUpdatePermissionMigration is used when one or more
+    // services are being replaced by other services.  We don't
+    // want to re-pester the user for permissions, so we migrate
+    // the permissions across.  Each permission migrations is 
+    // identified by a guid, which lets us ensure that the migration
+    // is only applied once.  Each migration then contains a list of 
+    // maps.  Within each map, if 'any'/'all' of the services
+    // in 'old' have autoupdate true for the specified domain ('*'
+    // matches all domains), we set autoupdate true for all
+    // of the services in 'new' for that domain.
+    //
+    "autoUpdatePermissionMigration": {
+       "F81D2642-5689-46E3-A03F-D7436D04AED7":
+          [
+             {  "domain": "*.yahoo.com",
+                "operator": "or",
+                "old": ["Uploader"],
+                "new": ["FileTransfer"]
+             }
+          ]
+    },
+
     // Service permission localizations
     //
     "servicePermissionLocalizations" : {

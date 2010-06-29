@@ -598,8 +598,10 @@ PermissionsManager::load()
     m_blacklist.clear();
     m_platformBlacklist.clear();
     m_permLocalizations.clear();
+    m_permMigrations.clear();
+    m_appliedPermMigrations.clear();
     m_badPermissionsOnDisk = false;
-    
+
     // All file contents are JSON.  Errors
     // within file cause us to ignore it
     string json;
@@ -613,8 +615,8 @@ PermissionsManager::load()
             BP_THROW("unable to read permissions file");
         }
         boost::scoped_ptr<bp::Object> obj(
-            bp::Object::fromPlainJsonString(json, &jsonErrors));
-        
+                    bp::Object::fromPlainJsonString(json, &jsonErrors));
+
         if (obj == NULL) {
             string errMsg("permissions file not valid json: ");
             errMsg += jsonErrors;
@@ -627,7 +629,7 @@ PermissionsManager::load()
         // service blacklist is a list of servicename/version pairs
         // gets turned into a map whose key is servicename and whose value
         // is list of versions
-        const bp::Object * objPtr;
+        const bp::Object* objPtr;
         objPtr = m["blacklist"];
         if (objPtr) {
             vector<const bp::Object*> v = *objPtr;
@@ -669,10 +671,75 @@ PermissionsManager::load()
                 m_permLocalizations[perm] = localizations;
             }
         }
-    } catch (const bp::error::Exception&) {
+
+        // autoupdate permission migration.  Format is:
+        // { <guid1>:
+        //    // list of maps for each migration in this group
+        //    [
+        //      {  "domain": "foo.com",
+        //         "operator": "or"|"and"
+        //         "old": ["service1", "service2",...]
+        //         "new": ["service3", "service4",...]
+        //      },
+        //      ...
+        //    ],
+        //   <guid2>:
+        //     ...
+        //  }
+        // For each entry, if any/all of the services in 'old' have
+        // autoupdate set, then autoupdate is set on the services in 'new' 
+        // The guid is persisted as part of 'appliedAutoUpdatePermissionMigrations'
+        // in order to prevent us from repeatedly applying the migration.
+        //
+        objPtr = m["autoUpdatePermissionMigration"];
+        if (objPtr) {
+            map<string, const bp::Object*> migrationMap = *objPtr;
+            map<string, const bp::Object*>::const_iterator migrationMapIter;
+            for (migrationMapIter = migrationMap.begin();
+                 migrationMapIter != migrationMap.end(); ++migrationMapIter) {
+                string guid = migrationMapIter->first;
+                vector<const bp::Object*> migrationVec = *(migrationMapIter->second);
+                vector<const bp::Object*>::const_iterator migrationVecIter;
+                for (migrationVecIter = migrationVec.begin();
+                     migrationVecIter != migrationVec.end(); ++migrationVecIter) {
+                    map<string, const bp::Object*> entryMap = *((const bp::Map*)*migrationVecIter);
+                    MigrationEntry entry;
+                    entry.m_guid = guid;
+                    const bp::String* s = dynamic_cast<const bp::String*>(entryMap["domain"]);
+                    if (!s) {
+                        BPLOG_WARN_STRM("bad migration domain entry for guid " << guid);
+                        continue;
+                    }
+                    entry.m_domain = s->value();
+                    s = dynamic_cast<const bp::String*>(entryMap["operator"]);
+                    if (!s) {
+                        BPLOG_WARN_STRM("bad migration operator entry for guid/domain "
+                                        << guid << "/" << entry.m_domain);
+                        continue;
+                    }
+                    entry.m_operator = s->value();
+                    vector<const bp::Object*> oldVec = *(const bp::List*) entryMap["old"];
+                    for (size_t i = 0; i < oldVec.size(); i++) {
+                        entry.m_old.push_back(string(*oldVec[i]));
+                    }
+                    vector<const bp::Object*> newVec = *(const bp::List*) entryMap["new"];
+                    for (size_t i = 0; i < newVec.size(); i++) {
+                        entry.m_new.push_back(string(*newVec[i]));
+                    }
+                    if (entry.m_domain.empty() || entry.m_operator.empty()
+                        || entry.m_old.empty() || entry.m_new.empty()) {
+                        continue;
+                    }
+                    m_permMigrations.push_back(entry);
+                }
+            }
+        }
+    } catch (const bp::error::Exception& e) {
+        BPLOG_ERROR(e.what());
         m_blacklist.clear();
         m_platformBlacklist.clear();
         m_permLocalizations.clear();
+        m_permMigrations.clear();
         m_badPermissionsOnDisk = true;
     }
     
@@ -705,8 +772,18 @@ PermissionsManager::load()
                     map<string, const bp::Object*>::const_iterator pit;
                     for (pit = perms.begin(); pit != perms.end(); ++pit) {
                         vector<const bp::Object*> pair = *(pit->second);
-                        bool b = ((bp::Bool*)pair[0])->value();
-                        string ts = ((bp::String*)pair[1])->value();
+                        const bp::Bool* bObj = dynamic_cast<const bp::Bool*>(pair[0]);
+                        if (!bObj) {
+                            BPLOG_WARN_STRM("bad domainPermissions for " << domain);
+                            continue;
+                        }
+                        bool b = bObj->value();
+                        const bp::String* sObj = dynamic_cast<const bp::String*>(pair[1]);
+                        if (!sObj) {
+                            BPLOG_WARN_STRM("bad domainPermissions for " << domain);
+                            continue;
+                        }
+                        string ts = *sObj;
                         PermissionInfo info(b, ts);
                         m_domainPermissions[domain].insert(make_pair(pit->first, info));
                     }
@@ -777,6 +854,18 @@ PermissionsManager::load()
                     m_autoUpdatePermissions[domain] = info;
                 }
             }
+
+            // applied permission migrations
+            const bp::List* lObj = dynamic_cast<const bp::List*>(pm["appliedAutoUpdatePermissionMigrations"]);
+            if (lObj) {
+                vector<const bp::Object*> v = *lObj;
+                for (size_t i = 0; i < v.size(); ++i) {
+                    const bp::String* s = dynamic_cast<const bp::String*>(v[i]);
+                    if (s) {
+                        m_appliedPermMigrations.insert(string(*s));
+                    }
+                }
+            }
             
         } catch (const bp::error::Exception& e) {
             BPLOG_WARN_STRM("error parsing domainPermissions: " << e.what());
@@ -785,7 +874,7 @@ PermissionsManager::load()
             BPLOG_WARN_STRM("bad timestamp format in domainPermissions");
             domainPermsBad = true;
         }
-    };
+    }
     
     if (domainPermsBad) {
         m_domainPermissions.clear();
@@ -793,6 +882,12 @@ PermissionsManager::load()
                                + bp::file::nativeFromUtf8("_bad"));
         (void) move(domainPermsFile, badFile);
         (void) remove(domainPermsFile);
+    }
+
+    try {
+        applyPermissionMigrations();
+    } catch (const bp::error::Exception& e) {
+        BPLOG_WARN_STRM("error applying permission migrations: " << e.what());
     }
 }
 
@@ -833,7 +928,7 @@ PermissionsManager::saveDomainPermissions()
     }
 
     // form json map from m_requireDomainApproval, m_domainPermissions,
-    // and m_autoUpdatePermissions
+    // m_autoUpdatePermissions, and m_appliedPermMigrations
     bp::Map* pm = new bp::Map;
     if (!pm) {
         BP_THROW_FATAL("unable to allocate Map");
@@ -921,6 +1016,17 @@ PermissionsManager::saveDomainPermissions()
         pm->add("autoUpdatePermissions", m);
     }
     
+    // add any applied permission migrations
+    if (!m_appliedPermMigrations.empty()) {
+        bp::List* l = new bp::List;
+        set<string>::const_iterator it;
+        for (it = m_appliedPermMigrations.begin();
+             it != m_appliedPermMigrations.end(); ++it) {
+            l->append(new bp::String(*it));
+        }
+        pm->add("appliedAutoUpdatePermissionMigrations", l);
+    }
+
     // stringify and store
     string json = pm->toPlainJsonString(true);
     if (!storeToFile(path, json)) {
@@ -961,6 +1067,72 @@ PermissionsManager::domainPatternValid(const string& pattern) const
         return false;
     }
     return true;
+}
+
+
+void
+PermissionsManager::applyPermissionMigrations()
+{
+    // Do we have autoupdate permission migration to apply?
+    if (m_permMigrations.empty() || m_domainPermissions.empty()) {
+        return;
+    }
+
+    set<string> newMigrations;
+    vector<pair<string, string> > toApply;
+    map<string, AutoUpdateInfo> info = queryAutoUpdate();
+    for (size_t pi = 0; pi < m_permMigrations.size(); ++pi) {
+        // If we've already applied this migration, skip it.
+        // Otherwise, apply it and remember the guid.
+        string guid = m_permMigrations[pi].m_guid;
+        if (m_appliedPermMigrations.count(guid) > 0) {
+            BPLOG_DEBUG_STRM("skipping applied migration " << guid);
+            continue;
+        }
+        newMigrations.insert(guid);
+
+        const string& domain = m_permMigrations[pi].m_domain;
+        const vector<string>& oldVec = m_permMigrations[pi].m_old;
+        const vector<string>& newVec = m_permMigrations[pi].m_new;
+        map<string, AutoUpdateInfo>::const_iterator iter;
+        for (iter = info.begin(); iter != info.end(); ++iter) {
+            if (domain != "*" && domain != iter->first) {
+                continue;
+            }
+            bool anyAllowed = false;
+            bool allAllowed = true;
+            for (size_t i = 0; i < oldVec.size(); i++) {
+                Permission p = queryAutoUpdateService(iter->first, oldVec[i]);
+                if (p == eAllowed) {
+                    anyAllowed = true; 
+                } else {
+                    allAllowed = false;
+                }
+            }
+
+            bool doUpdate = m_permMigrations[pi].m_operator == "or" 
+                            ? anyAllowed : allAllowed;
+            if (doUpdate) {
+                for (size_t i = 0; i < newVec.size(); i++) {
+                    toApply.push_back(pair<string, string>(iter->first,
+                                                           newVec[i]));
+                }
+            }
+        }
+    }
+
+    for (size_t i = 0; i < toApply.size(); ++i) {
+        BPLOG_DEBUG_STRM("autoupdate migrate sets " << toApply[i].first
+                         << " / " << toApply[i].second);
+        setAutoUpdateService(toApply[i].first, toApply[i].second, eAllowed);
+    }
+
+    // persist applied migrations
+    set<string>::const_iterator si;
+    for (si = newMigrations.begin(); si != newMigrations.end(); ++si) {
+        m_appliedPermMigrations.insert(*si);
+    }
+    saveDomainPermissions();
 }
 
 
@@ -1153,4 +1325,3 @@ PermissionsManager::queryAllPermissions() const
 
     return allPerms;
 }
-

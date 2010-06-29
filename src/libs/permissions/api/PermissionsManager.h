@@ -326,11 +326,22 @@ public:
     std::string normalizeDomain(const std::string& domain) const;
     
 private:
+    // Information needed to migrate autoUpdate permissions when
+    // one service is replaced by another.
+    struct MigrationEntry {
+        std::string m_guid;
+        std::string m_domain;
+        std::string m_operator;
+        std::vector<std::string> m_old;
+        std::vector<std::string> m_new;
+    };
+
     PermissionsManager(const std::string& baseURL);
     virtual ~PermissionsManager();
     void load();
     void saveDomainPermissions(); // throw bp::error::FatalException
     bool domainPatternValid(const std::string& pattern) const;
+    void applyPermissionMigrations();
 
     // implementation of ITimerListener interface
     void timesUp(class Timer * t);
@@ -370,6 +381,10 @@ private:
     // permission localizations.  key is permission, value is map of 
     // key/localizations
     std::map<std::string, std::map<std::string, std::string> > m_permLocalizations;
+
+    // autoupdate permission migrations
+    std::vector<MigrationEntry> m_permMigrations;
+    std::set<std::string> m_appliedPermMigrations;
     
     virtual void onTransactionFailed(unsigned int tid,
                                      const std::string& msg);
