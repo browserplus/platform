@@ -1,6 +1,7 @@
 To push new permissions to a distro server:
 
-#../../build/Archive/dist/bin/Debug/bpkg pack -publicKey ../../signing/devel/BrowserPlus.crt -privateKey ../../signing/devel/BrowserPlus.pvk -in permissions.json -out permissions.bpkg -password FreeYourBrowser
+# cd <build_dir>
+# dist/bin/bpkg pack -publicKey bpsdk_internal/signing/BrowserPlus.crt -privateKey bpsdk_internal/signing/BrowserPlus.pvk -in libs/permissions/permissions.json -out permissions.bpkg -password FreeYourBrowser
 
 # scp permissions.bpkg <distro_server>:/tmp
 
