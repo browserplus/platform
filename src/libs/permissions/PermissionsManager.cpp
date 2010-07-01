@@ -1096,7 +1096,8 @@ PermissionsManager::applyPermissionMigrations()
         const vector<string>& newVec = m_permMigrations[pi].m_new;
         map<string, AutoUpdateInfo>::const_iterator iter;
         for (iter = info.begin(); iter != info.end(); ++iter) {
-            if (domain != "*" && domain != iter->first) {
+            if (domain != "*"
+                && !bp::strutil::matchesWildcard(iter->first, domain)) {
                 continue;
             }
             bool anyAllowed = false;
