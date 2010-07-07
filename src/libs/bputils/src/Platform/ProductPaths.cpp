@@ -97,7 +97,7 @@ bp::paths::getPermissionsDirectory()
 Path
 bp::paths::getServiceDirectory()
 {
-    return doGetTopDir("Services");
+    return doGetTopDir("Corelets");
 }
 
 
@@ -111,7 +111,7 @@ bp::paths::getServiceCacheDirectory()
 Path
 bp::paths::getServiceInterfaceCachePath()
 {
-    return doGetTopDir("ServiceInterfaceCache");
+    return doGetTopDir("CoreletInterfaceCache");
 }
 
 
@@ -165,7 +165,7 @@ bp::paths::getServiceDataDirectory(string name,
     Path serviceDataDir(getProductTopDirectory());
     stringstream ss;
     ss << major_ver;
-    serviceDataDir /= Path("ServiceData")/name/ss.str();
+    serviceDataDir /= Path("CoreletData")/name/ss.str();
     return serviceDataDir;
 }
 
@@ -354,7 +354,7 @@ bp::paths::createDirectories(int major,
         bfs::create_directories(getServiceDirectory());
         bfs::create_directories(getServiceCacheDirectory());
         bfs::create_directories(getServiceInterfaceCachePath());
-        bfs::create_directories(getProductTopDirectory() / "ServiceData");
+        bfs::create_directories(getProductTopDirectory() / "CoreletData");
         bfs::create_directories(getPluginWritableDirectory(major, minor, micro));
         bfs::create_directories(getObfuscatedWritableDirectory(major, minor, micro));
         bfs::create_directories(getPlatformCacheDirectory());
