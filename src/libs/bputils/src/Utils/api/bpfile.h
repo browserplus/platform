@@ -450,8 +450,10 @@ namespace bp {
 
         bool makeReadOnly(const Path& path);
 
-        // what are a path's mimetypes?
-        std::set<std::string> mimeTypes(const Path& path);
+        // What are a path's mimetypes?  If there is
+        // an "official" mimetype (xxx/vnd.yyy), it
+        // will be first.
+        std::vector<std::string> mimeTypes(const Path& path);
 
         // is a path one of the specified mimetypes?
         bool isMimeType(const Path& path,

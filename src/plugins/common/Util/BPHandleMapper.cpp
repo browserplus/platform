@@ -53,7 +53,7 @@ BPHandleMapper::pathToHandle(const bpf::Path& path)
 
     // no known handle, add one
     string safeName = bpf::utf8FromNative(path.filename());
-    set<string> mimeTypes = bpf::mimeTypes(path);
+    vector<string> mimeTypes = bpf::mimeTypes(path);
     BPHandle h("BPTPath", bp::random::generate(), safeName, size, mimeTypes);
     s_pathMap.insert(make_pair(path, h));
     s_handleMap.insert(make_pair(h, path));
@@ -115,8 +115,8 @@ BPHandleMapper::insertHandles(const bp::Object* bpObj)
             m->add(DEPRECATED_BROWSERPLUS_HANDLENAME_KEY, new String(handle.name()));
             m->add(BROWSERPLUS_HANDLENAME_KEY, new String(handle.name()));
             m->add(BROWSERPLUS_HANDLESIZE_KEY, new Integer(handle.size()));
-            set<string> mt = handle.mimeTypes();
-            set<string>::const_iterator it;
+            vector<string> mt = handle.mimeTypes();
+            vector<string>::const_iterator it;
             List* l = new List;
             for (it = mt.begin(); it != mt.end(); ++it) {
                 l->append(new String(it->c_str()));
@@ -197,12 +197,12 @@ BPHandleMapper::expandHandles(const bp::Object* bpObj)
             const List* mimeTypeObj = 
                 dynamic_cast<const List*>(me->value(BROWSERPLUS_HANDLEMIMETYPE_KEY));
             if (typeObj && idObj && nameObj && sizeObj && mimeTypeObj) {
-                set<string> mt;
+                vector<string> mt;
                 for (unsigned int i = 0; i < mimeTypeObj->size(); ++i) {
                     const String* s = 
                         dynamic_cast<const String*>(mimeTypeObj->value(i));
                     if (s) {
-                        mt.insert(s->value());
+                        mt.push_back(s->value());
                     }
                 }
                 BPHandle h(typeObj->value(), (int) idObj->value(),

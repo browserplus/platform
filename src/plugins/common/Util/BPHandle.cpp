@@ -27,7 +27,7 @@ BPHandle::BPHandle(const std::string& type,
                    int id,
                    const std::string& safeName,
                    boost::uintmax_t size,
-                   const std::set<std::string>& mimeTypes) 
+                   const std::vector<std::string>& mimeTypes)
     : m_type(type), m_id(id), m_name(safeName),
       m_size(size), m_mimeTypes(mimeTypes)
 {
@@ -65,7 +65,7 @@ BPHandle::size() const
     return m_size;
 }
 
-std::set<std::string>
+std::vector<std::string>
 BPHandle::mimeTypes() const
 {
     return m_mimeTypes;
@@ -92,8 +92,8 @@ BPHandle::toBPMap() const
     // new style
     m->add(BROWSERPLUS_HANDLENAME_KEY, new String(name().c_str()));
     m->add(BROWSERPLUS_HANDLESIZE_KEY, new Integer(size()));
-    std::set<std::string> mt = mimeTypes();
-    std::set<std::string>::const_iterator it;
+    std::vector<std::string> mt = mimeTypes();
+    std::vector<std::string>::const_iterator it;
     List* l = new List;
     for (it = mt.begin(); it != mt.end(); ++it) {
         l->append(new String(it->c_str()));

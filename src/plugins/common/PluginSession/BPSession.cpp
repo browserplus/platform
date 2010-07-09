@@ -387,7 +387,7 @@ BPSession::variantToBPObject( const plugin::Variant* input,
                         BROWSERPLUS_HANDLESIZE_KEY))->value();
                 }
                 // mimetypes
-                std::set<std::string> mimeTypes;
+                std::vector<std::string> mimeTypes;
                 const bp::List* l = 
                     dynamic_cast<const bp::List *>(m->get(
                         BROWSERPLUS_HANDLEMIMETYPE_KEY));
@@ -396,7 +396,7 @@ BPSession::variantToBPObject( const plugin::Variant* input,
                         const bp::String* s = 
                             dynamic_cast<const bp::String*>(l->value(i));
                         if (s) {
-                            mimeTypes.insert(s->value());
+                            mimeTypes.push_back(s->value());
                         }
                     }
                 }
