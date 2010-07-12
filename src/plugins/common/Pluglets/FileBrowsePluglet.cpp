@@ -24,6 +24,8 @@
 #include "BPUtils/BPLog.h"
 #include "PluginCommonLib/CommonErrors.h"
 
+#include <string.h>
+
 
 const char* FileBrowsePluglet::kSelectKey = "FileBrowsePluglet::kSelectKey";
 const char* FileBrowsePluglet::kFileFolderNameKey = "FileBrowsePluglet::kFileFolderNameKey";
