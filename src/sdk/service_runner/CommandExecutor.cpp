@@ -60,6 +60,14 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::allocate)
     // set up allocate parameters
     std::string uri("bpclient://");
     uri.append(BPCLIENT_UUID);
+
+    // handle an optional argument which is the URI we should
+    // pass, a change that would allow for testing of cross domain
+    // checks among other things.
+    if (tokens.size() == 1) {
+        uri = tokens[0];
+    }
+
     bp::file::Path data_dir = 
         bp::paths::getServiceDataDirectory(m_desc.name(),
                                            m_desc.majorVersion());

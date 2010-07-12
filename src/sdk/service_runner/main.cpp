@@ -65,7 +65,7 @@ static APTArgDefinition g_args[] = {
       "provider services.  If a dependent service is specified, and no "
       "-providerPath is supplied, then we look for an installed service "
       "that satisfies the dependent's requirements."
-    },
+    }
 };
       
 static void 
@@ -325,8 +325,12 @@ main(int argc, const char ** argv)
         parser->registerHandler(
             "allocate", chp,
             BP_COMMAND_HANDLER(CommandExecutor::allocate),
-            0, 0,
-            "Allocate a new service instance.");
+            0, 1,
+            "Allocate a new service instance.  An optional arguyment is "
+            "a URI, when provided it will be passed into the service "
+            "allocated as the uri of the \"page\" that initialized "
+            "BrowserPlus, which allows for testing of code that uses "
+            "the URI (for cross domain checks, scoped storage, etc)");
 
         parser->registerHandler(
             "describe", chp,
