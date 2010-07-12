@@ -26,8 +26,9 @@
 #include "BPUtils/bpurl.h"
 #include "PluginCommonLib/CommonErrors.h"
 
-using namespace std;
+#include <string.h>
 
+using namespace std;
 
 const char* FileBrowsePluglet::kSelectKey = "FileBrowsePluglet::kSelectKey";
 const char* FileBrowsePluglet::kFileFolderNameKey = "FileBrowsePluglet::kFileFolderNameKey";
