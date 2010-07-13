@@ -108,7 +108,7 @@ static bp::Object * cloneOrConvert(const bp::Object * o)
     const bp::String* str = dynamic_cast<const bp::String*>(o);
     if (str) {
         // get the string out of the argList
-        bp::file::tString val;
+		std::string val;
         if (str->value()) val.append(str->value());
         if (!val.compare(0, pathPrefix.size(), pathPrefix)) {
             bp::file::Path path(val.substr(pathPrefix.size()));
