@@ -350,7 +350,10 @@ main(int argc, const char ** argv)
             BP_COMMAND_HANDLER(CommandExecutor::invoke),
             1, 2,
             "Invoke a function on a service instance.  First argument is "
-            "function name, second are json encoded arguments.");
+            "function name, second are json encoded arguments.  Within JSON "
+            "encoded arguments, one may pass Path and WritablePath types by "
+            "prepending 'path:' or 'writable_path:' to the native file path "
+            "represented as UTF8.");
 
         parser->registerHandler(
             "select", chp,

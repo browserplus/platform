@@ -94,9 +94,68 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::select)
     else onFailure();
 }
 
+// utility functions which traverses a bpobject and
+// maps strings with the prefix of path: into Paths,
+// and those with the prefix of writable_path: into
+// WritablePaths
+static bp::Object * cloneOrConvert(const bp::Object * o) 
+{
+    static std::string pathPrefix("path:");
+    static std::string writablePathPrefix("writable_path:");
+    
+    if (!o) return NULL;
+    bp::Object * rv = NULL;
+    const bp::String* str = dynamic_cast<const bp::String*>(o);
+    if (str) {
+        // get the string out of the argList
+        bp::file::tString val;
+        if (str->value()) val.append(str->value());
+        if (!val.compare(0, pathPrefix.size(), pathPrefix)) {
+            bp::file::Path path(val.substr(pathPrefix.size()));
+            rv = new bp::Path(path);
+        } else if (!val.compare(0, writablePathPrefix.size(), writablePathPrefix)) {
+            bp::file::Path path(val.substr(writablePathPrefix.size()));
+            rv = new bp::WritablePath(path);
+        }
+    }
+
+    return (rv ? rv : o->clone());
+}
+
+static bp::Object * replacePaths(bp::Object * o)
+{
+    if (NULL == o) return NULL;
+
+    if (o->type() == BPTMap) {
+        const bp::Map* argMap = dynamic_cast<bp::Map *>(o);
+        if (argMap) {        
+            bp::Map* newMap = new bp::Map;
+            bp::Map::Iterator i(*argMap);
+            const char * k;
+            while (NULL != (k = i.nextKey())) {
+                newMap->add(k, cloneOrConvert(argMap->value(k)));
+            }
+            return newMap;
+        }
+
+    } else if (o->type() == BPTList) {
+        const bp::List* argList = dynamic_cast<bp::List *>(o);
+        if (argList) {        
+            bp::List* newList = new bp::List;
+            for (size_t i = 0; i < argList->size(); i++) {
+                newList->append(cloneOrConvert(argList->value(i)));
+            }
+            return newList;
+        }
+    }
+
+    return o->clone();
+}
+
+
 BP_DEFINE_COMMAND_HANDLER(CommandExecutor::invoke)
 {
-    bp::Map argMap;
+    bp::Map rawArgMap;
     if (tokens.size() == 2) {
         std::string err;
         bp::Object * args = bp::Object::fromPlainJsonString(tokens[1], &err);
@@ -111,7 +170,7 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::invoke)
             onFailure();        
             return;
         }
-        argMap = *((bp::Map *) args);
+        rawArgMap = *((bp::Map *) args);
         delete args;
     }
 
@@ -126,6 +185,10 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::invoke)
         onFailure();        
         return;
     }
+
+    // first do a deep replacement of strings with file: and writable_file:
+    // prefixes
+    bp::Map * argMap = (bp::Map *) replacePaths(&rawArgMap);
     
     // fixup callbacks and file arguments
     std::list<bp::service::Argument> l = f.arguments(); 
@@ -133,41 +196,34 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::invoke)
     int callbackId = 1;
     for (it = l.begin(); it != l.end(); it++) {
         if (it->type() == bp::service::Argument::CallBack) {
-            argMap.add(it->name(), new bp::CallBack(callbackId++));
-        } else if (it->type() == bp::service::Argument::Path) {
+            argMap->add(it->name(), new bp::CallBack(callbackId++));
+        }
+        // we allow the client to be lazy at the top level and
+        // *not* specify a prefix (either path: or writable_path:),
+        // because we know the types of the first level args
+        else if (it->type() == bp::service::Argument::Path) {
             // get the string out of the argMap
             std::string str;
-            if (argMap.getString(it->name().c_str(), str)) {
-                bp::file::Path path;
-                if (bp::url::isFileUrl(str)) {
-                    path = bp::file::pathFromURL(str);
-                }
-                argMap.add(it->name(), new bp::Path(path));                
+            if (argMap->getString(it->name().c_str(), str)) {
+                bp::file::Path path(str);
+                argMap->add(it->name(), new bp::Path(path));                
             }
-        } else if (it->type() == bp::service::Argument::List) {
-            // deal with lists of files
-            const bp::List* argList = NULL;
-            if (argMap.getList(it->name().c_str(), argList)) {
-                bp::List* newList = new bp::List;
-                for (size_t i = 0; i < argList->size(); i++) {
-                    // get the string out of the argList
-                    const bp::Object* obj = argList->value(i);
-                    const bp::String* str = dynamic_cast<const bp::String*>(obj);
-                    if (str && bp::url::isFileUrl(str->value())) {
-                        bp::file::Path path = bp::file::pathFromURL(str->value());
-                        newList->append(new bp::Path(path));
-                    } else {
-                        newList->append(obj->clone());
-                    }
-                }
-                argMap.add(it->name(), newList);
+        }
+        else if (it->type() == bp::service::Argument::WritablePath) {
+            // get the string out of the argMap
+            std::string str;
+            if (argMap->getString(it->name().c_str(), str)) {
+                bp::file::Path path(str);
+                argMap->add(it->name(), new bp::WritablePath(path));                
             }
         }
     }
-
+    
     unsigned int instance = m_controlMan->currentInstance();    
 
-    (void) m_controller->invoke(instance, tokens[0], &argMap);
+    (void) m_controller->invoke(instance, tokens[0], argMap);
+
+    if (argMap) delete argMap;
 }
 
 BP_DEFINE_COMMAND_HANDLER(CommandExecutor::show)
