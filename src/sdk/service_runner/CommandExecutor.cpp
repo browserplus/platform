@@ -122,34 +122,34 @@ static bp::Object * cloneOrConvert(const bp::Object * o)
     return (rv ? rv : o->clone());
 }
 
-static bp::Object * replacePaths(bp::Object * o)
+static bp::Object * replacePaths(const bp::Object * o)
 {
     if (NULL == o) return NULL;
 
     if (o->type() == BPTMap) {
-        const bp::Map* argMap = dynamic_cast<bp::Map *>(o);
+        const bp::Map* argMap = dynamic_cast<const bp::Map *>(o);
         if (argMap) {        
             bp::Map* newMap = new bp::Map;
             bp::Map::Iterator i(*argMap);
             const char * k;
             while (NULL != (k = i.nextKey())) {
-                newMap->add(k, cloneOrConvert(argMap->value(k)));
+                newMap->add(k, replacePaths(argMap->value(k)));
             }
             return newMap;
         }
 
     } else if (o->type() == BPTList) {
-        const bp::List* argList = dynamic_cast<bp::List *>(o);
+        const bp::List* argList = dynamic_cast<const bp::List *>(o);
         if (argList) {        
             bp::List* newList = new bp::List;
             for (size_t i = 0; i < argList->size(); i++) {
-                newList->append(cloneOrConvert(argList->value(i)));
+                newList->append(replacePaths(argList->value(i)));
             }
             return newList;
         }
     }
 
-    return o->clone();
+    return cloneOrConvert(o);
 }
 
 
