@@ -1,3 +1,23 @@
+// <%= $cmake['NoEditWarning'] %>
+<%
+def insertFile(file)
+    inname = File.join($cmake['CMAKE_CURRENT_SOURCE_DIR'],
+                       "plugins", "npapi", "src", "DragAndDrop",
+                       file);
+    outname = File.join($cmake['CMAKE_CURRENT_BINARY_DIR'],
+                       "plugins", "npapi", "src", "DragAndDrop",
+                        file + '.out');
+    out = File.new(outname, 'w');
+    IO.foreach(inname) {|line|
+        s = line.chomp();
+        s.gsub!('\\', '\\\\\\\\');
+        out.puts('"' + s + '\n"');
+    }
+    out.close()
+    return File.read(outname);
+end
+%>
+
 /**
  * ***** BEGIN LICENSE BLOCK *****
  * The contents of this file are subject to the Mozilla Public License
@@ -41,169 +61,15 @@
 
 using namespace std;
 
-// a JavaScript function to add HTML5 style handlers to a supplied dom id, which call back into the supplied 
-static const char * s_addDropTargetFunc =
-"function (platformArg, browserArg, id, cbObj) {\n"
-"  if (!cbObj || !cbObj.onEnter || !cbObj.onExit || !cbObj.onDrop) { \n"
-"    throw 'error adding target, bogus callback object!';\n"
-"  }\n"
-"\n"
-"  var elem = document.getElementById(id);\n"
-"  var platform = platformArg;\n"
-"  var browser = browserArg;\n"
-"\n"
-"  if (elem == null) {\n"
-"    throw 'can\\'t find element with id: \\'' + id + '\\'';\n"
-"  }\n"
-"\n"
-"  if (elem.ondragenter || elem.ondragleave || elem.ondrop) {\n"
-"    throw 'element already has non-nil value for .ondragenter/.ondragleave/.ondrop -- BrowserPlus cannot attach drop target: \\'' + id + '\\'';\n"
-"  }\n"
-"\n"
-"  var isRealFile = function(f) {\n"
-"    var hasFileName = false, hasFileSize = false, mutableMembers = false;\n"
-"\n"
-"    for (var m in f) {\n"
-"      if (m === 'fileName') hasFileName = true;\n"
-"      else if (m === 'fileSize') hasFileSize = true;\n"
-"    }\n"
-"    try {\n"
-"      var before = f['fileName'];\n"
-"      f['fileName'] = '__IMutedYou__';\n"
-"      if (before !== f['fileName']) mutableMembers = true;\n"
-"      before = f['fileSize'];\n"
-"      f['fileSize'] = '__IMutedYou__';\n"
-"      if (before !== f['fileSize']) mutableMembers = true;\n"
-"    } catch (e) {\n"
-"    }\n"
-"    if (typeof(f) !== 'object' ||\n"
-"        !f.toString || f.toString.constructor !==  Function ||\n"
-"        f.toString() !== '[object File]' ||\n"
-"        f.constructor != File ||\n"
-"        f.protype != undefined ||\n"
-"        !hasFileName ||\n"
-"        !hasFileSize ||\n"
-"        mutableMembers) {\n"
-"      return false;\n"
-"    }\n"
-"\n"
-"    return true;\n"
-"  };\n"
-"\n"
-"  var extractDragItems = function(event) {\n"
-"    var dt = event.dataTransfer;\n"
-"    var files = dt.files;\n"
-"    var uris = [ ];\n"
-"    if (platform == 'Windows' && browser == 'Firefox') {\n"
-"      for (var i = 0; i < dt.mozItemCount; i++) {\n"
-"        uris[i] = dt.mozGetDataAt('text/x-moz-url', i);\n"
-"      }\n"
-"    } else if (platform == 'OSX' && browser == 'Safari') {\n"
-"      var uriText = dt.getData('text/uri-list');\n"
-"      if (uriText) uris = uriText.split('\\n');\n"
-"    }\n"
-"\n"
-"    if (uris.length != files.length) {\n"
-"      throw 'uri/files size mismatch, aborting drop';\n"
-"    }\n"
-"\n"
-"    var arr = new Array;\n"
-"    for (var i = 0; i < files.length; i++) {\n"
-"      if (!isRealFile(files[i])) {\n"
-"          throw 'bogus user File data found, possible attack detected!';\n"
-"      }\n"
-"      arr.push([ files[i], uris[i] ]);\n"
-"    }\n"
-"    return arr;\n"
-"  };\n"
-"\n"
-"  var insideCnt = 0;\n"
-"\n"
-"  /** Adapted from YUI - get the dimensions of a dom node */\n"
-"  function getDimensions(el) {\n"
-"    if (!el) { return false; }\n"
-"    // has to be part of document to have pageXY\n"
-"    if (el.parentNode === null || el.style.display == 'none') {\n"
-"      return false;\n"
-"    }\n"
-"    var pos = [el.offsetLeft, el.offsetTop];\n"
-"    var parentNode = el.offsetParent;\n"
-"    if (parentNode != el) {\n"
-"      while (parentNode) {\n"
-"        pos[0] += parentNode.offsetLeft;\n"
-"        pos[1] += parentNode.offsetTop;\n"
-"        parentNode = parentNode.offsetParent;\n"
-"      }\n"
-"    }\n"
-"    parentNode = el.parentNode;\n"
-"    \n"
-"    // account for any scrolled ancestors\n"
-"    while (parentNode && parentNode.tagName.toUpperCase() != 'HTML') {\n"
-"      pos[0] -= parentNode.scrollLeft;\n"
-"      pos[1] -= parentNode.scrollTop;\n"
-"      parentNode = parentNode.parentNode;\n"
-"    }\n"
-"  \n"
-"    return {\n"
-"      y: parseInt(pos[1]),\n"
-"      x: parseInt(pos[0]),\n"
-"      y1: (parseInt(pos[1]) + parseInt(el.offsetHeight)),\n"
-"      x1: (parseInt(pos[0]) + parseInt(el.offsetWidth))\n"
-"    };\n"
-"  }\n"
-"  \n"
-"  function eventInsideTarget(target, event) {\n"
-"    var cs = getDimensions(target);\n"
-"    return (cs.x <= event.clientX && event.clientX <= cs.x1 && cs.y <= event.clientY && event.clientY <= cs.y1);\n"
-"  } \n"
-"  \n"
-"  elem.ondragenter = function(event) {\n"
-"    event.stopPropagation(); event.preventDefault(); \n"
-"    if (eventInsideTarget(event.currentTarget, event)) {\n"
-"      if (0 == (insideCnt++)) {\n"
-"        cbObj.onEnter(extractDragItems(event));\n"
-"      }\n"
-"    }\n"
-"  };\n"
-"\n"
-"  elem.ondragleave =  function(event) {\n"
-"    event.stopPropagation(); event.preventDefault(); \n"
-"    if (insideCnt > 0) {\n"
-"      insideCnt--;\n"
-"      if (!insideCnt || !eventInsideTarget(event.currentTarget, event)) {\n"
-"        insideCnt = 0;\n"
-"        cbObj.onExit();\n"
-"      }\n"
-"    }\n"
-"  };\n"
-"  \n"
-"  elem.ondragover = function(event) {\n"
-"    event.stopPropagation(); event.preventDefault(); \n"
-"    var hit = eventInsideTarget(event.currentTarget, event);\n"
-"    if (hit && insideCnt == 0) {\n"
-"       insideCnt++; \n"
-"       cbObj.onEnter();\n"
-"    } else if (!hit && insideCnt > 0) {\n"
-"      if (0 == --insideCnt) cbObj.onExit();\n"
-"    }\n"
-"  };\n"
-"  \n"
-"  elem.ondrop = function(event) {\n"
-"    event.stopPropagation(); event.preventDefault(); \n"
-"    insideCnt = 0;\n"
-"    if (eventInsideTarget(event.currentTarget, event)) {\n"
-"      cbObj.onDrop(extractDragItems(event));\n"
-"    }\n"
-"  };\n"
-"  \n"
-"  return null;\n"
-"}\n";
+// a JavaScript function to add HTML5 style handlers to a
+// supplied dom id, which call back into the supplied object
 
-static const char * s_removeDropTargetFunc =
-"  function(id) {\n"
-"  var elem = document.getElementById(id);\n"
-"  elem.ondrop = elem.ondragover = elem.ondragleave = elem.ondragenter = null;\n"
-"  }\n";
+static const char * s_addDropTargetFunc =
+<%=  insertFile('addDropTarget.js') %>;
+
+static const char * s_removeDropTargetFunc = 
+<%=  insertFile('removeDropTarget.js') %>;
+
 
 IDropManager*
 Html5DropManager::allocate(NPP instance,
