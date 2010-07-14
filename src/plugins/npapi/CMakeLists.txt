@@ -34,7 +34,8 @@ IF (NOT CMAKE_BUILD_TYPE)
 ENDIF ()
 
 # include root source directory for easy header access when in subdirs 
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/src)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/src
+                    ${CMAKE_CURRENT_SOURCE_DIR}/src/DragAndDrop)
 
 # required npapi defines
 ADD_DEFINITIONS(-DMOZILLA_STRICT_API -DXPCOM_GLUE -DNPSIMPLE_EXPORTS)
@@ -87,6 +88,7 @@ SET(BPSRCS
     # these files are substituted using .erb
     ${CMAKE_CURRENT_BINARY_DIR}/src/main.cpp
     ${CMAKE_CURRENT_BINARY_DIR}/src/BPScriptableObject.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/DragAndDrop/Html5DropManager.cpp
     # these files are not
     src/NPAPIPlugin.cpp
     src/ScriptablePluginObjectBase.cpp
@@ -94,8 +96,7 @@ SET(BPSRCS
     src/DragAndDrop/DnDPlugletFactoryNPAPI.cpp
     src/DragAndDrop/DnDPlugletNPAPI.cpp
     src/DragAndDrop/DropManagerFactory.cpp
-    src/DragAndDrop/InterceptDropManager.cpp
-    src/DragAndDrop/Html5DropManager.cpp)
+    src/DragAndDrop/InterceptDropManager.cpp)
 
 SET(BPRSRCS "")
 
@@ -131,6 +132,22 @@ ENDIF ()
 
 TARGET_LINK_LIBRARIES( ${BPLIB} BPUtils_s BPProtocol_s
                                 PluginCommonLib_s ${OS_LIBS} )
+
+# Make sure that html5 erb substitution occurs if input js files change
+SET(HTML5JS "${CMAKE_CURRENT_SOURCE_DIR}/src/DragAndDrop/addDropTarget.js"
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/DragAndDrop/removeDropTarget.js")
+SET(TOPDIR "${CMAKE_CURRENT_SOURCE_DIR}/../../")
+SET(TOPBINDIR "${CMAKE_CURRENT_BINARY_DIR}/../../")
+SET(ERB_SUBST "${TOPDIR}/support/build_scripts/erb_subst.rb")
+FILE(TO_NATIVE_PATH "${TOPBINDIR}/cmakeContext.rb" ctxPath)
+SET(l10nData "${TOPDIR}/support/l10n/strings.json")
+ADD_CUSTOM_COMMAND(
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/src/DragAndDrop/Html5DropManager.cpp"
+    COMMAND ruby -s \"${ERB_SUBST}\" -force=true -context=\"${ctxPath}\" -l10n=\"${l10nData}\" -output_dir=\"${TOPBINDIR}\" -input_file=\"plugins/npapi/src/DragAndDrop/Html5DropManager.cpp.erb\"
+    COMMAND ruby -s \"${ERB_SUBST}\" -force=true -context=\"${ctxPath}\" -l10n=\"${l10nData}\" -output_dir=\"${TOPBINDIR}\" -input_file=\"plugins/npapi/src/DragAndDrop/dnd_test.html.erb\"
+    DEPENDS ${HTML5JS}
+    WORKING_DIRECTORY "${TOPDIR}"
+    COMMENT "Perform html5 drag/drop .erb file substitution")
 
 IF (APPLE)
   # now we manually setup the plugin "bundle"

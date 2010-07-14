@@ -1,0 +1,53 @@
+<!-- 
+A simple page for testing/debugging html5 drag/drop code.
+The code in addDropTarget.js and removeDropTarget.js will
+be baked into Html5DropManager.cpp.  This erb template
+lets you insert the same code into a simple page for
+testing and debugging.
+-->
+     
+<html>
+<body>
+
+<div id='output' style='min-height: 100px; white-space: pre; border: 1px solid black;'>
+
+<script>
+
+// Pull in the code used by the platform
+addDropTarget = <%= File.read(File.join($cmake['CMAKE_CURRENT_SOURCE_DIR'],
+                                        'plugins', 'npapi', 'src',
+                                        'DragAndDrop', 'addDropTarget.js')); %>
+
+// Add some test code around it
+console.log('starting up');
+
+var cb = new Object;
+cb.onEnter = function() {
+  console.log('onEnter');
+  document.getElementById('output').textContent = 'enter';
+};
+
+cb.onExit = function() {
+  console.log('onExit');
+  document.getElementById('output').textContent = 'leave';
+};
+
+cb.onDrop = function(files) {
+  console.log('onDrop');
+  var msg;
+  var count = files.length;
+  msg = 'File Count: ' + count + '\n';
+  for (var i = 0; i < count; i++) {
+    msg += (' File ' + i + ':\n');
+    msg += ('\turi: ' + files[i][1] + '\n');
+  }
+  document.getElementById('output').textContent = msg;
+};
+
+//addDropTarget('Windows', 'Firefox', 'output', cb);
+addDropTarget('OSX', 'Safari', 'output', cb);
+
+</script>
+
+</body>
+</html>
