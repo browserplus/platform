@@ -51,10 +51,10 @@ typedef enum {
     BPTCallBack,/*!< callback type. */
     BPTNativePath, /*!< pathname type - represented as a native path: UTF8
                      on unix and UTF16 on windows.  */
-    BPTWritableNativePath, /*!< Same as BPTNativePath, but services may (over)write
-                             the contents of the file specified */   
-    BPTAny      /*!< When specified in an argument description, denotes
+    BPTAny,     /*!< When specified in an argument description, denotes
                      that any data type is allowable. */
+    BPTWritableNativePath /*!< Same as BPTNativePath, but services may (over)write
+                               the contents of the file specified */   
 } BPType;
 
 /* definition of basic types */
