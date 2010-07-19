@@ -105,9 +105,15 @@ ELSE ()
       SET(CMAKE_FRAMEWORK_PATH "${CMAKE_OSX_SYSROOT}/System/Library/Frameworks"
 	      CACHE STRING "use 10.4 frameworks" FORCE)
 
+      GET_FILENAME_COMPONENT( tmp1 "${CMAKE_CURRENT_LIST_FILE}" PATH )
+      SET( BP_ALIAS_LIST "${tmp1}/alias_list.txt" )
+
       SET(CMAKE_MODULE_LINKER_FLAGS "${minVersionFlag} ${isysrootFlag}")
       SET(CMAKE_EXE_LINKER_FLAGS "-dead_strip -dead_strip_dylibs ${minVersionFlag} ${isysrootFlag}")
       SET(CMAKE_SHARED_LINKER_FLAGS "${minVersionFlag} ${isysrootFlag}  -Wl,-single_module")
+      #SET(CMAKE_MODULE_LINKER_FLAGS "${minVersionFlag} ${isysrootFlag} -alias_list ${BP_ALIAS_LIST} -lgcov")
+      #SET(CMAKE_EXE_LINKER_FLAGS "-dead_strip -dead_strip_dylibs ${minVersionFlag} ${isysrootFlag} -alias_list ${BP_ALIAS_LIST} -lgcov")
+      #SET(CMAKE_SHARED_LINKER_FLAGS "${minVersionFlag} ${isysrootFlag} -alias_list ${BP_ALIAS_LIST}  -Wl,-single_module -lgcov")
       ADD_DEFINITIONS(-DMACOSX -D_MACOSX -DMAC -D_MAC -DXP_MACOSX)
       SET(CMAKE_C_COMPILER gcc-4.0)
       SET(CMAKE_CXX_COMPILER g++-4.0)
@@ -120,6 +126,7 @@ ELSE ()
     SET(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -g")
     #SET(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -g -fprofile-arcs -ftest-coverage")
     SET(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -Os")
+    #SET(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -Os -fprofile-arcs -ftest-coverage")
     SET(CMAKE_MODULE_LINKER_FLAGS_RELEASE "-Wl,-x")
     SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "-Wl,-x")
     SET(CMAKE_SHARED_LINKER_FLAGS_RELEASE "-Wl,-x")
@@ -127,7 +134,7 @@ ENDIF ()
 
 # define this for a platform build
 #
-ADD_DEFINITIONS(-DBP_PLATFORM_BUILD)
+ADD_DEFteralINITIONS(-DBP_PLATFORM_BUILD)
 
 # can't rely on CMAKE_SYSTEM_NAME.  It's set by calling PROJECT() or some
 # such.  So we define system name ourselves based on other, more reliable
