@@ -134,7 +134,7 @@ ENDIF ()
 
 # define this for a platform build
 #
-ADD_DEFteralINITIONS(-DBP_PLATFORM_BUILD)
+ADD_DEFINITIONS(-DBP_PLATFORM_BUILD)
 
 # can't rely on CMAKE_SYSTEM_NAME.  It's set by calling PROJECT() or some
 # such.  So we define system name ourselves based on other, more reliable
