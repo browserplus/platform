@@ -204,7 +204,7 @@ getTempDirectory()
     }
     tempDir = buf;
     tempDir /= "YahooBrowserPlus";
-    boost::filesystem::create_directories(bpTempDir);
+    boost::filesystem::create_directories(tempDir);
     return tempDir;
 }
 
