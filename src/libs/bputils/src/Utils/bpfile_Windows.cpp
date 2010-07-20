@@ -203,16 +203,9 @@ getTempDirectory()
         throw tFileSystemError("GetTempPathW fails", Path(), Path(), ec);
     }
     tempDir = buf;
-    Path bpTempDir = tempDir / "BrowserPlus";
-    if (exists(bpTempDir) && !isDirectory(bpTempDir)) {
-        BPLOG_WARN_STRM(bpTempDir << " exists, using " << tempDir);
-        bpTempDir = tempDir;
-    } else {
-        if (!isDirectory(bpTempDir)) {
-            boost::filesystem::create_directories(bpTempDir);
-        }
-    }
-    return bpTempDir;
+    tempDir /= "YahooBrowserPlus";
+    boost::filesystem::create_directories(bpTempDir);
+    return tempDir;
 }
 
 
