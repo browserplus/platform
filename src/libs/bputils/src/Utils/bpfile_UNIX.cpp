@@ -131,10 +131,9 @@ getTempDirectory()
             tempDir = stringRefToUTF8(ctmpDir);
             CFRelease(ctmpDir);
             CFRelease(tmpUrl);
-        }
-        else 
-        {
-            BP_THROW_FATAL("Can't get temp dir");
+        } else {
+            boost::system::error_code ec(errno, boost::system::system_category);
+            throw tFileSystemError("Can't get temp dir", Path(), Path(), ec);
         }
     }
 
