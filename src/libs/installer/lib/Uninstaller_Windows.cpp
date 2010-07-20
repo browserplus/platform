@@ -224,13 +224,18 @@ Uninstaller::run(bool fromRunonce)
         removeDirIfEmpty(path.parent_path());
     }
 
-
     // remove add/remove programs entry
     try {
         deleteKey("HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Yahoo! BrowserPlus");
     } catch (const Exception& e) {
         BPLOG_WARN_STRM("failed to get remove add/remove programs entry " << e.what());
         m_error = true;
+    }
+
+    // remove temp dir
+    bpf::Path tempDir = bpf::getTempDirectory();
+    if (tempDir.filename() == bpf::Path("BrowserPlus")) {
+        (void) bpf::remove(tempDir);
     }
 
     // Remove platform, must be last.

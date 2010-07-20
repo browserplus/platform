@@ -831,7 +831,7 @@ main(int argc, const char** argv)
     
         // debug logging on be default.  logfile cannot be in same dir
         // as executable since a mounted mac .dmg is read-only
-        Path logFile = getTempDirectory() / "BrowserPlusInstaller.log";
+        Path logFile = getTempDirectory().parent_path() / "BrowserPlusInstaller.log";
         (void) remove(logFile);
         string logLevel = bp::log::levelToString(bp::log::LEVEL_ALL);
 
@@ -923,7 +923,18 @@ main(int argc, const char** argv)
         Path configPath = exeDir / "installer.config";
         Path keyPath = exeDir / "BrowserPlus.crt";
 
-        destDir = getTempPath(getTempDirectory(), "BrowserPlusInstaller");
+        // Unpack into product temp dir.  Doze sometimes has
+        // issues executing .exe files out of system temp.
+        Path prodTempDir = bp::paths::getProductTempDirectory();
+        if (!isDirectory(prodTempDir)) {
+            (void) remove(prodTempDir);
+            try {
+                boost::filesystem::create_directories(prodTempDir);
+            } catch(const tFileSystemError&) {
+                BP_THROW("unable to create " + prodTempDir.externalUtf8());
+            }
+        }
+        destDir = getTempPath(prodTempDir, "BrowserPlusInstaller");
         (void) remove(destDir);  // doze re-uses same dir.  sigh
 
         list<string> servers;

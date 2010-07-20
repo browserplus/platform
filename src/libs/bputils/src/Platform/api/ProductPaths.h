@@ -61,6 +61,12 @@ namespace bp {
         bp::file::Path getProductTopDirectory();
 
         /**
+         *   Get path to product temp directory
+         *   \return   path to product temp directory
+         */
+        bp::file::Path getProductTempDirectory();
+
+        /**
          *   Get path to "base" directory for specified version.
          *   This is the directory under which versioned platform 
          *   files will be kept. Letting all args default gets 

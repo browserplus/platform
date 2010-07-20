@@ -256,13 +256,13 @@ namespace bp {
         /** Get a path within the specified dir that in not in use.
          *  \param tempDir [IN] - path to directory
          *  \param prefix [IN] - prefix to append to resulting path name
-         *  \returns - path within tempDir (empty on failure)
+         *  \returns - path within tempDir (throws on failure)
          */
         Path getTempPath(const Path& tempDir,
                          const std::string& prefix); 
 
         /**  Get path to user's temporary directory.
-         *   \returns   path to user's temporary directory (empty on failure)
+         *   \returns   path to user's temporary directory (throws on failure)
          */
         Path getTempDirectory();
 

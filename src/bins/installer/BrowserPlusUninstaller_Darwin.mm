@@ -41,7 +41,7 @@ main(int argc, const char** argv)
 {
     try {
         // debug logging on be default
-        Path logFile = getTempDirectory() / "BrowserPlusUninstaller.log";
+        Path logFile = getTempDirectory().parent_path() / "BrowserPlusUninstaller.log";
         string logLevel = "debug";
 
         bool quiet = false;

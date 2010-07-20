@@ -29,7 +29,8 @@
 #include <windows.h>
 #include "BPInstaller/BPInstaller.h"
 #include "BPUtils/bpexitcodes.h"
-#include "BPUtils/BPFile.h"
+#include "BPUtils/bpfile.h"
+#include "BPUtils/ProductPaths.h"
 #include "BPUtils/bplocalization.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bpprocess.h"
@@ -51,7 +52,7 @@ void forkChild( const string& sChildName, const vector<string>& vsArgs );
 
 void setupLogging( bool bIsParent )
 {
-    Path logFile = getTempDirectory() / "BrowserPlusUninstaller.log";
+    Path logFile = getTempDirectory().parent_path() / "BrowserPlusUninstaller.log";
     bp::log::Level level = bp::log::LEVEL_DEBUG;
 
     bp::log::FileMode mode = bIsParent ?
@@ -118,70 +119,88 @@ int doChild( const vector<string>& vsArgs )
 void forkChild( const string& sChildName, const vector<string>& vsParentArgs )
 {
     BPLOG_FUNC_SCOPE;
-    
+
     // Get path to current (parent) exe.
     wchar_t wszParentPath[MAX_PATH];
     GetModuleFileNameW( NULL, wszParentPath, MAX_PATH );
 
-    // Copy parent exe into temp file.
-    Path childPath = getTempDirectory() / sChildName;
-    CopyFileW( wszParentPath, childPath.external_file_string().c_str(), FALSE );
-
-    // Open temp file with delete-on-close.
-    HANDLE hChild = CreateFileW( childPath.external_file_string().c_str(),
-                                 GENERIC_READ,
-                                 FILE_SHARE_READ|FILE_SHARE_DELETE, 0,
-                                 OPEN_EXISTING, FILE_FLAG_DELETE_ON_CLOSE, 0 );
-
-    // Setup the child's command line.
+    // Copy parent exe into temp file in system temp dir.
+    Path tempDir = getTempDirectory().parent_path();
+    HANDLE hChild = NULL;
+    Path childPath;
     vector<string> vsChildArgs;
-    vsChildArgs.push_back( "\"" + childPath.externalUtf8() + "\""); 
-    vsChildArgs.push_back("/child");
+    wchar_t* wszChildCmd = NULL;
+    try {
+        childPath = tempDir / sChildName;
 
-    // Add all the parent's args.
-    for (vector<string>::const_iterator it = vsParentArgs.begin();
-         it != vsParentArgs.end(); ++it) {
-        vsChildArgs.push_back( *it );
-    }
+        // Setup the child's command line.
+        vsChildArgs.push_back( "\"" + childPath.externalUtf8() + "\""); 
+        vsChildArgs.push_back("/child");
 
-    // Convert arg vec to wide string.
-    stringstream ss;
-    copy( vsChildArgs.begin(), vsChildArgs.end(),
-          std::ostream_iterator<string>( ss, " " ) );
-    wstring wsChildArgs = utf8ToWide( ss.str() );
+        // Add all the parent's args.
+        for (vector<string>::const_iterator it = vsParentArgs.begin();
+             it != vsParentArgs.end(); ++it) {
+            vsChildArgs.push_back( *it );
+        }
+
+        // Create a deleteOnClose copy of ourselves and launch it
+        CopyFileW( wszParentPath, childPath.external_file_string().c_str(), FALSE );
+
+        // Open temp file with delete-on-close.
+        hChild = CreateFileW( childPath.external_file_string().c_str(),
+                              GENERIC_READ,
+                              FILE_SHARE_READ|FILE_SHARE_DELETE, 0,
+                              OPEN_EXISTING, FILE_FLAG_DELETE_ON_CLOSE, 0 );
+        if ( !hChild ) {
+            throw string( "unable to create handle for " + childPath.externalUtf8() );
+        }
+
+        // Convert arg vec to wide string.
+        stringstream ss;
+        copy( vsChildArgs.begin(), vsChildArgs.end(),
+              std::ostream_iterator<string>( ss, " " ) );
+        wstring wsChildArgs = utf8ToWide( ss.str() );
     
-    // CreateProcess demands a mutable cmd line. 
-    size_t len = wsChildArgs.length() + 1;
-    wchar_t* wszChildCmd = new wchar_t[len];
-    wcsncpy_s( wszChildCmd, len, wsChildArgs.c_str(), len-1 );
+        // CreateProcess demands a mutable cmd line. 
+        size_t len = wsChildArgs.length() + 1;
+        wszChildCmd = new wchar_t[len];
+        wcsncpy_s( wszChildCmd, len, wsChildArgs.c_str(), len-1 );
 
-    STARTUPINFOW si;
-    ZeroMemory(&si, sizeof(STARTUPINFOW));
-    si.cb = sizeof(STARTUPINFOW);
-    PROCESS_INFORMATION pi;
-    ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));
-    BOOL bRet = CreateProcessW( 0, wszChildCmd, 0, 0, FALSE, 
-                                NORMAL_PRIORITY_CLASS, 0, 0, &si, &pi );
-    if (!bRet) {
-        // hrm, couldn't run child.  We'll do the uninstall ourselves.  
-        // This may leave cruft, especially BrowserPlusUninstaller.exe, 
-        // but it's the best we can do.
-        BPLOG_ERROR( bp::error::lastErrorString( "failed to launch: " 
-                                                 + wideToUtf8( wszChildCmd )));
-        remove( childPath );
-        doWork( vsChildArgs );
-    } else {
+        STARTUPINFOW si;
+        ZeroMemory(&si, sizeof(STARTUPINFOW));
+        si.cb = sizeof(STARTUPINFOW);
+        PROCESS_INFORMATION pi;
+        ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));
+        BOOL bRet = CreateProcessW( 0, wszChildCmd, 0, 0, FALSE, 
+                                    NORMAL_PRIORITY_CLASS, 0, 0, &si, &pi );
+        if ( !bRet ) {
+            throw string( bp::error::lastErrorString( "failed to launch: " 
+                                                      + wideToUtf8( wszChildCmd )));
+        }
+
         // Give the child a chance to run.
         BPLOG_INFO_STRM( "launched: " << wideToUtf8( wszChildCmd ));
         Sleep( 100 );
+    } catch (const string& s ) {
+        // hrm, couldn't run child.  We'll do the uninstall ourselves.  
+        // This may leave cruft, especially BrowserPlusUninstaller.exe, 
+        // but it's the best we can do.
+        BPLOG_ERROR( "error launching child uninstall (\'" + s 
+                     + "\'), completing uninstall in parent" );
+        remove( childPath );
+        doWork( vsChildArgs );
     }
 
-    delete[] wszChildCmd;
+    if ( wszChildCmd ) {
+        delete[] wszChildCmd;
+    }
 
     // Close our handle to the new process. Because the process is
     // memory-mapped, there will still be a handle held by the O/S, so
     // it won't get deleted.
-    CloseHandle( hChild );
+    if ( hChild ) {
+        CloseHandle( hChild );
+    }
 }
 
 

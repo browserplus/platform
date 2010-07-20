@@ -39,7 +39,6 @@ static string s_typeLibGuid;
 static string s_controlPanelGuid;
 #endif
 
-
 void 
 bp::install::utils::readPlatformInfo(const bpf::Path& path)
 {
@@ -90,7 +89,6 @@ bp::install::utils::readPlatformInfo(const bpf::Path& path)
             BPLOG_WARN_STRM("unable to iterate thru " << dir
                             << ": " << e.what());
         }
-        
     }
 }
 

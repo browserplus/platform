@@ -95,6 +95,12 @@ namespace bp {
             (void) remove(path);
             removeDirIfEmpty(path.parent_path());
 
+            // remove temp dir
+            Path tempDir = getTempDirectory();
+            if (tempDir.filename() == "BrowserPlus") {
+                (void) remove(tempDir);
+            }
+
             // remove receipts from old packagemaker installer
             dir = utils::getFolderPath(kInstallerReceiptsFolderType);
             path = dir / "BrowserPlus.pkg";
