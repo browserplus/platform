@@ -138,32 +138,17 @@ getTempDirectory()
         }
     }
 
-    Path bpTempDir = tempDir / "BrowserPlus";
-    if (exists(bpTempDir) && !isDirectory(bpTempDir)) {
-        BPLOG_WARN_STRM(bpTempDir << " exists, using " << tempDir);
-        bpTempDir = tempDir;
-    } else {
-        if (!isDirectory(bpTempDir)) {
-            boost::filesystem::create_directories(bpTempDir);
-        }
-    }
-    return bpTempDir;
+    tempDir /= "YahooBrowserPlus";
+    boost::filesystem::create_directories(tempDir);
+    return tempDir;
 }
 #else
 Path
 getTempDirectory()
 {
-    Path tempDir("/tmp");
-    Path bpTempDir = tempDir / "BrowserPlus";
-    if (exists(bpTempDir) && !isDirectory(bpTempDir)) {
-        BPLOG_WARN_STRM(bpTempDir << " exists, using " << tempDir);
-        bpTempDir = tempDir;
-    } else {
-        if (!isDirectory(bpTempDir)) {
-            boost::filesystem::create_directories(bpTempDir);
-        }
-    }
-    return bpTempDir;
+    Path tempDir("/tmp/YahooBrowserPlus");
+    boost::filesystem::create_directories(tempDir);
+    return tempDir;
 }
 #endif
 
