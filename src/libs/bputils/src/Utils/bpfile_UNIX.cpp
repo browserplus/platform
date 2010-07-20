@@ -91,11 +91,79 @@ readLink(const Path& path)
 }
 
 
-#ifndef MACOSX
+#ifdef MACOSX
+static string
+stringRefToUTF8(CFStringRef cfStr)
+{
+    string rval;
+    CFIndex cfLen = CFStringGetLength(cfStr);
+
+    if (cfLen > 0) {
+        char stackBuffer[2048], *dynamicBuf = NULL;
+        char * buf = stackBuffer;
+        if ((size_t) (cfLen*4) >= sizeof(stackBuffer)) {
+            dynamicBuf = (char*) malloc(cfLen*4 + 1);
+            buf = dynamicBuf;
+        }
+        CFStringGetCString(cfStr, buf, cfLen*4 + 1,
+                           kCFStringEncodingUTF8);
+        rval.append(buf);
+        if (dynamicBuf) free(dynamicBuf);
+    }
+
+    return rval;
+}
+
+
 Path
 getTempDirectory()
 {
-    return Path("/tmp");
+    Path tempDir;
+    FSRef fref;
+    OSErr err = FSFindFolder(kUserDomain, kTemporaryFolderType, 
+                             kCreateFolder, &fref);
+    if (err == noErr) {
+        CFURLRef tmpUrl = CFURLCreateFromFSRef(kCFAllocatorSystemDefault,
+                                               &fref);
+        if (tmpUrl != NULL) {
+            CFStringRef ctmpDir = CFURLCopyFileSystemPath(tmpUrl,
+                                                          kCFURLPOSIXPathStyle);
+            tempDir = stringRefToUTF8(ctmpDir);
+            CFRelease(ctmpDir);
+            CFRelease(tmpUrl);
+        }
+        else 
+        {
+            BP_THROW_FATAL("Can't get temp dir");
+        }
+    }
+
+    Path bpTempDir = tempDir / "BrowserPlus";
+    if (exists(bpTempDir) && !isDirectory(bpTempDir)) {
+        BPLOG_WARN_STRM(bpTempDir << " exists, using " << tempDir);
+        bpTempDir = tempDir;
+    } else {
+        if (!isDirectory(bpTempDir)) {
+            boost::filesystem::create_directories(bpTempDir);
+        }
+    }
+    return bpTempDir;
+}
+#else
+Path
+getTempDirectory()
+{
+    Path tempDir("/tmp");
+    Path bpTempDir = tempDir / "BrowserPlus";
+    if (exists(bpTempDir) && !isDirectory(bpTempDir)) {
+        BPLOG_WARN_STRM(bpTempDir << " exists, using " << tempDir);
+        bpTempDir = tempDir;
+    } else {
+        if (!isDirectory(bpTempDir)) {
+            boost::filesystem::create_directories(bpTempDir);
+        }
+    }
+    return bpTempDir;
 }
 #endif
 

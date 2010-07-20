@@ -87,6 +87,13 @@ bp::paths::getProductDirectory(int major,
 }
 
 
+bp::file::Path
+bp::paths::getProductTempDirectory()
+{
+    return doGetTopDir("Temp");
+}
+
+    
 Path
 bp::paths::getPermissionsDirectory()
 {
@@ -350,6 +357,7 @@ bp::paths::createDirectories(int major,
     try {
         bfs::create_directories(getProductTopDirectory());
         bfs::create_directories(getProductDirectory(major, minor, micro));
+        bfs::create_directories(getProductTempDirectory());
         bfs::create_directories(getPermissionsDirectory());
         bfs::create_directories(getServiceDirectory());
         bfs::create_directories(getServiceCacheDirectory());

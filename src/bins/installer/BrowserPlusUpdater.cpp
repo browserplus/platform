@@ -133,7 +133,7 @@ main(int argc, const char** argv)
         Installer::setLocalizedStringsPath(stringsPath, locale);
 
         // setup logging, may be overridden by -logPath=<path> and/or -logLevel=<level>
-        Path logFile = getTempDirectory() / "BrowserPlusUpdater.log";
+        Path logFile = getTempDirectory().parent_path() / "BrowserPlusUpdater.log";
         bp::log::Level logLevel = bp::log::LEVEL_ALL;
 
         // crack argv

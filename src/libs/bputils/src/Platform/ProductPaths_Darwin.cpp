@@ -161,30 +161,3 @@ bp::paths::getPluginPaths(int major,
     rval.push_back(pluginDir);
     return rval;
 }
-
-
-Path
-bp::file::getTempDirectory()
-{
-    Path tempDir;
-    FSRef fref;
-    OSErr err = FSFindFolder(kUserDomain, kTemporaryFolderType, 
-                             kCreateFolder, &fref);
-    if (err == noErr) {
-        CFURLRef tmpUrl = CFURLCreateFromFSRef(kCFAllocatorSystemDefault,
-                                               &fref);
-        if (tmpUrl != NULL) {
-            CFStringRef ctmpDir = CFURLCopyFileSystemPath(tmpUrl,
-                                                          kCFURLPOSIXPathStyle);
-            tempDir = stringRefToUTF8(ctmpDir);
-            CFRelease(ctmpDir);
-            CFRelease(tmpUrl);
-        }
-        else 
-        {
-            BP_THROW_FATAL("Can't get temp dir");
-        }
-    }
-
-    return tempDir;
-}
