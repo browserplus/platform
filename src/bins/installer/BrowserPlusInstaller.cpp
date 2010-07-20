@@ -330,6 +330,8 @@ private:
     // asynchronous steps
     void doInstall()
     {
+        BPLOG_DEBUG_STRM("doInstall(), m_destDir = " << m_destDir);
+
         boost::tuple<string, size_t, string> runItResult;
         string errMsg;
 
@@ -481,6 +483,8 @@ private:
         // own compiled in Installer.  When everyone is updated
         // to 2.6 or greater, m_runner can go away.
         string s = bp::file::utf8FromNative(platformDir.filename());
+        BPLOG_DEBUG_STRM("platformDir = " << platformDir
+                         << ", nativeLeaf = " << s);
         bp::ServiceVersion version;
         weak_ptr<IInstallerListener> wp(shared_from_this());
         if (!version.parse(s)) {
