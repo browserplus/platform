@@ -602,9 +602,9 @@ Transaction::Impl::~Impl()
 {
     consistencyCheck();
 
+    BPLOG_DEBUG_STRM(m_id << ":  HTTP transaction unregistered");
     removeFromImplMap();
     m_pListener.reset();
-    BPLOG_DEBUG_STRM(m_id << ":  HTTP transaction unregistered");
 
     closeConnection();
 
