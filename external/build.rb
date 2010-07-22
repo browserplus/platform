@@ -23,7 +23,7 @@ require 'timeout'
 include Config
 
 # configure thyself
-if CONFIG['arch'] =~ /mswin/
+if CONFIG['arch'] =~ /mswin/ || CONFIG['arch'] =~ /mingw32/
     $platform = "Windows"
     $sevenZCmd = "7z.exe"
 elsif CONFIG['arch'] =~ /darwin/
