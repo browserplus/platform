@@ -488,6 +488,13 @@ private:
         bp::ServiceVersion version;
         weak_ptr<IInstallerListener> wp(shared_from_this());
         if (!version.parse(s)) {
+            BPLOG_WARN_STRM("bad version: children of " << platformDir
+                            << " are: ");
+            bp::file::tDirIter endIter;
+            for (bp::file::tDirIter iter(platformDir); iter != endIter; ++iter) {
+                bp::file::Path p(iter->path());
+                BPLOG_WARN_STRM("\t" << p);
+            }
             BP_THROW("bad version: " + s);
         }
         bp::paths::createDirectories(version.majorVer(),
