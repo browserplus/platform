@@ -100,6 +100,7 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::select)
 // WritablePaths
 static bp::Object * cloneOrConvert(const bp::Object * o) 
 {
+    static std::string uriPrefix("file://");
     static std::string pathPrefix("path:");
     static std::string writablePathPrefix("writable_path:");
     
@@ -116,6 +117,9 @@ static bp::Object * cloneOrConvert(const bp::Object * o)
         } else if (!val.compare(0, writablePathPrefix.size(), writablePathPrefix)) {
             bp::file::Path path(val.substr(writablePathPrefix.size()));
             rv = new bp::WritablePath(path);
+        } else if (!val.compare(0, uriPrefix.size(), uriPrefix)) {
+            bp::file::Path path(val.substr(uriPrefix.size()));
+            rv = new bp::Path(path);
         }
     }
 
