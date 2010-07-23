@@ -66,7 +66,7 @@ int APIENTRY WinMain( HINSTANCE, HINSTANCE, LPSTR, int )
     // different logfile can be specified via command line.
     // debug logging on be default
     std::vector<std::string> args;
-    bp::file::Path logFile = bp::file::getTempDirectory()/"BrowserPlusInstaller.log";
+    bp::file::Path logFile = bp::file::getTempDirectory().parent_path() /"BrowserPlusInstaller.log";
 
     for (int i = 1; i < __argc; i++) {
         std::vector<std::string> arg = bp::strutil::split(__argv[i], "=");
