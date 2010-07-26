@@ -794,7 +794,7 @@ ServiceQuery::onLatestPlatform(const LatestPlatformServerAndVersion & latest)
 
         bp::http::RequestPtr req(WSProtocol::buildRequest(url));
         m_httpTransaction.reset(new bp::http::client::Transaction(req));
-        BPLOG_INFO_STRM(this << ": initiate GET of latest platform version for "
+        BPLOG_INFO_STRM(this << ": initiate GET of latest platform for "
                         << m_platform);
         m_httpTransaction->initiate(shared_from_this());
     } else {

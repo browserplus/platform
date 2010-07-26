@@ -576,16 +576,12 @@ private:
         doExit(0);
     }
 
+    // IFetcherListener overrides
+
     virtual void onTransactionFailed(unsigned int tid,
                                      const string& msg)
     {
-        if (m_skin) {
-            m_skin->errorMessage(Installer::getString(Installer::kErrorEncountered)
-                                 + ": " + msg);
-        }
     }
-    
-    // IFetcherListener overrides
 
     virtual void onDownloadProgress(unsigned int tid,
                                     const string& file,

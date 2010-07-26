@@ -1,4 +1,4 @@
-/**
+ /**
  * ***** BEGIN LICENSE BLOCK *****
  * The contents of this file are subject to the Mozilla Public License
  * Version 1.1 (the "License"); you may not use this file except in
@@ -501,6 +501,8 @@ QueryCache::pruneBlacklistedAndUnsupported(AvailableServiceList & lst)
 void
 QueryCache::latestPlatformVersion(std::string plat)
 {
+    BPLOG_INFO_STRM(this << ": initiate GET of latest platform version for "
+                    << plat);
     m_qType = T_PlatformVersion;
 
     if (m_serverURLs.size() == 0) {
