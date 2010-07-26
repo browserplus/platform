@@ -67,8 +67,12 @@ publicKey = nil
 privateKey = nil
 outDir = nil
 
-sdkDir = File.join(topDir, "..", "build", "bpsdk_internal")
+sdkDir = File.join(topDir, "..", "..", "..", "build", "bpsdk_internal")
 bpsigner = File.join(sdkDir, "signing", "bpsigner")
+if !File.exist?(bpsigner) 
+    puts "#{bpsigner} not found, script assumes that 'build' is a sibling of 'src'"
+    exit -1
+end
 
 # parse command line
 fileStart = 2
@@ -102,8 +106,13 @@ if certType != nil
     privateKey = "#{topDir}/#{certType}/#{signedBy}.pvk"
 end
 
-opensslPath = "#{topDir}/../../External/#{platform}/bin/openssl"
-ENV["OPENSSL_CONF"] = "#{topDir}/../../External/#{platform}/ssl/openssl.cnf"
+opensslPath = "#{topDir}/../../../external/#{platform}/bin/openssl"
+if !File.exist?(opensslPath) 
+    puts "#{opensslPath} not found"
+    exit -1
+end
+
+ENV["OPENSSL_CONF"] = "#{topDir}/../../../external/#{platform}/ssl/openssl.cnf"
 
 curdir = Dir.getwd
 Dir.chdir(topDir) do 
@@ -120,7 +129,7 @@ Dir.chdir(topDir) do
         # make private key
         runCmd("#{opensslPath} genrsa #{passOut} -des3 -out #{outDir}/#{certType}/#{signedBy}.pvk 4096") 
         # make public key (certificate)
-        runCmd("#{opensslPath} req #{passIn} -new -x509 -days 1000 -key #{outDir}/#{certType}/#{signedBy}.pvk -out #{outDir}/#{certType}/#{signedBy}.crt")
+        runCmd("#{opensslPath} req #{passIn} -new -x509 -days 5000 -key #{outDir}/#{certType}/#{signedBy}.pvk -out #{outDir}/#{certType}/#{signedBy}.crt")
 
     when "sign":
         usage() if certType == nil
