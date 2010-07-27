@@ -163,7 +163,8 @@ main(int argc, const char** argv)
 
         if (!logFile.empty()) {
             // TODO: size, layout, time format
-            bp::log::setupLogToFile(logFile, logLevel, bp::log::kSizeRollover);
+            bp::log::setupLogToFile(logFile, logLevel, bp::log::kSizeRollover,
+                                    bp::log::TIME_UTC, "standard", 512);
         } else {
             bp::log::setupLogToConsole(logLevel);
         }

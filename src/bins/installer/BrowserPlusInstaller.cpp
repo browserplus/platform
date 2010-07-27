@@ -836,7 +836,6 @@ main(int argc, const char** argv)
         // debug logging on be default.  logfile cannot be in same dir
         // as executable since a mounted mac .dmg is read-only
         Path logFile = getTempDirectory().parent_path() / "BrowserPlusInstaller.log";
-        (void) remove(logFile);
         string logLevel = bp::log::levelToString(bp::log::LEVEL_ALL);
 
         // we must get current user's locale, this may be overridded with the
@@ -897,7 +896,7 @@ main(int argc, const char** argv)
 
         bp::log::Level bpLogLevel = bp::log::levelFromString(logLevel);
         if (!logFile.empty()) {
-            bp::log::setupLogToFile(logFile, bpLogLevel, bp::log::kAppend);
+            bp::log::setupLogToFile(logFile, bpLogLevel, bp::log::kTruncate);
         } else if (!logLevel.empty()) {
             bp::log::setupLogToConsole(bpLogLevel);
         }
