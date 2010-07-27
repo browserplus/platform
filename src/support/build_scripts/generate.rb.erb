@@ -51,7 +51,7 @@ rescue LoadError
   require "json/json.rb"
 end
 
-platform = CONFIG['arch'] =~ /mswin/ ? "Windows" : "Darwin"
+platform = CONFIG['arch'] =~ /mswin|mingw/ ? "Windows" : "Darwin"
 
 exeSuffix = platform == "Windows" ? ".exe" : ""
 

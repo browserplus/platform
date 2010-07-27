@@ -17,7 +17,7 @@ require 'pathname'
 require 'rbconfig'
 include Config
 
-if CONFIG['arch'] =~ /mswin/
+if CONFIG['arch'] =~ /mswin|mingw/
     platform = 'Win32'
 else
     platform = 'Darwin'
@@ -32,7 +32,7 @@ $workDir = File.join($buildDir, "pab_#{bpVersion}-#{platform}", "work")
 
 installerExe = File.join($workDir, "install", "BrowserPlusInstaller")
 updatePkg = File.join($buildDir, updatePkgName)
-if CONFIG['arch'] =~ /mswin/
+if CONFIG['arch'] =~ /mswin|mingw/
     installerExe.gsub!(/\//, '\\')
     updatePkg.gsub!(/\//, '\\')
 end

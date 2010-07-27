@@ -45,7 +45,7 @@ usage() if certType == nil
 for i in serviceStart..ARGV.length-1
     service = ARGV[i]
     if !platform
-        if CONFIG['arch'] =~ /mswin/
+        if CONFIG['arch'] =~ /mswin|mingw/
             platform = "win32"
         else
             platform = "osx"
@@ -53,7 +53,7 @@ for i in serviceStart..ARGV.length-1
     end
 
     exeSuffix = ""
-    if CONFIG['arch'] =~ /mswin/
+    if CONFIG['arch'] =~ /mswin|mingw/
         exeSuffix = ".exe"
     end
 

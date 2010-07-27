@@ -52,7 +52,7 @@ usage() if ARGV.length < 1 || ARGV[1] == "help"
 
 
 topDir = File.dirname(File.expand_path(__FILE__))
-platform = CONFIG['arch'] =~ /mswin/ ? "Windows" : "Darwin"
+platform = CONFIG['arch'] =~ /mswin|mingw/ ? "Windows" : "Darwin"
 signedBy = "BrowserPlus"
 timeurl = "http://timestamp.verisign.com/scripts/timstamp.dll"
 

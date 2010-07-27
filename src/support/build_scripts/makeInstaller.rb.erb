@@ -38,7 +38,7 @@ bpVersion = "<%= $cmake["VersionString"] %>"
 platform = nil
 libSuffix = nil
 exeSuffix = nil
-if CONFIG['arch'] =~ /mswin/
+if CONFIG['arch'] =~ /mswin|mingw/
     # you have my profound sympathy...
     platform = 'Windows'
     plat_fname = 'Win32'
