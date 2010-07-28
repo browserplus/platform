@@ -42,18 +42,16 @@
 #
 SET(BrowserPlusPlatform_MAJOR_VERSION 2)
 SET(BrowserPlusPlatform_MINOR_VERSION 9)
-SET(BrowserPlusPlatform_MICRO_VERSION 5)
+SET(BrowserPlusPlatform_MICRO_VERSION 6)
 
 # Previous mimetypes which we also support as a CMAKE list
 # Syntax is:
-#  SET(BackwardCompatibleMimeTypes 
-#        mimetype1 mimetype2 ... mimetypeN)
-#
+#  SET(BackwardCompatibleMimeTypes mimetype1 mimetype2 ... mimetypeN)
 SET(BackwardCompatibleMimeTypes)
 
 # activeX control's clsid and typelib guid
 # clsid (ActiveXGuid) should be changed EVERY TIME YOU BUMP PLATFORM VERSION
-SET(ActiveXGuid "704886B0-03A6-4D15-B0B0-4FAB589FA94F")
+SET(ActiveXGuid "55CD1E12-DFB2-4C6C-A7A5-F9C68F5B0056")
 SET(TypeLibGuid "399F26B4-E0C6-4345-8AD6-7AC1D86DAAA5") 
 
 # guid for control panel item on vista and later
