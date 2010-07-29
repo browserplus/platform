@@ -1,3 +1,8 @@
+07/29/2010 - Changes from 2.9.6 to 2.9.7
+  * 2.9.7 is a clone of 2.9.4 with a new version number, used only to
+    address the expiration of our prod certs.  There are no code changes
+    (other than browserplus.js) from 2.9.2 to 2.9.7.
+
 07/28/2010 - Changes from 2.9.5 to 2.9.6
   * a new version number
 
