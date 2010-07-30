@@ -56,7 +56,7 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
             }, 1000);
         },        
 
-        isAtLeastVersion: function(wantVer) {
+        isAtLeastVersion: function(wantVer, testVersion) {
             function parseVersion(vStr) {
                 if (typeof(vStr) != 'string') {
                     throw "invalid version string: '"+String(vStr)+"'";
@@ -68,7 +68,7 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
                     (parseInt(v[2]) || 0)
                 ];
             }
-            var gv = parseVersion(BrowserPlus.getPlatformInfo().version);
+            var gv = parseVersion(testVersion ? testVersion : BrowserPlus.getPlatformInfo().version);
             var wv = parseVersion(wantVer);
             for (var i = 0; i < 3; i++) {
                 if (gv[i] != wv[i]) {
@@ -341,6 +341,16 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
                             for (var i = 0; i < cbs.length; i++) cbs[i](res);
                         };
                         try {
+			    // completely disable versions prior to 2.9.7 (given the certificate
+			    // in use with those versions expires Aug 10, 2010
+			    if (!BrowserPlus.isAtLeastVersion("2.9.7", _corePlugin().Info().version)) {
+				proxyInitCallback({
+					    success: false,
+					    error: "bp.notInstalled",
+					    verboseError: "versions < 2.9.7 have been disabled"
+					    });
+				return;
+			    }
                             _corePlugin().Initialize(_args, proxyInitCallback);
                         } catch(e) {
                             // we'll get here when initialize fails.  this
