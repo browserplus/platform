@@ -33,7 +33,6 @@
 #include "InstallerSkin.h"
 #include "InstallerSkinVerbose.h"
 #include "InstallerSkinGUI.h"
-#include "InstallerRunner.h"
 #include "InstallProcessRunner.h"
 
 #include <string>
@@ -246,7 +245,7 @@ public:
           m_autoUpdatePermissions(autoUpdatePermissions), m_skin(skin), m_rl(rl), 
           m_width(width), m_height(height), m_title(title),
           m_installerLock(NULL), m_state(ST_Started),
-          m_downloadingServices(false), m_26orLater(false), m_logPath(logPath),
+          m_downloadingServices(false), m_logPath(logPath),
           m_logLevel(logLevel), m_distQuery()
           
     {
@@ -289,7 +288,6 @@ private:
     string m_autoUpdatePermissions;
     shared_ptr<InstallerSkin> m_skin;
     bp::runloop::RunLoop * m_rl;
-    shared_ptr<InstallerRunner> m_runner;
     shared_ptr<InstallProcessRunner> m_processRunner;
     unsigned int m_width, m_height;
     string m_title;
@@ -314,14 +312,6 @@ private:
     } m_state;
     bool m_downloadingServices;
 
-    // XXX: note about m_26orLater
-    // XXX: 100% progress has a special meaning prior to 2.6, it tells the InstallManager 
-    // XXX: that installation is complete.  2.6 and later use IInstallerListener::onDone().
-    // XXX: To remain compatible with 2.5 and earlier, we must know whether or not
-    // XXX: to expect onDone() to be invoked.  When 2.5 and prior are history,
-    // XXX: this m_26orLater hack can be removed
-    bool m_26orLater;
-    
     Path m_logPath;
     string m_logLevel;
     shared_ptr<DistQuery> m_distQuery; // only set for new installs
@@ -477,11 +467,8 @@ private:
 
         if (m_skin) m_skin->progress(69);
 
-        // platformDir is all set up, install from it.
-        // Starting with version 2.6.0, we install by invoking 
-        // dir/BrowserPlusUpdater.  Prior to that, we use our
-        // own compiled in Installer.  When everyone is updated
-        // to 2.6 or greater, m_runner can go away.
+        // platformDir is all set up, install from it
+        // by invoking dir/BrowserPlusUpdater.
         string s = bp::file::utf8FromNative(platformDir.filename());
         BPLOG_DEBUG_STRM("platformDir = " << platformDir
                          << ", nativeLeaf = " << s);
@@ -500,21 +487,11 @@ private:
         bp::paths::createDirectories(version.majorVer(),
                                      version.minorVer(),
                                      version.microVer());
-        m_26orLater = version.majorVer() >= 2
-                      && version.minorVer() >= 6;
-        if (m_26orLater) {
-            BPLOG_DEBUG_STRM("install version " << version.asString() 
-                             << " using BrowserPlusUpdater");
-            m_processRunner.reset(new InstallProcessRunner(m_logPath, m_logLevel));
-            m_processRunner->setListener(wp);
-            m_processRunner->start(platformDir, false);
-        } else {
-            BPLOG_DEBUG_STRM("install version " << version.asString() 
-                             << " using Installer instance");
-            m_runner.reset(new InstallerRunner);
-            m_runner->setListener(wp);
-            m_runner->start(platformDir, false);
-        }
+        BPLOG_DEBUG_STRM("install version " << version.asString() 
+                         << " using BrowserPlusUpdater");
+        m_processRunner.reset(new InstallProcessRunner(m_logPath, m_logLevel));
+        m_processRunner->setListener(wp);
+        m_processRunner->start(platformDir, false);
     }
     
     void shutdown()
@@ -639,12 +616,6 @@ private:
             // scale installation progress between 70 - 100
             pct = (unsigned int) ((((double) pct / 100.0) * 30.0) + 70);
             m_skin->progress(pct);
-        }
-
-        // XXX: see note above about m_26orLater
-        if (!m_26orLater && pct == 100) {
-            BPLOG_DEBUG_STRM("got 100% progress, assuming done");
-            onDone();
         }
 	}
 
