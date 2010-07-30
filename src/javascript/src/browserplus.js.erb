@@ -341,16 +341,18 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
                             for (var i = 0; i < cbs.length; i++) cbs[i](res);
                         };
                         try {
-			    // completely disable versions prior to 2.9.7 (given the certificate
-			    // in use with those versions expires Aug 10, 2010
-			    if (!BrowserPlus.isAtLeastVersion("2.9.7", _corePlugin().Info().version)) {
-				proxyInitCallback({
-					    success: false,
-					    error: "bp.notInstalled",
-					    verboseError: "versions < 2.9.7 have been disabled"
-					    });
-				return;
-			    }
+                            // completely disable versions prior to 2.9.7 (given the certificate
+                            // in use with those versions expires Aug 10, 2010
+                            var now = new Date();
+                            var exp = new Date(2010, 7, 8, 23, 59, 59);
+                            if (now > exp && !BrowserPlus.isAtLeastVersion("2.9.7", _corePlugin().Info().version)) {
+                                proxyInitCallback({
+                                    success: false,
+                                    error: "bp.notInstalled",
+                                    verboseError: "versions < 2.9.7 have been disabled"
+                                });
+                                return;
+                            }
                             _corePlugin().Initialize(_args, proxyInitCallback);
                         } catch(e) {
                             // we'll get here when initialize fails.  this
