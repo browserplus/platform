@@ -77,8 +77,8 @@ SET(WindowsVersionInfo
 
 # Our mimetype
 #
-SET(MimeType application/x-yahoo-browserplus_${BrowserPlusPlatform_MAJOR_VERSION})
-SET(FullMimeType application/x-yahoo-browserplus_${BrowserPlusPlatform_MAJOR_VERSION}.${BrowserPlusPlatform_MINOR_VERSION}.${BrowserPlusPlatform_MICRO_VERSION})
+SET(MimeType application/x-browserplus_${BrowserPlusPlatform_MAJOR_VERSION})
+SET(FullMimeType application/x-browserplus_${BrowserPlusPlatform_MAJOR_VERSION}.${BrowserPlusPlatform_MINOR_VERSION}.${BrowserPlusPlatform_MICRO_VERSION})
 
 # Plugin name and description 
 SET(PluginName "BrowserPlus (from Yahoo!) v${VersionString}")
