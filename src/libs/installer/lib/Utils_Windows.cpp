@@ -472,7 +472,7 @@ bp::install::utils::unregisterCruftControls(bool force)
             continue;
         }
         const string& edge = vec[vec.size() - 1];
-        string mimePrefix("application/x-yahoo-browserplus_");
+        string mimePrefix("application/x-browserplus_");
         if (edge.find(mimePrefix) != 0 || edge.find(".") == string::npos) {
             continue;
         }
