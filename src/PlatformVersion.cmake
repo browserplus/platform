@@ -51,7 +51,7 @@ SET(BackwardCompatibleMimeTypes)
 
 # activeX control's clsid and typelib guid
 # clsid (ActiveXGuid) should be changed EVERY TIME YOU BUMP PLATFORM VERSION
-SET(ActiveXGuid "18DFAE23-7CF7-4D8D-992F-BA969EBDBE2D")
+SET(ActiveXGuid "79F25DFA-4A02-42A3-A936-16CF8DBF5448")
 SET(TypeLibGuid "399F26B4-E0C6-4345-8AD6-7AC1D86DAAA5") 
 
 # guid for control panel item on vista and later
