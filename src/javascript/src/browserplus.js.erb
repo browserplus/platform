@@ -235,6 +235,11 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
 
             if (_setupPlugin() && _corePlugin() !== null) {
                 success = true; 
+            } else {
+                _mimeType = "application/x-yahoo-browserplus_2.9.8";
+                if (_setupPlugin() && _corePlugin() !== null) {
+                    success = true; 
+                }
             }
 
             if (!success) {
@@ -265,7 +270,7 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
                                 _detectBrowser().browser !== "Explorer")
                             {
                                 // construct a new mimetype
-                                var newMT = "application/x-yahoo-browserplus_";
+                                var newMT = "application/x-browserplus_";
                                 newMT += res.verboseError;
                                 if (newMT !== _mimeType) {
                                     _mimeType = newMT;
@@ -341,11 +346,11 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
                             for (var i = 0; i < cbs.length; i++) cbs[i](res);
                         };
                         try {
-                            // completely disable versions prior to 2.9.7 (given the certificate
+                            // completely disable versions prior to 2.9.8 (given the certificate
                             // in use with those versions expires Aug 10, 2010
                             var now = new Date();
                             var exp = new Date(2010, 7, 8, 23, 59, 59);
-                            if (now > exp && !BrowserPlus.isAtLeastVersion("2.9.7", _corePlugin().Info().version)) {
+                            if (now > exp && !BrowserPlus.isAtLeastVersion("2.9.8", _corePlugin().Info().version)) {
                                 proxyInitCallback({
                                     success: false,
                                     error: "bp.notInstalled",
@@ -688,3 +693,4 @@ if (typeof YAHOO == "undefined" || !YAHOO) {
 if (typeof YAHOO["bp"] == "undefined" || !YAHOO["bp"]) {
     YAHOO.bp = BrowserPlus;
 }
+
