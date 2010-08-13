@@ -1,8 +1,0 @@
-#
-# Aliases to fix the gcov problem for programs built against the 10.4u SDK
-#
-#_fstat _fstat$INODE64
-#_fdopen _fdopen$UNIX2003
-#_fcntl _fcntl$UNIX2003
-#_open _open$UNIX2003
-#_close _close$UNIX2003

@@ -11,11 +11,17 @@
     <target name="clean_make_debug" unless="is.windows">
         <delete dir="../build_debug" />
     </target>
+    <target name="clean_make_codecoverage" unless="is.windows">
+        <delete dir="../build_codecoverage" />
+    </target>
     <target name="clean_make_release" unless="is.windows">
         <delete dir="../build_release" />
     </target>
     <target name="clean_vc08_debug" if="is.windows">
         <delete dir="../build" />
+    </target>
+    <target name="clean_vc08_codecoverage" if="is.windows">
+        <!-- NO-OP -->
     </target>
     <target name="clean_vc08_release" if="is.windows">
         <delete dir="../build" />
@@ -26,6 +32,15 @@
             <arg line="-G &quot;Unix Makefiles&quot; -DCMAKE_BUILD_TYPE:STRING=Debug ../src" />
         </exec>
         <exec executable="make" dir="../build_debug" failonerror="true">
+            <arg line="-j3" />
+        </exec>
+    </target>
+    <target name="build_make_codecoverage" unless="is.windows">
+        <mkdir dir="../build_codecoverage" />
+        <exec executable="cmake" dir="../build_codecoverage" failonerror="true">
+            <arg line="-G &quot;Unix Makefiles&quot; -DCMAKE_BUILD_TYPE:STRING=CodeCoverage ../src" />
+        </exec>
+        <exec executable="make" dir="../build_codecoverage" failonerror="true">
             <arg line="-j3" />
         </exec>
     </target>
@@ -62,6 +77,9 @@ devenv BrowserPlus.sln /Build Debug /Project ALL_BUILD
         </exec>
         <delete file="../build/x1.bat" />
     </target>
+    <target name="build_vc08_codecoverage" if="is.windows">
+        <!-- NO-OP -->
+    </target>
     <target name="build_vc08_release" if="is.windows">
         <mkdir dir="../build" />
         <delete file="../build/x1.bat" />
@@ -91,6 +109,11 @@ devenv BrowserPlus.sln /Build Release /Project ALL_BUILD
             <arg line="test" />
         </exec>
     </target>
+    <target name="test_make_codecoverage" unless="is.windows">
+        <exec executable="make" dir="../build_codecoverage" failonerror="true">
+            <arg line="test" />
+        </exec>
+    </target>
     <target name="test_make_release" unless="is.windows">
         <exec executable="make" dir="../build_release" failonerror="true">
             <arg line="test" />
@@ -109,6 +132,9 @@ devenv BrowserPlus.sln /Build Debug /Project test
         </exec>
         <delete file="../build/x1.bat" />
     </target>
+    <target name="test_vc08_codecoverage" if="is.windows">
+        <!-- NO-OP -->
+    </target>
     <target name="test_vc08_release" if="is.windows">
         <delete file="../build/x1.bat" />
         <echo file="../build/x1.bat">@echo off
@@ -123,9 +149,12 @@ devenv BrowserPlus.sln /Build Release /Project test
         <delete file="../build/x1.bat" />
     </target>
     <target name="clean_debug" depends="clean_make_debug,clean_vc08_debug" />
+    <target name="clean_codecoverage" depends="clean_make_codecoverage,clean_vc08_codecoverage" />
     <target name="clean_release" depends="clean_make_release,clean_vc08_release" />
     <target name="build_debug" depends="build_make_debug,build_vc08_debug" />
+    <target name="build_codecoverage" depends="build_make_codecoverage,build_vc08_codecoverage" />
     <target name="build_release" depends="build_make_release,build_vc08_release" />
     <target name="test_debug" depends="test_make_debug,test_vc08_debug" />
+    <target name="test_codecoverage" depends="test_make_codecoverage,test_vc08_codecoverage" />
     <target name="test_release" depends="test_make_release,test_vc08_release" />
 </project>

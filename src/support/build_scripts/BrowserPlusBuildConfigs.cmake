@@ -30,7 +30,7 @@ ENDIF (POLICY CMP0011)
 cmake_policy(SET CMP0003 NEW)
 cmake_policy(SET CMP0009 NEW)
 
-SET (CMAKE_CONFIGURATION_TYPES Debug Release 
+SET (CMAKE_CONFIGURATION_TYPES Debug Release CodeCoverage
      CACHE STRING "BrowserPlus build configs" FORCE)
 
 # reduce redundancy in the cmake language
@@ -49,28 +49,36 @@ IF(WIN32)
         CACHE STRING "BrowserPlus CXX flags" FORCE)
     SET(CMAKE_CXX_FLAGS_DEBUG "/MTd /DDEBUG /D_DEBUG /Od /RTC1 /RTCc"
         CACHE STRING "BrowserPlus debug CXX flags" FORCE)
+    SET(CMAKE_CXX_FLAGS_CODECOVERAGE "${CMAKE_CXX_FLAGS_DEBUG}"
+        CACHE STRING "BrowserPlus codecoverage CXX flags" FORCE)
     SET(CMAKE_CXX_FLAGS_RELEASE "/MT /DNDEBUG /O1"
         CACHE STRING "BrowserPlus release CXX flags" FORCE)
   
     # libs to ignore, from http://msdn.microsoft.com/en-us/library/aa267384.aspx
     #
     SET(noDefaultLibFlagsDebug "/NODEFAULTLIB:libc.lib /NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:msvcrt.lib /NODEFAULTLIB:libcd.lib /NODEFAULTLIB:msvcrtd.lib")
+    SET(noDefaultLibFlagsCodeCoverage "${noDefaultLibFlagsDebug}")
     SET(noDefaultLibFlagsRelease "/NODEFAULTLIB:libc.lib /NODEFAULTLIB:msvcrt.lib /NODEFAULTLIB:libcd.lib /NODEFAULTLIB:libcmtd.lib /NODEFAULTLIB:msvcrtd.lib")
 
     SET(linkFlags "/DEBUG /MANIFEST:NO")
     SET(linkFlagsDebug " ${noDefaultLibFlagsDebug}")
+    SET(linkFlagsCodeCoverage " ${linkFlagsDebug}")
     SET(linkFlagsRelease " /INCREMENTAL:NO /OPT:REF /OPT:ICF ${noDefaultLibFlagsRelease}")
   
     SET(CMAKE_EXE_LINKER_FLAGS "${linkFlags}"
         CACHE STRING "BrowserPlus linker flags" FORCE)
     SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "${linkFlagsDebug}"
         CACHE STRING "BrowserPlus debug linker flags" FORCE)
+    SET(CMAKE_EXE_LINKER_FLAGS_CODECOVERAGE "${CMAKE_EXE_LINKER_FLAGS_DEBUG}"
+        CACHE STRING "BrowserPlus codecoverage linker flags" FORCE)
     SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "${linkFlagsRelease}"
         CACHE STRING "BrowserPlus release linker flags" FORCE)
     SET(CMAKE_SHARED_LINKER_FLAGS "${linkFlags}"
         CACHE STRING "BrowserPlus shared linker flags" FORCE)
     SET(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${linkFlagsDebug}"
         CACHE STRING "BrowserPlus shared debug linker flags" FORCE)
+    SET(CMAKE_SHARED_LINKER_FLAGS_CODECOVERAGE "${CMAKE_SHARED_LINKER_FLAGS_DEBUG}"
+        CACHE STRING "BrowserPlus shared codecoverage linker flags" FORCE)
     SET(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${linkFlagsRelease}"
         CACHE STRING "BrowserPlus shared release linker flags" FORCE)
 
@@ -78,6 +86,8 @@ IF(WIN32)
         CACHE STRING "BrowserPlus module linker flags" FORCE)
     SET(CMAKE_MODULE_LINKER_FLAGS_DEBUG "${linkFlagsDebug}"
         CACHE STRING "BrowserPlus module debug linker flags" FORCE)
+    SET(CMAKE_MODULE_LINKER_FLAGS_CODECOVERAGE "${CMAKE_MODULE_LINKER_FLAGS_DEBUG}"
+        CACHE STRING "BrowserPlus module codecoverage linker flags" FORCE)
     SET(CMAKE_MODULE_LINKER_FLAGS_RELEASE "${linkFlagsRelease}"
         CACHE STRING "BrowserPlus module release linker flags" FORCE)
 ELSE ()
@@ -94,26 +104,36 @@ ELSE ()
            CACHE STRING "BrowserPlus debug CXX flags" FORCE )
       SET(CMAKE_XCODE_ATTRIBUTE_ARCHS i386)
 
-      # and we want 32bit i386 for osx 10.4
-      SET(CMAKE_OSX_ARCHITECTURES i386)
-      Set (CMAKE_OSX_DEPLOYMENT_TARGET "10.4"
-	       CACHE STRING "Compile for tiger deployment" FORCE)
-      SET (CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.4u.sdk"
-	       CACHE STRING "Compile for tiger backwards compat" FORCE)
-      SET(isysrootFlag "-isysroot ${CMAKE_OSX_SYSROOT}")
-      SET(minVersionFlag "-mmacosx-version-min=10.4")
-      SET(CMAKE_FRAMEWORK_PATH "${CMAKE_OSX_SYSROOT}/System/Library/Frameworks"
-	      CACHE STRING "use 10.4 frameworks" FORCE)
-
-      GET_FILENAME_COMPONENT( tmp1 "${CMAKE_CURRENT_LIST_FILE}" PATH )
-      SET( BP_ALIAS_LIST "${tmp1}/alias_list.txt" )
+      IF ("${CMAKE_BUILD_TYPE}" STREQUAL "CodeCoverage")
+        # and we 32bit i386 for osx 10.6
+        SET(CMAKE_OSX_ARCHITECTURES i386)
+        SET (CMAKE_OSX_DEPLOYMENT_TARGET "10.6"
+          CACHE STRING "Compile for snow leopard deployment" FORCE)
+        SET(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.6.sdk"
+            CACHE STRING "Compile for snow leopard backwards compat" FORCE)
+        SET(isysrootFlag "-isysroot ${CMAKE_OSX_SYSROOT}")
+        SET(minVersionFlag "-mmacosx-version-min=10.6")
+        SET(CMAKE_FRAMEWORK_PATH "${CMAKE_OSX_SYSROOT}/System/Library/Frameworks"
+            CACHE STRING "use 10.6 frameworks" FORCE)
+      ELSE ()
+        # and we 32bit i386 for osx 10.4
+        SET(CMAKE_OSX_ARCHITECTURES i386)
+        SET (CMAKE_OSX_DEPLOYMENT_TARGET "10.4"
+          CACHE STRING "Compile for tiger deployment" FORCE)
+        SET(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.4u.sdk"
+            CACHE STRING "Compile for tiger backwards compat" FORCE)
+        SET(isysrootFlag "-isysroot ${CMAKE_OSX_SYSROOT}")
+        SET(minVersionFlag "-mmacosx-version-min=10.4")
+        SET(CMAKE_FRAMEWORK_PATH "${CMAKE_OSX_SYSROOT}/System/Library/Frameworks"
+            CACHE STRING "use 10.4 frameworks" FORCE)
+      ENDIF ()
 
       SET(CMAKE_MODULE_LINKER_FLAGS "${minVersionFlag} ${isysrootFlag}")
+      SET(CMAKE_MODULE_LINKER_FLAGS_CODECOVERAGE "-lgcov")
       SET(CMAKE_EXE_LINKER_FLAGS "-dead_strip -dead_strip_dylibs ${minVersionFlag} ${isysrootFlag}")
+      SET(CMAKE_EXE_LINKER_FLAGS_CODECOVERAGE "-lgcov")
       SET(CMAKE_SHARED_LINKER_FLAGS "${minVersionFlag} ${isysrootFlag}  -Wl,-single_module")
-      #SET(CMAKE_MODULE_LINKER_FLAGS "${minVersionFlag} ${isysrootFlag} -alias_list ${BP_ALIAS_LIST} -lgcov")
-      #SET(CMAKE_EXE_LINKER_FLAGS "-dead_strip -dead_strip_dylibs ${minVersionFlag} ${isysrootFlag} -alias_list ${BP_ALIAS_LIST} -lgcov")
-      #SET(CMAKE_SHARED_LINKER_FLAGS "${minVersionFlag} ${isysrootFlag} -alias_list ${BP_ALIAS_LIST}  -Wl,-single_module -lgcov")
+      SET(CMAKE_SHARED_LINKER_FLAGS_CODECOVERAGE "-lgcov")
       ADD_DEFINITIONS(-DMACOSX -D_MACOSX -DMAC -D_MAC -DXP_MACOSX)
       SET(CMAKE_C_COMPILER gcc-4.0)
       SET(CMAKE_CXX_COMPILER g++-4.0)
@@ -124,11 +144,13 @@ ELSE ()
 
     SET(CMAKE_CXX_FLAGS "-Wall ${isysrootFlag} ${minVersionFlag} ${FPICFlag}")
     SET(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -g")
-    #SET(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -g -fprofile-arcs -ftest-coverage")
+    SET(CMAKE_CXX_FLAGS_CODECOVERAGE "${CMAKE_CXX_FLAGS_DEBUG} -O0 -fprofile-arcs -ftest-coverage")
     SET(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -Os")
-    #SET(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -Os -fprofile-arcs -ftest-coverage")
+    SET(CMAKE_MODULE_LINKER_FLAGS_CODECOVERAGE "-lgcov")
     SET(CMAKE_MODULE_LINKER_FLAGS_RELEASE "-Wl,-x")
+    SET(CMAKE_EXE_LINKER_FLAGS_CODECOVERAGE "-lgcov")
     SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "-Wl,-x")
+    SET(CMAKE_SHARED_LINKER_FLAGS_CODECOVERAGE "-lgcov")
     SET(CMAKE_SHARED_LINKER_FLAGS_RELEASE "-Wl,-x")
 ENDIF ()
 
@@ -162,8 +184,13 @@ INCLUDE_DIRECTORIES( "${BP_EXTERNAL}/include" )
 #       it returns "Debug;Release", even for a single config generator
 
 IF (CMAKE_CFG_INTDIR STREQUAL "." OR CMAKE_CFG_INTDIR STREQUAL "/")
-   # using a single configuration generator
-   LINK_DIRECTORIES("${BP_EXTERNAL}/lib/${CMAKE_BUILD_TYPE}")
+   IF ("${CMAKE_BUILD_TYPE}" STREQUAL "CodeCoverage")
+     # using a single configuration generator
+     LINK_DIRECTORIES("${BP_EXTERNAL}/lib/Debug")
+   ELSE ()
+     # using a single configuration generator
+     LINK_DIRECTORIES("${BP_EXTERNAL}/lib/${CMAKE_BUILD_TYPE}")
+   ENDIF ()
 ELSE ()
    # using a multiple configuration generator
    # vs and xcode append a build type to this path
