@@ -56,29 +56,29 @@
         <ant dir="external" target="build_vc08_release" />
         <ant dir="src" target="build_vc08_release" />
     </target>
-    <target name="test_make_debug" unless="is.windows">
-        <ant dir="external" target="test_make_debug" />
-        <ant dir="src" target="test_make_debug" />
+    <target name="unittest_make_debug" unless="is.windows">
+        <ant dir="external" target="unittest_make_debug" />
+        <ant dir="src" target="unittest_make_debug" />
     </target>
-    <target name="test_make_codecoverage" unless="is.windows">
-        <ant dir="external" target="test_make_codecoverage" />
-        <ant dir="src" target="test_make_codecoverage" />
+    <target name="unittest_make_codecoverage" unless="is.windows">
+        <ant dir="external" target="unittest_make_codecoverage" />
+        <ant dir="src" target="unittest_make_codecoverage" />
     </target>
-    <target name="test_make_release" unless="is.windows">
-        <ant dir="external" target="test_make_release" />
-        <ant dir="src" target="test_make_release" />
+    <target name="unittest_make_release" unless="is.windows">
+        <ant dir="external" target="unittest_make_release" />
+        <ant dir="src" target="unittest_make_release" />
     </target>
-    <target name="test_vc08_debug" if="is.windows">
-        <ant dir="external" target="test_vc08_debug" />
-        <ant dir="src" target="test_vc08_debug" />
+    <target name="unittest_vc08_debug" if="is.windows">
+        <ant dir="external" target="unittest_vc08_debug" />
+        <ant dir="src" target="unittest_vc08_debug" />
     </target>
-    <target name="test_vc08_codecoverage" if="is.windows">
-        <ant dir="external" target="test_vc08_codecoverage" />
-        <ant dir="src" target="test_vc08_codecoverage" />
+    <target name="unittest_vc08_codecoverage" if="is.windows">
+        <ant dir="external" target="unittest_vc08_codecoverage" />
+        <ant dir="src" target="unittest_vc08_codecoverage" />
     </target>
-    <target name="test_vc08_release" if="is.windows">
-        <ant dir="external" target="test_vc08_release" />
-        <ant dir="src" target="test_vc08_release" />
+    <target name="unittest_vc08_release" if="is.windows">
+        <ant dir="external" target="unittest_vc08_release" />
+        <ant dir="src" target="unittest_vc08_release" />
     </target>
     <target name="clean_debug" depends="clean_make_debug,clean_vc08_debug" />
     <target name="clean_codecoverage" depends="clean_make_codecoverage,clean_vc08_codecoverage" />
@@ -86,7 +86,7 @@
     <target name="build_debug" depends="build_make_debug,build_vc08_debug" />
     <target name="build_codecoverage" depends="build_make_codecoverage,build_vc08_codecoverage" />
     <target name="build_release" depends="build_make_release,build_vc08_release" />
-    <target name="test_debug" depends="test_make_debug,test_vc08_debug" />
-    <target name="test_codecoverage" depends="test_make_codecoverage,test_vc08_codecoverage" />
-    <target name="test_release" depends="test_make_release,test_vc08_release" />
+    <target name="unittest_debug" depends="unittest_make_debug,unittest_vc08_debug" />
+    <target name="unittest_codecoverage" depends="unittest_make_codecoverage,unittest_vc08_codecoverage" />
+    <target name="unittest_release" depends="unittest_make_release,unittest_vc08_release" />
 </project>
