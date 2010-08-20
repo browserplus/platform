@@ -54,7 +54,7 @@ BrowserInfo::BrowserInfo(const std::string& userAgent)
     } else if (userAgent.find("Mac OS X") != string::npos) {
         m_platform = "OSX";
     } else {
-        BP_THROW_FATAL("unknown platform in '" + userAgent + "'");
+        BP_THROW("unknown platform in '" + userAgent + "'");
     }
 
     // now figure out the browser
@@ -68,12 +68,12 @@ BrowserInfo::BrowserInfo(const std::string& userAgent)
     } else if (userAgent.find("Safari") != string::npos) {
         m_browser = "Safari";
     } else {
-        BP_THROW_FATAL("unknown browser in '" + userAgent + "'");
+        BP_THROW("unknown browser in '" + userAgent + "'");
     }
     
     // now figure out the version
-    size_t start;
-    size_t len;
+    size_t start = 0;
+    size_t len = string::npos;
     if (m_browser == "IE") {
         // 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; .NET4.0C)'
         start = userAgent.find("MSIE ") + strlen("MSIE ");
@@ -95,8 +95,8 @@ BrowserInfo::BrowserInfo(const std::string& userAgent)
     
     string vstr = userAgent.substr(start, len);
     if (!m_version.parse(vstr)) {
-        BP_THROW_FATAL("unable to parse version'" + vstr
-                       + "', userAgent = '" + userAgent + "'");
+        BP_THROW("unable to parse version'" + vstr
+                 + "', userAgent = '" + userAgent + "'");
     }
 }
 

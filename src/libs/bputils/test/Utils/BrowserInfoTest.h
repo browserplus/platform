@@ -45,6 +45,7 @@ class BrowserInfoTest : public CPPUNIT_NS::TestCase
     CPPUNIT_TEST(winFirefox);
     CPPUNIT_TEST(winSafari);
     CPPUNIT_TEST(winChrome);
+    CPPUNIT_TEST(badUserAgent);
     CPPUNIT_TEST_SUITE_END();
     
   protected:
@@ -57,6 +58,7 @@ class BrowserInfoTest : public CPPUNIT_NS::TestCase
     void winFirefox();
     void winSafari();
     void winChrome();
+    void badUserAgent();
 };
 
 #endif

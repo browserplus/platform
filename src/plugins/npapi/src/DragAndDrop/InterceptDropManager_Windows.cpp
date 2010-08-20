@@ -36,6 +36,7 @@
 #include "BPUtils/bptime.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/bpbrowserinfo.h"
+#include "BPUtils/bperrorutil.h"
 
 #include <npapi/npapi.h>
 #include <npapi/npruntime.h>
@@ -160,10 +161,15 @@ WindowsDropManager::WindowsDropManager(NPP instance,
       m_pDataObject(NULL), m_refCount(0), m_atom(0)
 {
     std::string uagent(gBrowserFuncs.uagent(m_instance));
-    bp::BrowserInfo info(uagent);
-    bp::ServiceVersion baseVersion;
-    (void) baseVersion.parse("3.6.0");
-    m_isOldFirefoxBrowser = info.version().compare(baseVersion) < 0;
+    try {
+        bp::BrowserInfo info(uagent);
+        bp::ServiceVersion baseVersion;
+        (void) baseVersion.parse("3.6.0");
+        m_isOldFirefoxBrowser = info.version().compare(baseVersion) < 0;
+    } catch (const bp::error::Exception& e) {
+        BPLOG_ERROR_STRM("caught " << e.what());
+        m_isOldFirefoxBrowser = false;
+    }
     m_pluginHWnd = (HWND)(window->window);
     m_hWnd = GetParent(m_pluginHWnd);
     OleInitialize(0);

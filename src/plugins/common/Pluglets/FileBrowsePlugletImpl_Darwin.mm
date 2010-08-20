@@ -29,6 +29,7 @@
 #import "BPUtils/BPLog.h"
 #import "BPUtils/OS.h"
 #import "BPUtils/bpbrowserinfo.h"
+#import "BPUtils/bperrorutil.h"
 #import <sstream>
 #import <Cocoa/Cocoa.h>
 
@@ -154,10 +155,14 @@ isSafari5OnSnowLeopard(const string& userAgent)
     osVersion.parse(bp::os::PlatformVersion());
     
     if (osVersion.compare(leastOSVersion) >= 0) {
-        bp::BrowserInfo info(userAgent);
-        if (info.browser() == "Safari" && info.version().majorVer() >= 5)
-        {
-            return true;
+        try {
+            bp::BrowserInfo info(userAgent);
+            if (info.browser() == "Safari" && info.version().majorVer() >= 5) {
+                return true;
+            }
+        } catch (const bp::error::Exception& e) {
+            BPLOG_ERROR_STRM("caught " << e.what());
+            return false;
         }
     }
 
