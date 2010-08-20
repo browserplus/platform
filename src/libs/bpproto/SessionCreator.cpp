@@ -38,6 +38,7 @@
 #include "BPUtils/ProductPaths.h"
 #include "BPUtils/bpplatformutil.h"
 #include "BPUtils/bperrorutil.h"
+#include "BPUtils/bpexitcodes.h"
 
 
 const double SessionCreator::c_initialPollPeriodS = 0.020;
@@ -230,8 +231,8 @@ SessionCreator::tryConnect()
             // Check for daemon error exit.  If no exit, wait and try again.
             int errCode = 0;
             if (bp::process::wait(m_spawnStatus, false, errCode)) {
-                // daemon has exited, exit status of -666 well-known
-                if (errCode == -666) {
+                // daemon has exited, exit status of kKillswitch well-known
+                if (errCode == bp::exit::kKillswitch) {
                     BPLOG_ERROR_STRM("daemon not running, blacklisted");
                     BPLOG_ERROR_STRM("removing blacklisted platform");
                     bp::ServiceVersion version;

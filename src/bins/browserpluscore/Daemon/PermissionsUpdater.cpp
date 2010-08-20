@@ -29,6 +29,7 @@
 #include "PermissionsUpdater.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bptimer.h"
+#include "BPUtils/bpexitcodes.h"
 #include "Permissions/Permissions.h"
 
 using namespace std;
@@ -163,7 +164,7 @@ PermissionsUpdaterSingleton::gotUpToDate()
     if (!PermissionsManager::get()->mayRun()) {
         BPLOG_ERROR_STRM("PermissionsUpdater finds !mayRun(), exiting");
         // this exit code known to BPProtocol SessionCreator.cpp
-        ::exit(-666);
+        ::exit(bp::exit::kKillswitch);
     }
 }
 
@@ -173,7 +174,6 @@ PermissionsUpdaterSingleton::cantGetUpToDate()
 {
     BPLOG_ERROR_STRM("PermissionsUpdater unable to get permissions, exiting");
     m_busy = false;
-    // this exit code known to BPProtocol SessionCreator.cpp
-    ::exit(-666);
+    ::exit(bp::exit::kCantGetUpToDatePerms);
 }
 
