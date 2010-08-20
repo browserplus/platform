@@ -35,6 +35,7 @@
 #include "BPUtils/bpstrutil.h"
 #include "BPUtils/bptime.h"
 #include "BPUtils/bpfile.h"
+#include "BPUtils/bpbrowserinfo.h"
 
 #include <npapi/npapi.h>
 #include <npapi/npruntime.h>
@@ -52,27 +53,6 @@ using namespace std;
 // no "unused args" or "conditional expression is a constant" warnings
 // (second warning from NPVariant macros)
 #pragma warning (disable : 4100 4127)
-
-// a hardcoded test that determines if a useragent string represents a
-// Firefox browser < 3.6
-static bool isOldFirefoxBrowser(std::string uagent)
-{
-    size_t loc = uagent.find("Firefox/");
-    if (loc == std::string::npos) return false;
-    loc += 8;
-    
-    const char * verptr = uagent.c_str() + loc;
-	char * endptr = NULL;
-
-    if (::strtoul(verptr, &endptr, 10) > 3) return false;
-    if (!endptr || !(*endptr)) return true;
-	endptr++;
-    if (::strtoul(endptr, NULL, 10) >= 6) return false;    
-
-    return true;
-}
-
-
 
 class WindowsDropManager : public virtual InterceptDropManager,
                            public virtual IDropTarget
@@ -180,7 +160,10 @@ WindowsDropManager::WindowsDropManager(NPP instance,
       m_pDataObject(NULL), m_refCount(0), m_atom(0)
 {
     std::string uagent(gBrowserFuncs.uagent(m_instance));
-    m_isOldFirefoxBrowser = isOldFirefoxBrowser(uagent);
+    bp::BrowserInfo info(uagent);
+    bp::ServiceVersion baseVersion;
+    (void) baseVersion.parse("3.6.0");
+    m_isOldFirefoxBrowser = info.version().compare(baseVersion) < 0;
     m_pluginHWnd = (HWND)(window->window);
     m_hWnd = GetParent(m_pluginHWnd);
     OleInitialize(0);

@@ -28,6 +28,7 @@
 #import "BPUtils/bpurl.h"
 #import "BPUtils/BPLog.h"
 #import "BPUtils/OS.h"
+#import "BPUtils/bpbrowserinfo.h"
 #import <sstream>
 #import <Cocoa/Cocoa.h>
 
@@ -153,33 +154,10 @@ isSafari5OnSnowLeopard(const string& userAgent)
     osVersion.parse(bp::os::PlatformVersion());
     
     if (osVersion.compare(leastOSVersion) >= 0) {
-        if (userAgent.find("Safari") != string::npos)
+        bp::BrowserInfo info(userAgent);
+        if (info.browser() == "Safari" && info.version().majorVer() >= 5)
         {
-            bp::ServiceVersion baseVersion;
-            baseVersion.parse("5.0.0");
-
-            std::string vstr = "Version/";
-            size_t start = userAgent.find(vstr);
-            if (start == string::npos) return false;
-            size_t end = userAgent.find(" ", start);
-            if (end == string::npos) return false;
-            string s = userAgent.substr(start, end - start);
-            vector<string> v = bp::strutil::split(s, "/");
-            if (v.size() < 2) return false;
-        
-            bp::ServiceVersion thisVersion;
-            // get around a bug in the serviceversion class where 5.0 would be less than
-            // 5.0.0
-            thisVersion.setMajor(0);
-            thisVersion.setMinor(0);
-            thisVersion.setMicro(0);
-            
-            if (thisVersion.parse(v[1])) {
-                if (thisVersion.compare(baseVersion) >= 0) {
-                    return true;
-                }
-            }
-        
+            return true;
         }
     }
 

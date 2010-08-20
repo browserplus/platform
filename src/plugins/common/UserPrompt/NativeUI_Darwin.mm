@@ -334,7 +334,8 @@ bp::ui::HTMLPrompt(void * parentWindow,
     // Don't use sheets on Safari, we don't have a useful
     // window in the out-of-proc case
     unsigned int style = 0;
-    if (userAgent.find("Safari") != std::string::npos)
+    bp::BrowserInfo info(userAgent);
+    if (info.browser() == "Safari")
     {
         mso->parentWindow = nil;
         style = NSTitledWindowMask;
