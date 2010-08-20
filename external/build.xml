@@ -9,22 +9,22 @@
         <os family="unix" />
     </condition>
     <target name="clean_make_debug" unless="is.windows">
-        <!-- NO-OP -->
+        <delete dir="Darwin" />
     </target>
     <target name="clean_make_codecoverage" unless="is.windows">
-        <!-- NO-OP -->
+        <delete dir="Darwin" />
     </target>
     <target name="clean_make_release" unless="is.windows">
-        <!-- NO-OP -->
+        <delete dir="Darwin" />
     </target>
     <target name="clean_vc08_debug" if="is.windows">
-        <!-- NO-OP -->
+        <delete dir="Windows" />
     </target>
     <target name="clean_vc08_codecoverage" if="is.windows">
-        <!-- NO-OP -->
+        <delete dir="Windows" />
     </target>
     <target name="clean_vc08_release" if="is.windows">
-        <!-- NO-OP -->
+        <delete dir="Windows" />
     </target>
     <target name="build_make_debug" unless="is.windows">
         <exec executable="ruby" failonerror="true">
