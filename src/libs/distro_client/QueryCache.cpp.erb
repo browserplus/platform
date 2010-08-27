@@ -303,7 +303,7 @@ QueryCache::parsePlatformVersionResponses(LatestPlatformServerAndVersion & lates
                 && m->getInteger("size", size))
             {
                 server = *url_it;
-                bp::ServiceVersion cur;
+                bp::SemanticVersion cur;
                 if (cur.parse(version)) {
                     if (cur.compare(latest.version) > 0) {
                         latest.version = cur;

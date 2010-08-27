@@ -29,8 +29,8 @@ ServiceRunner::determineProviderPath(const bp::service::Summary & s,
                                      std::string & err)
 {
     std::string name = s.usesService();
-    bp::ServiceVersion version = s.usesVersion();
-    bp::ServiceVersion minversion = s.usesMinversion();
+    bp::SemanticVersion version = s.usesVersion();
+    bp::SemanticVersion minversion = s.usesMinversion();
 
     // build directory where versions of this service should be
     bp::file::Path d = bp::paths::getServiceDirectory() / name;
@@ -42,13 +42,13 @@ ServiceRunner::determineProviderPath(const bp::service::Summary & s,
     }
 
     // list all subdirectories
-    bp::ServiceVersion winner;
+    bp::SemanticVersion winner;
     try {
         bp::file::tDirIter end;
         for (bp::file::tDirIter it(d); it != end; ++it) 
         {
             bp::file::Path p(it->path().filename());
-            bp::ServiceVersion current;        
+            bp::SemanticVersion current;
             if (!current.parse(p.utf8()))
             {
                 std::cerr << "skipping bogus version dir: " << p.utf8()
@@ -56,8 +56,8 @@ ServiceRunner::determineProviderPath(const bp::service::Summary & s,
                 continue;
             }
             
-            if (bp::ServiceVersion::isNewerMatch(current, winner,
-                                                 version, minversion))
+            if (bp::SemanticVersion::isNewerMatch(current, winner,
+                                                  version, minversion))
             {
                 winner = current;
             }

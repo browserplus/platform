@@ -44,7 +44,7 @@ class LatestPlatformServerAndVersion
 {
   public:
     LatestPlatformServerAndVersion() : version(), size(0), serverURL()  {}
-    bp::ServiceVersion version;    
+    bp::SemanticVersion version;
     int size;
     std::string serverURL;    
 };

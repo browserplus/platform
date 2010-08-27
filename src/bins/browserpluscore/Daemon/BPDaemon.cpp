@@ -327,7 +327,7 @@ BPDaemon::run()
             bp::file::tDirIter end;
             for (bp::file::tDirIter iter(dir); iter != end; ++iter) {
                 string s = bp::file::utf8FromNative(iter->path().filename());
-                bp::ServiceVersion version;
+                bp::SemanticVersion version;
                 if (version.parse(s)) {
                     BPLOG_DEBUG_STRM("examine " << version.asString());
                     bp::platformutil::removePlatform(version, false);

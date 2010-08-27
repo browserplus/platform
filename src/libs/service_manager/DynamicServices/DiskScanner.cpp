@@ -116,22 +116,22 @@ getBestProvider(const bp::service::Summary & dep,
                 const std::set<bp::service::Summary> & providers)
 {
     std::string name = dep.usesService();
-    bp::ServiceVersion version = dep.usesVersion();
-    bp::ServiceVersion minversion = dep.usesMinversion();
+    bp::SemanticVersion version = dep.usesVersion();
+    bp::SemanticVersion minversion = dep.usesMinversion();
 
     bp::service::Summary winner;
-    bp::ServiceVersion winnerVer;        
+    bp::SemanticVersion winnerVer;
 
     std::set<bp::service::Summary>::const_iterator i;
 
     for (i = providers.begin(); i != providers.end(); i++)
     {
         // XXX: we shouldn't have to parse every time :(
-        bp::ServiceVersion current;        
+        bp::SemanticVersion current;
         if (!current.parse(i->version())) continue;
 
-        if (bp::ServiceVersion::isNewerMatch(current, winnerVer,
-                                             version, minversion))
+        if (bp::SemanticVersion::isNewerMatch(current, winnerVer,
+                                              version, minversion))
         {
             winner = *i;
             winnerVer = current;

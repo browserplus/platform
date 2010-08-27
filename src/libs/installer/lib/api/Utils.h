@@ -22,7 +22,7 @@
 
 #include <string>
 #include <vector>
-#include "BPUtils/bpserviceversion.h"
+#include "BPUtils/bpsemanticversion.h"
 #include "BPUtils/bpfile.h"
 
 namespace bp {
@@ -34,7 +34,7 @@ namespace utils {
     void readPlatformInfo(const bp::file::Path& path);
 
     std::vector<std::string> mimeTypes();
-    std::vector<bp::ServiceVersion> installedVersions();
+    std::vector<bp::SemanticVersion> installedVersions();
 
 #ifdef WIN32
     std::string activeXGuid();
@@ -51,7 +51,7 @@ namespace utils {
 
     // Return progid of our activex control.
     std::string axProgid(const std::string& version);
-    std::string axProgid(const bp::ServiceVersion& version);
+    std::string axProgid(const bp::SemanticVersion& version);
     
     // Return dir into which to install npapi plugin.
     // For users with non-ascii usernames, Firefox can't

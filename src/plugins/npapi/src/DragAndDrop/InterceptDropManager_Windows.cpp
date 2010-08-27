@@ -29,13 +29,13 @@
  *
  */
 
+#include "NPAPIPlugin.h"
 #include "InterceptDropManager.h"
 #include "nputils.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bpstrutil.h"
 #include "BPUtils/bptime.h"
 #include "BPUtils/bpfile.h"
-#include "BPUtils/bpbrowserinfo.h"
 #include "BPUtils/bperrorutil.h"
 
 #include <npapi/npapi.h>
@@ -160,12 +160,11 @@ WindowsDropManager::WindowsDropManager(NPP instance,
     : InterceptDropManager(instance, window, dl), 
       m_pDataObject(NULL), m_refCount(0), m_atom(0)
 {
-    std::string uagent(gBrowserFuncs.uagent(m_instance));
     try {
-        bp::BrowserInfo info(uagent);
-        bp::ServiceVersion baseVersion;
+        bp::SemanticVersion baseVersion;
         (void) baseVersion.parse("3.6.0");
-        m_isOldFirefoxBrowser = info.version().compare(baseVersion) < 0;
+        NPAPIPlugin* plugin = (NPAPIPlugin*)instance->pdata;
+        m_isOldFirefoxBrowser = plugin->getBrowserInfo().version().compare(baseVersion) < 0;
     } catch (const bp::error::Exception& e) {
         BPLOG_ERROR_STRM("caught " << e.what());
         m_isOldFirefoxBrowser = false;

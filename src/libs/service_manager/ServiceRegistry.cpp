@@ -253,11 +253,11 @@ ServiceRegistry::getReg(const std::string & name,
     std::list<DescFactPair>::iterator it;
 
     // the version we want
-    bp::ServiceVersion wantver;
+    bp::SemanticVersion wantver;
     // the minimum version we want
-    bp::ServiceVersion wantminver;
+    bp::SemanticVersion wantminver;
     // the version we've found
-    bp::ServiceVersion got;
+    bp::SemanticVersion got;
 
     if (name.empty()) {
         return found;
@@ -284,14 +284,14 @@ ServiceRegistry::getReg(const std::string & name,
             // 3. be greater than the minver
 
             // the version we're considering
-            bp::ServiceVersion current;
+            bp::SemanticVersion current;
             current.setMajor((int) it->first.majorVersion());
             current.setMinor((int) it->first.minorVersion());
             current.setMicro((int) it->first.microVersion());
 
             // is this a newer match than what we've already got?
-            if (!bp::ServiceVersion::isNewerMatch(current, got,
-                                                  wantver, wantminver))
+            if (!bp::SemanticVersion::isNewerMatch(current, got,
+                                                   wantver, wantminver))
             {
                 continue;
             }

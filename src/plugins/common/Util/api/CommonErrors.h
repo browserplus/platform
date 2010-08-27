@@ -66,6 +66,9 @@ extern const char * UnapprovedDomain;
 // A newer platform version is available and javascript should use that
 // one instead
 extern const char * SwitchVersion;
+
+// unsupported client
+extern const char * UnsupportedClient;
 };
 
 #endif

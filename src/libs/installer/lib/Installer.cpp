@@ -108,8 +108,8 @@ Installer::run()
     try {
         // Make sure that a newer version (within same major rev)
         // isn't installed
-        vector<bp::ServiceVersion> plats = utils::installedVersions();
-        vector<bp::ServiceVersion>::const_iterator iter;
+        vector<bp::SemanticVersion> plats = utils::installedVersions();
+        vector<bp::SemanticVersion>::const_iterator iter;
         for (iter = plats.begin(); iter != plats.end(); ++iter) {
             if (iter->majorVer() != m_version.majorVer()) {
                 continue;
@@ -663,7 +663,7 @@ Installer::filesAreIdentical(const bpf::Path& f1,
 
 
 void
-Installer::removePlatform(const bp::ServiceVersion& version)
+Installer::removePlatform(const bp::SemanticVersion& version)
 {
     // "uninstall" platform
     bpf::Path installedPath = getBPInstalledPath(version.majorVer(),

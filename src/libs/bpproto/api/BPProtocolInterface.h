@@ -99,7 +99,9 @@ extern "C" {
         BP_EC_PEER_ENDED_CONNECTION = 23,
         /** This platform has been uninstalled, and a newer version has
          *  been detected on disk */
-        BP_EC_SWITCH_VERSION = 24
+        BP_EC_SWITCH_VERSION = 24,
+        /** Platform/browser combo not supported */
+        BP_EC_UNSUPPORTED_CLIENT = 25
     } BPErrorCode;
         
     /** 

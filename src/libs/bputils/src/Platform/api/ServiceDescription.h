@@ -30,7 +30,7 @@
 #define __SERVICEDESCRIPTION_H__
 
 #include "BPUtils/bptypeutil.h"
-#include "BPUtils/bpserviceversion.h"
+#include "BPUtils/bpsemanticversion.h"
 #include "ServiceAPI/bpdefinition.h" 
 
 #include <list>
@@ -167,7 +167,7 @@ public:
     /** get a string of the form: "name major.minor.version" */
     std::string nameVersionString() const;
     
-    bp::ServiceVersion version() const;
+    bp::SemanticVersion version() const;
 
     /** get service major version */
     unsigned int majorVersion() const;

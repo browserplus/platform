@@ -145,7 +145,7 @@ private:
     bool m_updatesOnly;
     
     // any pending platform updates
-    std::vector<bp::ServiceVersion> m_platformUpdates;
+    std::vector<bp::SemanticVersion> m_platformUpdates;
     
     ServiceSynopsisList m_platformUpdateDescriptions;
     ServiceSynopsisList m_descriptions;

@@ -21,7 +21,9 @@
  */
 
 #include "DnDPluglet.h"
+#include "BPPlugin.h"
 #include "BPUtils/BPLog.h"
+#include "BPUtils/bpbrowserinfo.h"
 #include "PluginCommonLib/CommonErrors.h"
 
 #include <string.h>
@@ -39,8 +41,6 @@ DnDPluglet::DnDPluglet(BPPlugin* plugin,
 {
     if (m_dropMgr) {
         m_dropMgr->registerDropListener(this);
-    } else {
-        BPLOG_WARN_STRM("DnDPluglet ctor with NULL m_dropMgr");
     }
 }
 
@@ -66,8 +66,10 @@ DnDPluglet::execute(unsigned int tid,
         return;
     }
 
-    if (m_dropMgr == NULL) {
-        BPLOG_WARN_STRM("DnDPluglet::execute " << function << " with NULL m_dropMgr");
+    // do we support the pluglet?
+    std::string supp = m_plugin->getBrowserInfo().capability(bp::BrowserInfo::kDnDCapability);
+    if (supp == bp::BrowserInfo::kUnsupported || m_dropMgr == NULL) {
+        BPLOG_WARN_STRM(function << ", DnD.unsupported");
         failureCB(callbackArgument, tid, "DnD.unsupported",
                   "DragDrop unsupported on this platform/browser combination");
         return;

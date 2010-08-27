@@ -331,23 +331,17 @@ bp::ui::HTMLPrompt(void * parentWindow,
     mso->wv = nil;
     mso->session = nil;
     mso->response = NULL;
-    // Don't use sheets on Safari, we don't have a useful
+    // Don't use sheets on Safari or Chrome, we don't have a useful
     // window in the out-of-proc case
     unsigned int style = 0;
-    try {
-        bp::BrowserInfo info(userAgent);
-        if (info.browser() == "Safari")
-        {
-            mso->parentWindow = nil;
-            style = NSTitledWindowMask;
-        }
-        else
-        {
-            mso->parentWindow = [[NSWindow alloc] initWithWindowRef: parentWindow];
-            style = NSBorderlessWindowMask;
-        }
-    } catch (const bp::error::Exception& e) {
-        BPLOG_ERROR_STRM("caught " << e.what());
+    bp::BrowserInfo info(userAgent);
+    if (info.browser() == "Safari" || info.browser() == "Chrome")
+    {
+        mso->parentWindow = nil;
+        style = NSTitledWindowMask;
+    }
+    else
+    {
         mso->parentWindow = [[NSWindow alloc] initWithWindowRef: parentWindow];
         style = NSBorderlessWindowMask;
     }

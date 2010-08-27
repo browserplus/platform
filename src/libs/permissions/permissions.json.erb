@@ -33,6 +33,71 @@ end
         <%= $cmake["BP_PLATFORM_BLACKLIST"] %>
     ],
      
+    // Supported browsers and their capabilities
+    "browserSupport": {
+        // browserplus version
+        "2" : {
+            // platform 
+            "Windows": {
+                // browser
+                "IE": {
+                    // browser version range
+                    "6-8.0": {
+                        // capabilities
+                        "FileBrowse":"supported",
+                        "DnD":"activeX"
+                    }
+                },
+                "Firefox": {
+                    "3.0-3.6.2": {
+                        "FileBrowse":"supported",
+                        "DnD":"intercept"
+                    },
+                    "3.6.3-3.6.8": {
+                        "FileBrowse":"supported",
+                        "DnD":"html5"
+                    }
+                },
+                "Safari": {
+                    "1-5.0.1": {
+                        "FileBrowse":"supported",
+                        "DnD":"intercept"
+                    }
+                },
+                "Chrome": {
+                    "1-5.0.375": {
+                        "FileBrowse":"supported",
+                        "DnD":"intercept"
+                    }
+                }
+            },
+            "OSX": {
+                "Firefox": {
+                    "3-3.6.8": {
+                        "FileBrowse":"supported",
+                        "DnD":"intercept"
+                    }
+                },
+                "Safari": {
+                    "1-4.0.2": {
+                        "FileBrowse":"supported",
+                        "DnD":"intercept"
+                    },
+                    "4.0.2-5.0.1": {
+                        "FileBrowse":"supported",
+                        "DnD":"html5"
+                    }
+                },
+                "Chrome": {
+                    "5.0.375": {
+                        "FileBrowse":"supported",
+                        "DnD":"unsupported"
+                    }
+                }
+            }
+        }
+    },
+
     // autoUpdatePermissionMigration is used when one or more
     // services are being replaced by other services.  We don't
     // want to re-pester the user for permissions, so we migrate
@@ -44,16 +109,16 @@ end
     // matches all domains), we set autoupdate true for all
     // of the services in 'new' for that domain.
     //
-    "autoUpdatePermissionMigration": {
-       "F81D2642-5689-46E3-A03F-D7436D04AED7":
-          [
-             {  "domain": "*.yahoo.com",
-                "operator": "or",
-                "old": ["Uploader"],
-                "new": ["FileTransfer"]
-             }
-          ]
-    },
+//    "autoUpdatePermissionMigration": {
+//       "F81D2642-5689-46E3-A03F-D7436D04AED7":
+//          [
+//             {  "domain": "*.yahoo.com",
+//                "operator": "or",
+//                "old": ["Uploader"],
+//                "new": ["FileTransfer"]
+//             }
+//          ]
+//    },
 
     // Service permission localizations
     //

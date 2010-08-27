@@ -36,7 +36,7 @@
 #include "BPUtils/ProductPaths.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/bplocalization.h"
-#include "BPUtils/bpserviceversion.h"
+#include "BPUtils/bpsemanticversion.h"
 #include "BPUtils/InstallID.h"
 #include "BPUtils/BPLog.h"
 
@@ -213,7 +213,7 @@ bp::paths::getLocalizedStringsPath(int major,
         path = getProductDirectory(major, minor, micro);
     } else {
         path = getPlatformCacheDirectory();
-        bp::ServiceVersion v;
+        bp::SemanticVersion v;
         v.setMajor(major);
         v.setMinor(minor);
         v.setMicro(micro);

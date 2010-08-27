@@ -98,8 +98,8 @@ Installer::postflight()
 {
     BPLOG_DEBUG_STRM("begin Installer::postflight()");
 
-    vector<bp::ServiceVersion> plats = utils::installedVersions();
-    vector<bp::ServiceVersion>::const_iterator iter;
+    vector<bp::SemanticVersion> plats = utils::installedVersions();
+    vector<bp::SemanticVersion>::const_iterator iter;
     for (iter = plats.begin(); iter != plats.end(); ++iter) {
         if (iter->majorVer() != m_version.majorVer()) {
             continue;
@@ -122,7 +122,7 @@ Installer::postflight()
 
 
 void
-Installer::disablePlugins(const bp::ServiceVersion& version)
+Installer::disablePlugins(const bp::SemanticVersion& version)
 {
     // Must physically remove OSX plugins to keep them from
     // being found by browser

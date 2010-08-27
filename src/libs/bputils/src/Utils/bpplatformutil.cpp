@@ -32,7 +32,7 @@ using namespace bp::file;
 using namespace bp::paths;
 
 void
-bp::platformutil::removePlatform(const bp::ServiceVersion& version,
+bp::platformutil::removePlatform(const bp::SemanticVersion& version,
                                  bool force)
 {
     BPLOG_DEBUG_STRM("removePlatform(" << version.asString()

@@ -37,7 +37,7 @@
 #define __SERVICESUMMARY_H__
 
 #include "BPUtils/bptime.h"
-#include "BPUtils/bpserviceversion.h"
+#include "BPUtils/bpsemanticversion.h"
 #include "BPUtils/bpfile.h"
 
 #include <set>
@@ -112,9 +112,9 @@ public:
     /** for a dependent service, who does the service depend on? */
     std::string usesService() const;
     /** for a dependent service, what version does the service depend on? */
-    bp::ServiceVersion usesVersion() const;
+    bp::SemanticVersion usesVersion() const;
     /** for a dependent service, what minVersion does the service depend on? */
-    bp::ServiceVersion usesMinversion() const;
+    bp::SemanticVersion usesMinversion() const;
 
     /** for a dependent service, ??? */
     std::map<std::string, std::string> arguments() const;
@@ -147,8 +147,8 @@ public:
 
     // specific to dependent services
     std::string m_usesService;
-    bp::ServiceVersion m_usesVersion;
-    bp::ServiceVersion m_usesMinversion;
+    bp::SemanticVersion m_usesVersion;
+    bp::SemanticVersion m_usesMinversion;
     std::map<std::string, std::string> m_arguments;
 
     std::set<std::string> m_permissions;

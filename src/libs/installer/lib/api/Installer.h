@@ -22,7 +22,7 @@
 
 #include <memory>
 #include <string>
-#include "BPUtils/bpserviceversion.h"
+#include "BPUtils/bpsemanticversion.h"
 #include "BPUtils/bptr1.h"
 #include "BPUtils/bpfile.h"
 
@@ -145,14 +145,14 @@ class Installer
                 const bp::file::Path& dest);  // throws
     void doSingleFileCopy(const bp::file::Path& src,
                           const bp::file::Path& dest);
-    void removePlatform(const bp::ServiceVersion& version);
-    void disablePlugins(const bp::ServiceVersion& version);
+    void removePlatform(const bp::SemanticVersion& version);
+    void disablePlugins(const bp::SemanticVersion& version);
     bool filesAreIdentical(const bp::file::Path& f1,
                            const bp::file::Path& f2);
 
     bp::file::Path m_dir;
     bool m_deleteWhenDone;
-    bp::ServiceVersion m_version;
+    bp::SemanticVersion m_version;
     std::tr1::weak_ptr<IInstallerListener> m_listener;
 
     static std::string s_locale;

@@ -62,7 +62,6 @@ const char* kSilentServiceUpdate = "SilentServiceUpdate";
 
 PermissionsManager* PermissionsManager::m_singleton = NULL;
 
-using namespace std;
 
 PermissionsManager*
 PermissionsManager::get(int major,
@@ -120,12 +119,12 @@ bool
 PermissionsManager::mayRun()
 {  
     string version = bp::paths::versionString();
-    bp::ServiceVersion ourVersion;
+    bp::SemanticVersion ourVersion;
     (void) ourVersion.parse(version);
     
     vector<string>::const_iterator it;
     for (it = m_platformBlacklist.begin(); it != m_platformBlacklist.end(); ++it) {
-        bp::ServiceVersion bad;
+        bp::SemanticVersion bad;
         if (bad.parse(*it) && ourVersion.match(bad)) {
             m_error = true;
             return false;
@@ -215,7 +214,7 @@ PermissionsManager::serviceMayRun(const string& name,
     if (it == m_blacklist.end()) {
         return true;
     }
-    bp::ServiceVersion ourVersion;
+    bp::SemanticVersion ourVersion;
     if (!ourVersion.parse(version)) {
         BPLOG_ERROR_STRM("serviceMayRun(" << name
                          << "," << version << "), bad version");
@@ -224,7 +223,7 @@ PermissionsManager::serviceMayRun(const string& name,
     
     for (unsigned int i = 0; i < it->second.size(); i++) {
         const string& v = it->second[i];
-        bp::ServiceVersion bad;
+        bp::SemanticVersion bad;
         if (bad.parse(v) && ourVersion.match(bad)) {
             return false;
         }

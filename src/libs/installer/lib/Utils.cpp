@@ -32,7 +32,7 @@ namespace bpf = bp::file;
 
 
 static vector<string> s_mimeTypes;
-static vector<bp::ServiceVersion> s_installedVersions;
+static vector<bp::SemanticVersion> s_installedVersions;
 #ifdef WIN32
 static string s_activeXGuid;
 static string s_typeLibGuid;
@@ -75,7 +75,7 @@ bp::install::utils::readPlatformInfo(const bpf::Path& path)
         try {
             for (bpf::tDirIter it(dir); it != end; ++it) {
                 string s = bpf::utf8FromNative(it->filename());
-                bp::ServiceVersion version;
+                bp::SemanticVersion version;
                 if (version.parse(s)) {
                     bpf::Path installedPath = getBPInstalledPath(version.majorVer(),
                                                                  version.minorVer(),
@@ -101,7 +101,7 @@ bp::install::utils::mimeTypes()
 
 
 
-vector<bp::ServiceVersion> 
+vector<bp::SemanticVersion>
 bp::install::utils::installedVersions()
 {
     return s_installedVersions;

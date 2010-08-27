@@ -21,31 +21,31 @@
  */
 
 /**
- * ServiceVersion
+ * SemanticVersion
  *
- * A Class for representing, comparing and parsing service versions
+ * A Class for representing, comparing and parsing semantic versions
  */
 
-#ifndef __BPSERVICEVERSION_H__
-#define __BPSERVICEVERSION_H__
+#ifndef __BPSEMANTICVERSION_H__
+#define __BPSEMANTICVERSION_H__
 
 #include <string>
 
 namespace bp {
 
 /**
- * A Class for representing, comparing and parsing service versions
+ * A Class for representing, comparing and parsing semantic versions
  */ 
-class ServiceVersion
+class SemanticVersion
 {
 public:
-    ServiceVersion();
-    virtual ~ServiceVersion();    
+    SemanticVersion();
+    virtual ~SemanticVersion();    
 
-    ServiceVersion& operator=(const ServiceVersion & in);
+    SemanticVersion& operator=(const SemanticVersion& in);
 
-    bool parse(const char * version);
-    bool parse(const std::string & version);
+    bool parse(const char* version);
+    bool parse(const std::string& version);
 
     int majorVer(void) const;
     void setMajor(int majorVersion);
@@ -56,15 +56,25 @@ public:
     int microVer(void) const;
     void setMicro(int microVersion);
 
-    /** -1 if this version is less than other version
+    int nanoVer(void) const;
+    void setNano(int nanoVersion);
+
+      /** -1 if this version is less than other version
      *  0 if this version is equal to other version
      *  1 if this version is greater than other version
+     *  Negative version numbers are wildcards.
      */
-    int compare(const ServiceVersion & otherVersion) const;
+    int compare(const SemanticVersion& otherVersion) const;
 
     /** do the two versions match, considering negative version numbers
      *  to be wildcards */
-    bool match(const ServiceVersion & otherVersion) const;
+    bool match(const SemanticVersion& otherVersion) const;
+
+    /** Is this versions within a min-max range?
+     *  Negative version numbers are wildcards.
+     */
+    bool withinRange(const SemanticVersion& vmin,
+                     const SemanticVersion& vmax) const;
 
     std::string asString(void) const;
 
@@ -75,14 +85,15 @@ public:
      * the 'current' version both matches the wanted 'version' and
      * 'minversion', AND is newer than the match we've already 'got'
      */
-    static bool isNewerMatch(const ServiceVersion &current,
-                             const ServiceVersion &got,
-                             const ServiceVersion &wantver,
-                             const ServiceVersion &wantminver);
+    static bool isNewerMatch(const SemanticVersion& current,
+                             const SemanticVersion& got,
+                             const SemanticVersion& wantver,
+                             const SemanticVersion& wantminver);
 private:
     int m_major;
     int m_minor;
     int m_micro;
+    int m_nano;
 };
 
 };

@@ -123,9 +123,9 @@ BPSession::findLoadedService(const std::string & service,
                              bp::service::Description & oDesc)
 {
     std::list<bp::service::Description>::iterator it;
-    bp::ServiceVersion got;
-    bp::ServiceVersion wantver;
-    bp::ServiceVersion wantminver;
+    bp::SemanticVersion got;
+    bp::SemanticVersion wantver;
+    bp::SemanticVersion wantminver;
     bool found = false;
 
     if (!wantver.parse(version.c_str()) || !wantminver.parse(minversion)) {
@@ -145,12 +145,12 @@ BPSession::findLoadedService(const std::string & service,
         curService = it->name();
         curVersion = it->versionString();
 
-        bp::ServiceVersion current;
+        bp::SemanticVersion current;
         if (!current.parse(curVersion)) continue; /** can't parse!? */
 
         if (!curService.compare(service)) {
-            if (bp::ServiceVersion::isNewerMatch(current, got,
-                                                 wantver, wantminver)) {
+            if (bp::SemanticVersion::isNewerMatch(current, got,
+                                                  wantver, wantminver)) {
                 found = true;
                 got = current;
                 oDesc = *it;

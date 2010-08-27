@@ -284,14 +284,14 @@ void
 PlatformUpdaterSingleton::gotLatestPlatformVersion(unsigned int,
                                                    const std::string & latest)
 {
-    bp::ServiceVersion latestVersion;
+    bp::SemanticVersion latestVersion;
     if (!latestVersion.parse(latest)) {
         BPLOG_WARN_STRM("DistQuery returned bad latest platform version "
                         << latest);    
         return;
     }
         
-    bp::ServiceVersion current;
+    bp::SemanticVersion current;
     (void) current.parse(bp::paths::versionString());
     if (latestVersion.compare(current) == 1) {
         Path cacheDir = getPlatformCacheDirectory() / latestVersion.asString();

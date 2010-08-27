@@ -65,11 +65,11 @@ PlugletRegistry::find(std::string name, std::string wantverStr,
     Pluglet * pluglet = NULL;
 
     // the version pattern we want
-    bp::ServiceVersion wantver;
+    bp::SemanticVersion wantver;
     // the minimum version we want
-    bp::ServiceVersion wantminver;
+    bp::SemanticVersion wantminver;
     // the version we've found
-    bp::ServiceVersion got;
+    bp::SemanticVersion got;
 
     if (!wantver.parse(wantverStr.c_str()) ||
         !wantminver.parse(wantminverStr.c_str()))
@@ -85,14 +85,14 @@ PlugletRegistry::find(std::string name, std::string wantverStr,
         
         if (name.compare(desc->name())) continue;
         
-        bp::ServiceVersion current;            
+        bp::SemanticVersion current;
         current.setMajor(desc->majorVersion());
         current.setMinor(desc->minorVersion());
         current.setMicro(desc->microVersion());
 
         // is this a newer match than what we've already got?
-        if (!bp::ServiceVersion::isNewerMatch(current, got,
-                                              wantver, wantminver))
+        if (!bp::SemanticVersion::isNewerMatch(current, got,
+                                               wantver, wantminver))
         {
             continue;
         }

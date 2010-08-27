@@ -189,11 +189,11 @@ DynamicServiceManager::internalFind(const std::string & name,
                                     bp::service::Summary & oSummary,
                                     bp::service::Description & oDescription)
 {
-    bp::ServiceVersion version, minversion;
+    bp::SemanticVersion version, minversion;
     if (!version.parse(versionString)) return false;
     if (!minversion.parse(minversionString)) return false;
 
-    bp::ServiceVersion bestVer;
+    bp::SemanticVersion bestVer;
     bool found = false;
 
     std::map<bp::service::Summary, bp::service::Description>::iterator i;
@@ -201,7 +201,7 @@ DynamicServiceManager::internalFind(const std::string & name,
     {
         if (0 != name.compare(i->first.name())) continue;
         
-        if (bp::ServiceVersion::isNewerMatch(
+        if (bp::SemanticVersion::isNewerMatch(
                 i->second.version(), bestVer, version, minversion))
         {
             oSummary = i->first;
@@ -223,18 +223,18 @@ getBestProvider(const bp::service::Summary & dep,
                      & installed)
 {
     std::string name = dep.usesService();
-    bp::ServiceVersion version = dep.usesVersion();
-    bp::ServiceVersion minversion = dep.usesMinversion();
+    bp::SemanticVersion version = dep.usesVersion();
+    bp::SemanticVersion minversion = dep.usesMinversion();
 
     bp::service::Summary winner;
-    bp::ServiceVersion winnerVer;        
+    bp::SemanticVersion winnerVer;
 
     std::map<bp::service::Summary, bp::service::Description>::const_iterator i;
 
     for (i = installed.begin(); i != installed.end(); i++)
     {
-        if (bp::ServiceVersion::isNewerMatch(i->second.version(), winnerVer,
-                                             version, minversion))
+        if (bp::SemanticVersion::isNewerMatch(i->second.version(), winnerVer,
+                                              version, minversion))
         {
             winner = i->first;
             winnerVer = i->second.version();

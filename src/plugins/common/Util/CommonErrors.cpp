@@ -61,3 +61,6 @@ const char * pluginerrors::NotInstalled =
 
 const char * pluginerrors::SwitchVersion =
     "bp.switchVersion";
+
+const char * pluginerrors::UnsupportedClient =
+    "bp.unsupportedClient";

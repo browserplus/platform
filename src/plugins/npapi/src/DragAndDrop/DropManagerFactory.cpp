@@ -29,9 +29,7 @@
  */
 
 #include <string>
-#include "BPUtils/bpserviceversion.h"
 #include "BPUtils/BPLog.h"
-#include "BPUtils/bpstrutil.h"
 #include "BPUtils/bpbrowserinfo.h"
 #include "NPAPIPlugin.h"
 #include "DropManagerFactory.h"
@@ -39,6 +37,7 @@
 #include "Html5DropManager.h"
 
 using namespace std;
+using namespace bp;
 
 IDropManager* 
 DropManagerFactory::create(NPP instance,
@@ -46,52 +45,23 @@ DropManagerFactory::create(NPP instance,
                            IDropListener* listener)
 {
     IDropManager* rval = NULL;
-    bool unsupported = false;
-    bool useHtml5 = false;
-    try {
-        // access user agent and get browserinfo from it
-        NPAPIPlugin* plugin = (NPAPIPlugin*)instance->pdata;
-        string userAgent = plugin->getUserAgent();
-        BPLOG_DEBUG_STRM("DropManagerFactory userAgent: '" << userAgent << "'");
-        bp::BrowserInfo info(userAgent);
-        BPLOG_INFO_STRM("platform/browser/version = " << info.asString());
-
-        // Curent Html5 users:
-        //  - Firefox 3.6.3 or greater on Windows
-        //  - Safari 4.0.3 or greater on OSX
-        // Everybody else uses Intercept.
-        // Chrome on OSX doesn't support DnD.
-        if (info.platform() == "Windows") {
-            if (info.browser() == "Firefox") {
-                bp::ServiceVersion baseVersion;
-                (void) baseVersion.parse("3.6.3");
-                useHtml5 = info.version().compare(baseVersion) >= 0;
-            }
-        } else if (info.platform() == "OSX") {
-            if (info.browser() == "Safari") {
-                bp::ServiceVersion baseVersion;
-                (void) baseVersion.parse("4.0.3");
-                useHtml5 = info.version().compare(baseVersion) >= 0;
-            } else if (info.browser() == "Chrome") {
-                unsupported = true;
-            }
-        }
-
-        if (unsupported) {
-            BPLOG_INFO_STRM("DnD unsuppored for " << userAgent);
-        } else {
-            BPLOG_INFO_STRM("using " << string(useHtml5 ? "html5" : "intercept")
-                            << " drop manager for " << userAgent);
-            rval = useHtml5 ? Html5DropManager::allocate(instance, window,
-                                                         listener,
-                                                         info.platform(),
-                                                         info.browser())
-                              : InterceptDropManager::allocate(instance, window,
-                                                               listener);
-        }
-    } catch (const bp::error::Exception& e) {
-        BPLOG_ERROR_STRM("caught " << e.what() << ", DnD unsupported");
-        rval = NULL;
+    NPAPIPlugin* plugin = (NPAPIPlugin*)instance->pdata;
+    BrowserInfo info = plugin->getBrowserInfo();
+    string dndType = info.capability(BrowserInfo::kDnDCapability);
+    BPLOG_INFO_STRM("platform/browser/version = " << info.asString()
+                    << ", dndType = " << dndType);
+    if (dndType == BrowserInfo::kDnDIntercept) {
+        rval = InterceptDropManager::allocate(instance, window, listener);
+    } else if (dndType == BrowserInfo::kDnDHtml5) {
+        rval = Html5DropManager::allocate(instance, window,
+                                          listener,
+                                          info.platform(),
+                                          info.browser());
+    } else if (dndType == BrowserInfo::kUnsupported) {
+        // empty, logging done above
+    } else {
+        // shouldn't happen
+        BPLOG_ERROR_STRM("unknown DnD capability: " << dndType);
     }
     return rval;
 }

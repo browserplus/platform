@@ -88,9 +88,9 @@ ServiceQueryUtil::findBestMatch(std::string name,
     
     // when nav is non-null, found is meaningful, and is the version
     // of the service we've found
-    bp::ServiceVersion found;
-    bp::ServiceVersion version;
-    bp::ServiceVersion minversion;
+    bp::SemanticVersion found;
+    bp::SemanticVersion version;
+    bp::SemanticVersion minversion;
 
     // parse version string if present
     if (!versionStr.empty()) {
@@ -109,15 +109,15 @@ ServiceQueryUtil::findBestMatch(std::string name,
     
     for (it = list.begin(); it != list.end(); it++)
     {
-        bp::ServiceVersion current = it->version;
+        bp::SemanticVersion current = it->version;
         
         // (1)
         if (name.compare(it->name) != 0) continue;
         
 
         // (2, 3, and 4) is this a newer match than what we've already got?
-        if (!bp::ServiceVersion::isNewerMatch(current, found,
-                                              version, minversion))
+        if (!bp::SemanticVersion::isNewerMatch(current, found,
+                                               version, minversion))
         {
             continue;
         }

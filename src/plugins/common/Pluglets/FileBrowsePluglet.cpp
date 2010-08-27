@@ -24,6 +24,7 @@
 #include "BPUtils/bplocalization.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bpurl.h"
+#include "BPUtils/bpbrowserinfo.h"
 #include "PluginCommonLib/CommonErrors.h"
 
 #include <string.h>
@@ -63,6 +64,15 @@ FileBrowsePluglet::execute(unsigned int tid,
                            void* callbackArgument)
 {
     try {
+        // do we support the pluglet?
+        string supp = m_plugin->getBrowserInfo().capability(bp::BrowserInfo::kFileBrowseCapability);
+        if (supp == bp::BrowserInfo::kUnsupported) {
+            BPLOG_WARN_STRM(function << ", FileBrowse.unsupported");
+            failureCB(callbackArgument, tid, "FileBrowse.unsupported",
+                      "FileBrowse unsupported on this platform/browser combination");
+            return;
+        }
+
         // validate function
         if (!function) {
             BPLOG_WARN_STRM("execute called will NULL function");

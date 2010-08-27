@@ -38,6 +38,7 @@
 #include <vector>
 #include <list>
 #include "BPUtils/bptypeutil.h"
+#include "BPUtils/bpbrowserinfo.h"
 
 
 // Forward decls
@@ -111,6 +112,10 @@ public:
 
     virtual std::string getUserAgent() const = 0;
 
+    // tell the plugin that it's connection to the daemon is complete
+    virtual void setConnected() = 0;
+
+    virtual bp::BrowserInfo getBrowserInfo() = 0;
 };
 
 

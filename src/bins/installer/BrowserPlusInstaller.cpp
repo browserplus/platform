@@ -472,7 +472,7 @@ private:
         string s = bp::file::utf8FromNative(platformDir.filename());
         BPLOG_DEBUG_STRM("platformDir = " << platformDir
                          << ", nativeLeaf = " << s);
-        bp::ServiceVersion version;
+        bp::SemanticVersion version;
         weak_ptr<IInstallerListener> wp(shared_from_this());
         if (!version.parse(s)) {
             BPLOG_WARN_STRM("bad version: children of " << platformDir

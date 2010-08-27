@@ -47,7 +47,7 @@
 
 NPAPIPlugin::NPAPIPlugin(NPP npp)
     : BPPlugin(), m_npp(npp), m_scriptableObject(NULL), m_session(this),
-      m_windowPtr(NULL)
+      m_npWindow(NULL), m_connected(false)
 {
 }
     
@@ -58,38 +58,26 @@ NPAPIPlugin::~NPAPIPlugin()
 void
 NPAPIPlugin::setWindow(NPWindow* window)
 {
-    // iterate through all pluglets and inform the ones that need to
-    // know
-    if (m_scriptableObject) {
-        std::list<Pluglet *> pluglets =
-            m_session.getPlugletRegistry()->availablePluglets();
-        std::list<Pluglet *>::iterator pluglet;
-    
-        for (pluglet = pluglets.begin(); pluglet != pluglets.end(); pluglet++)
-        {
-            WindowedPluglet * wpluglet =
-                dynamic_cast<WindowedPluglet *>(*pluglet);
-            if (wpluglet) wpluglet->setWindow(window);
-        }
-    }
-    
+    m_npWindow = window;
+    plugletsSetWindow();
+}
+
+void*
+NPAPIPlugin::getWindow() const
+{
+    void* rval = NULL;
     // get the os specific window reference
 #ifdef WIN32
     // this is a HWND
-    m_windowPtr = (void *) (window->window);
+    rval = m_npWindow->window;
 #elif defined(MACOSX)
     // this is a WindowRef (may be null)
-    NP_CGContext* ctx = (NP_CGContext*)window->window;
-    m_windowPtr = ctx->window;
+    NP_CGContext* ctx = (NP_CGContext*)m_npWindow->window;
+    rval = ctx->window;
 #else 
 #warning "Linux NPAPI graphics stuff needsta be implemented!"
 #endif
-}
-
-void *
-NPAPIPlugin::getWindow() const
-{
-    return m_windowPtr;
+    return rval;
 }
 
 
@@ -112,6 +100,27 @@ plugin::Variant*
 NPAPIPlugin::allocVariant() const
 {
     return new NPAPIVariant();
+}
+
+
+void
+NPAPIPlugin::plugletsSetWindow()
+{
+    // see comments in setConnected()
+    if (!m_connected) {
+        return;
+    }
+
+    // let all windowed pluglets know about latest NPWindow
+    if (m_scriptableObject) {
+        std::list<Pluglet*> pluglets = m_session.getPlugletRegistry()->availablePluglets();
+        std::list<Pluglet*>::iterator pluglet;
+    
+        for (pluglet = pluglets.begin(); pluglet != pluglets.end(); pluglet++) {
+            WindowedPluglet* wpluglet = dynamic_cast<WindowedPluglet*>(*pluglet);
+            if (wpluglet) wpluglet->setWindow(m_npWindow);
+        }
+    }
 }
 
 
@@ -260,4 +269,29 @@ NPAPIPlugin::getUserAgent() const
     const char * ua = NULL; 
     ua = gBrowserFuncs.uagent(m_npp);
     return std::string((ua ? ua : "unknown"));
+}
+
+void
+NPAPIPlugin::setConnected()
+{
+    // A tad tricky here.  Can't tell windowed pluglets
+    // about new window until we're connected to daemon.
+    // Otherwise we have the possibility of no Permissions
+    // file, and hence no browser support or capabilities
+    // (see bpbrowserinfo.cpp)
+    bool wasConnected = m_connected;
+    m_connected = true;
+    if (!wasConnected) {
+        plugletsSetWindow();
+    }
+}
+
+
+bp::BrowserInfo
+NPAPIPlugin::getBrowserInfo()
+{
+    if (m_browserInfo.platform().empty()) {
+        m_browserInfo = bp::BrowserInfo(getUserAgent());
+    }
+    return m_browserInfo;
 }

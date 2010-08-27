@@ -59,7 +59,7 @@ using namespace std;
 // Initialization / Teardown
 //
 CBPCtl::CBPCtl() :
-m_pSession( 0 )
+m_pSession( 0 ), m_bConnected(false)
 {
 }
 
@@ -696,6 +696,23 @@ CBPCtl::getUserAgent() const
     // Most other bp::plugin methods have a way to explicitly indicate error.
     // Leave it this way for now.
     return bStat ? sUserAgent : "unknown";
+}
+
+
+void
+CBPCtl::setConnected()
+{
+    m_bConnected = true;
+}
+
+
+bp::BrowserInfo
+CBPCtl::getBrowserInfo()
+{
+    if (m_browserInfo.platform().empty()) {
+        m_browserInfo = bp::BrowserInfo(getUserAgent());
+    }
+    return m_browserInfo;
 }
 
 

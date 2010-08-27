@@ -644,10 +644,10 @@ service::Description::clear()
     m_builtIn = false;
 }
 
-bp::ServiceVersion
+bp::SemanticVersion
 service::Description::version() const
 {
-    bp::ServiceVersion v;
+    bp::SemanticVersion v;
     v.setMajor(m_majorVersion);
     v.setMinor(m_minorVersion);    
     v.setMicro(m_microVersion);    

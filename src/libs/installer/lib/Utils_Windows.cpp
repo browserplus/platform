@@ -82,7 +82,7 @@ bp::install::utils::axProgid(const std::string& version)
 
 
 std::string
-bp::install::utils::axProgid(const bp::ServiceVersion& version)
+bp::install::utils::axProgid(const bp::SemanticVersion& version)
 {
     return axProgid(version.asString());
 }
@@ -414,7 +414,7 @@ bp::install::utils::unregisterCruftControls(bool force)
             && startIndex < endIndex) {
             size_t versionIndex = edge.find("_") + 1;
             string versionStr = edge.substr(versionIndex, endIndex - versionIndex);
-            bp::ServiceVersion version;
+            bp::SemanticVersion version;
             if (!version.parse(versionStr)) {
                 BPLOG_DEBUG_STRM(versionStr << " not a valid version, skipping");
                 continue;
@@ -477,7 +477,7 @@ bp::install::utils::unregisterCruftControls(bool force)
             continue;
         }
         string versionStr = edge.substr(mimePrefix.length());
-        bp::ServiceVersion version;
+        bp::SemanticVersion version;
         if (!version.parse(versionStr)) {
             BPLOG_DEBUG_STRM(versionStr << " not a valid version, skipping");
             continue;

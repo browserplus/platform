@@ -33,12 +33,26 @@
 #ifndef __BPBROWSERINFO_H__
 #define __BPBROWSERINFO_H__
 
-#include "bpserviceversion.h"
+#include <string>
+#include <map>
+#include <vector>
+#include "bpsemanticversion.h"
 
 namespace bp { 
     class BrowserInfo 
     {
     public:
+        // well known capability keys/values
+        static const char* kDnDCapability;
+        static const char* kFileBrowseCapability;
+        static const char* kSupported;
+        static const char* kUnsupported;
+        static const char* kDnDIntercept;
+        static const char* kDnDHtml5;
+        static const char* kDnDActiveX;
+
+        BrowserInfo() : m_supported(false) {
+        }
         BrowserInfo(const std::string& userAgent);
         virtual ~BrowserInfo() {
         }
@@ -48,16 +62,28 @@ namespace bp {
         std::string browser() const {
             return m_browser;
         }
-        bp::ServiceVersion version() const {
+        bp::SemanticVersion version() const {
             return m_version;
         }
+        bool supported() const;
+        std::map<std::string, std::string> capabilities() const;
+        std::string capability(const std::string& s) const;
         std::string asString() const {
             return m_platform + "/" + m_browser + "/" + m_version.asString();
         }
-    protected:
+
+    private:
         std::string m_platform;
         std::string m_browser;
-        bp::ServiceVersion m_version;
+        bp::SemanticVersion m_version;
+        bool m_supported;
+        std::map<std::string, std::string> m_capabilities;
+
+        void loadBrowserSupportInfo();
+        std::vector<bp::SemanticVersion> versionRange(const std::string& s) const;
+        std::string versionFromUA(const std::string& userAgent,
+                                  const std::string& prefix,
+                                  const std::string& separator) const;
     };
 }
 

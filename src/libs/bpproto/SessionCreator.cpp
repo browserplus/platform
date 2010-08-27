@@ -132,14 +132,14 @@ SessionCreator::createSession(const char * uri, const char * locale,
 static std::string
 getNewestInstalledPlatform()
 {
-    bp::ServiceVersion newest;
+    bp::SemanticVersion newest;
     bp::file::Path dir = bp::paths::getProductTopDirectory();
     if (bp::file::isDirectory(dir)) {
         try {
             bp::file::tDirIter end;
             for (bp::file::tDirIter it(dir); it != end; ++it)
             {
-                bp::ServiceVersion version;
+                bp::SemanticVersion version;
                 std::string s = bp::file::utf8FromNative(it->path().filename());
                 if (version.parse(s) && version.compare(newest) > 0 &&
                     bp::file::exists(bp::paths::getBPInstalledPath(
@@ -235,7 +235,7 @@ SessionCreator::tryConnect()
                 if (errCode == bp::exit::kKillswitch) {
                     BPLOG_ERROR_STRM("daemon not running, blacklisted");
                     BPLOG_ERROR_STRM("removing blacklisted platform");
-                    bp::ServiceVersion version;
+                    bp::SemanticVersion version;
                     (void) version.parse(bp::paths::versionString());
                     bp::platformutil::removePlatform(version, true);
                     reportError(BP_EC_PLATFORM_BLACKLISTED,

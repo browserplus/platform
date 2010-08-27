@@ -47,6 +47,10 @@ class NPAPIPlugin : public BPPlugin
 
     virtual std::string getUserAgent() const;
 
+    virtual void setConnected();
+
+    virtual bp::BrowserInfo getBrowserInfo();
+
 private:
     NPP m_npp;
     NPObject* m_scriptableObject;
@@ -55,6 +59,8 @@ private:
     virtual plugin::Variant* allocVariant() const;
     
     virtual void * getWindow() const;
+
+    virtual void plugletsSetWindow();
 
     virtual bool callJsFunction( const plugin::Object* oFunc,
                                  plugin::Variant* args[], int nArgCount,
@@ -97,7 +103,11 @@ private:
 
     BPSession m_session;
 
-    void * m_windowPtr;
+    bp::BrowserInfo m_browserInfo;
+
+    NPWindow* m_npWindow;
+
+    bool m_connected;
 };
 
 #endif

@@ -362,7 +362,7 @@ private:
     
     // key is service name, value is vector of
     // blacklisted versions x.y.z.  pattern
-    // matching of version via bp::ServiceVersion::match() 
+    // matching of version via bp::SemanticVersion::match()
     std::map<std::string, std::vector<std::string> > m_blacklist; 
     
     // blacklisted platforms

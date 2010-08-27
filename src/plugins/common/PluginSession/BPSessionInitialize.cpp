@@ -27,6 +27,7 @@
 #include "BPSession.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bperrorutil.h"
+#include "BPUtils/bpbrowserinfo.h"
 #include "PluginCommonLib/CommonErrors.h"
 
 // disable warnings about assignment within conditional expression
@@ -79,6 +80,9 @@ generateReturn(const BPSession * session, BPErrorCode ec,
             case BP_EC_EXTENDED_ERROR:
                 err = error;
                 break;
+            case BP_EC_UNSUPPORTED_CLIENT:
+                err = pluginerrors::UnsupportedClient;
+                break;
             default:
                 err = pluginerrors::ConnectionError;
                 break;
@@ -111,6 +115,18 @@ BPSession::connectCallback(BPErrorCode ec,
         session->m_initialized = true;
     }
 
+    try {
+        // verify that browser is supported
+        plugin.setConnected();
+        if (!plugin.getBrowserInfo().supported()) {
+            ec = BP_EC_UNSUPPORTED_CLIENT;
+        }
+    } catch (const bp::error::Exception& e) {
+        BPLOG_ERROR_STRM("caught " << e.what());
+        ec = BP_EC_UNSUPPORTED_CLIENT;
+    }
+
+
     (void) generateReturn(session, ec, arg, error, verboseError);
 
     BPASSERT(ctx->callback != NULL);
@@ -126,7 +142,6 @@ BPSession::connectCallback(BPErrorCode ec,
 void
 BPSession::alreadyConnected(void * cookie)
 {
-
     InitializeContext * ctx = (InitializeContext *) cookie;    
     ctx->bp->connectCallback(BP_EC_OK, cookie, NULL, NULL);
 #ifdef WIN32

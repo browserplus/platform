@@ -391,7 +391,7 @@ service::Summary::detectService(const bp::file::Path &dirName,
     // service isn't in a <name>/<version> dir, and leave these two
     // members empty.
     std::string versionCandidate = bp::file::utf8FromNative(dirName.filename());
-    bp::ServiceVersion sv;
+    bp::SemanticVersion sv;
 
     if (!versionCandidate.empty() && sv.parse(versionCandidate)) {
         m_version = versionCandidate;     
@@ -492,13 +492,13 @@ service::Summary::usesService() const
     return m_usesService;
 }
 
-bp::ServiceVersion
+bp::SemanticVersion
 service::Summary::usesVersion() const
 {
     return m_usesVersion;
 }
 
-bp::ServiceVersion
+bp::SemanticVersion
 service::Summary::usesMinversion() const
 {
     return m_usesMinversion;

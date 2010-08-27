@@ -242,8 +242,14 @@ public:
     // error during check.
     bool isJsFunction( const plugin::Object* pObj ) const;
 
-	// return the user agent string
-	std::string getUserAgent() const;
+    // return the user agent string
+    std::string getUserAgent() const;
+
+    // set connected to daemon state
+    void setConnected();
+
+    // return browserinfo
+    bp::BrowserInfo getBrowserInfo();
     
 // Internal Methods    
 protected:
@@ -276,8 +282,12 @@ private:
     
     BPSession*              m_pSession;
 
+    bp::BrowserInfo         m_browserInfo;
+
     // These are pointers to anonymous Js functions we may generate.
     mutable CComPtr<IDispatch> m_jsfnIsArray;
     mutable CComPtr<IDispatch> m_jsfnIsFunction;
+
+    bool                    m_bConnected;
 };
 

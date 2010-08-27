@@ -24,7 +24,7 @@
 #ifndef __BPPLATFORMUTIL_H__
 #define __BPPLATFORMUTIL_H__
 
-#include "BPUtils/bpserviceversion.h"
+#include "BPUtils/bpsemanticversion.h"
 
 namespace bp {
     namespace platformutil {
@@ -33,7 +33,7 @@ namespace bp {
         //  b) it is not installing (no .installing file)
         //  c) it is not running
         // force flag ignores these checks
-        void removePlatform(const bp::ServiceVersion& version,
+        void removePlatform(const bp::SemanticVersion& version,
                             bool force = false);
     };
 };

@@ -150,7 +150,7 @@ using namespace std;
 static bool 
 isSafari5OnSnowLeopard(const string& userAgent)
 {
-    bp::ServiceVersion osVersion, leastOSVersion;
+    bp::SemanticVersion osVersion, leastOSVersion;
     leastOSVersion.parse("10.6.0");
     osVersion.parse(bp::os::PlatformVersion());
     

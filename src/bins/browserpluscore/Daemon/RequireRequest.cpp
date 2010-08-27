@@ -205,7 +205,7 @@ RequireRequest::doRun()
     
     // platform updates?
     checkPlatformUpdates();
-    vector<bp::ServiceVersion>::iterator ui = m_platformUpdates.begin();
+    vector<bp::SemanticVersion>::iterator ui = m_platformUpdates.begin();
     while (ui != m_platformUpdates.end()) {
         string version = ui->asString();
         
@@ -451,7 +451,7 @@ RequireRequest::checkPlatformUpdates()
 {
     using namespace bp::file;
     
-    bp::ServiceVersion thisVersion;
+    bp::SemanticVersion thisVersion;
     bool b = thisVersion.parse(bp::paths::versionString());
     BPASSERT(b);
     if (!b) {
@@ -475,7 +475,7 @@ RequireRequest::checkPlatformUpdates()
     }
     vector<string>::iterator it = updates.begin();
     while (it != updates.end()) {
-        bp::ServiceVersion v;
+        bp::SemanticVersion v;
         if (v.parse(*it)) {
             // remove any updates which have already been installed or are 
             // older than our current version
@@ -506,25 +506,25 @@ RequireRequest::checkPlatformUpdates()
     // if we have updates, get the latest in each 
     // major rev and delete the others
     if (!updates.empty()) {
-        vector<bp::ServiceVersion> toDelete;
+        vector<bp::SemanticVersion> toDelete;
         if (updates.size() == 1) {
             // easy case, only one update
-            bp::ServiceVersion v;
+            bp::SemanticVersion v;
             if (v.parse(updates[0]) 
                 && !PlatformUpdater::updateSpawned(v.asString())) {
                 m_platformUpdates.push_back(v);
             }
         } else {
             // harder case, find latest in each major rev and "outdated" ones
-            map<int, bp::ServiceVersion> m;
+            map<int, bp::SemanticVersion> m;
             for (unsigned int i = 0; i < updates.size(); i++) {
-                bp::ServiceVersion v;
+                bp::SemanticVersion v;
                 if (!v.parse(updates[i])
                     || PlatformUpdater::updateSpawned(v.asString())) {
                     continue;
                 }
                 int major = v.majorVer();
-                map<int, bp::ServiceVersion>::iterator it = m.find(major);
+                map<int, bp::SemanticVersion>::iterator it = m.find(major);
                 if (it == m.end()) {
                     m[major] = v;
                 } else {
@@ -536,7 +536,7 @@ RequireRequest::checkPlatformUpdates()
                     }
                 }
             }
-            map<int, bp::ServiceVersion>::iterator it;
+            map<int, bp::SemanticVersion>::iterator it;
             for (it = m.begin(); it != m.end(); ++it) {
                 m_platformUpdates.push_back(it->second);
             }

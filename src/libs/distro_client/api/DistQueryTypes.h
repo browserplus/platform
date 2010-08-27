@@ -34,7 +34,7 @@
 #include <set>
 #include <string>
 
-#include "BPUtils/bpserviceversion.h"
+#include "BPUtils/bpsemanticversion.h"
 
 /**
  * a smart pointer container for a list of service name, version pairs.
@@ -51,7 +51,7 @@ class AvailableService
     AvailableService() : sizeBytes(0), serviceAPIVersion(0), dependentService(false) { }
 
     std::string name;
-    bp::ServiceVersion version;    
+    bp::SemanticVersion version;
     std::string serverURL;    
     unsigned int sizeBytes;
     unsigned int serviceAPIVersion;

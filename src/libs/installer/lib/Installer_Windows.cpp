@@ -242,8 +242,8 @@ Installer::postflight()
     writeInt(key, "NoRepair", 1);
 
     // Remove replaced platforms. 
-    vector<bp::ServiceVersion> plats = utils::installedVersions();
-    vector<bp::ServiceVersion>::const_iterator iter;
+    vector<bp::SemanticVersion> plats = utils::installedVersions();
+    vector<bp::SemanticVersion>::const_iterator iter;
     for (iter = plats.begin(); iter != plats.end(); ++iter) {
         if (iter->majorVer() != m_version.majorVer()) {
             continue;
@@ -300,7 +300,7 @@ Installer::postflight()
 
 
 void
-Installer::disablePlugins(const bp::ServiceVersion& version)
+Installer::disablePlugins(const bp::SemanticVersion& version)
 {
     string osVersion = bp::os::PlatformVersion();
     bool isVistaOrLater = osVersion.compare("6") >= 0;
