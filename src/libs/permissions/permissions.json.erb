@@ -98,6 +98,12 @@ end
         }
     },
 
+    // New public signing keys to be appended to BrowserPlus.crt if 
+    // not already present.  Be careful with how newlines are embedded.
+    "publicKeys" : [
+//        "-----BEGIN CERTIFICATE-----\nMIIGKzCCBBOgAwIBAgIJALR4C+TE+6rBMA0GCSqGSIb3DQEBBQUAMIGrMQswCQYD\n...many lines removed...1n8ZkZ8FIV9cS4TKFVQdfjL03UE3I2A1qOjwPHSJMkqGi7fxyX8K11mx0AMq4Is=\n-----END CERTIFICATE-----\n"
+    ],
+
     // autoUpdatePermissionMigration is used when one or more
     // services are being replaced by other services.  We don't
     // want to re-pester the user for permissions, so we migrate
@@ -109,7 +115,7 @@ end
     // matches all domains), we set autoupdate true for all
     // of the services in 'new' for that domain.
     //
-//    "autoUpdatePermissionMigration": {
+    "autoUpdatePermissionMigration": {
 //       "F81D2642-5689-46E3-A03F-D7436D04AED7":
 //          [
 //             {  "domain": "*.yahoo.com",
@@ -118,7 +124,7 @@ end
 //                "new": ["FileTransfer"]
 //             }
 //          ]
-//    },
+    },
 
     // Service permission localizations
     //

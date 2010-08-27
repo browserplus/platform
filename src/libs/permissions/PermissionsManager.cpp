@@ -652,6 +652,31 @@ PermissionsManager::load()
                 m_platformBlacklist.push_back(s);
             }
         }
+
+        // publicKeys is a list of public keys to be added to certs
+        objPtr = m["publicKeys"];
+        if (objPtr) {
+            bp::file::Path certPath = getCertFilePath();
+            string certs;
+            if (!loadFromFile(certPath, certs)) {
+                BP_THROW("unable to read " + certPath.externalUtf8());
+            }
+            bool dirty = false;
+            vector<const bp::Object*>v = *objPtr;
+            for (size_t i = 0; i < v.size(); i++) {
+                string s = *(v[i]);
+                if (certs.find(s) == string::npos) {
+                    BPLOG_INFO_STRM("add cert " << s.substr(0, 50) << "...");
+                    certs += s;
+                    dirty = true;
+                }
+            }
+            if (dirty){
+                if (!storeToFile(certPath, certs)) {
+                    BP_THROW("unable to write " + certPath.externalUtf8());
+                }
+            }
+        }
         
         // permission localizations are a map
         objPtr = m["servicePermissionLocalizations"];
