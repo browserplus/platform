@@ -28,8 +28,8 @@ Import Library Paths (In-tree)
 
 Import Libraries
 ================
-BPUtils_s.lib libeay32_s.lib mongoose_s.lib rpcrt4.lib ssleay32_s.lib? 
-Wininet.lib? winmm.lib? Ws2_32.lib? yajl_s.lib 
+BPUtils_s.lib libeay32_s.lib mongoose_s.lib rpcrt4.lib ssleay32_s.lib 
+Wininet.lib winmm.lib Ws2_32.lib yajl_s.lib 
 
 
 
