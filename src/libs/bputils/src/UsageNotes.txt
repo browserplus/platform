@@ -6,21 +6,13 @@ Settings needed to consume the BPUtils_s static lib
 
 General Build Settings
 ======================
-Character Set: Use Multi-Byte Character Set
-_DEBUG not defined even for Debug builds
-Runtime Library: Multi-threaded (/MT)
+Character Set: Use Unicode Character Set
+Runtime Library: Multi-threaded or Multi-threaded Debug (/MT or /MTd)
 
 
 Include Paths (In-tree, explicit includes)
 ==========================================
-[...]\Core\build\BPUtils\dist\include
-
-
-Include Paths (In-tree, uber-header)
-====================================
-[...]\Core\build\BPUtils\dist\include
-[...]\Core\build\BPProtocol\dist\include
-[...]\external\Windows\include
+[...]\public_platform\build\dist\include
 
 
 Include Files (explicit includes)
@@ -28,20 +20,16 @@ Include Files (explicit includes)
 #include "BPUtils/[specific header]"
 
 
-Include Files (uber-header)
-===========================
-#include "BPUtils/BPUtils.h"
-
-
 Import Library Paths (In-tree)
 ==============================
-[...]Core\build\BPUtils\dist\lib\[debug|release]
-[...]\external\Windows\lib
+[...]public_platform\build\dist\lib\[Debug|Release]
+[...]public_platform\external\Windows\lib\[Debug|Release]
 
 
 Import Libraries
-==========================
-BPUtils_s.lib yajl_s.lib rpcrt4.lib
+================
+BPUtils_s.lib libeay32_s.lib mongoose_s.lib rpcrt4.lib ssleay32_s.lib? 
+Wininet.lib? winmm.lib? Ws2_32.lib? yajl_s.lib 
 
 
 
