@@ -31,8 +31,8 @@
  */
 
 #include "BPObjectTest.h"
-#include "BPUtils/bptypeutil.h"
 #include "BPUtils/bpfile.h"
+#include "BPUtils/bptypeutil.h"
 
 
 CPPUNIT_TEST_SUITE_REGISTRATION(BPObjectTest);

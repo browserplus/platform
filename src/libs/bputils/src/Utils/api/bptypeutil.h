@@ -21,14 +21,18 @@
  */
 
 /**
- * bptypeutil.hh -- c++ utilities to make building hierarchies of BPElements
- *                  eaiser.  A tool that may be consumed in source form
- *                  by a service author to simplify mapping into and out of
- *                  introspectable service API types.
+ * bptypeutil.h -- c++ utilities to make building hierarchies of BPElements
+ *                 eaiser.  A tool that may be consumed in source form
+ *                 by a service author to simplify mapping into and out of
+ *                 introspectable service API types.
  */
 
-#ifndef __BPTYPEUTIL_HH__
-#define __BPTYPEUTIL_HH__
+#ifndef BPTYPEUTIL_H__
+#define BPTYPEUTIL_H__
+
+#include <map>
+#include <string>
+#include <vector>
 
 // when you compile this file, the service SDK include directory must
 // be in the include path
@@ -37,9 +41,6 @@
 #include "bperrorutil.h"
 #include "bpfile.h"
 
-#include <string>
-#include <vector>
-#include <map>
 
 /** 
  * BP types are represented in JSON as maps.

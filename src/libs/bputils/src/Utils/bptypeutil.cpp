@@ -21,18 +21,18 @@
  */
 
 /**
- * bputil.hh -- c++ utilities to make building hierarchies of BPElements
- *              eaiser.  A tool that may be consumed in source form
- *              by a service author to simplify mapping into and out of
- *              introspectable service API types.
+ * bptypeutil.cpp -- c++ utilities to make building hierarchies of BPElements
+ *                   eaiser.  A tool that may be consumed in source form
+ *                   by a service author to simplify mapping into and out of
+ *                   introspectable service API types.
  */
 
 #include "bptypeutil.h"
-#include "bperrorutil.h"
 #include <iostream>
 #include <sstream>
 #include <stdlib.h>
 #include <string.h>
+#include "bperrorutil.h"
 #include "bpstrutil.h"
 
 #ifdef WIN32

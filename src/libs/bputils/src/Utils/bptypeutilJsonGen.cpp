@@ -21,9 +21,9 @@
  */
 
 #include "bptypeutil.h"
-#include "bperrorutil.h"
-#include <yajl/yajl_gen.h>
 #include <string.h>
+#include <yajl/yajl_gen.h>
+#include "bperrorutil.h"
 
 using namespace bp;
 

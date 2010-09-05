@@ -21,10 +21,10 @@
  */
 
 #include "bptypeutil.h"
-#include "bperrorutil.h"
-#include <yajl/yajl_parse.h>
 #include <iostream>
 #include <stack>
+#include <yajl/yajl_parse.h>
+#include "bperrorutil.h"
 
 using namespace bp;
 

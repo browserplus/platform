@@ -21,11 +21,12 @@
  */
 
 #include "bptypeutil.h"
-#include "bperrorutil.h"
-#include "bpfile.h"
-#include <yajl/yajl_parse.h>
 #include <iostream>
 #include <stack>
+#include <yajl/yajl_parse.h>
+#include "bperrorutil.h"
+#include "bpfile.h"
+
 
 struct ParseContext {
     std::stack<bp::Object *> nodeStack;
