@@ -30,7 +30,7 @@
 #include "bpdebug.h"
 #include <string>
 #include "bpconfig.h"
-#include "BPLog.h"
+#include "BPUtils/BPLog.h"
 #include "ProductPaths.h"
 
 

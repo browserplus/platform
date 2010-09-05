@@ -30,11 +30,10 @@
  */
 
 #include "bpurlcollection.h"
-#include "bpfile.h"
-#include "bpstrutil.h"
-#include "bpurl.h"
-
 #include <sstream>
+#include "BPUtils/bpfile.h"
+#include "BPUtils/bpstrutil.h"
+#include "BPUtils/bpurl.h"
 
 
 bp::URLCollection::URLCollection()

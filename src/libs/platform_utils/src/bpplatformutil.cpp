@@ -20,12 +20,12 @@
  * ***** END LICENSE BLOCK *****
  */
 
+#include "bpplatformutil.h"
 #include <string>
-#include "BPUtils/bpplatformutil.h"
 #include "BPUtils/bpfile.h"
-#include "BPUtils/ProductPaths.h"
-#include "BPUtils/ProcessLock.h"
 #include "BPUtils/BPLog.h"
+#include "ProcessLock.h"
+#include "ProductPaths.h"
 
 using namespace std;
 using namespace bp::file;

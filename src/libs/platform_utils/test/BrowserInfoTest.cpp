@@ -21,8 +21,8 @@
  */
 
 #include "BrowserInfoTest.h"
-#include "BPUtils/bpbrowserinfo.h"
 #include "BPUtils/bperrorutil.h"
+#include "platform_utils/bpbrowserinfo.h"
 
 using namespace std;
 CPPUNIT_TEST_SUITE_REGISTRATION(BrowserInfoTest);

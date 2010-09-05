@@ -36,7 +36,7 @@
 #include <string>
 #include <map>
 #include <vector>
-#include "bpsemanticversion.h"
+#include "BPUtils/bpsemanticversion.h"
 
 namespace bp { 
     class BrowserInfo 

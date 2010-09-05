@@ -33,7 +33,7 @@
 #define __BPCONFIG_H__
 
 #include <list>
-#include "bptypeutil.h"
+#include "BPUtils/bptypeutil.h"
 
 namespace bp {
 namespace config {

@@ -23,17 +23,16 @@
 /*
  *  ConfigReader.cpp
  *  Helps read values from (json, currently) configuration files.
- *  
+ *
  *  Created by David Grigsby on 8/04/07.
  *  Copyright 2007 Yahoo! Inc. All rights reserved.
  *
  */
 
 #include "bpconfig.h"
-#include "bpstrutil.h"
-
 #include <iostream>
-#include "BPLog.h"
+#include "BPUtils/BPLog.h"
+#include "BPUtils/bpstrutil.h"
 
 
 namespace bp

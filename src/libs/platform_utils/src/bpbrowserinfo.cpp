@@ -32,13 +32,12 @@
  */
 
 #include "bpbrowserinfo.h"
-#include "bperrorutil.h"
-#include "bpstrutil.h"
-#include "bptypeutil.h"
-#include "bperrorutil.h"
+#include "BPUtils/bperrorutil.h"
+#include "BPUtils/BPLog.h"
+#include "BPUtils/bpstrutil.h"
+#include "BPUtils/bptypeutil.h"
+#include "BPUtils/OS.h"
 #include "ProductPaths.h"
-#include "OS.h"
-#include "BPLog.h"
 
 using namespace std;
 

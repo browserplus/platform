@@ -33,8 +33,8 @@
 #define __BPURLCOLLECTION_H__
 
 #include <string>
-#include "bptypeutil.h"
-#include "bpfile.h"
+#include "BPUtils/bpfile.h"
+#include "BPUtils/bptypeutil.h"
 
 namespace bp {
     class URLCollection 

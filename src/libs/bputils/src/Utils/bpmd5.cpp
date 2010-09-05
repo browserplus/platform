@@ -20,37 +20,48 @@
  * ***** END LICENSE BLOCK *****
  */
 
-/**
- * UrlCollectionTest.h
- * A test of the bp::URLCollection component
+/*
+ *  bpmd5.cpp
  *
- * Created by Lloyd Hilaiel on Tues Apr 29
- * Copyright (c) 2008 Yahoo!, Inc. All rights reserved.
+ *  Created by David Grigsby on 04/29/09.
+ *  Copyright 2009 Yahoo! Inc. All rights reserved.
+ *
  */
 
-#ifndef __URLCOLLECTIONTEST_H__
-#define __URLCOLLECTIONTEST_H__
+#include "bpmd5.h"
+#include <iomanip>
+#include <sstream>
+#include <string>
 
-#include "TestingFramework/TestingFramework.h"
-#include "BPUtils/bpfile.h"
+#include <openssl/md5.h>
 
-class URLCollectionTest : public CPPUNIT_NS::TestCase
+using namespace std;
+
+
+namespace bp {
+namespace md5 {
+
+
+string hash( const std::string& sIn )
 {
-    CPPUNIT_TEST_SUITE(URLCollectionTest);
-    CPPUNIT_TEST(bogusPath);
-    CPPUNIT_TEST(malformedJSON);
-    CPPUNIT_TEST(fullTest);
-    CPPUNIT_TEST_SUITE_END();
+    MD5_CTX ctx;
+    MD5_Init(&ctx);
 
-  public:
-    void setUp();
-    void tearDown();
-    
-  protected:
-    void bogusPath();
-    void malformedJSON();
-    void fullTest();
-    bp::file::Path m_path;
-};
+    MD5_Update(&ctx, sIn.c_str(), sIn.length() );
 
-#endif
+    unsigned char chBuf[MD5_DIGEST_LENGTH];
+    MD5_Final( chBuf, &ctx );
+
+    stringstream ss;
+    for( int i=0; i<MD5_DIGEST_LENGTH; i++)
+    {
+        ss << setw(2) << setfill('0') << hex << (unsigned int)chBuf[i];
+    }
+
+    return ss.str();
+}
+
+
+} // md5
+} // bp
+
