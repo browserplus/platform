@@ -32,7 +32,6 @@
 #define __MIMETYPETEST_H__
 
 #include "TestingFramework/TestingFramework.h"
-//#include "BPUtils/BPUtils.h"
 
 class MimeTypeTest : public CPPUNIT_NS::TestCase
 {

@@ -32,6 +32,8 @@
 #include "BPUtils/bpconvert.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
+#include "BPUtils/bpmd5.h"
+#include "BPUtils/bprandom.h"
 #include "BPUtils/bprunloop.h"
 #include "BPUtils/bpstopwatch.h"
 #include "BPUtils/bpurl.h"
@@ -39,8 +41,6 @@
 #include "BPUtils/HttpSyncTransaction.h"
 #include "BPUtils/HttpTransaction.h"
 #include "BPUtils/OS.h"
-#include "BPUtils/bprandom.h"
-#include "BPUtils/bpmd5.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION(HttpStressTest);
 
