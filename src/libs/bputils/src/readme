@@ -1,0 +1,7 @@
+BPUtils provides highly-generic facilities.  
+
+To the extent possible, BrowserPlus-specific items do not appear in this lib.
+
+This project does not depend on any other browserplus projects or files.
+
+It does have some dependencies on 3rd party code.
