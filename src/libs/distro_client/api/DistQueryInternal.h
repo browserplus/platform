@@ -27,8 +27,8 @@
 #ifndef __DISTQUERYINTERNAL_H__
 #define __DISTQUERYINTERNAL_H__
 
-#include "BPUtils/ServiceDescription.h"
 #include "DistributionClient/DistQueryTypes.h"
+#include "platform_utils/ServiceDescription.h"
 
 class ServiceQuery;
 

@@ -28,10 +28,10 @@
 #define __BPPROTOUTIL_H__
 
 #include "BPProtocolInterface.h"
-#include <BPUtils/bpprocess.h>
-#include <BPUtils/bptypeutil.h>
 #include <ServiceAPI/bptypes.h>
 #include <ServiceAPI/bpdefinition.h>
+#include "BPUtils/bpprocess.h"
+#include "BPUtils/bptypeutil.h"
 
 
 

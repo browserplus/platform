@@ -27,8 +27,8 @@
 #ifndef __PLUGLET_H__
 #define __PLUGLET_H__
 
-#include "BPUtils/ServiceDescription.h"
 #include "BPUtils/bptypeutil.h"
+#include "platform_utils/ServiceDescription.h"
 #include "ServiceAPI/bpdefinition.h"
 
 

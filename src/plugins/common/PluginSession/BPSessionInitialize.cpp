@@ -27,7 +27,7 @@
 #include "BPSession.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bperrorutil.h"
-#include "BPUtils/bpbrowserinfo.h"
+#include "platform_utils/bpbrowserinfo.h"
 #include "PluginCommonLib/CommonErrors.h"
 
 // disable warnings about assignment within conditional expression

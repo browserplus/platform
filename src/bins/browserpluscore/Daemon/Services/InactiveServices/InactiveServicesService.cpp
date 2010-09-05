@@ -29,11 +29,11 @@
 
 #include "InactiveServicesService.h"
 #include "BPUtils/bpfile.h"
-#include "BPUtils/bpconfig.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/OS.h"
-#include "BPUtils/ProductPaths.h"
 #include "Permissions/Permissions.h"
+#include "platform_utils/bpconfig.h"
+#include "platform_utils/ProductPaths.h"
 
 using namespace std;
 using namespace std::tr1;

@@ -30,9 +30,9 @@
 
 #include <map>
 
-#include "BPUtils/ServiceDescription.h"
-#include "BPUtils/ServiceSummary.h"
 #include "BPUtils/bpfile.h"
+#include "platform_utils/ServiceDescription.h"
+#include "platform_utils/ServiceSummary.h"
 
 namespace DiskScanner {
     

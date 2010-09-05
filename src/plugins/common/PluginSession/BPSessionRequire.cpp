@@ -25,10 +25,10 @@
  */
 #include "BPSession.h"
 #include "bppluginutil.h"
-#include "BPUtils/bpdefutil.h"
-#include "BPUtils/BPLog.h"
 #include "BPUtils/bperrorutil.h"
+#include "BPUtils/BPLog.h"
 #include "CommonErrors.h"
+#include "platform_utils/bpdefutil.h"
 
 #ifdef WIN32
 // silence "assignment within conditional expression" warning

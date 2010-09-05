@@ -30,11 +30,11 @@
 
 #include "ServiceUpdater.h"
 #include "BPUtils/BPLog.h"
-#include "BPUtils/bpphash.h"
 #include "BPUtils/OS.h"
 #include "ServiceInstaller.h"
 #include "DistributionClient/DistributionClient.h"
 #include "Permissions/Permissions.h"
+#include "platform_utils/bpphash.h"
 #include "RequireRequest.h"
 
 using namespace std;

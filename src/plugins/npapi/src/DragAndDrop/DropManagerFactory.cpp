@@ -30,11 +30,11 @@
 
 #include <string>
 #include "BPUtils/BPLog.h"
-#include "BPUtils/bpbrowserinfo.h"
-#include "NPAPIPlugin.h"
 #include "DropManagerFactory.h"
-#include "InterceptDropManager.h"
 #include "Html5DropManager.h"
+#include "InterceptDropManager.h"
+#include "NPAPIPlugin.h"
+#include "platform_utils/bpbrowserinfo.h"
 
 using namespace std;
 using namespace bp;

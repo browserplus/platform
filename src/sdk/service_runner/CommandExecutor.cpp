@@ -20,14 +20,12 @@
  * ***** END LICENSE BLOCK *****
  */
 
+#include "CommandExecutor.h"
 #include <iostream>
-
 #include "BPUtils/bpfile.h"
 #include "BPUtils/bpurl.h"
-#include "BPUtils/ProductPaths.h"
-
+#include "platform_utils/ProductPaths.h"
 #include "Output.h"
-#include "CommandExecutor.h"
 
 
 using namespace std;

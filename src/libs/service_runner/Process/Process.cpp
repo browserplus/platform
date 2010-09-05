@@ -32,12 +32,13 @@
 #include <iostream>
 #include <stdlib.h>
 #include "BPUtils/APTArgParse.h"
-#include "BPUtils/bpconfig.h"
 #include "BPUtils/BPLog.h"
-#include "BPUtils/bpdebug.h"
 #include "BPUtils/bpstopwatch.h"
-#include "BPUtils/ProductPaths.h"
 #include "OutputRedirector.h"
+#include "platform_utils/bpconfig.h"
+#include "platform_utils/bpdebug.h"
+#include "platform_utils/ProductPaths.h"
+#include "platform_utils/LogConfigurator.h"
 #include "ServiceLibrary.h"
 #include "ServiceProtocol.h"
 

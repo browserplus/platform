@@ -29,9 +29,9 @@
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bpprocess.h"
-#include "BPUtils/ProductPaths.h"
 #include "BPUtils/bpstrutil.h"
 #include "BPUtils/OS.h"
+#include "platform_utils/ProductPaths.h"
 #include "RegUtils_Windows.h"
 
 using namespace std;

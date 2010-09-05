@@ -24,19 +24,19 @@
 #include <iostream>
 #include <stdlib.h>
 #include "ArchiveLib/ArchiveLib.h"
-#include "BPUtils/bpconfig.h"
 #include "BPUtils/bpconvert.h"
 #include "BPUtils/bpfile.h"
-#include "BPUtils/bplocalization.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bpprocess.h"
 #include "BPUtils/bpstrutil.h"
 #include "BPUtils/HttpRequest.h"
 #include "BPUtils/HttpSyncTransaction.h"
-#include "BPUtils/ProductPaths.h"
-#include "BPUtils/ProcessLock.h"
+#include "platform_utils/bpconfig.h"
+#include "platform_utils/bplocalization.h"
+#include "platform_utils/ProcessLock.h"
+#include "platform_utils/ProductPaths.h"
 
-#include <string.h>
+//#include <string.h>
 
 #ifdef MACOSX
 #include <CoreFoundation/CoreFoundation.h>

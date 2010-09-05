@@ -36,13 +36,13 @@
 #include <vector>
 
 #include "ArchiveLib/ArchiveLib.h"
-#include "BPUtils/bpconfig.h"
 #include "BPUtils/bpdns.h"
 #include "BPUtils/bpfile.h"
-#include "BPUtils/bplocalization.h"
 #include "BPUtils/BPLog.h"
-#include "BPUtils/bpphash.h"
-#include "BPUtils/ProductPaths.h"
+#include "platform_utils/bpconfig.h"
+#include "platform_utils/bplocalization.h"
+#include "platform_utils/bpphash.h"
+#include "platform_utils/ProductPaths.h"
 
 
 using namespace std;

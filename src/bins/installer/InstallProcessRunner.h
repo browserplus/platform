@@ -28,9 +28,9 @@
 #ifndef __INSTALL_PROCESS_RUNNER_H__
 #define __INSTALL_PROCESS_RUNNER_H__
 
+#include "bpipc/IPCChannelServer.h"
 #include "BPUtils/bptr1.h"
 #include "BPUtils/bpfile.h"
-#include "BPUtils/IPCChannelServer.h"
 #include "BPInstaller/BPInstaller.h"
 #include "BPUtils/bptimer.h"
 

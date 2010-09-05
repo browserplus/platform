@@ -29,9 +29,9 @@
  */
 #include "PluginLogging.h"
 #include <iostream>
-#include "BPUtils/bpconfig.h"
-#include "BPUtils/LogConfigurator.h"
-#include "BPUtils/ProductPaths.h"
+#include "platform_utils/bpconfig.h"
+#include "platform_utils/LogConfigurator.h"
+#include "platform_utils/ProductPaths.h"
 
 using namespace std;
 

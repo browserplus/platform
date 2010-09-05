@@ -5,10 +5,10 @@
 #ifndef __OUTPUT_H__
 #define __OUTPUT_H__
 
-#include "BPUtils/bptypeutil.h"
-#include "BPUtils/ServiceDescription.h"
-
 #include <string>
+#include "BPUtils/bptypeutil.h"
+#include "platform_utils/ServiceDescription.h"
+
 
 namespace output 
 {

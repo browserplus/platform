@@ -30,13 +30,13 @@
 #include "PlatformUpdater.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
-#include "BPUtils/bpphash.h"
 #include "BPUtils/bpprocess.h"
 #include "BPUtils/bptimer.h"
 #include "BPUtils/OS.h"
-#include "BPUtils/ProductPaths.h"
 #include "DistributionClient/DistributionClient.h"
 #include "Permissions/Permissions.h"
+#include "platform_utils/bpphash.h"
+#include "platform_utils/ProductPaths.h"
 
 #include <iostream>
 

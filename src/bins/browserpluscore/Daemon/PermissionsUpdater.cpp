@@ -29,8 +29,8 @@
 #include "PermissionsUpdater.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bptimer.h"
-#include "BPUtils/bpexitcodes.h"
 #include "Permissions/Permissions.h"
+#include "platform_utils/bpexitcodes.h"
 
 using namespace std;
 

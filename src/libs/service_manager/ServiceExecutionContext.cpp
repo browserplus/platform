@@ -30,7 +30,7 @@
  * Copyright (c) 2007 Yahoo!, Inc. All rights reserved.
  */
  
-#include "api/ServiceExecutionContext.h"
+#include "ServiceExecutionContext.h"
 #include "BPUtils/bptypeutil.h"
 
 using namespace std;

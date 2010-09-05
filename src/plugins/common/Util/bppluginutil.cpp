@@ -29,13 +29,11 @@
 
 #include "api/bppluginutil.h"
 #include "api/BPHandleMapper.h"
-#include "BPUtils/bpfile.h"
-#include "BPUtils/bpconfig.h"
-#include "BPUtils/BPLog.h"
-#include "BPUtils/ProductPaths.h"
 #include "BPUtils/bperrorutil.h"
-
-#include <string.h>
+#include "BPUtils/bpfile.h"
+#include "BPUtils/BPLog.h"
+#include "platform_utils/bpconfig.h"
+#include "platform_utils/ProductPaths.h"
 
 using namespace std;
 using namespace std::tr1;

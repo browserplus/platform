@@ -21,7 +21,7 @@ SET(progName ServiceInstaller)
 
 SET(${progName}_MAJOR_VERSION 0)
 SET(${progName}_MINOR_VERSION 1)
-SET(${progName}_LINK_STATIC ServiceRunnerLib BPUtils)
+SET(${progName}_LINK_STATIC BPUtils platform_utils ServiceRunnerLib)
 
 YBT_BUILD(BINARY ${progName})
 

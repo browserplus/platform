@@ -27,7 +27,7 @@
 
 #include "InstallProcessRunner.h"
 #include "BPUtils/BPLog.h"
-#include "BPUtils/ProductPaths.h"
+#include "platform_utils/ProductPaths.h"
 
 #define TIMER_MSECS 1000
 #define MAX_TIMER_FIRES 10

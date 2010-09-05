@@ -29,8 +29,8 @@
 #include <iostream>
 #include "BPProtocol/BPProtocol.h"
 #include "BPUtils/APTArgParse.h"
-#include "BPUtils/bpconfig.h"
 #include "BPUtils/BPLog.h"
+#include "platform_utils/bpconfig.h"
 #include "stresstest.h"
 
 static void 

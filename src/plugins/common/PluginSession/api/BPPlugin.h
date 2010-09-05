@@ -38,7 +38,7 @@
 #include <vector>
 #include <list>
 #include "BPUtils/bptypeutil.h"
-#include "BPUtils/bpbrowserinfo.h"
+#include "platform_utils/bpbrowserinfo.h"
 
 
 // Forward decls

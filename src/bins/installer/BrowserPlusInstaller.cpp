@@ -23,17 +23,17 @@
 #include "BPInstaller/BPInstaller.h"
 #include "BPUtils/ARGVConverter.h"
 #include "BPUtils/bpfile.h"
-#include "BPUtils/bplocalization.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bprunloop.h"
-#include "BPUtils/ProcessLock.h"
-#include "BPUtils/ProductPaths.h"
 #include "BPUtils/OS.h"
-#include "BPUtils/InstallID.h"
 #include "InstallerSkin.h"
 #include "InstallerSkinVerbose.h"
 #include "InstallerSkinGUI.h"
 #include "InstallProcessRunner.h"
+#include "platform_utils/bplocalization.h"
+#include "platform_utils/InstallID.h"
+#include "platform_utils/ProcessLock.h"
+#include "platform_utils/ProductPaths.h"
 
 #include <string>
 #include <list>

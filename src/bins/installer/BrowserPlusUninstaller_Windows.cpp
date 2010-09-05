@@ -28,13 +28,13 @@
 #include <string>
 #include <windows.h>
 #include "BPInstaller/BPInstaller.h"
-#include "BPUtils/bpexitcodes.h"
 #include "BPUtils/bpfile.h"
-#include "BPUtils/ProductPaths.h"
-#include "BPUtils/bplocalization.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bpprocess.h"
 #include "BPUtils/bpstrutil.h"
+#include "platform_utils/bpexitcodes.h"
+#include "platform_utils/bplocalization.h"
+#include "platform_utils/ProductPaths.h"
 
 using namespace bp::file;
 using namespace bp::localization;

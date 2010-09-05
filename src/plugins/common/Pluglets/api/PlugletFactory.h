@@ -27,10 +27,11 @@
 #ifndef __PLUGLETFACTORY_H__
 #define __PLUGLETFACTORY_H__
 
-#include "BPUtils/ServiceDescription.h"
-#include "BPUtils/bptypeutil.h"
-#include "ServiceAPI/bpdefinition.h"
 #include <list>
+#include "BPUtils/bptypeutil.h"
+#include "platform_utils/ServiceDescription.h"
+#include "ServiceAPI/bpdefinition.h"
+
 
 class PlugletFactory
 {

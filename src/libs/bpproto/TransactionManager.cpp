@@ -24,7 +24,7 @@
 #include "BPProtoUtil.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bpfile.h"
-#include "BPUtils/ServiceDescription.h"
+#include "platform_utils/ServiceDescription.h"
 
 TransactionManager::TransactionManager()
     : m_promptCB(NULL), m_promptCookie(NULL), m_peerEnded(NULL)

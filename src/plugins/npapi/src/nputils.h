@@ -26,6 +26,9 @@
 #ifndef __NPUTILS_H__
 #define __NPUTILS_H__
 
+#include <string>
+#include <vector>
+
 #include <npapi/npapi.h>
 #include <npapi/npruntime.h>
 #include <npapi/npupp.h>
@@ -33,9 +36,6 @@
 #include "BPUtils/bptypeutil.h"
 #include "PluginCommonLib/BPTransaction.h"
 #include "PluginCommonLib/PluginObject.h"
-
-#include <string>
-#include <vector>
 
 namespace npu {
 

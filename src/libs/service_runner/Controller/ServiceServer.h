@@ -36,7 +36,7 @@
 #include <string>
 #include <set>
 #include "api/Controller.h"
-#include "BPUtils/IPCChannelServer.h"
+#include "bpipc/IPCChannelServer.h"
 
 
 namespace ServiceRunner 

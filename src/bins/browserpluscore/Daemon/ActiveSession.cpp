@@ -31,11 +31,11 @@
  */
 
 #include "ActiveSession.h"
-#include "BPUtils/ProductPaths.h"
-#include "BPUtils/ServicesUpdatedFile.h"
 #include "BPUtils/bprandom.h"
 #include "I18n/idna.h"
 #include "Permissions/Permissions.h"
+#include "platform_utils/ProductPaths.h"
+#include "platform_utils/ServicesUpdatedFile.h"
 #include "SystemConfig.h"
 #include "UsageReporting.h"
 

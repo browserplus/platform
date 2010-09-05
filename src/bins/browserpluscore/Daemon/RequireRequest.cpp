@@ -28,14 +28,14 @@
 #include <sstream>
 #include "ActiveSession.h"
 #include "BPUtils/bpfile.h"
-#include "BPUtils/bplocalization.h"
-#include "BPUtils/bpphash.h"
 #include "BPUtils/bprandom.h"
 #include "BPUtils/OS.h"
-#include "BPUtils/ProductPaths.h"
-#include "ServiceInstaller.h"
 #include "Permissions/Permissions.h"
+#include "platform_utils/bplocalization.h"
+#include "platform_utils/bpphash.h"
+#include "platform_utils/ProductPaths.h"
 #include "PlatformUpdater.h"
+#include "ServiceInstaller.h"
 
 using namespace std;
 using namespace std::tr1;

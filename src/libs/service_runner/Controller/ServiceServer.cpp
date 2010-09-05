@@ -33,7 +33,7 @@
 #include "ServiceServer.h"
 #include <sstream>
 #include "BPUtils/BPLog.h"
-#include "BPUtils/ProductPaths.h"
+#include "platform_utils/ProductPaths.h"
 
 using namespace std;
 using namespace std::tr1;

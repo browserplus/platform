@@ -33,7 +33,7 @@
 #include <sstream>
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
-#include "BPUtils/ProductPaths.h"
+#include "platform_utils/ProductPaths.h"
 #include "Process.h"
 #include "ServiceServer.h"
 

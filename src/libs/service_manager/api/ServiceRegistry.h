@@ -30,8 +30,8 @@
 #ifndef __SERVICEREGISTRY_H__
 #define __SERVICEREGISTRY_H__
 
-#include "BPUtils/ServiceDescription.h"
 #include "BPUtils/bpfile.h"
+#include "platform_utils/ServiceDescription.h"
 #include "ServiceManager/ServiceExecutionContext.h"
 #include "ServiceManager/ServiceInstance.h"
 #include "ServiceManager/ServiceFactory.h"

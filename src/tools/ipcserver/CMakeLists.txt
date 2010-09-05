@@ -18,5 +18,5 @@
 # Contributor(s): 
 # ***** END LICENSE BLOCK *****
 SET(binName IPCServer) 
-SET(${binName}_LINK_STATIC BPUtils)
+SET(${binName}_LINK_STATIC bpipc)
 YBT_BUILD(BINARY ${binName})

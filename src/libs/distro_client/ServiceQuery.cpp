@@ -28,10 +28,10 @@
 #include "ServiceQuery.h"
 #include "ArchiveLib/ArchiveLib.h"
 #include "BPUtils/bpfile.h"
-#include "BPUtils/bplocalization.h"
-#include "BPUtils/ProductPaths.h"
 #include "ServiceQueryUtil.h"
 #include "PendingUpdateCache.h"
+#include "platform_utils/bplocalization.h"
+#include "platform_utils/ProductPaths.h"
 #include "WSProtocol.h"
 
 // hopping actions.  We use a thread hopper to preserve

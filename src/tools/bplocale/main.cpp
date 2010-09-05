@@ -30,7 +30,7 @@
 
 #include <iostream>
 #include "BPUtils/APTArgParse.h"
-#include "BPUtils/bplocalization.h"
+#include "platform_utils/bplocalization.h"
 
 // definition of program arguments
 static APTArgDefinition s_args[] =

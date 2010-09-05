@@ -29,7 +29,7 @@
 #ifndef __SERVICEFACTORY_H__
 #define __SERVICEFACTORY_H__
 
-#include "BPUtils/ServiceSummary.h"
+#include "platform_utils/ServiceSummary.h"
 #include "ServiceExecutionContext.h"
 #include "ServiceInstance.h"
 

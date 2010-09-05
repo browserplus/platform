@@ -20,9 +20,6 @@
  * ***** END LICENSE BLOCK *****
  */
 
-
-#include "BPUtils/IPCServer.h"
-
 #include <iostream>
 #include <set>
 #include <sstream>
@@ -31,6 +28,9 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "bpipc/IPCServer.h"
+
 
 class MyServerListener : public bp::ipc::IServerListener,
                          public bp::ipc::IConnectionListener

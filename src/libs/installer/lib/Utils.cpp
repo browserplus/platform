@@ -20,8 +20,9 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include "BPUtils/BPUtils.h"
-#include "api/Utils.h"
+#include "Utils.h"
+#include "platform_utils/bpconfig.h"
+#include "platform_utils/ProductPaths.h"
 
 using namespace std;
 using namespace bp::paths;

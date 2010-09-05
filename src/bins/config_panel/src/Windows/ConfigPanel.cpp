@@ -32,12 +32,12 @@
 #include <atlstr.h>
 #include <atlwin.h>
 #include <comutil.h>
-#include "BPUtils/bplocalization.h"
 #include "BPUtils/bpfile.h"
-#include "BPUtils/LogConfigurator.h"
-#include "BPUtils/ProductPaths.h"
 #include "HTMLRender/HTMLDialog_Windows.h"
 #include "HTMLRender/ScriptGateway_Windows.h"
+#include "platform_utils/bplocalization.h"
+#include "platform_utils/LogConfigurator.h"
+#include "platform_utils/ProductPaths.h"
 #include "ScriptableConfigObject.h"
 
 

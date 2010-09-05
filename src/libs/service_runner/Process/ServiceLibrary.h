@@ -30,19 +30,9 @@
 #ifndef __SERVICELIBRARY_H__
 #define __SERVICELIBRARY_H__
 
-#include <string>
-#include "BPUtils/BPLogLevel.h"
-#include "BPUtils/BPLogLogger.h"
-#include "BPUtils/bprunloop.h"
-#include "BPUtils/bprunloopthread.h"
-#include "BPUtils/bpthreadhopper.h"
-#include "BPUtils/bptr1.h"
-#include "BPUtils/bptypeutil.h"
-#include "BPUtils/LogConfigurator.h"
-#include "BPUtils/ServiceDescription.h"
-#include "BPUtils/ServiceSummary.h"
-#include "BPUtils/bpfile.h"
-#include "ServiceAPI/bppfunctions.h"
+#include "platform_utils/ServiceDescription.h"
+#include "platform_utils/ServiceSummary.h"
+
 
 namespace ServiceRunner 
 {

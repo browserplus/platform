@@ -23,7 +23,7 @@
 #include "DnDPluglet.h"
 #include "BPPlugin.h"
 #include "BPUtils/BPLog.h"
-#include "BPUtils/bpbrowserinfo.h"
+#include "platform_utils/bpbrowserinfo.h"
 #include "PluginCommonLib/CommonErrors.h"
 
 #include <string.h>

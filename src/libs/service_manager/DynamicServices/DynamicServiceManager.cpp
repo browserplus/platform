@@ -29,12 +29,12 @@
 
 #include "DynamicServiceManager.h"
 #include "BPUtils/bpfile.h"
-#include "BPUtils/bpstrutil.h"
-#include "BPUtils/bpexitcodes.h"
 #include "BPUtils/BPLog.h"
-#include "BPUtils/ProductPaths.h"
-#include "BPUtils/ServiceInterfaceCache.h"
+#include "BPUtils/bpstrutil.h"
 #include "DiskScanner.h"
+#include "platform_utils/bpexitcodes.h"
+#include "platform_utils/ProductPaths.h"
+#include "platform_utils/ServiceInterfaceCache.h"
 
 using namespace std;
 using namespace std::tr1;

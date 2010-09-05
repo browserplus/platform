@@ -28,10 +28,10 @@
 #ifndef __SERVICEQUERY_H__
 #define __SERVICEQUERY_H__
 
-#include "BPUtils/ServiceSummary.h"
-#include "DistQueryTypes.h"
-#include "QueryCache.h"
 #include "DistQueryInternal.h"
+#include "DistQueryTypes.h"
+#include "platform_utils/ServiceSummary.h"
+#include "QueryCache.h"
 
 
 class ServiceQuery : public bp::http::client::Listener,

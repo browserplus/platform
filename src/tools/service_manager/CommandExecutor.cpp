@@ -20,15 +20,15 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include <iostream>
 #include "CommandExecutor.h"
-#include "BPUtils/ProductPaths.h"
-#include "BPUtils/bpfile.h"
-#include "ServiceManager/ServiceManager.h"
-
+#include <iostream>
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include "BPUtils/bpfile.h"
+#include "platform_utils/ProductPaths.h"
+#include "ServiceManager/ServiceManager.h"
+
 
 using namespace std;
 using namespace std::tr1;

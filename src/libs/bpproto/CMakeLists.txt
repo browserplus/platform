@@ -21,24 +21,10 @@ SET( libName BPProtocol )
 
 SET( ${libName}_MAJOR_VERSION 0)
 SET( ${libName}_MINOR_VERSION 1)
-SET( ${libName}_LINK_STATIC BPUtils)
+SET( ${libName}_LINK_STATIC bpipc platform_utils)
 
 YBT_BUILD(LIBRARY ${libName})
 
-ADD_DEPENDENCIES(BPProtocol BPUtils_s) 
-ADD_DEPENDENCIES(BPProtocol_s BPUtils_s) 
+ADD_DEPENDENCIES(BPProtocol bpipc_s platform_utils_s) 
+ADD_DEPENDENCIES(BPProtocol_s bpipc_s platform_utils_s) 
 
-############################################################
-# now copy in the required subset of the ServiceAPI to make this thing
-# more self contained.
-############################################################
-
-FILE(TO_NATIVE_PATH
-     "${CMAKE_CURRENT_BINARY_DIR}/dist/include/ServiceAPI"
-	 apiDir)
-
-SET(mkdirArg) 
-
-IF (NOT WIN32)
-  SET(mkdirArg "-p")
-ENDIF ()

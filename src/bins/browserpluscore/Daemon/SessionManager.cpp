@@ -22,8 +22,8 @@
 
 #include "SessionManager.h" 
 #include "ActiveSession.h" 
-#include "BPUtils/bpconfig.h"
-#include "BPUtils/ProductPaths.h"
+#include "platform_utils/bpconfig.h"
+#include "platform_utils/ProductPaths.h"
 
 using namespace std;
 using namespace std::tr1;

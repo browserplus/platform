@@ -29,21 +29,23 @@
  */
 
 #include "ServiceLibrary.h"
-#include "ServiceLibraryImpl.h"
-#include "v5/ServiceLibrary_v5.h"
-#include "v4/ServiceLibrary_v4.h"
+#include <stdarg.h>
+#include <string.h>
+
 #include <ServiceAPI/bptypes.h>
 #include <ServiceAPI/bpdefinition.h>
 #include <ServiceAPI/bpcfunctions.h>
 #include <ServiceAPI/bppfunctions.h>
-#include "BPUtils/bpconfig.h"
+
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bpstrutil.h"
-#include "BPUtils/ProductPaths.h"
+#include "platform_utils/bpconfig.h"
+#include "platform_utils/ProductPaths.h"
+#include "ServiceLibraryImpl.h"
+#include "v5/ServiceLibrary_v5.h"
+#include "v4/ServiceLibrary_v4.h"
 
-#include <stdarg.h>
-#include <string.h>
 
 using namespace std;
 using namespace std::tr1;

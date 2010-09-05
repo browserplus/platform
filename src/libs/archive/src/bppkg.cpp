@@ -34,9 +34,9 @@
 #include "api/bplzma.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
-#include "BPUtils/bpsign.h"
 #include "BPUtils/bpstopwatch.h"
 #include "BPUtils/bpstrutil.h"
+#include "platform_utils/bpsign.h"
 
 #ifdef WIN32
 #pragma warning(disable:4512)

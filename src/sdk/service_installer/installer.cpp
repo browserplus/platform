@@ -29,8 +29,8 @@
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bprunloop.h"
-#include "BPUtils/ProductPaths.h"
-#include "BPUtils/ServicesUpdatedFile.h"
+#include "platform_utils/ProductPaths.h"
+#include "platform_utils/ServicesUpdatedFile.h"
 #include "ServiceRunnerLib/ServiceRunnerLib.h"
 
 using namespace std;

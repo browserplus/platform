@@ -33,9 +33,9 @@
  */
 
 #include "BPUtils/ARGVConverter.h"
-#include "BPUtils/bpexitcodes.h"
-#include "BPUtils/ProductPaths.h"
 #include "Daemon/BPDaemon.h"
+#include "platform_utils/bpexitcodes.h"
+#include "platform_utils/ProductPaths.h"
 #include "ServiceRunnerLib/ServiceRunnerLib.h"
 
 #ifndef WIN32

@@ -32,7 +32,7 @@
 #define __SERVICEPROTOCOL_H__
 
 #include "ServiceLibrary.h"
-#include "BPUtils/IPCChannel.h"
+#include "bpipc/IPCChannel.h"
 #include "BPUtils/bpfile.h"
 
 #include <string>

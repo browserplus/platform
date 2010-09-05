@@ -32,9 +32,9 @@
 
 #include "api/ServiceUnpacker.h"
 #include "BPUtils/bpfile.h"
-#include "BPUtils/bptime.h"
 #include "BPUtils/BPLog.h"
-#include "BPUtils/ProductPaths.h"
+#include "BPUtils/bptime.h"
+#include "platform_utils/ProductPaths.h"
 
 using namespace std;
 using namespace bp::file;

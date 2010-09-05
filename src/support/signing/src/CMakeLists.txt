@@ -21,7 +21,7 @@
 
 SET(bpsigner_MAJOR_VERSION 1)
 SET(bpsigner_MINOR_VERSION 0)
-SET(bpsigner_LINK_STATIC BPUtils)
+SET(bpsigner_LINK_STATIC BPUtils platform_utils)
 
 YBT_BUILD(BINARY bpsigner)
 

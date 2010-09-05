@@ -26,8 +26,8 @@
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/OS.h"
-#include "BPUtils/ProductPaths.h"
-#include "BPUtils/bplocalization.h"
+#include "platform_utils/bplocalization.h"
+#include "platform_utils/ProductPaths.h"
 #include "RegUtils_Windows.h"
 
 using namespace std;

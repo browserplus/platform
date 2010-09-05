@@ -38,7 +38,7 @@
 #include "BPUtils/bpprocess.h"
 #include "BPUtils/bpstopwatch.h"
 #include "BPUtils/bptimer.h"
-#include "BPUtils/IPCChannel.h"
+#include "bpipc/IPCChannel.h"
 
 class ISessionCreatorListener 
 {

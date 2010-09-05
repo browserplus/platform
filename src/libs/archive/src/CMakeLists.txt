@@ -29,9 +29,9 @@ SET(${libName}_MINOR_VERSION 1)
 # This enables bt to emit link statements for either ourselves (dll case) 
 # or our clients (static lib case).
 # Note: currently (01/28/09): libs listed here must have name ending *_s
-SET(${libName}_LINK_STATIC BPUtils archive easylzma)
+SET(${libName}_LINK_STATIC BPUtils archive easylzma platform_utils)
 
 # Build our target as a static lib.
 YBT_BUILD(LIBRARY_STATIC ${libName})
 
-ADD_DEPENDENCIES(${libName}_s BPUtils_s)
+ADD_DEPENDENCIES(${libName}_s BPUtils_s platform_utils_s)

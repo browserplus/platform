@@ -22,11 +22,11 @@
 
 #include "DistQuery.h"
 #include "BPUtils/bpurl.h"
-#include "BPUtils/InstallID.h"
 #include "WSProtocol.h"
 #include "ServiceQuery.h"
 #include "ServiceQueryUtil.h"
 #include "QueryCache.h"
+#include "platform_utils/InstallID.h"
 #include "PendingUpdateCache.h"
 
 #include <iostream>

@@ -24,16 +24,16 @@
  * BrowserPlusUpdater - a simple binary to manage the update process.
  */
 
-#include "BPUtils/bpfile.h"
-#include "BPUtils/bplocalization.h"
-#include "BPUtils/BPLog.h"
-#include "BPUtils/ARGVConverter.h"
-#include "BPUtils/IPCChannel.h"
-#include "BPInstaller/BPInstaller.h"
-
 #include <string>
 #include <string.h>
  
+#include "bpipc/IPCChannel.h"
+#include "BPUtils/bpfile.h"
+#include "BPUtils/BPLog.h"
+#include "BPUtils/ARGVConverter.h"
+#include "BPInstaller/BPInstaller.h"
+#include "platform_utils/bplocalization.h"
+
 using namespace std;
 using namespace std::tr1;
 using namespace bp::file;

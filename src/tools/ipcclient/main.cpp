@@ -20,9 +20,6 @@
  * ***** END LICENSE BLOCK *****
  */
 
-
-#include "BPUtils/IPCConnection.h"
-
 #include <iostream>
 #include <sstream>
 #include <stdio.h>
@@ -32,6 +29,9 @@
 #ifndef WIN32
 #include <signal.h>
 #endif
+
+#include "bpipc/IPCConnection.h"
+
 
 class MyIPCClient : public bp::ipc::IConnectionListener
 {

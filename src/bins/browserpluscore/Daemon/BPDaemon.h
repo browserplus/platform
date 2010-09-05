@@ -33,9 +33,10 @@
 #include "AutoShutdown.h"
 #include "BPUtils/APTArgParse.h"
 #include "BPUtils/bpfile.h"
-#include "BPUtils/bpconfig.h"
 #include "BPUtils/bprunloop.h"
+#include "platform_utils/bpconfig.h"
 #include "SessionManager.h"
+
 
 class BPDaemon : virtual public IPermissionsManagerListener,
                  public std::tr1::enable_shared_from_this<BPDaemon>

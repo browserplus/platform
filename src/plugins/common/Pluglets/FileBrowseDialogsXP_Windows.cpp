@@ -33,12 +33,11 @@
 #include <shlobj.h>
 #include <shobjidl.h>
 
-
 #include "BPUtils/bpfile.h"
-#include "BPUtils/bplocalization.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bpstrutil.h"
 #include "FileBrowsePluglet.h"
+#include "platform_utils/bplocalization.h"
 
 
 using namespace std;

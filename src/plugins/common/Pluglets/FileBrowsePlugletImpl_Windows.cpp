@@ -36,13 +36,13 @@
 
 #include "bppluginutil.h"
 #include "BPUtils/bpfile.h"
-#include "BPUtils/bplocalization.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bpurl.h"
 #include "BPUtils/bpstrutil.h"
 #include "BPUtils/OS.h"
 #include "CommonErrors.h"
 #include "FileBrowseDialogs_Windows.h"
+#include "platform_utils/bplocalization.h"
 
 
 using namespace std;

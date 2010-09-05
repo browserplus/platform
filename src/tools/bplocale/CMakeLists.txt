@@ -18,5 +18,5 @@
 # Contributor(s): 
 # ***** END LICENSE BLOCK *****
 SET(binName bplocale)
-SET(${binName}_LINK_STATIC BPUtils)
+SET(${binName}_LINK_STATIC BPUtils platform_utils)
 YBT_BUILD(BINARY ${binName})

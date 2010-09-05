@@ -21,14 +21,14 @@
  */
 
 /**
- * BPProtoUtil.h -- custom little tools used by the service library.
+ * BPProtoUtil.cpp -- custom little tools used by the service library.
  */
 #include "BPProtoUtil.h"
-#include "BPUtils/BPLog.h"
-#include "BPUtils/ProductPaths.h"
 #include "BPUtils/bperrorutil.h"
+#include "BPUtils/BPLog.h"
+#include "platform_utils/ProductPaths.h"
 
-#include <string.h>
+//#include <string.h>
 
 bool startupDaemon(bp::process::spawnStatus& spawnStatus) 
 {

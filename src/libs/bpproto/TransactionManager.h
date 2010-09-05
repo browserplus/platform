@@ -25,7 +25,7 @@
 
 #include <stddef.h>
 #include "api/BPProtocolInterface.h"
-#include "BPUtils/IPCChannel.h"
+#include "bpipc/IPCChannel.h"
 
 class Transaction 
 {

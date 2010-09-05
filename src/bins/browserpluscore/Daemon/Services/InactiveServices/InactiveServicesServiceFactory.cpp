@@ -28,7 +28,7 @@
 
 #include "InactiveServicesServiceFactory.h"
 #include "InactiveServicesService.h"
-#include "BPUtils/bplocalization.h"
+#include "platform_utils/bplocalization.h"
 
 using namespace std;
 using namespace std::tr1;

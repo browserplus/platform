@@ -20,10 +20,13 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include "BPUtils/BPUtils.h"
+#include "Installer.h"
+#include "platform_utils/bplocalization.h"
+#include "platform_utils/bpplatformutil.h"
+#include "platform_utils/ProductPaths.h"
 #include "Permissions/Permissions.h"
-#include "api/Installer.h"
-#include "api/Utils.h"
+#include "Utils.h"
+
 #include <memory.h>
 #include <fcntl.h>
 

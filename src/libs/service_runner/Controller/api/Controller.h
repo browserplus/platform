@@ -34,16 +34,16 @@
 
 #include <string>
 
+#include "bpipc/IPCChannel.h"
+#include "bpipc/IPCChannelServer.h"
+#include "bpipc/IPCServer.h"
+#include "BPUtils/bpfile.h"
 #include "BPUtils/bpprocess.h"
 #include "BPUtils/bpstopwatch.h"
 #include "BPUtils/bptimer.h"
 #include "BPUtils/bptr1.h"
-#include "BPUtils/IPCServer.h"
-#include "BPUtils/IPCChannel.h"
-#include "BPUtils/IPCChannelServer.h"
-#include "BPUtils/ServiceDescription.h"
-#include "BPUtils/ServiceSummary.h"
-#include "BPUtils/bpfile.h"
+#include "platform_utils/ServiceDescription.h"
+#include "platform_utils/ServiceSummary.h"
 
 
 namespace ServiceRunner 

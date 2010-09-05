@@ -33,16 +33,17 @@
 #ifndef __GENERICJSOBJECT_H__
 #define __GENERICJSOBJECT_H__
 
+#include <string>
+#include <map>
+
 #include <npapi/npapi.h>
 #include <npapi/npruntime.h>
 #include <npapi/npupp.h>
 
-#include <string>
-#include <map>
+#include "BPUtils/bptypeutil.h"
 #include "common.h"
 #include "ScriptablePluginObjectBase.h"
 
-#include "BPUtils/bptypeutil.h"
 
 // A listener may implement callable functions on the javascript object
 class IJSCallableFunctionHost 

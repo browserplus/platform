@@ -36,10 +36,10 @@
 #include <vector>
 
 #include "BPUtils/bperrorutil.h"
-#include "BPUtils/bpsign.h"
-#include "BPUtils/bpstrutil.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
+#include "BPUtils/bpstrutil.h"
+#include "platform_utils/bpsign.h"
 
 using namespace std;
 using namespace bp::file;

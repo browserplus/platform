@@ -28,7 +28,7 @@
 #include "PendingUpdateCache.h"
 #include <stack>
 #include "BPUtils/bpfile.h"
-#include "BPUtils/ProductPaths.h"
+#include "platform_utils/ProductPaths.h"
 #include "ServiceUnpacker.h"
 
 

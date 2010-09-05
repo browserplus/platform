@@ -21,7 +21,7 @@ SET(libName ServiceRunnerLib)
 
 SET(${libName}_MAJOR_VERSION 0)
 SET(${libName}_MINOR_VERSION 1)
-SET(${libName}_LINK_STATIC BPUtils)
+SET(${libName}_LINK_STATIC bpipc BPUtils)
 
 YBT_BUILD(LIBRARY_STATIC ${libName})
-ADD_DEPENDENCIES(${libName}_s BPUtils_s) 
+ADD_DEPENDENCIES(${libName}_s bpipc_s BPUtils_s) 

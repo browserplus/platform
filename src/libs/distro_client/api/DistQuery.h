@@ -36,10 +36,10 @@
 #include "BPUtils/bpstopwatch.h"
 #include "BPUtils/HttpListener.h"
 #include "BPUtils/HttpTransaction.h"
-#include "BPUtils/ServiceSummary.h"
-
 #include "DistributionClient/DistQueryTypes.h"
 #include "DistributionClient/DistQueryInternal.h"
+#include "platform_utils/ServiceSummary.h"
+
 
 // a service filter is a class that will filter the set of results
 // from the distribution server.  This is useful for things like

@@ -23,7 +23,7 @@
 #include "api/Fetcher.h"
 #include "BPUtils/OS.h"
 #include "BPUtils/bpfile.h"
-#include "BPUtils/ProductPaths.h"
+#include "platform_utils/ProductPaths.h"
 
 using namespace std;
 using namespace std::tr1;

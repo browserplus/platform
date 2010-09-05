@@ -19,7 +19,7 @@
 # ***** END LICENSE BLOCK *****
 SET(binName HTMLRenderTest) 
 
-SET(${binName}_LINK_STATIC HTMLRender BPUtils TestingFramework)
+SET(${binName}_LINK_STATIC HTMLRender platform_utils TestingFramework)
 
 YBT_BUILD(BINARY ${binName})
 

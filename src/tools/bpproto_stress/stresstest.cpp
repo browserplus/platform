@@ -23,12 +23,12 @@
 #include "stresstest.h"
 #include <iostream>
 #include "BPProtocol/BPProtocol.h"
+#include "BPUtils/bperrorutil.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bprunloop.h"
 #include "BPUtils/bptime.h"
 #include "BPUtils/bptimer.h"
 #include "BPUtils/bptypeutil.h"
-#include "BPUtils/bperrorutil.h"
 
 
 bp::runloop::RunLoop s_rl;

@@ -21,13 +21,13 @@
  */
 
 #include "FileBrowsePluglet.h"
-#include "BPUtils/bplocalization.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bpurl.h"
-#include "BPUtils/bpbrowserinfo.h"
+#include "platform_utils/bpbrowserinfo.h"
+#include "platform_utils/bplocalization.h"
 #include "PluginCommonLib/CommonErrors.h"
 
-#include <string.h>
+//#include <string.h>
 
 using namespace std;
 

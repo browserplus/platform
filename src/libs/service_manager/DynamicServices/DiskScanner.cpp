@@ -43,9 +43,9 @@
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bprunloopthread.h"
 #include "BPUtils/bptimer.h"
-#include "BPUtils/ProductPaths.h"
-#include "BPUtils/ServiceInterfaceCache.h"
 #include "Permissions/Permissions.h"
+#include "platform_utils/ProductPaths.h"
+#include "platform_utils/ServiceInterfaceCache.h"
 #include "ServiceRunnerLib/ServiceRunnerLib.h"
 
 using namespace std;

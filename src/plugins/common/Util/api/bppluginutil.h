@@ -35,8 +35,8 @@
 #include <string>
 
 #include "BPProtocol/BPProtocol.h"
-#include "BPUtils/bptypeutil.h"
 #include "BPUtils/bpfile.h"
+#include "BPUtils/bptypeutil.h"
 
 
 

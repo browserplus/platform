@@ -21,7 +21,7 @@
  */
 
 #include "ActiveSession.h"
-#include "BPUtils/IPCChannelServer.h"
+#include "bpipc/IPCChannelServer.h"
 #include "ServiceManager/ServiceManager.h"
 
 #ifndef __SESSIONMANAGER_H__

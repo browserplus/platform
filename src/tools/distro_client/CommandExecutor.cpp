@@ -26,12 +26,12 @@
 #include <string>
 #include <vector>
 #include "ArchiveLib/ArchiveLib.h"
+#include "BPUtils/bperrorutil.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/OS.h"
-#include "BPUtils/ProductPaths.h"
-#include "BPUtils/bperrorutil.h"
-#include "ServiceManager/ServiceManager.h"
 #include "Permissions/Permissions.h"
+#include "platform_utils/ProductPaths.h"
+#include "ServiceManager/ServiceManager.h"
 
 using namespace std;
 using namespace std::tr1;

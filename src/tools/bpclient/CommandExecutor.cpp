@@ -25,11 +25,12 @@
 #include "CommandExecutor.h"
 #include <iostream>
 #include "BPUtils/bptypeutil.h"
-#include "BPUtils/ServiceDescription.h"
+#include "platform_utils/ServiceDescription.h"
 
 #ifdef WIN32
 #pragma warning(disable:4100)
 #endif
+
 
 static void printProtoError(BPErrorCode ec)
 {

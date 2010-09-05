@@ -17,17 +17,18 @@
 # 
 # Contributor(s): 
 # ***** END LICENSE BLOCK *****
-ADD_SUBDIRECTORY(bputils)
-ADD_SUBDIRECTORY(test_framework)
 ADD_SUBDIRECTORY(archive)
-ADD_SUBDIRECTORY(console)
-ADD_SUBDIRECTORY(i18n)
-ADD_SUBDIRECTORY(html_render)
+ADD_SUBDIRECTORY(bpipc)
 ADD_SUBDIRECTORY(bpproto)
-
+ADD_SUBDIRECTORY(bputils)
+ADD_SUBDIRECTORY(console)
 ADD_SUBDIRECTORY(distro_client)
-ADD_SUBDIRECTORY(service_runner)
-ADD_SUBDIRECTORY(service_manager)
+ADD_SUBDIRECTORY(html_render)
+ADD_SUBDIRECTORY(i18n)
 ADD_SUBDIRECTORY(installer)
 ADD_SUBDIRECTORY(permissions)
+ADD_SUBDIRECTORY(platform_utils)
+ADD_SUBDIRECTORY(service_manager)
+ADD_SUBDIRECTORY(service_runner)
+ADD_SUBDIRECTORY(test_framework)
 
