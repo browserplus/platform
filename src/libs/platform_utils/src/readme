@@ -1,0 +1,2 @@
+This library provides facilities that are only consumed by the platform, 
+not by services.
