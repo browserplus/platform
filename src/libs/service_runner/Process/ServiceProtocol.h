@@ -31,11 +31,12 @@
 #ifndef __SERVICEPROTOCOL_H__
 #define __SERVICEPROTOCOL_H__
 
+#include <string>
 #include "ServiceLibrary.h"
 #include "bpipc/IPCChannel.h"
 #include "BPUtils/bpfile.h"
+#include "BPUtils/bprunloop.h"
 
-#include <string>
 
 namespace ServiceRunner 
 {

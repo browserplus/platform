@@ -21,6 +21,9 @@
  */
 
 #include "Installer.h"
+#include "BPUtils/bptr1.h"
+#include "BPUtils/BPLog.h"
+#include "BPUtils/OS.h"
 #include "platform_utils/bplocalization.h"
 #include "platform_utils/bpplatformutil.h"
 #include "platform_utils/ProductPaths.h"

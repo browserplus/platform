@@ -32,9 +32,11 @@
 #define __SERVICELIBRARY_V5_H__
 
 #include <string>
+#include "../ServiceLibraryImpl.h"
+#include "BPUtils/bpthreadhopper.h"
+#include "BPUtils/bprunloopthread.h"
 #include "platform_utils/LogConfigurator.h"
 #include "ServiceAPI/bppfunctions.h"
-#include "../ServiceLibraryImpl.h"
 
 namespace ServiceRunner 
 {

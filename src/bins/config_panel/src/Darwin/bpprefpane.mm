@@ -23,7 +23,11 @@
 
 #import "bpprefpane.h"
 #include "BPUtils/BPUtils.h"
+#include "platform_utils/bplocalization.h"
+#include "platform_utils/LogConfigurator.h"
+#include "platform_utils/ProductPaths.h"
 #include <iostream>
+
 
 @implementation BPPrefPane
 

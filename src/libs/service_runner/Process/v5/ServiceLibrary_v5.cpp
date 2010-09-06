@@ -29,11 +29,13 @@
  */
 
 #include "ServiceLibrary_v5.h"
+#include "BPUtils/bpstrutil.h"
 
 using namespace std;
 using namespace std::tr1;
 using namespace ServiceRunner;
 namespace bpf = bp::file;
+
 
 // BEGIN call-in points for dynamically loaded services
 

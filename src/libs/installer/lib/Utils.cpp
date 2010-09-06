@@ -21,6 +21,8 @@
  */
 
 #include "Utils.h"
+#include "BPUtils/BPLog.h"
+#include "BPUtils/bpstrutil.h"
 #include "platform_utils/bpconfig.h"
 #include "platform_utils/ProductPaths.h"
 

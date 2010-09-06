@@ -23,13 +23,13 @@
 #import "PluginCommonLib/bppluginutil.h"
 #import "PluginCommonLib/CommonErrors.h"
 #import "PluginCommonLib/FileBrowsePluglet.h"
+#import "BPUtils/bperrorutil.h"
 #import "BPUtils/bpfile.h"
-#import "BPUtils/bplocalization.h"
 #import "BPUtils/bpurl.h"
 #import "BPUtils/BPLog.h"
 #import "BPUtils/OS.h"
-#import "BPUtils/bpbrowserinfo.h"
-#import "BPUtils/bperrorutil.h"
+#import "platform_utils/bpbrowserinfo.h"
+#import "platform_utils/bplocalization.h"
 #import <sstream>
 #import <Cocoa/Cocoa.h>
 

@@ -30,6 +30,7 @@
 #ifndef __SERVICELIBRARY_H__
 #define __SERVICELIBRARY_H__
 
+#include "BPUtils/bptr1.h"
 #include "platform_utils/ServiceDescription.h"
 #include "platform_utils/ServiceSummary.h"
 

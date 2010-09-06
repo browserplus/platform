@@ -32,6 +32,8 @@
 #define __SERVICELIBRARY_V4_H__
 
 #include "../ServiceLibraryImpl.h"
+#include "BPUtils/bpthreadhopper.h"
+#include "BPUtils/bprunloopthread.h"
 #include "platform_utils/LogConfigurator.h"
 #include "v4_bptypes.h"
 #include "v4_bppfunctions.h"

@@ -23,6 +23,7 @@
 #include "NativeUI.h"
 #include "BPUtils/BPUtils.h"
 #include "HTMLRender/HTMLRender.h"
+#include "platform_utils/bpbrowserinfo.h"
 
 #import <AppKit/AppKit.h>
 #import <WebKit/WebKit.h>

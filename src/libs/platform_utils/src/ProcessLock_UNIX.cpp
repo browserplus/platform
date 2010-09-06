@@ -35,7 +35,7 @@
 #include <sys/sem.h>
 
 #include "BPUtils/bperrorutil.h"
-#include "BPUtils/ProductPaths.h"
+#include "ProductPaths.h"
 
 
 #ifdef LINUX

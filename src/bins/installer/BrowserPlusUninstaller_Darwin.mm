@@ -21,14 +21,13 @@
  */
 
 
-#include "BPUtils/ARGVConverter.h"
+#include "BPInstaller/BPInstaller.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
-#include "BPUtils/bpexitcodes.h"
-#include "BPUtils/bpexitcodes.h"
-#include "BPUtils/bplocalization.h"
 #include "BPUtils/bpstrutil.h"
-#include "BPInstaller/BPInstaller.h"
+#include "platform_utils/ARGVConverter.h"
+#include "platform_utils/bpexitcodes.h"
+#include "platform_utils/bplocalization.h"
 
 #import <Cocoa/Cocoa.h>
 
