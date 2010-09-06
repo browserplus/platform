@@ -24,11 +24,11 @@
  * A tool which will validate services and publish them locally.
  */
 
-#include "BPUtils/APTArgParse.h"
-#include "BPUtils/ARGVConverter.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bprunloop.h"
+#include "platform_utils/APTArgParse.h"
+#include "platform_utils/ARGVConverter.h"
 #include "platform_utils/ProductPaths.h"
 #include "platform_utils/ServicesUpdatedFile.h"
 #include "ServiceRunnerLib/ServiceRunnerLib.h"

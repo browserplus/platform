@@ -21,7 +21,6 @@
  */
 
 #include "BPInstaller/BPInstaller.h"
-#include "BPUtils/ARGVConverter.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bprunloop.h"
@@ -30,6 +29,7 @@
 #include "InstallerSkinVerbose.h"
 #include "InstallerSkinGUI.h"
 #include "InstallProcessRunner.h"
+#include "platform_utils/ARGVConverter.h"
 #include "platform_utils/bplocalization.h"
 #include "platform_utils/InstallID.h"
 #include "platform_utils/ProcessLock.h"

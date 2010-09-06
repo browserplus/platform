@@ -32,8 +32,8 @@
  * Copyright (c) 2007-2009 Yahoo!, Inc. All rights reserved.
  */
 
-#include "BPUtils/ARGVConverter.h"
 #include "Daemon/BPDaemon.h"
+#include "platform_utils/ARGVConverter.h"
 #include "platform_utils/bpexitcodes.h"
 #include "platform_utils/ProductPaths.h"
 #include "ServiceRunnerLib/ServiceRunnerLib.h"

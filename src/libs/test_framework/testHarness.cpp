@@ -40,9 +40,9 @@
 #include <cppunit/TextTestProgressListener.h>
 
 #include "api/TestHarnessInclude.h"
-#include "BPUtils/APTArgParse.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bpfile.h"
+#include "platform_utils/APTArgParse.h"
 
 // definition of program arguments
 static APTArgDefinition s_args[] =

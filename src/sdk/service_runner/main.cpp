@@ -22,13 +22,13 @@
 
 #include <iostream>
 
-#include "BPUtils/ARGVConverter.h"
-#include "BPUtils/APTArgParse.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bprunloop.h"
 #include "ConsoleLib/ConsoleLib.h"
 #include "Output.h"
+#include "platform_utils/ARGVConverter.h"
+#include "platform_utils/APTArgParse.h"
 
 // here's our implementation of handling commands
 #include "CommandExecutor.h"

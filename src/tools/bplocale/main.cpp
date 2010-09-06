@@ -29,8 +29,9 @@
  */
 
 #include <iostream>
-#include "BPUtils/APTArgParse.h"
 #include "platform_utils/bplocalization.h"
+#include "platform_utils/APTArgParse.h"
+
 
 // definition of program arguments
 static APTArgDefinition s_args[] =

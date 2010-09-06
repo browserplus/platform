@@ -30,8 +30,8 @@
 #include "bpipc/IPCChannel.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
-#include "BPUtils/ARGVConverter.h"
 #include "BPInstaller/BPInstaller.h"
+#include "platform_utils/ARGVConverter.h"
 #include "platform_utils/bplocalization.h"
 
 using namespace std;

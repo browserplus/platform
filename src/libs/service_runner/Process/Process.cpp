@@ -31,10 +31,10 @@
 #include "Process.h"
 #include <iostream>
 #include <stdlib.h>
-#include "BPUtils/APTArgParse.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bpstopwatch.h"
 #include "OutputRedirector.h"
+#include "platform_utils/APTArgParse.h"
 #include "platform_utils/bpconfig.h"
 #include "platform_utils/bpdebug.h"
 #include "platform_utils/ProductPaths.h"

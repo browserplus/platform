@@ -36,10 +36,10 @@
 #include <vector>
 
 #include "ArchiveLib/ArchiveLib.h"
-#include "BPUtils/bpdns.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
 #include "platform_utils/bpconfig.h"
+#include "platform_utils/bpdns.h"
 #include "platform_utils/bplocalization.h"
 #include "platform_utils/bpphash.h"
 #include "platform_utils/ProductPaths.h"

@@ -31,9 +31,9 @@
 #define __BPDAEMON_H__
 
 #include "AutoShutdown.h"
-#include "BPUtils/APTArgParse.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/bprunloop.h"
+#include "platform_utils/APTArgParse.h"
 #include "platform_utils/bpconfig.h"
 #include "SessionManager.h"
 

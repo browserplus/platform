@@ -28,11 +28,11 @@
  */
 
 #include <iostream>
-#include "BPUtils/APTArgParse.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bprunloop.h"
 #include "BPUtils/HttpSyncTransaction.h"
+#include "platform_utils/APTArgParse.h"
 
 using namespace std;
 using namespace std::tr1;

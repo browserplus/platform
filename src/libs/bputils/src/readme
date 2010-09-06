@@ -2,6 +2,8 @@ BPUtils provides highly-generic facilities.
 
 To the extent possible, BrowserPlus-specific items do not appear in this lib.
 
-This project does not depend on any other browserplus projects or files.
+In here should go facilities that are useful to *both* the BrowserPlus platform
+and to BrowserPlus services.  Facilities used only by the platform should
+be placed elsewhere, e.g. in platform_utils.
 
-It does have some dependencies on 3rd party code.
+It is a goal to minimize this library's dependence on external projects.
