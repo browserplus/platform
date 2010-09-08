@@ -33,9 +33,9 @@
 #include <vector>
 #include <string>
 
+#include "bphttp/HttpListener.h"
+#include "bphttp/HttpTransaction.h"
 #include "BPUtils/bpstopwatch.h"
-#include "BPUtils/HttpListener.h"
-#include "BPUtils/HttpTransaction.h"
 #include "DistributionClient/DistQueryTypes.h"
 #include "DistributionClient/DistQueryInternal.h"
 #include "platform_utils/ServiceSummary.h"

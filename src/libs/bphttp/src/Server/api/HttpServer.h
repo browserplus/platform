@@ -28,7 +28,8 @@
 
 #include "BPUtils/bpsync.h"
 #include "BPUtils/bpthread.h"
-#include "BPUtils/HttpHandler.h"
+#include "HttpHandler.h"
+
 
 namespace bp { namespace http { namespace server {
 

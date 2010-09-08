@@ -32,8 +32,8 @@
 #include "HttpQueryString.h"
 
 #include <sstream>
-#include "bperrorutil.h"
-#include "bpurl.h"
+#include "BPUtils/bperrorutil.h"
+#include "BPUtils/bpurl.h"
 
 
 namespace bp {

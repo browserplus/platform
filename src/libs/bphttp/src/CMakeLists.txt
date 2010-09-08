@@ -17,19 +17,24 @@
 # 
 # Contributor(s): 
 # ***** END LICENSE BLOCK *****
-ADD_SUBDIRECTORY(archive)
-ADD_SUBDIRECTORY(bphttp)
-ADD_SUBDIRECTORY(bpipc)
-ADD_SUBDIRECTORY(bpproto)
-ADD_SUBDIRECTORY(bputils)
-ADD_SUBDIRECTORY(console)
-ADD_SUBDIRECTORY(distro_client)
-ADD_SUBDIRECTORY(html_render)
-ADD_SUBDIRECTORY(i18n)
-ADD_SUBDIRECTORY(installer)
-ADD_SUBDIRECTORY(permissions)
-ADD_SUBDIRECTORY(platform_utils)
-ADD_SUBDIRECTORY(service_manager)
-ADD_SUBDIRECTORY(service_runner)
-ADD_SUBDIRECTORY(test_framework)
+######################################################################
+#
+# cmakelists.txt for BP platform_utils library
+#
+SET(libName bphttp)
+
+# How do we use this?
+SET(${libName}_MAJOR_VERSION 0)
+SET(${libName}_MINOR_VERSION 1)
+
+# Tell build templates who we consume.
+# This enables bt to emit link statements for either ourselves (dll case) 
+# or our clients (static lib case).
+# Note: currently (01/28/09): libs listed here must have name ending *_s
+SET(${libName}_LINK_STATIC BPUtils)
+
+# Build our target as a static lib.
+YBT_BUILD(LIBRARY_STATIC ${libName})
+
+ADD_DEPENDENCIES(${libName}_s BPUtils_s)
 

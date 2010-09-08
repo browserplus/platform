@@ -29,8 +29,8 @@
 #define __HTTP_HANDLER_H__
 
 
-#include "BPUtils/HttpRequest.h"
-#include "BPUtils/HttpResponse.h"
+#include "HttpRequest.h"
+#include "HttpResponse.h"
 
 
 namespace bp { namespace http { namespace server {

@@ -32,8 +32,8 @@
 #define __HTTPTESTSERVER_H__
 
 #include "TestingFramework/TestingFramework.h"
-#include "BPUtils/HttpResponse.h"
-#include "BPUtils/HttpServer.h"
+#include "bphttp/HttpResponse.h"
+#include "bphttp/HttpServer.h"
 
 class TestServer
 {

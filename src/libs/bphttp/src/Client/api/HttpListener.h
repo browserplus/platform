@@ -32,8 +32,8 @@
 #ifndef _HTTPLISTENER_H_
 #define _HTTPLISTENER_H_
 
-#include "bpstrutil.h"
-#include "bpurl.h"
+#include "BPUtils/bpstrutil.h"
+#include "BPUtils/bpurl.h"
 #include "HttpHeaders.h"
 #include "HttpStatus.h"
 #include "HttpResponse.h"

@@ -29,9 +29,10 @@
  *  Copyright 2008 Yahoo! Inc. All rights reserved.
  *
  */
+
+#include "HttpStatus.h"
 #include <sstream>
-#include "api/BPLog.h"
-#include "api/HttpStatus.h"
+#include "BPUtils/BPLog.h"
 
 
 namespace bp {

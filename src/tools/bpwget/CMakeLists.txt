@@ -18,5 +18,5 @@
 # Contributor(s): 
 # ***** END LICENSE BLOCK *****
 SET(binName bpwget)
-SET(${binName}_LINK_STATIC platform_utils)
+SET(${binName}_LINK_STATIC bphttp platform_utils)
 YBT_BUILD(BINARY ${binName})

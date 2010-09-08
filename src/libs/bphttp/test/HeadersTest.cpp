@@ -20,43 +20,30 @@
  * ***** END LICENSE BLOCK *****
  */
 
-/*
- *  HttpResponse.h
+/**
+ * HeadersTest.cpp
+ * Unit tests for the bp::http::Headers class.
  *
- *  Declares HttpResponse class and related items.
- *
- *  Created by David Grigsby on 7/15/08.
- *  Copyright 2008 Yahoo! Inc. All rights reserved.
- *
+ * Created by David Grigsby on 8/25/08.
+ * Copyright (c) 2008 Yahoo!, Inc. All rights reserved.
  */
-#ifndef _HTTPRESPONSE_H_
-#define _HTTPRESPONSE_H_
-
-#include "bptr1.h"
-#include "HttpBody.h"
-#include "HttpHeaders.h"
-#include "HttpStatus.h"
-#include "HttpVersion.h"
+#include "HeadersTest.h"
+#include "bphttp/HttpHeaders.h"
 
 
-namespace bp {
-namespace http {
+CPPUNIT_TEST_SUITE_REGISTRATION(HeadersTest);
 
 
-struct Response
+void HeadersTest::testAdd()
 {
-    Version version;
-    Status  status;
-    Headers headers;
-    Body    body;
-};
+    bp::http::Headers headers;
 
-typedef std::tr1::shared_ptr<Response> ResponsePtr;
+    std::string s1 = "Date: Mon, 25 Aug 2008 22:37:49 GMT";
+    headers.add( s1 );
+    
+    CPPUNIT_ASSERT( headers.size() == 1 );
+    std::string sDate = headers.get( "Date" );
+    CPPUNIT_ASSERT( sDate == s1.substr( 6 ) );
+}
 
-
-} // namespace http
-} // namespace bp
-
-
-#endif // _HTTPRESPONSE_H
 

@@ -22,9 +22,9 @@
 
 #include "PusherMan.h"
 #include <iostream>
+#include "bphttp/HttpRequest.h"
+#include "bphttp/HttpSyncTransaction.h"
 #include "BPUtils/bpfile.h"
-#include "BPUtils/HttpRequest.h"
-#include "BPUtils/HttpSyncTransaction.h"
 
 #define PUBLISH_BASE_PATH "/v4/internal/service/"
 

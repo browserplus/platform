@@ -32,9 +32,10 @@
 #include "HttpHeaders.h"
 
 #include <sstream>
-#include "bperrorutil.h"
-#include "bpstrutil.h"
-#include "BPLog.h"
+#include "BPUtils/bperrorutil.h"
+#include "BPUtils/bpstrutil.h"
+#include "BPUtils/BPLog.h"
+
 
 namespace bp {
 namespace http {

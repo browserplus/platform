@@ -21,17 +21,17 @@
  */
 
 /**
- * bpwget - a command line HTTP client built on bputils - used for testing
+ * bpwget - a command line HTTP client built on bphttp - used for testing
  *
  * Author: Lloyd Hilaiel
  * (c) Yahoo! Inc 2008
  */
 
 #include <iostream>
+#include "bphttp/HttpSyncTransaction.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bprunloop.h"
-#include "BPUtils/HttpSyncTransaction.h"
 #include "platform_utils/APTArgParse.h"
 
 using namespace std;

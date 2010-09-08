@@ -29,9 +29,9 @@
 #include <iostream>
 #include <sstream>
 
-#include "BPLog.h"
-#include "bpstopwatch.h"
-#include "bptime.h"
+#include "BPUtils/BPLog.h"
+#include "BPUtils/bpstopwatch.h"
+#include "BPUtils/bptime.h"
 #include "HttpRequest.h"
 #include "HttpResponse.h"
 #include "mongoose/mongoose.h"

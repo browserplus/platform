@@ -22,17 +22,17 @@
 
 /**
  * BPWebServe - A trivial little webserver mainly to test the http server
- *              implementation in BPUtils.   
+ *              implementation in bphttp.
  */
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include "bphttp/HttpRequest.h"
+#include "bphttp/HttpResponse.h"
+#include "bphttp/HttpServer.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/bptime.h"
 #include "BPUtils/bpstrutil.h"
-#include "BPUtils/HttpRequest.h"
-#include "BPUtils/HttpResponse.h"
-#include "BPUtils/HttpServer.h"
 
 #ifdef WIN32
 #include <Windows.h>

@@ -33,8 +33,8 @@
 #define _HTTPMETHOD_H_
 
 #include <string>
-#include "bperrorutil.h"
-#include "bpstrutil.h"
+#include "BPUtils/bperrorutil.h"
+#include "BPUtils/bpstrutil.h"
 
 
 namespace bp {

@@ -92,6 +92,7 @@ internalSdkDir = File.join(buildDir, "bpsdk_internal")
 bpclientDir = File.join(internalSdkDir, "CommandLineClient")
 utilsDir = File.join(internalSdkDir, "BPUtils")
 protocolDir = File.join(internalSdkDir, "ProtocolLibrary")
+httpDir = File.join(internalSdkDir, "bphttp")
 signingDir = File.join(internalSdkDir, "signing")
 shippingBinsDir = File.join(buildDir, "ShippingBinaries")
 
@@ -139,6 +140,16 @@ FileUtils.mkdir_p("#{protocolDir}/lib")
 Dir["#{protoBuildDir}/lib/#{$intDir}/*BPProtocol*"].each do |lib|
   FileUtils.install(lib, "#{protocolDir}/lib", :verbose => $beVerbose)
 end
+
+# Copy bphttp to internal sdk.
+httpBuildDir = "#{buildDir}/dist"
+FileUtils.mkdir_p("#{httpDir}/include", :verbose => $beVerbose)
+myCP_R("#{httpBuildDir}/include/bphttp", "#{httpDir}/include")
+FileUtils.mkdir_p("#{httpDir}/lib")
+Dir["#{httpBuildDir}/lib/#{$intDir}/*bphttp*"].each do |lib|
+  FileUtils.install(lib, "#{httpDir}/lib", :verbose => $beVerbose)
+end
+
 
 # copy appropriate files from ServiceAPI to SDK
 FileUtils.mkdir_p("#{sdkDir}/include/ServiceAPI", :verbose => $beVerbose)

@@ -30,7 +30,7 @@
 #define __WSPROTOCOL_H__
 
 #include <string>
-#include "BPUtils/HttpRequest.h"
+#include "bphttp/HttpRequest.h"
 
 namespace WSProtocol
 {

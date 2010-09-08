@@ -33,8 +33,8 @@
 #ifdef WIN32
 #include <Windows.h>
 #endif
+#include "bphttp/HttpQueryString.h"
 #include "BPUtils/bpconvert.h"
-#include "BPUtils/HttpQueryString.h"
 #include "BPUtils/bperrorutil.h"
 #include "TestImageData.h"
 

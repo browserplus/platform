@@ -24,13 +24,13 @@
 #include <iostream>
 #include <stdlib.h>
 #include "ArchiveLib/ArchiveLib.h"
+#include "bphttp/HttpRequest.h"
+#include "bphttp/HttpSyncTransaction.h"
 #include "BPUtils/bpconvert.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bpprocess.h"
 #include "BPUtils/bpstrutil.h"
-#include "BPUtils/HttpRequest.h"
-#include "BPUtils/HttpSyncTransaction.h"
 #include "platform_utils/bpconfig.h"
 #include "platform_utils/bplocalization.h"
 #include "platform_utils/ProcessLock.h"

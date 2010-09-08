@@ -33,9 +33,9 @@
 #define _HTTPVERSION_H_
 
 #include <string>
-#include "bperrorutil.h"
-#include "bpstrutil.h"
-#include "bpconvert.h"
+#include "BPUtils/bperrorutil.h"
+#include "BPUtils/bpstrutil.h"
+#include "BPUtils/bpconvert.h"
 
 
 namespace bp {

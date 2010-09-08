@@ -28,7 +28,7 @@
  */
 
 #include "HttpServerTest.h"
-#include "BPUtils/HttpServer.h"
+#include "bphttp/HttpServer.h"
 
 
 CPPUNIT_TEST_SUITE_REGISTRATION(HttpServerTest);

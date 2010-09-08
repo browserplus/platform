@@ -36,5 +36,5 @@ ADD_EXECUTABLE(${EXENAME} WIN32 ${SRCS} ${HDRS}
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/bpicon.ico"
                "${CMAKE_CURRENT_BINARY_DIR}/bpicon.ico" COPYONLY)
 
-TARGET_LINK_LIBRARIES(${EXENAME} BPProtocol_s
-                      HTMLRender_s BPUtils_s ArchiveLib_s)
+TARGET_LINK_LIBRARIES(${EXENAME} ArchiveLib_s bphttp_s BPProtocol_s BPUtils_s 
+                      HTMLRender_s )

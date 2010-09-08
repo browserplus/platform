@@ -33,9 +33,9 @@
 #define _HTTPSYNCTRANSACTION_H_
 
 #include "BPUtils/bprunloopthread.h"
-#include "BPUtils/HttpListener.h"
-#include "BPUtils/HttpRequest.h"
-#include "BPUtils/HttpTransaction.h"
+#include "HttpListener.h"
+#include "HttpRequest.h"
+#include "HttpTransaction.h"
 
 
 namespace bp {

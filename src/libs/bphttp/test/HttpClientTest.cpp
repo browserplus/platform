@@ -30,15 +30,15 @@
 
 #include "HttpClientTest.h"
 #include <math.h>
+#include "bphttp/HttpQueryString.h"
+#include "bphttp/HttpSyncTransaction.h"
+#include "bphttp/HttpTransaction.h"
 #include "BPUtils/bpconvert.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bprunloop.h"
 #include "BPUtils/bpstopwatch.h"
 #include "BPUtils/bpurl.h"
-#include "BPUtils/HttpQueryString.h"
-#include "BPUtils/HttpSyncTransaction.h"
-#include "BPUtils/HttpTransaction.h"
 #include "BPUtils/OS.h"
 
 using namespace std;

@@ -30,18 +30,17 @@
  *
  */
 #include "HttpTransaction.h"
-#include "BPLog.h"
-#include "bpconvert.h"
-#include "bpthreadhopper.h"
-#include "bpfile.h"
-#include "bprunloop.h"
-#include "bptimer.h"
-#include "HttpListener.h"
-
 #include <map>
-
 #include <Windows.h>
 #include <Wininet.h>
+#include "BPUtils/BPLog.h"
+#include "BPUtils/bpconvert.h"
+#include "BPUtils/bpthreadhopper.h"
+#include "BPUtils/bpfile.h"
+#include "BPUtils/bprunloop.h"
+#include "BPUtils/bptimer.h"
+#include "HttpListener.h"
+
 
 using namespace std;
 

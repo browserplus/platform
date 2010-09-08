@@ -34,11 +34,12 @@
 #include <string>
 
 #include "api/DistQueryTypes.h"
+#include "bphttp/HttpListener.h"
+#include "bphttp/HttpTransaction.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bpthreadhopper.h"
 #include "BPUtils/bpstopwatch.h"
-#include "BPUtils/HttpListener.h"
-#include "BPUtils/HttpTransaction.h"
+
 
 class LatestPlatformServerAndVersion
 {

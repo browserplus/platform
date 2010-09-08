@@ -32,8 +32,8 @@
 #ifndef _HTTPREQUEST_H_
 #define _HTTPREQUEST_H_
 
-#include "bptr1.h"
-#include "bpurl.h"
+#include "BPUtils/bptr1.h"
+#include "BPUtils/bpurl.h"
 #include "HttpBody.h"
 #include "HttpHeaders.h"
 #include "HttpListener.h"
