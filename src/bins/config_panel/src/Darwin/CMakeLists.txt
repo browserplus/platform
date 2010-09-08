@@ -64,7 +64,7 @@ SET(LIBNAME BrowserPlusPrefs)
 ADD_LIBRARY(${LIBNAME} MODULE ${SRCS} ${HDRS})
 
 TARGET_LINK_LIBRARIES(${LIBNAME} BPProtocol_s
-                      HTMLRender_s BPUtils_s ArchiveLib_s ${OS_LIBS})
+                      HTMLRender_s bphttp_s BPUtils_s ArchiveLib_s ${OS_LIBS})
 
 # Shipping binaries dir
 SET(pluginDir "${CMAKE_CURRENT_BINARY_DIR}/${LIBNAME}.prefPane")
