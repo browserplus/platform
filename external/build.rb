@@ -197,7 +197,12 @@ unpack("bakery.tgz")
 whackyName = Dir.glob("browserplus-bakery-*")[0]
 if whackyName && File.directory?(whackyName)
   FileUtils.rm_rf("bakery.tgz")
-  FileUtils.mv(whackyName, bakeryUnpackPath)
+  begin
+    FileUtils.mv(whackyName, bakeryUnpackPath)
+  rescue
+    # Try again...
+    FileUtils.mv(whackyName, bakeryUnpackPath)
+  end
   
   # now on winblows, let's go and fixup all .patch files with silly
   # line endings as required by patch.
