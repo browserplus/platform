@@ -38,7 +38,10 @@
     <target name="build_make_codecoverage" unless="is.windows">
         <mkdir dir="../build_codecoverage" />
         <exec executable="cmake" dir="../build_codecoverage" failonerror="true">
+<!--
             <arg line="-G &quot;Unix Makefiles&quot; -DCMAKE_BUILD_TYPE:STRING=CodeCoverage ../src" />
+-->
+            <arg line="-G &quot;Unix Makefiles&quot; -DCMAKE_BUILD_TYPE:STRING=Debug ../src" />
         </exec>
         <exec executable="make" dir="../build_codecoverage" failonerror="true">
             <arg line="-j3" />
