@@ -200,8 +200,15 @@ if whackyName && File.directory?(whackyName)
   begin
     FileUtils.mv(whackyName, bakeryUnpackPath)
   rescue
-    # Try again...
-    FileUtils.mv(whackyName, bakeryUnpackPath)
+    begin
+      # Try again...
+      sleep(1)
+      FileUtils.mv(whackyName, bakeryUnpackPath)
+    rescue
+      # Try one last time...
+      sleep(10)
+      FileUtils.mv(whackyName, bakeryUnpackPath)
+    end
   end
   
   # now on winblows, let's go and fixup all .patch files with silly
