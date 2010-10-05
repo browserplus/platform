@@ -1,4 +1,4 @@
-Some Influential Environmental Variables;
+Some Influential Environment Variables;
 
 During build time the built BrowserPlus platform will be installed
 (user-scoped) on your machine.  Certain environment variables allow
@@ -17,6 +17,40 @@ you to control how that installed version is configured:
   BP_DISTRO_SERVERS - a comma separated list of hostnames which are the
                  distribution servers you'd like BrowserPlus to query
                  for permissions, updates, and services.
+
+Required environment variables are:
+
+  BP_PLATFORM_PATH - path to "public_platform", must be set
+  BP_INTERNAL_SDK_PATH - path to built internal sdk, usually 
+                $BP_PLATFORM_PATH/build/bpsdk_internal.  Must be set.
+
+Note that when building production bpkgs (private_platform/docs/HowToShip.txt),
+some env vars must be uset.  Adding the following to your ~/.profile or
+~/.bashrc may be useful (change paths to reflect your dir structure):
+
+function setDevEnv()
+{
+    export BP_LOG_LEVEL=debug
+    export BP_LOG_TIME=local
+    export BP_DISTRO_SERVERS="http://bp-dev.corp.yahoo.com,http://bp-int.corp.yahoo.com,http://browserplus.yahoo.com"
+    export BP_PLATFORM_PATH=$HOME/work/projects/BrowserPlus/public_platform
+    export BPSDK_PATH=$HOME/work/projects/BrowserPlus/public_platform/build/bpsdk
+    export BP_INTERNAL_SDK_PATH=$HOME/work/projects/BrowserPlus/public_platform/build/bpsdk_internal
+}
+
+function setProdEnv()
+{
+    unset BP_LOG_LEVEL
+    unset BP_LOG_TIME
+    unset BP_DISTRO_SERVERS
+}
+
+setDevEnv
+
+Now the env vars are set automatically, and you can just run "setProdEnv" when 
+you need to build production bits.  When you're done building production bits,
+just run "setDevEnv".
+
 
 ***************************************************************************
 * NOTE:  Due to limitations with several of the 3rd party packages used   *
