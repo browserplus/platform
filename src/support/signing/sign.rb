@@ -51,8 +51,22 @@ end
 usage() if ARGV.length < 1 || ARGV[1] == "help"
 
 
+# Verify needed environment vars
+["BP_PLATFORM_PATH", "BP_INTERNAL_SDK_PATH"].each do |p|
+    if !ENV.has_key?(p)
+        puts "#{p} environment variable not set!"
+        exit -1
+    end
+    path = ENV[p]
+    if !File.exist?(path)
+      puts "#{p} (#{path}) does not exist!"
+        exit -1
+    end
+end
+
 topDir = File.dirname(File.expand_path(__FILE__))
 platform = CONFIG['arch'] =~ /mswin|mingw/ ? "Windows" : "Darwin"
+exeSuffix = platform == "Windows" ? ".exe" : ""
 signedBy = "BrowserPlus"
 timeurl = "http://timestamp.verisign.com/scripts/timstamp.dll"
 
@@ -67,8 +81,7 @@ publicKey = nil
 privateKey = nil
 outDir = nil
 
-sdkDir = File.join(topDir, "..", "..", "..", "build", "bpsdk_internal")
-bpsigner = File.join(sdkDir, "signing", "bpsigner")
+bpsigner = File.join(ENV["BP_INTERNAL_SDK_PATH"], "signing", "bpsigner#{exeSuffix}")
 if !File.exist?(bpsigner) 
     puts "#{bpsigner} not found, script assumes that 'build' is a sibling of 'src'"
     exit -1
@@ -106,13 +119,14 @@ if certType != nil
     privateKey = "#{topDir}/#{certType}/#{signedBy}.pvk"
 end
 
-opensslPath = "#{topDir}/../../../external/#{platform}/bin/openssl"
+opensslPath = File.join(ENV["BP_PLATFORM_PATH"], "external", 
+                        platform, "bin", "openssl#{exeSuffix}")
 if !File.exist?(opensslPath) 
     puts "#{opensslPath} not found"
     exit -1
 end
-
-ENV["OPENSSL_CONF"] = "#{topDir}/../../../external/#{platform}/ssl/openssl.cnf"
+ENV["OPENSSL_CONF"] = File.join(ENV["BP_PLATFORM_PATH"], "external", 
+                                platform, "ssl", "openssl.cnf")
 
 curdir = Dir.getwd
 Dir.chdir(topDir) do 
