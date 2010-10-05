@@ -29,6 +29,11 @@
 #include "Output.h"
 #include "platform_utils/ARGVConverter.h"
 #include "platform_utils/APTArgParse.h"
+#include "ServiceManager/ServiceManager.h"
+#include "Permissions/Permissions.h"
+#include "Permissions/PermissionsManager.h"
+#include "BPUtils/OS.h"
+#include "platform_utils/ProductPaths.h"
 
 // here's our implementation of handling commands
 #include "CommandExecutor.h"
@@ -36,8 +41,115 @@
 using namespace std;
 using namespace std::tr1;
 
-
 bp::runloop::RunLoop s_rl;
+
+class ServiceUpdateListener : public IDistQueryListener {
+public:
+    ServiceUpdateListener(DistQuery* dq, bp::file::Path& downloadPath)
+        : m_distQuery(dq)
+        , m_downloadSuccess(false)
+        , m_downloadPath(downloadPath)
+        , m_serviceName("")
+        , m_serviceVersion("") {
+    }
+    virtual ~ServiceUpdateListener() {
+    }
+    bool DidDownloadSucceed() const {
+        // we only support one dependent service right now.
+        // the provider path stuff needs to be re-thought a little to support more complex hierarchy.
+        return m_neededServices.size() == 0 || m_downloadSuccess;
+    }
+    ServiceList CompletedServices() {
+        return m_completedServices;
+    }
+private:
+    virtual void onTransactionFailed(unsigned int tid, const std::string& msg) {
+        m_downloadSuccess = false;
+        s_rl.stop();
+    }
+    virtual void gotAvailableServices(unsigned int tid, const ServiceList & list) {
+        m_downloadSuccess = false;
+    }
+    virtual void onServiceFound(unsigned int tid, const AvailableService & service) {
+        std::cout << "Found viable service: "
+                  << service.name
+                  << " v"
+                  << service.version.asString()
+                  << std::endl;
+        m_serviceName = service.name;
+        m_serviceVersion = service.version.asString();
+        m_downloadSuccess = false;
+    }
+    virtual void onDownloadProgress(unsigned int tid, unsigned int pct) {
+        std::cout << ".";
+    }
+    virtual void onDownloadComplete(unsigned int tid, const std::vector<unsigned char> & buf) {
+        std::cout << std::endl;
+        pair<string, string> p = m_neededServices.front();
+        ServiceUnpacker unpacker(buf, m_downloadPath, p.first, p.second);
+        string errMsg;
+        std::cout << "Installing service: "
+                  << p.first
+                  << " v"
+                  << p.second
+                  << std::endl;
+        m_downloadSuccess = unpacker.unpack(errMsg) && unpacker.install(errMsg);
+        if (m_downloadSuccess) {
+            m_neededServices.pop_front();
+            m_completedServices.push_back(p);
+            fetchNextService();
+        }
+        else {
+            std::cout << "Installing failed: "
+                      << errMsg
+                      << std::endl;
+            s_rl.stop();
+        }
+    }
+    virtual void onRequirementsSatisfied(unsigned int, const ServiceList & clist) {
+        // Run thru clist, only adding services that we don't
+        // have to m_neededServices.  We check for the existence
+        // of a service's manifest.json since if a running service
+        // is removed, the directory and dll will still exist,
+        // but the manifest file won't (since windows can't remove
+        // open files or their containing dirs).
+        bp::file::Path serviceDir(m_downloadPath);
+        ServiceList::const_iterator it;
+        for (it = clist.begin(); it != clist.end(); ++it) {
+            bp::file::Path path = serviceDir / it->first / it->second / "manifest.json";
+            if (bp::file::exists(path)) {
+                m_completedServices.push_back(*it);
+            }
+            else {
+                m_neededServices.push_back(*it);
+            }
+        }
+        fetchNextService();
+    }
+    unsigned int fetchNextService() {
+        if (!m_neededServices.empty()) {
+            pair<string, string> p = m_neededServices.front();
+            std::cout << "Downloading service: "
+                      << p.first
+                      << " v"
+                      << p.second
+                      << std::endl;
+            return m_distQuery->downloadService(p.first, p.second,
+                                                bp::os::PlatformAsString());
+        } else {
+            s_rl.stop();
+        }
+        return 0;
+    }
+private:
+    DistQuery* m_distQuery;
+    bool m_downloadSuccess;
+    bp::file::Path m_downloadPath;
+    std::string m_serviceName;
+    std::string m_serviceVersion;
+    ServiceList m_neededServices;
+    ServiceList m_completedServices;
+};
 
 static APTArgDefinition g_args[] = {
     { "log", APT::TAKES_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
@@ -65,6 +177,21 @@ static APTArgDefinition g_args[] = {
       "provider services.  If a dependent service is specified, and no "
       "-providerPath is supplied, then we look for an installed service "
       "that satisfies the dependent's requirements."
+    },
+    { "downloadPath", APT::TAKES_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
+      APT::NOT_INTEGER, APT::MAY_RECUR,
+      "When running a dependent service, you may explicitly specify "
+      "the path to the download a provider service.  This is useful "
+      "when developing provider services.  If a dependent service is "
+      "specified, and no -downloadPath is supplied, then we look for"
+      "an installed service that satisfies the dependent's requirements."
+    },
+    { "distroServer", APT::TAKES_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
+      APT::NOT_INTEGER, APT::MAY_RECUR,
+      "When downloading provider services, use this distro server."
+      "This is useful when developing provider services.  If a dependent "
+      "service is specified, and no -distroServer is supplied, then we "
+      "any attempt to download will be handled by production servers."
     }
 };
       
@@ -81,19 +208,19 @@ setupLogging(const APTArgParse& argParser)
     if (config.empty()) config = "info";
     
     // Setup the system-wide minimum log level.
-	bp::log::Level logLevel = bp::log::levelFromString(config);
+        bp::log::Level logLevel = bp::log::levelFromString(config);
     bp::log::setLogLevel(logLevel);
 
     // For now always use "msec" time format.
     // We could add an APTArg but seems unnecessary at the moment.
-	bp::log::TimeFormat timeFormat = bp::log::TIME_MSEC;
+        bp::log::TimeFormat timeFormat = bp::log::TIME_MSEC;
     
-	if (path.empty()) {
+        if (path.empty()) {
         bp::log::setupLogToConsole(logLevel,"BrowserPlus Service Runner",
                                    timeFormat);
-	} else {
+        } else {
         bp::log::setupLogToFile(path,logLevel,bp::log::kTruncate,timeFormat);
-	}
+        }
 }
 
 /** a class to listen for UserQuitEvents and stop the runloop upon
@@ -160,6 +287,33 @@ private:
                   const bp::file::Path &,
                   const bp::Object *) { }
 };
+
+bool
+downloadRequires(const std::list<std::string>& distroServers, bp::service::Summary s, bp::file::Path& downloadPath, ServiceList& pathList, bool useInstalled) {
+    // generate list of ServiceRequireStatements
+    std::list<ServiceRequireStatement> reqStmts;
+    ServiceRequireStatement reqStmt;
+    reqStmt.m_name = s.usesService();
+    reqStmt.m_version = s.usesVersion().asString();
+    reqStmt.m_minversion = s.usesMinversion().asString();
+    reqStmts.push_back(reqStmt);
+    // satisfy requirements
+    DistQuery dq(distroServers, PermissionsManager::get());
+    ServiceUpdateListener serviceUpdateListener(&dq, downloadPath);
+    dq.setListener(&serviceUpdateListener);
+    std::list<bp::service::Summary> installed;
+    unsigned int tid = dq.satisfyRequirements(bp::os::PlatformAsString(), reqStmts, installed);
+    if (tid == 0) {
+        return false;
+    }
+    // execute everything
+    s_rl.run();
+    // done
+    if (serviceUpdateListener.DidDownloadSucceed()) {
+        pathList = serviceUpdateListener.CompletedServices();
+    }
+    return serviceUpdateListener.DidDownloadSucceed();
+}
 
 int
 main(int argc, const char ** argv)
@@ -245,20 +399,28 @@ main(int argc, const char ** argv)
         }
 
         bp::file::Path providerPath;
+        // if a path was specified on the command line, we'll
+        // use that
+        if (argParser.argumentPresent("providerPath")) {
+            providerPath = argParser.argument("providerPath");
+        }
         
         // for dependent services we'll need to concoct a reasonable
         // path to the provider service
         if (s.type() == bp::service::Summary::Dependent) {
-            // if a path was specified on the command line, we'll
-            // use that
-            if (argParser.argumentPresent("providerPath")) {
-                providerPath = argParser.argument("providerPath");
-            } else {
-                std::string err;
-
-                // determine the path without using service manager
-                providerPath = ServiceRunner::determineProviderPath(s, err);
-                if (!err.empty()) {
+            bp::file::Path downloadPath;
+            // This should be the location to the provider services.
+            std::list<std::string> distroServers;
+            if (argParser.argumentPresent("distroServer")) {
+                distroServers.push_back(argParser.argument("distroServer"));
+            }
+            else {
+                distroServers.push_back("http://browserplus.yahoo.com");
+            }
+            if (argParser.argumentPresent("downloadPath")) {
+                ServiceList pathList;
+                downloadPath = argParser.argument("downloadPath");
+                if (!downloadRequires(distroServers, s, downloadPath, pathList, false)) {
                     std::stringstream ss;
                     ss << "Couldn't run service because I couldn't "
                        << "find an appropriate installed " << std::endl
@@ -274,8 +436,25 @@ main(int argc, const char ** argv)
                     output::puts(output::T_ERROR, ss.str());
                     exit(1);
                 }
+                // NEEDSWORK!!  ServiceRunner is stupid.
+                if (pathList.size() > 1) {
+                    std::stringstream ss;
+                    ss << "Couldn't run service because too many "
+                       << "upstream services required: " << std::endl;
+                    for (ServiceList::const_iterator i = pathList.begin(); i != pathList.end(); i++) {
+                        ss << "  " << i->first << " v" << i->second << std::endl;
+                    }
+                    output::puts(output::T_ERROR, ss.str());
+                    exit(1);
+                }
+                // Set providerPath now, based on where we download to.
+                if (pathList.size() == 1) {
+                    ServiceList::const_iterator i = pathList.begin();
+                    providerPath = downloadPath / i->first / i->second;
+                }
             }
         }
+        s_rl.init();
 
         // specify our own binary as the "harness program"
         bp::file::Path harnessProgram = bp::file::canonicalProgramPath(bp::file::Path(argv[0]));
