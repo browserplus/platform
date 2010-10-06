@@ -1,3 +1,6 @@
+10/06/2010 - Changes from 2.10.4 to 2.10.5
+  * restore previous bpsemanticversion semantics
+
 10/05/2010 - Changes from 2.10.3 to 2.10.4
   * Start decomposing the bputils monolith.  Broke out of it new libraries
     bpdns, bphttp, bpipc, and platform_utils.
