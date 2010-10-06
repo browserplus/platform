@@ -305,7 +305,7 @@ QueryCache::parsePlatformVersionResponses(LatestPlatformServerAndVersion & lates
                 server = *url_it;
                 bp::SemanticVersion cur;
                 if (cur.parse(version)) {
-                    if (cur.compare(latest.version) > 0) {
+                    if (cur.compare(latest.version) >= 0) {
                         latest.version = cur;
                         latest.size = size;
                         latest.serverURL = server;

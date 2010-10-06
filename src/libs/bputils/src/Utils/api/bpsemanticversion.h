@@ -89,6 +89,14 @@ public:
                              const SemanticVersion& got,
                              const SemanticVersion& wantver,
                              const SemanticVersion& wantminver);
+
+	/**
+	 * Return true if all versions fields are -1
+	 */
+	bool isUnset() const {
+		return m_major == -1 && m_micro == -1 && m_minor == -1 && m_nano == 1;
+	}
+
 private:
     int m_major;
     int m_minor;

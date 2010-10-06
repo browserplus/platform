@@ -141,7 +141,7 @@ getNewestInstalledPlatform()
             {
                 bp::SemanticVersion version;
                 std::string s = bp::file::utf8FromNative(it->path().filename());
-                if (version.parse(s) && version.compare(newest) > 0 &&
+                if (version.parse(s) && version.compare(newest) >= 0 &&
                     bp::file::exists(bp::paths::getBPInstalledPath(
                                          version.majorVer(),
                                          version.minorVer(),

@@ -119,24 +119,32 @@ bp::SemanticVersion::compare(const bp::SemanticVersion& other) const
     int rv = 0;
 
     // compare major
-    rv = (m_major > other.m_major) ? 1 : ((m_major < other.m_major) ? -1 : 0);
+    if (m_major >= 0 && other.m_major >=0) {
+        rv = (m_major > other.m_major) ? 1 : ((m_major < other.m_major) ? -1 : 0);
+    }
 
     // compare minor
     if (rv == 0) {
-        rv = (m_minor > other.m_minor) ? 1 :
-             ((m_minor < other.m_minor) ? -1 : 0);
+        if (m_minor >= 0 && other.m_minor >= 0) {
+            rv = (m_minor > other.m_minor) ? 1 :
+                 ((m_minor < other.m_minor) ? -1 : 0);
+        }
     }
 
     // compare micro
     if (rv == 0) {
-        rv = (m_micro > other.m_micro) ? 1 :
-             ((m_micro < other.m_micro) ? -1 : 0);
+        if (m_micro >= 0 && other.m_micro >= 0) {
+            rv = (m_micro > other.m_micro) ? 1 :
+                 ((m_micro < other.m_micro) ? -1 : 0);
+        }
     }
 
      // compare nano
      if (rv == 0) {
-         rv = (m_nano > other.m_nano) ? 1 :
-              ((m_nano < other.m_nano) ? -1 : 0);
+         if (m_nano >= 0 && other.m_nano >= 0) {
+            rv = (m_nano > other.m_nano) ? 1 :
+                 ((m_nano < other.m_nano) ? -1 : 0);
+         }
      }
 
      return rv;

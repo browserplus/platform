@@ -193,6 +193,7 @@ static bool findServiceSet(
         } else if (haveFromDistro) {
             // have something which will work.  only add service to need
             // list if we want newest and a newer one is available
+            BPASSERT(!acp.version.isUnset() && !iacp.version.isUnset());
             if (wantNewest && (acp.version.compare(iacp.version) > 0)) {
                 need.push_back(acp);
                 dcp = &acp; // check deps on new service
