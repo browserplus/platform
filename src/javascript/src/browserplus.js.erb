@@ -239,6 +239,12 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
                 _mimeType = "application/x-yahoo-browserplus_2.9.8";
                 if (_setupPlugin() && _corePlugin() !== null) {
                     success = true; 
+                } else {
+                   // We've tried both mimetypes without luck,
+                   // which is probably because b+ isn't installed.
+                   // Reset _mimeType so that the init() after
+                   // an install will work.
+                   _mimeType = "application/x-browserplus_2";
                 }
             }
 
