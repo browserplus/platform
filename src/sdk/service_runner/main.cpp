@@ -45,10 +45,11 @@ bp::runloop::RunLoop s_rl;
 
 class ServiceUpdateListener : public IDistQueryListener {
 public:
-    ServiceUpdateListener(DistQuery* dq, bp::file::Path& downloadPath)
+    ServiceUpdateListener(DistQuery* dq, bp::file::Path& downloadPath, bp::file::Path& certFile)
         : m_distQuery(dq)
         , m_downloadSuccess(false)
         , m_downloadPath(downloadPath)
+        , m_certFile(certFile)
         , m_serviceName("")
         , m_serviceVersion("") {
     }
@@ -86,7 +87,7 @@ private:
     virtual void onDownloadComplete(unsigned int tid, const std::vector<unsigned char> & buf) {
         std::cout << std::endl;
         pair<string, string> p = m_neededServices.front();
-        ServiceUnpacker unpacker(buf, m_downloadPath, p.first, p.second);
+        ServiceUnpacker unpacker(buf, m_downloadPath, p.first, p.second, m_certFile);
         string errMsg;
         std::cout << "Installing service: "
                   << p.first
@@ -145,6 +146,7 @@ private:
     DistQuery* m_distQuery;
     bool m_downloadSuccess;
     bp::file::Path m_downloadPath;
+    bp::file::Path m_certFile;
     std::string m_serviceName;
     std::string m_serviceVersion;
     ServiceList m_neededServices;
@@ -190,8 +192,15 @@ static APTArgDefinition g_args[] = {
       APT::NOT_INTEGER, APT::MAY_RECUR,
       "When downloading provider services, use this distro server."
       "This is useful when developing provider services.  If a dependent "
-      "service is specified, and no -distroServer is supplied, then we "
+      "service is specified, and no -distroServer is supplied, then "
       "any attempt to download will be handled by production servers."
+    },
+    { "certFile", APT::TAKES_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
+      APT::NOT_INTEGER, APT::MAY_RECUR,
+      "When validating downloaded provider services, use this certificate file."
+      "This is useful when developing provider services.  If a dependent "
+      "service is specified, and no -certFile is supplied, then "
+      "the service may fail to unpack."
     }
 };
       
@@ -288,8 +297,14 @@ private:
                   const bp::Object *) { }
 };
 
+class MyServiceFilter : public virtual IServiceFilter {
+public:
+    virtual ~MyServiceFilter() {}
+    virtual bool serviceMayRun(const std::string&, const std::string&) const { return true; }
+};
+
 bool
-downloadRequires(const std::list<std::string>& distroServers, bp::service::Summary s, bp::file::Path& downloadPath, ServiceList& pathList, bool useInstalled) {
+downloadRequires(const std::list<std::string>& distroServers, bp::service::Summary s, bp::file::Path& downloadPath, bp::file::Path& certFile, ServiceList& pathList, bool useInstalled) {
     // generate list of ServiceRequireStatements
     std::list<ServiceRequireStatement> reqStmts;
     ServiceRequireStatement reqStmt;
@@ -298,8 +313,9 @@ downloadRequires(const std::list<std::string>& distroServers, bp::service::Summa
     reqStmt.m_minversion = s.usesMinversion().asString();
     reqStmts.push_back(reqStmt);
     // satisfy requirements
-    DistQuery dq(distroServers, PermissionsManager::get());
-    ServiceUpdateListener serviceUpdateListener(&dq, downloadPath);
+    MyServiceFilter sf;
+    DistQuery dq(distroServers, &sf);
+    ServiceUpdateListener serviceUpdateListener(&dq, downloadPath, certFile);
     dq.setListener(&serviceUpdateListener);
     std::list<bp::service::Summary> installed;
     unsigned int tid = dq.satisfyRequirements(bp::os::PlatformAsString(), reqStmts, installed);
@@ -420,7 +436,16 @@ main(int argc, const char ** argv)
             if (argParser.argumentPresent("downloadPath")) {
                 ServiceList pathList;
                 downloadPath = argParser.argument("downloadPath");
-                if (!downloadRequires(distroServers, s, downloadPath, pathList, false)) {
+                // This should be the location to the provider services.
+                bp::file::Path certFile;
+                if (argParser.argumentPresent("certFile")) {
+                    certFile = argParser.argument("certFile");
+                }
+                else {
+                    // NEEDSWORK!!!
+                    // No default cert file for now.  Ask gad about what we can use (or distribute).
+                }
+                if (!downloadRequires(distroServers, s, downloadPath, certFile, pathList, false)) {
                     std::stringstream ss;
                     ss << "Couldn't run service because I couldn't "
                        << "find an appropriate installed " << std::endl
