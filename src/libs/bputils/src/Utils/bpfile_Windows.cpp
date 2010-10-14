@@ -486,7 +486,7 @@ programPath()
     memset(szFilename, 0, sizeof(szFilename));
     if (0 != GetModuleFileNameW(NULL, szFilename, (MAX_PATH * 4)))
     {
-        rv = szFilename
+        rv = szFilename;
     }
     return rv.canonical();
 }
