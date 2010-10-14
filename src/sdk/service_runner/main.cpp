@@ -442,8 +442,10 @@ main(int argc, const char ** argv)
                     certFile = argParser.argument("certFile");
                 }
                 else {
-                    // NEEDSWORK!!!
-                    // No default cert file for now.  Ask gad about what we can use (or distribute).
+                    // Default cert file distributes in same directory as current executable.
+                    // Try that one if none passed in with command-line arguments.
+                    bp::file::Path p1 = bp::file::programPath();
+                    certFile = p1.parent_path() / "BrowserPlus.crt";
                 }
                 if (!downloadRequires(distroServers, s, downloadPath, certFile, pathList, false)) {
                     std::stringstream ss;

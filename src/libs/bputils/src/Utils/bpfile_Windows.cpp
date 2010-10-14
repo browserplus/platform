@@ -478,5 +478,18 @@ setFileProperties(const Path& p,
     return true;
 }
 
+Path
+programPath()
+{
+    Path rv("");
+    WCHAR szFilename[(MAX_PATH * 4) + 1];
+    memset(szFilename, 0, sizeof(szFilename));
+    if (0 != GetModuleFileNameW(NULL, szFilename, (MAX_PATH * 4)))
+    {
+        rv = szFilename
+    }
+    return rv.canonical();
+}
+
 
 }}

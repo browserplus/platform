@@ -188,12 +188,14 @@ FileUtils.mkdir_p("#{internalSdkDir}/bin", :verbose => $beVerbose)
 FileUtils.install(installerExe, "#{internalSdkDir}/bin", :mode => 0755, :verbose => $beVerbose)
 FileUtils.install(publisherExe, "#{internalSdkDir}/bin", :mode => 0755, :verbose => $beVerbose)
 FileUtils.install(runnerExe, "#{internalSdkDir}/bin", :mode => 0755, :verbose => $beVerbose)
+FileUtils.install("#{$topDir}/support/signing/Combined.crt", "#{internalSdkDir}/bin/BrowserPlus.crt", :verbose => $beVerbose)
 
 # External service installer and service runner
 #
 FileUtils.mkdir_p("#{sdkDir}/bin", :verbose => $beVerbose)
 FileUtils.install(installerExe, "#{sdkDir}/bin", :mode => 0755, :verbose => $beVerbose)
 FileUtils.install(runnerExe, "#{sdkDir}/bin", :mode => 0755, :verbose => $beVerbose)
+FileUtils.install("#{$topDir}/support/signing/Combined.crt", "#{sdkDir}/bin/BrowserPlus.crt", :verbose => $beVerbose)
 
 # Plugins go to shipping binaries dir where makeInstaller and installLocally
 # will find them

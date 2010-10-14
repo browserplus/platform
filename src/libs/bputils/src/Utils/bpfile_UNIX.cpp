@@ -39,6 +39,7 @@
 #ifdef MACOSX
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreServices/CoreServices.h>
+#include <mach-o/dyld.h>	/* _NSGetExecutablePath */
 #else
 #include <stdio.h>
 #endif
@@ -376,6 +377,24 @@ setFileProperties(const Path& p,
         // empty
     }
     return true;
+}
+
+Path
+programPath()
+{
+    Path rv("");
+#ifdef MACOSX
+    char pathbuf[PATH_MAX + 1];
+    char real_executable[PATH_MAX + 1];
+    memset(pathbuf, 0, sizeof(pathbuf));
+    memset(real_executable, 0, sizeof(real_executable));
+    uint32_t bufsize = sizeof(pathbuf);
+    _NSGetExecutablePath(pathbuf, &bufsize);
+    rv = pathbuf;
+#else // MACOSX
+    // NEEDSWORK.  No reliable implementation across Unices that I could find for now.
+#endif // MACOSX
+    return rv.canonical();
 }
 
 

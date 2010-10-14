@@ -253,6 +253,11 @@ namespace bp {
         Path canonicalProgramPath(const Path& path,
                                   const Path& root = Path());
 
+        /** Return the full path of the current executing program.
+         *  \returns full path of the current executing program
+         */
+        Path programPath();
+
         /** Get a path within the specified dir that in not in use.
          *  \param tempDir [IN] - path to directory
          *  \param prefix [IN] - prefix to append to resulting path name

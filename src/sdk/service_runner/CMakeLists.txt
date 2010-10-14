@@ -24,3 +24,8 @@ SET(${progName}_MINOR_VERSION 1)
 SET(${progName}_LINK_STATIC BPUtils ConsoleLib platform_utils ServiceRunnerLib DistributionClient Permissions)
 
 YBT_BUILD(BINARY ${progName})
+
+ADD_CUSTOM_COMMAND(
+  TARGET ${progName} POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/../../support/signing/Combined.crt ${CMAKE_INSTALL_PREFIX}/bin/BrowserPlus.crt
+)
