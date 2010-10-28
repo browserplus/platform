@@ -12,6 +12,11 @@ void output::setSlaveMode()
     s_slaveMode = true;
 }
 
+bool output::getSlaveMode()
+{
+    return s_slaveMode;
+}
+
 void
 output::puts(output::type msgType, const bp::Object * obj)
 {

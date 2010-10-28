@@ -25,6 +25,7 @@ namespace output
     // set "slave mode" turning all output into json formatted 
     // messages
     void setSlaveMode();
+    bool getSlaveMode();
 
     // output a string message 
     void puts(output::type msgType, const std::string & msg);

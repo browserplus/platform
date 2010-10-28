@@ -72,28 +72,34 @@ private:
         m_downloadSuccess = false;
     }
     virtual void onServiceFound(unsigned int tid, const AvailableService & service) {
-        std::cout << "Found viable service: "
-                  << service.name
-                  << " v"
-                  << service.version.asString()
-                  << std::endl;
+        std::stringstream ss;
+        ss << "Found viable service: " << service.name << " v" << service.version.asString();
+        output::puts(output::T_INFO, ss.str());
         m_serviceName = service.name;
         m_serviceVersion = service.version.asString();
         m_downloadSuccess = false;
     }
     virtual void onDownloadProgress(unsigned int tid, unsigned int pct) {
-        std::cout << ".";
+        if (output::getSlaveMode()) {
+            output::puts(output::T_INFO, ".");
+        }
+        else {
+            std::cout << ".";
+        }
     }
     virtual void onDownloadComplete(unsigned int tid, const std::vector<unsigned char> & buf) {
-        std::cout << std::endl;
+        if (output::getSlaveMode()) {
+            // NO-OP
+        }
+        else {
+            std::cout << std::endl;
+        }
         pair<string, string> p = m_neededServices.front();
         ServiceUnpacker unpacker(buf, m_downloadPath, p.first, p.second, m_certFile);
         string errMsg;
-        std::cout << "Installing service: "
-                  << p.first
-                  << " v"
-                  << p.second
-                  << std::endl;
+        std::stringstream ss;
+        ss << "Installing service: " << p.first << " v" << p.second;
+        output::puts(output::T_INFO, ss.str());
         m_downloadSuccess = unpacker.unpack(errMsg) && unpacker.install(errMsg);
         if (m_downloadSuccess) {
             m_neededServices.pop_front();
@@ -101,9 +107,9 @@ private:
             fetchNextService();
         }
         else {
-            std::cout << "Installing failed: "
-                      << errMsg
-                      << std::endl;
+            std::stringstream ss;
+            ss << "Installing failed: " << errMsg;
+            output::puts(output::T_ERROR, ss.str());
             s_rl.stop();
         }
     }
@@ -130,11 +136,9 @@ private:
     unsigned int fetchNextService() {
         if (!m_neededServices.empty()) {
             pair<string, string> p = m_neededServices.front();
-            std::cout << "Downloading service: "
-                      << p.first
-                      << " v"
-                      << p.second
-                      << std::endl;
+            std::stringstream ss;
+            ss << "Downloading service: " << p.first << " v" << p.second;
+            output::puts(output::T_INFO, ss.str());
             return m_distQuery->downloadService(p.first, p.second,
                                                 bp::os::PlatformAsString());
         } else {
