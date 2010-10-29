@@ -151,6 +151,50 @@ devenv BrowserPlus.sln /Build Release /Project test
         </exec>
         <delete file="../build/x1.bat" />
     </target>
+    <target name="compress_make_debug" unless="is.windows">
+        <exec executable="make" dir="../build_debug" failonerror="true">
+            <arg line="CompressSDK" />
+        </exec>
+    </target>
+    <target name="compress_make_codecoverage" unless="is.windows">
+        <exec executable="make" dir="../build_codecoverage" failonerror="true">
+            <arg line="CompressSDK" />
+        </exec>
+    </target>
+    <target name="compress_make_release" unless="is.windows">
+        <exec executable="make" dir="../build_release" failonerror="true">
+            <arg line="CompressSDK" />
+        </exec>
+    </target>
+    <target name="compress_vc08_debug" if="is.windows">
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+devenv BrowserPlus.sln /Build Debug /Project CompressSDK
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+    </target>
+    <target name="compress_vc08_codecoverage" if="is.windows">
+        <!-- NO-OP -->
+    </target>
+    <target name="compress_vc08_release" if="is.windows">
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+devenv BrowserPlus.sln /Build Release /Project CompressSDK
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+    </target>
     <target name="clean_debug" depends="clean_make_debug,clean_vc08_debug" />
     <target name="clean_codecoverage" depends="clean_make_codecoverage,clean_vc08_codecoverage" />
     <target name="clean_release" depends="clean_make_release,clean_vc08_release" />
@@ -160,4 +204,7 @@ devenv BrowserPlus.sln /Build Release /Project test
     <target name="unittest_debug" depends="unittest_make_debug,unittest_vc08_debug" />
     <target name="unittest_codecoverage" depends="unittest_make_codecoverage,unittest_vc08_codecoverage" />
     <target name="unittest_release" depends="unittest_make_release,unittest_vc08_release" />
+    <target name="compress_debug" depends="compress_make_debug,compress_vc08_debug" />
+    <target name="compress_codecoverage" depends="compress_make_codecoverage,compress_vc08_codecoverage" />
+    <target name="compress_release" depends="compress_make_release,compress_vc08_release" />
 </project>

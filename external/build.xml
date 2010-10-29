@@ -88,6 +88,24 @@ ruby .\build.rb
     <target name="unittest_vc08_release" if="is.windows">
         <!-- NO-OP -->
     </target>
+    <target name="compress_make_debug" unless="is.windows">
+        <!-- NO-OP -->
+    </target>
+    <target name="compress_make_codecoverage" unless="is.windows">
+        <!-- NO-OP -->
+    </target>
+    <target name="compress_make_release" unless="is.windows">
+        <!-- NO-OP -->
+    </target>
+    <target name="compress_vc08_debug" if="is.windows">
+        <!-- NO-OP -->
+    </target>
+    <target name="compress_vc08_codecoverage" if="is.windows">
+        <!-- NO-OP -->
+    </target>
+    <target name="compress_vc08_release" if="is.windows">
+        <!-- NO-OP -->
+    </target>
     <target name="clean_debug" depends="clean_make_debug,clean_vc08_debug" />
     <target name="clean_codecoverage" depends="clean_make_codecoverage,clean_vc08_codecoverage" />
     <target name="clean_release" depends="clean_make_release,clean_vc08_release" />
@@ -97,4 +115,7 @@ ruby .\build.rb
     <target name="unittest_debug" depends="unittest_make_debug,unittest_vc08_debug" />
     <target name="unittest_codecoverage" depends="unittest_make_codecoverage,unittest_vc08_codecoverage" />
     <target name="unittest_release" depends="unittest_make_release,unittest_vc08_release" />
+    <target name="compress_debug" depends="compress_make_debug,compress_vc08_debug" />
+    <target name="compress_codecoverage" depends="compress_make_codecoverage,compress_vc08_codecoverage" />
+    <target name="compress_release" depends="compress_make_release,compress_vc08_release" />
 </project>
