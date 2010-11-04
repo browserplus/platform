@@ -34,6 +34,7 @@
 #include "Permissions/PermissionsManager.h"
 #include "BPUtils/OS.h"
 #include "platform_utils/ProductPaths.h"
+#include "platform_utils/bpdebug.h"
 
 // here's our implementation of handling commands
 #include "CommandExecutor.h"
@@ -185,7 +186,7 @@ static APTArgDefinition g_args[] = {
       "that satisfies the dependent's requirements."
     },
     { "downloadPath", APT::TAKES_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
-      APT::NOT_INTEGER, APT::MAY_RECUR,
+      APT::NOT_INTEGER, APT::MAY_NOT_RECUR,
       "When running a dependent service, you may explicitly specify "
       "the path to the download a provider service.  This is useful "
       "when developing provider services.  If a dependent service is "
@@ -193,19 +194,25 @@ static APTArgDefinition g_args[] = {
       "an installed service that satisfies the dependent's requirements."
     },
     { "distroServer", APT::TAKES_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
-      APT::NOT_INTEGER, APT::MAY_RECUR,
+      APT::NOT_INTEGER, APT::MAY_NOT_RECUR,
       "When downloading provider services, use this distro server."
       "This is useful when developing provider services.  If a dependent "
       "service is specified, and no -distroServer is supplied, then "
       "any attempt to download will be handled by production servers."
     },
     { "certFile", APT::TAKES_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
-      APT::NOT_INTEGER, APT::MAY_RECUR,
+      APT::NOT_INTEGER, APT::MAY_NOT_RECUR,
       "When validating downloaded provider services, use this certificate file."
       "This is useful when developing provider services.  If a dependent "
       "service is specified, and no -certFile is supplied, then "
       "the service may fail to unpack."
-    }
+    },
+    { "debugService", APT::NO_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
+      APT::NOT_INTEGER, APT::MAY_NOT_RECUR,
+      "Used to launch a debugger and attach to the correct process, "
+      "the breakpoint occurs before your service is loaded so that "
+      "all of the service code may be debugged and verified."
+    },
 };
       
 static void 
@@ -362,6 +369,17 @@ main(int argc, const char ** argv)
     // capable of running services.
     // (lth/27.04.2009)
     if (argc > 1 && !std::string("-runService").compare(argv[1])) {
+        // optional -breakpoint arguments set forced breaks
+        std::list<std::string> breakpoints;
+        for (int i = 2; i < argc; i++) {
+            if (!std::string(argv[i]).compare("-breakpoint")) {
+                if ((i + 1) < argc) {
+                    breakpoints.push_back(std::string(argv[i + 1]));
+                    i++; // go past this value
+                }
+            }
+        }
+        bp::debug::setForcedBreakpoints(breakpoints);
         if (ServiceRunner::runServiceProcess(argc, argv)) return 0;
         return 1;
     }
@@ -399,6 +417,7 @@ main(int argc, const char ** argv)
     // scope here so that all objects are cleaned up by end of main
     {
         shared_ptr<ServiceRunner::Controller> controller;
+
         if (x == argc - 2) {
             std::string service(argv[argc - 2]), version(argv[argc - 1]);
             controller.reset(new ServiceRunner::Controller(service, version));
@@ -406,7 +425,13 @@ main(int argc, const char ** argv)
             bp::file::Path path(argv[argc - 1]);
             controller.reset(new ServiceRunner::Controller(path));            
         }
-        
+
+        if (argParser.argumentPresent("debugService")) {
+            // manually push debugBreak to controller since there is no bp.config
+            std::list<std::string> breakpoints;
+            breakpoints.push_back("runServiceProcess");
+            controller->setDebugBreakpoints(breakpoints);
+        }
 
         // now let's parse the manifest and determine if this is a dependent
         bp::service::Summary s;

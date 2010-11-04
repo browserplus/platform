@@ -46,35 +46,11 @@ using namespace std;
 namespace bp {
 namespace debug {
 
+std::list<std::string> s_forcedBreakpoints;
 
-void breakpoint( const std::string& sName )
+
+void attachDebuggerImpl()
 {
-#ifndef NDEBUG
-    // Load the bp config file.
-    bp::config::ConfigReader config;
-    bp::file::Path configPath = bp::paths::getConfigFilePath();
-    if (!config.load( configPath ))  {
-        BPLOG_ERROR_STRM( "couldn't read config file at " << configPath );
-        return;
-    }
-
-    // Get "Breakpoints" member array.
-    list<string> lsNames;
-    if (!config.getArrayOfStrings( "Breakpoints", lsNames )) {
-        return;
-    }
-
-    // Break if our name is present.
-    if (find( lsNames.begin(), lsNames.end(), sName ) != lsNames.end()) {
-        attachDebugger();
-    }
-#endif // NDEBUG
-}
-
-
-void attachDebugger()
-{
-#ifndef NDEBUG    
 #ifdef WIN32
     DebugBreak();
 #elif defined(MACOSX)
@@ -86,9 +62,47 @@ void attachDebugger()
     kill(p, SIGSTOP);
 #else
 #endif
+}
+
+void attachDebugger()
+{
+#ifndef NDEBUG    
+attachDebuggerImpl();
 #endif // NDEBUG
 }
 
+void breakpoint( const std::string& sName )
+{
+#ifndef NDEBUG
+    // Load the bp config file.
+    bp::config::ConfigReader config;
+    bp::file::Path configPath = bp::paths::getConfigFilePath();
+    if (config.load( configPath ))  {
+        // Get "Breakpoints" member array.
+        list<string> lsNames;
+        if (config.getArrayOfStrings( "Breakpoints", lsNames )) {
+            // Break if our name is present.
+            if (find( lsNames.begin(), lsNames.end(), sName ) != lsNames.end()) {
+                attachDebugger();
+                return;
+            }
+        }
+    }
+    else {
+        BPLOG_ERROR_STRM( "couldn't read config file at " << configPath );
+    }
+#endif // NDEBUG
+    // Break if our name is present.
+    if (find( s_forcedBreakpoints.begin(), s_forcedBreakpoints.end(), sName ) != s_forcedBreakpoints.end()) {
+        attachDebuggerImpl();
+        return;
+    }
+}
+
+void setForcedBreakpoints( const std::list<std::string>& breakpoints )
+{
+    s_forcedBreakpoints = breakpoints;
+}
    
 } // namespace debug
 } // namespace bp

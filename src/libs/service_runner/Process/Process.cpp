@@ -92,6 +92,10 @@ ServiceRunner::runServiceProcess(int argc, const char ** argv)
           APT::NOT_INTEGER, APT::MAY_NOT_RECUR,
           "required cmd line arg indicating that we're running a service"
         },
+        { "breakpoint", APT::TAKES_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
+          APT::NOT_INTEGER, APT::MAY_RECUR,
+          "optional cmd line arg indicating a given bp debug breakpoint"
+        },
         { "ipcName", APT::TAKES_ARG, APT::NO_DEFAULT, APT::REQUIRED,
           APT::NOT_INTEGER, APT::MAY_NOT_RECUR,
           "the name of the ipc channel that we should connect to once "

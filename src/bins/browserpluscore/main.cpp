@@ -36,6 +36,7 @@
 #include "platform_utils/ARGVConverter.h"
 #include "platform_utils/bpexitcodes.h"
 #include "platform_utils/ProductPaths.h"
+#include "platform_utils/bpdebug.h"
 #include "ServiceRunnerLib/ServiceRunnerLib.h"
 
 #ifndef WIN32
@@ -66,6 +67,17 @@ int main(int argc, const char ** argv)
         // flag causes us to run a service, rather than running the Daemon
         if (argc > 1 && !std::string(argv[1]).compare("-runService"))
         {
+            // optional -breakpoint arguments set forced breaks
+            std::list<std::string> breakpoints;
+            for (int i = 2; i < argc; i++) {
+                if (!std::string(argv[i]).compare("-breakpoint")) {
+                    if ((i + 1) < argc) {
+                        breakpoints.push_back(std::string(argv[i + 1]));
+                        i++; // go past this value
+                    }
+                }
+            }
+            bp::debug::setForcedBreakpoints(breakpoints);
             if (!ServiceRunner::runServiceProcess(argc, argv)) {
                 return bp::exit::kCantRunServiceProcess;
             }

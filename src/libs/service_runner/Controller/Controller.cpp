@@ -150,6 +150,12 @@ Controller::run(const bpf::Path & pathToHarness,
     std::vector<std::string> args;
     args.push_back("-runService");
 
+    for (std::list<std::string>::const_iterator i = m_breakpoints.begin(); i != m_breakpoints.end(); i++)
+    {
+        args.push_back("-breakpoint");
+        args.push_back(*i);
+    }
+
     args.push_back("-ipcName");    
     args.push_back(m_serviceConnector->ipcName());
 
@@ -530,5 +536,11 @@ Controller::friendlyServiceName()
         ss << "service at " << m_path;
     }
     return ss.str();
+}
+
+void
+Controller::setDebugBreakpoints(const std::list<std::string>& breakpoints)
+{
+    m_breakpoints = breakpoints;
 }
 

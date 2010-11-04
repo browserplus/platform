@@ -30,6 +30,7 @@
 
 #include "ServiceProtocol.h"
 #include "BPUtils/BPLog.h"
+#include "platform_utils/bpdebug.h"
 
 using namespace ServiceRunner;
 

@@ -33,6 +33,7 @@
 #include "BPUtils/bperrorutil.h"
 #include "platform_utils/APTArgParse.h"
 #include "ServiceRunnerLib/ServiceRunnerLib.h"
+#include "platform_utils/bpdebug.h"
 
 // the gunk to do the push
 #include "PusherMan.h"
@@ -203,6 +204,17 @@ int main(int argc, const char ** argv)
     try {
         // which mode are we running in?
         if (argc > 1 && !string("-runService").compare(argv[1])) {
+            // optional -breakpoint arguments set forced breaks
+            std::list<std::string> breakpoints;
+            for (int i = 2; i < argc; i++) {
+                if (!std::string(argv[i]).compare("-breakpoint")) {
+                    if ((i + 1) < argc) {
+                        breakpoints.push_back(std::string(argv[i + 1]));
+                        i++; // go past this value
+                    }
+                }
+            }
+            bp::debug::setForcedBreakpoints(breakpoints);
             if (ServiceRunner::runServiceProcess(argc, argv)) return 0;
             return 1;
         }

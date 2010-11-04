@@ -202,6 +202,11 @@ namespace ServiceRunner
         // otherwise it'll be the service path.
         std::string friendlyServiceName();
                 
+        // Enables automatic breakpoints, outside of bp.config.
+        // This is useful for scenarios such as standalone tools
+        // like ServiceRunner executable, which does not require
+        // platform to be present, in order to run.
+        void setDebugBreakpoints(const std::list<std::string>& breakpoints);
       private:
         std::string m_service;
         std::string m_version;
@@ -264,6 +269,9 @@ namespace ServiceRunner
         // Temp dirs that were provided to instances.
         // We purge at end in case service does not.
         std::vector<bp::file::Path> m_tempDirs;
+
+        // Forced breakpoints (outside of bp.config).
+        std::list<std::string> m_breakpoints;
     };
 }
 

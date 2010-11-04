@@ -33,19 +33,20 @@
 
 
 #include <string>
+#include <list>
 
 namespace bp {
 namespace debug {
         
 
-void breakpoint( const std::string& sName );
-
 /**
  * invoke os-specific call to offer developer opportunity to attach a debugger.
  */
 void attachDebugger();
-        
 
+void breakpoint( const std::string& sName );
+        
+void setForcedBreakpoints( const std::list<std::string>& breakpoints );
         
 } // debug
 } // bp
