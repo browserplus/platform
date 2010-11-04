@@ -1,3 +1,9 @@
+10/06/2010 - Changes from 2.10.7 to 2.10.8
+  * Add support to ServiceRunner for JIT debugging and breakpoints
+
+10/06/2010 - Changes from 2.10.6 to 2.10.7
+  * Add support to download provider services automatically in ServiceRunner
+
 10/06/2010 - Changes from 2.10.5 to 2.10.6
   * put correct versions semantics back in, fix places that needed
     incorrect semantics
