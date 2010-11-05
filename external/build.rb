@@ -19,6 +19,7 @@ require 'rbconfig'
 require 'fileutils'
 require 'pathname'
 require 'open-uri'
+require 'openssl'
 require 'timeout'
 include Config
 
@@ -37,6 +38,7 @@ else
   exit -1
 end
 
+OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
 TOPDIR = File.dirname(File.expand_path(__FILE__))
 url = "http://github.com/browserplus/bakery/tarball/#{bakery_commit}"
 bakeryVersionFile = File.join(TOPDIR, "bakery_version.txt")
