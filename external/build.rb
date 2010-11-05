@@ -23,6 +23,24 @@ require 'openssl'
 require 'timeout'
 include Config
 
+# WORKAROUND
+# This is a workaround, we open the OpenURI class and redefine the
+# redirectable? method so that we can redirect from http:// -> https://
+# This should be safe, but is not allowed in the current implementation.
+# The reason for the redirect is related to Sidejack exploit that allows
+# existing sessions to be hijacked from other computers by sniffing a
+# few cookies.
+if OpenSSL::SSL::VERIFY_PEER != OpenSSL::SSL::VERIFY_NONE
+  OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
+end
+def OpenURI.redirectable?(uri1, uri2) # :nodoc:
+  # This test is intended to forbid a redirection from http://... to
+  # file:///etc/passwd.
+  # However this is ad hoc.  It should be extensible/configurable.
+  uri1.scheme.downcase == uri2.scheme.downcase ||
+  (/\A(?:http|ftp|https)\z/i =~ uri1.scheme && /\A(?:http|ftp|https)\z/i =~ uri2.scheme)
+end
+
 # configure thyself
 if CONFIG['arch'] =~ /mswin|mingw/
     $platform = "Windows"
@@ -38,7 +56,6 @@ else
   exit -1
 end
 
-OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
 TOPDIR = File.dirname(File.expand_path(__FILE__))
 url = "http://github.com/browserplus/bakery/tarball/#{bakery_commit}"
 bakeryVersionFile = File.join(TOPDIR, "bakery_version.txt")
@@ -114,21 +131,6 @@ if File.directory? bakeryUnpackPath
   end
   FileUtils.rm_f bakeryVersionFile
   FileUtils.rm_rf bakeryUnpackPath
-end
-
-# WORKAROUND
-# This is a workaround, we open the OpenURI class and redefine the
-# redirectable? method so that we can redirect from http:// -> https://
-# This should be safe, but is not allowed in the current implementation.
-# The reason for the redirect is related to Sidejack exploit that allows
-# existing sessions to be hijacked from other computers by sniffing a
-# few cookies.
-def OpenURI.redirectable?(uri1, uri2) # :nodoc:
-  # This test is intended to forbid a redirection from http://... to
-  # file:///etc/passwd.
-  # However this is ad hoc.  It should be extensible/configurable.
-  uri1.scheme.downcase == uri2.scheme.downcase ||
-  (/\A(?:http|ftp|https)\z/i =~ uri1.scheme && /\A(?:http|ftp|https)\z/i =~ uri2.scheme)
 end
 
 def fetch(tarball, url)
