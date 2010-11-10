@@ -46,11 +46,11 @@ using namespace std;
 namespace bp {
 namespace debug {
 
-std::list<std::string> s_forcedBreakpoints;
-
+static std::list<std::string>* s_forcedBreakpoints = NULL;
 
 void attachDebuggerImpl()
 {
+#ifndef NDEBUG
 #ifdef WIN32
     DebugBreak();
 #elif defined(MACOSX)
@@ -61,6 +61,7 @@ void attachDebuggerImpl()
     BPLOG_ERROR( ss.str() );    
     kill(p, SIGSTOP);
 #else
+#endif
 #endif
 }
 
@@ -91,17 +92,25 @@ void breakpoint( const std::string& sName )
     else {
         BPLOG_ERROR_STRM( "couldn't read config file at " << configPath );
     }
-#endif // NDEBUG
+
     // Break if our name is present.
-    if (find( s_forcedBreakpoints.begin(), s_forcedBreakpoints.end(), sName ) != s_forcedBreakpoints.end()) {
+    if (s_forcedBreakpoints != NULL &&
+        find( s_forcedBreakpoints->begin(), s_forcedBreakpoints->end(), sName ) != s_forcedBreakpoints->end()) {
         attachDebuggerImpl();
         return;
     }
+#endif // NDEBUG
 }
 
 void setForcedBreakpoints( const std::list<std::string>& breakpoints )
 {
-    s_forcedBreakpoints = breakpoints;
+#ifndef NDEBUG
+    if (s_forcedBreakpoints != NULL) {
+        delete s_forcedBreakpoints;
+        s_forcedBreakpoints = NULL;
+    }
+    s_forcedBreakpoints = new std::list<std::string>(breakpoints);
+#endif // NDEBUG
 }
    
 } // namespace debug
