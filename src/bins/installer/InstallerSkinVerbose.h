@@ -23,24 +23,24 @@
 #ifndef __INSTALLERSKINVERBOSE__
 #define __INSTALLERSKINVERBOSE__
 
-#include "InstallerSkin.h"
+#include "InstallerSkinMinimal.h"
 
 #include <string>
 
 /**
- * A graphical installer skin that handles spawning a window which
- * renders HTML.
+ * A non-graphical installer skin that just prints progress with percentages
  */
-class InstallerSkinVerbose : public InstallerSkin
+class InstallerSkinVerbose : public InstallerSkinMinimal
 {
   public:
     InstallerSkinVerbose();
     virtual ~InstallerSkinVerbose();
 
-    virtual void startUp(unsigned int width, unsigned int height,
+    virtual void startUp(unsigned int width,
+                         unsigned int height,
                          std::string title);
     
-    virtual void debugMessage(const std::string & sMsg);
+    virtual void debugMessage(const std::string& sMsg);
 
     virtual void allDone();
 

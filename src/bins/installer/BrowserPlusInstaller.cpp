@@ -764,9 +764,9 @@ static void
 usage()
 {
     stringstream ss;
-    ss << "usage: BrowserPlusInstaller [-nogui=<anything>] [-verbose=<anything>] "
-       << "[-pkg=<path>] [-log=<loglevel>] [-logfile=<filename>|console] "
-       << "[-locale=<locale>]";
+    ss << "usage: BrowserPlusInstaller [-silent=<anything> [-nogui=<anything>] "
+       << "[-verbose=<anything>] [-pkg=<path>] [-log=<loglevel>] "
+       << "[-logfile=<filename>|console] [-locale=<locale>]";
     BPLOG_ERROR(ss.str());
     cerr << ss.str() << endl;
     exit(-1);
@@ -841,6 +841,8 @@ main(int argc, const char** argv)
             } else if (!args[0].compare("-verbose")) {
                 skin.reset(new InstallerSkinVerbose);
             } else if (!args[0].compare("-nogui")) {
+                skin.reset(new InstallerSkinMinimal);
+            } else if (!args[0].compare("-silent")) {
                 skin.reset(new InstallerSkin);
             } else if (!args[0].compare("-pkg")) {
                 updatePkg = Path(args[1]);

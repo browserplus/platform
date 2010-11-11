@@ -61,7 +61,7 @@ class InstallerSkin
     // the InstallManager invokes this call on the installer output
     // skin at before the installation begins.  This is an opportunity
     // for the skin to present the user with whatever interface is
-    // required.  The skin should call IInstallerSkinListener::carryOn()
+    // required.  The skin should call IInstallerSkinListener::beginInstall()
     // to continue the installation based on interaction with the
     // user, or IInstallerSkinListener::cancelInstallation() to stop
     // the install.

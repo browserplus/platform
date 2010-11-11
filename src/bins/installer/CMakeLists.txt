@@ -26,6 +26,7 @@
 SET(installerXplatSources
     BrowserPlusInstaller.cpp 
     InstallerSkin.h InstallerSkin.cpp 
+    InstallerSkinMinimal.h InstallerSkinMinimal.cpp 
     InstallerSkinGUI.h
     ScriptableInstallerObject.h ScriptableInstallerObject.cpp
     InstallerSkinVerbose.h InstallerSkinVerbose.cpp

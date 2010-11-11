@@ -20,60 +20,25 @@
  * ***** END LICENSE BLOCK *****
  */
 
+#ifndef __INSTALLERSKINMINIMAL__
+#define __INSTALLERSKINMINIMAL__
+
 #include "InstallerSkin.h"
 
-#include <iostream>
-#include <stdlib.h>
-
-InstallerSkin::InstallerSkin()
-    : m_listener(NULL)
+/**
+ * A base class installer skin.  The skin handles interaction with
+ * the user and is provided hooks and events to display to the user
+ * progress and status.
+ */
+class InstallerSkinMinimal : virtual public InstallerSkin
 {
-}
+  public:
+    InstallerSkinMinimal();
+    virtual ~InstallerSkinMinimal();    
 
-InstallerSkin::~InstallerSkin()
-{
-}
+    virtual void statusMessage(const std::string & sMsg);
 
-void
-InstallerSkin::setListener(IInstallerSkinListener * listener)
-{
-    m_listener = listener;
-}
+    virtual void errorMessage(const std::string & sMsg);
+};
 
-void
-InstallerSkin::startUp(unsigned int width, unsigned int height,
-                       std::string title)
-{
-    if (m_listener) {
-        m_listener->beginInstall();
-    }
-}
-
-void
-InstallerSkin::statusMessage(const std::string & sMsg)
-{
-}
-
-void
-InstallerSkin::errorMessage(const std::string & sMsg)
-{
-    exit(-1);
-}
-
-void
-InstallerSkin::debugMessage(const std::string &)
-{
-}
-
-void
-InstallerSkin::progress(int)
-{
-}
-
-void
-InstallerSkin::allDone()
-{
-    if (m_listener) {
-        m_listener->shutdown();
-    }
-}
+#endif

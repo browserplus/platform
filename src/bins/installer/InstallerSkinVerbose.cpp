@@ -27,23 +27,28 @@ InstallerSkinVerbose::InstallerSkinVerbose()
 {
 }
 
+
 InstallerSkinVerbose::~InstallerSkinVerbose()
 {
 }
 
+
 void
-InstallerSkinVerbose::startUp(unsigned int width, unsigned int height,
+InstallerSkinVerbose::startUp(unsigned int width,
+                              unsigned int height,
                               std::string title)
 {
     std::cout << "starting installation..." << std::endl;
     m_listener->beginInstall();
 }
 
+
 void
-InstallerSkinVerbose::debugMessage(const std::string & sMsg)
+InstallerSkinVerbose::debugMessage(const std::string& sMsg)
 {
     std::cout << sMsg << std::endl;
 }
+
 
 void
 InstallerSkinVerbose::allDone()
@@ -51,6 +56,7 @@ InstallerSkinVerbose::allDone()
     std::cout << "installation complete..." << std::endl;
     m_listener->shutdown();
 }
+
 
 void
 InstallerSkinVerbose::progress(int pct)

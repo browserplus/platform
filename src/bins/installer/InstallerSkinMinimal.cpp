@@ -20,60 +20,32 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include "InstallerSkin.h"
+#include "InstallerSkinMinimal.h"
 
 #include <iostream>
 #include <stdlib.h>
 
-InstallerSkin::InstallerSkin()
-    : m_listener(NULL)
+InstallerSkinMinimal::InstallerSkinMinimal()
 {
 }
 
-InstallerSkin::~InstallerSkin()
+
+InstallerSkinMinimal::~InstallerSkinMinimal()
 {
 }
 
-void
-InstallerSkin::setListener(IInstallerSkinListener * listener)
-{
-    m_listener = listener;
-}
 
 void
-InstallerSkin::startUp(unsigned int width, unsigned int height,
-                       std::string title)
+InstallerSkinMinimal::statusMessage(const std::string& sMsg)
 {
-    if (m_listener) {
-        m_listener->beginInstall();
-    }
+    std::cout << sMsg << std::endl;
 }
 
-void
-InstallerSkin::statusMessage(const std::string & sMsg)
-{
-}
 
 void
-InstallerSkin::errorMessage(const std::string & sMsg)
+InstallerSkinMinimal::errorMessage(const std::string& sMsg)
 {
+    std::cout << sMsg << std::endl;
     exit(-1);
 }
 
-void
-InstallerSkin::debugMessage(const std::string &)
-{
-}
-
-void
-InstallerSkin::progress(int)
-{
-}
-
-void
-InstallerSkin::allDone()
-{
-    if (m_listener) {
-        m_listener->shutdown();
-    }
-}
