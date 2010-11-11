@@ -150,6 +150,10 @@ InstallerSkinGUI::startUp(unsigned int width, unsigned int height,
 
     [window setHasShadow: YES];
 
+    // We want a dock icon
+    ProcessSerialNumber psn = {0, kCurrentProcess};
+    (void) TransformProcessType(&psn, kProcessTransformToForegroundApplication);
+
     // alloc a webview
     WebView * webView =
         [[WebView alloc] initWithFrame: [[window contentView] frame]
