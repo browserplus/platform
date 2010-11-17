@@ -115,7 +115,7 @@ end
     // matches all domains), we set autoupdate true for all
     // of the services in 'new' for that domain.
     //
-    "autoUpdatePermissionMigration": {
+//    "autoUpdatePermissionMigration": {
 //       "F81D2642-5689-46E3-A03F-D7436D04AED7":
 //          [
 //             {  "domain": "*.yahoo.com",
@@ -124,8 +124,29 @@ end
 //                "new": ["FileTransfer"]
 //             }
 //          ]
-    },
+//    },
 
+    // auto-update permissions to be set IFF not set by user
+    // Lets us dynamically pre-seed permissions for properties
+    // that don't want users to see our perms prompting
+//    "autoUpdatePermissions": {
+//        "*.yahoo.com": { 
+//            "platform": true,
+//            "services": {
+//                "YahooVoiceAndVideo": true
+//            }
+//        }
+//    },
+
+    // Domain permissions to be set IFF not set by user
+    // Lets us dynamically pre-seed domain permissions for 
+    // properties that don't want users to see our perms prompting
+//    "domainPermissions": {
+//        "*.yahoo.com": { 
+//            "AllowBrowserPlus": true
+//        }
+//    },
+            
     // Service permission localizations
     //
     "servicePermissionLocalizations" : {

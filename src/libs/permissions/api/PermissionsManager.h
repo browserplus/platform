@@ -336,6 +336,29 @@ private:
         std::vector<std::string> m_new;
     };
 
+    // Classes needed when handling "autoUpdatePermissions"
+    // and "domainPermission" stuff from a permissions bundle
+    class AutoUpdatePerms {
+    public:
+        AutoUpdatePerms() : m_platform(eUnknown) {
+        }
+        AutoUpdatePerms(const std::string& s) : m_domain(s), m_platform(eUnknown) {
+        }
+        std::string m_domain;
+        Permission m_platform;
+        std::map<std::string, Permission> m_services;
+    };
+
+    class DomainPerms {
+    public:
+        DomainPerms() {
+        }
+        DomainPerms(const std::string& s) : m_domain(s) {
+        }
+        std::string m_domain;
+        std::map<std::string, Permission> m_perms;
+    };
+
     PermissionsManager(const std::string& baseURL);
     virtual ~PermissionsManager();
     void load();

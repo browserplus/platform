@@ -587,6 +587,28 @@ PermissionsManager::~PermissionsManager()
 }
 
 
+class AutoUpdatePerms {
+public:
+    AutoUpdatePerms() : m_platform(PermissionsManager::eUnknown) {
+    }
+    AutoUpdatePerms(const string& s)
+      : m_domain(s), m_platform(PermissionsManager::eUnknown) {
+    }
+    string m_domain;
+    PermissionsManager::Permission m_platform;
+    map<string, PermissionsManager::Permission> m_services;
+};
+
+class DomainPerms {
+public:
+    DomainPerms() {
+    }
+    DomainPerms(const string& s) : m_domain(s) {
+    }
+    string m_domain;
+    map<string, PermissionsManager::Permission> m_perms;
+};
+
 void
 PermissionsManager::load()
 {
@@ -600,6 +622,11 @@ PermissionsManager::load()
     m_permMigrations.clear();
     m_appliedPermMigrations.clear();
     m_badPermissionsOnDisk = false;
+
+    // must get new autoupdateperms and domainperms from permissions file,
+    // then apply them after we've loaded domain permissions
+    map<string, AutoUpdatePerms> newAutoUpdatePerms;
+    map<string, DomainPerms> newDomainPerms;
 
     // All file contents are JSON.  Errors
     // within file cause us to ignore it
@@ -758,6 +785,74 @@ PermissionsManager::load()
                 }
             }
         }
+
+        // auto update perms to set IF user hasn't already set them
+        // example entry:
+        //    "autoUpdatePermissions": {
+        //       "*.yahoo.com": { 
+        //          "platform": true,
+        //          "services": {
+        //             "YahooVoiceAndVideo": true
+        //          }
+        //       }
+        //    }
+        objPtr = m["autoUpdatePermissions"];
+        if (objPtr) {
+            map<string, const bp::Object*> m2 = *objPtr;
+            map<string, const bp::Object*>::const_iterator it;
+            for (it = m2.begin(); it != m2.end(); ++it) {
+                AutoUpdatePerms perms(it->first);
+                map<string, const bp::Object*> pm = *(it->second);
+                map<string, const bp::Object*>::const_iterator pi;
+                for (pi = pm.begin(); pi != pm.end(); ++pi) {
+                    string key = pi->first;
+                    if (key == "platform") {
+                        const bp::Bool* bObj = dynamic_cast<const bp::Bool*>(pi->second);
+                        if (bObj) {
+                            perms.m_platform = bObj->value() ? eAllowed : eNotAllowed;
+                        }
+                    } else if (key == "services") {
+                        map<string, const bp::Object*> sm = *(pi->second);
+                        map<string, const bp::Object*>::const_iterator si;
+                        for (si = sm.begin(); si != sm.end(); ++si) {
+                            string service = si->first;
+                            const bp::Bool* bObj = dynamic_cast<const bp::Bool*>(si->second);
+                            if (bObj) {
+                                perms.m_services[service] = bObj->value() ? eAllowed : eNotAllowed;
+                            }
+                        }
+                    }
+                }
+                newAutoUpdatePerms[it->first] = perms;
+            }
+        }
+
+        // domain perms to set IF user hasn't already set them
+        // example entry:
+        //    "domainPermissions": {
+        //       "*.yahoo.com": { 
+        //          "AllowBrowserPlus": true
+        //       }
+        //    }
+        objPtr = m["domainPermissions"];
+        if (objPtr) {
+            map<string, const bp::Object*> m2 = *objPtr;
+            map<string, const bp::Object*>::const_iterator it;
+            for (it = m2.begin(); it != m2.end(); ++it) {
+                DomainPerms perms(it->first);
+                map<string, const bp::Object*> pm = *(it->second);
+                map<string, const bp::Object*>::const_iterator pi;
+                for (pi = pm.begin(); pi != pm.end(); ++pi) {
+                    string permission = pi->first;
+                    const bp::Bool* bObj = dynamic_cast<const bp::Bool*>(pi->second);
+                    if (bObj) {
+                        perms.m_perms[permission] = bObj->value() ? eAllowed : eNotAllowed;
+                    }
+                }
+                newDomainPerms[it->first] = perms;
+            }
+        }
+
     } catch (const bp::error::Exception& e) {
         BPLOG_ERROR(e.what());
         m_blacklist.clear();
@@ -887,6 +982,51 @@ PermissionsManager::load()
                     const bp::String* s = dynamic_cast<const bp::String*>(v[i]);
                     if (s) {
                         m_appliedPermMigrations.insert(string(*s));
+                    }
+                }
+            }
+
+            // Now apply newAutoUpdatePerms and newDomainPerms
+            map<string, AutoUpdatePerms>::const_iterator it;
+            for (it = newAutoUpdatePerms.begin(); it != newAutoUpdatePerms.end(); ++it) {
+                const AutoUpdatePerms& perms = it->second;
+                if (perms.m_platform != eUnknown) {
+                    if (queryAutoUpdatePlatform(perms.m_domain) == eUnknown) {
+                        BPLOG_DEBUG_STRM("newAutoUpdatePerms sets silent platform update for "
+                                         << perms.m_domain);
+                        setAutoUpdatePlatform(perms.m_domain, perms.m_platform);
+                    }
+                }
+                map<string, Permission>::const_iterator si;
+                for (si = it->second.m_services.begin();
+                     si != it->second.m_services.end(); ++si) {
+                    if (si->second == eUnknown) continue;
+                    if (queryAutoUpdateService(perms.m_domain, si->first) == eUnknown) {
+                        BPLOG_DEBUG_STRM("newAutoUpdatePerms "
+                                         << (si->second == eAllowed ? "sets" : "revokes")
+                                         << " silent service update for "
+                                         << perms.m_domain << " / " << si->first);
+                        setAutoUpdateService(perms.m_domain, si->first, si->second);
+                    }
+                }
+            }
+
+            map<string, DomainPerms>::const_iterator it2;
+            for (it2 = newDomainPerms.begin(); it2 != newDomainPerms.end(); ++it2) {
+                const DomainPerms& perms = it2->second;
+                map<string, Permission>::const_iterator pi;
+                for (pi = perms.m_perms.begin(); pi != perms.m_perms.end(); ++pi) {
+                    if (pi->second == eUnknown) continue;
+                    if (queryDomainPermission(perms.m_domain, pi->first) == eUnknown) {
+                        BPLOG_DEBUG_STRM("newDomainPerms "
+                                         << (pi->second == eAllowed ? "sets" : "revokes")
+                                         << " permission " << pi->first
+                                         << " for " << perms.m_domain);
+                        if (pi->second == eAllowed) {
+                            addDomainPermission(perms.m_domain, pi->first);
+                        } else {
+                            revokeDomainPermission(perms.m_domain, pi->first);
+                        }
                     }
                 }
             }
