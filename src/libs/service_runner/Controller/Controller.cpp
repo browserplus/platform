@@ -46,6 +46,7 @@ Controller::Controller(const std::string & service,
                        const std::string & version) :
     m_service(),
     m_version(),
+    m_apiVersion(0),
     m_path(),
     m_pid(0),
     m_spawnStatus(),
@@ -67,6 +68,7 @@ Controller::Controller(const std::string & service,
 Controller::Controller(const bpf::Path & path) :
     m_service(),
     m_version(),
+    m_apiVersion(0),
     m_path(path),
     m_pid(0),
     m_spawnStatus(),
@@ -255,12 +257,17 @@ Controller::allocate(const std::string & uri,
         bp::Map context;
         context.add("uri", new bp::String(
                         uri.empty() ? std::string("bpclient://unknown") : uri));
-        context.add("dataDir", new bp::String(data_dir.externalUtf8()));
-        context.add("tempDir", new bp::String(temp_dir.externalUtf8()));
+        if (m_apiVersion >= 5) {
+            context.add("dataDir", new bp::Path(data_dir));
+            context.add("tempDir", new bp::Path(temp_dir));
+        } else {
+            context.add("dataDir", new bp::String(data_dir.externalUtf8()));
+            context.add("tempDir", new bp::String(temp_dir.externalUtf8()));
+        }
         context.add("locale", new bp::String(locale));
         context.add("userAgent", new bp::String(userAgent));
         context.add("clientPid", new bp::Integer(clientPid));
-
+        
         bp::ipc::Query q;
         q.setCommand("allocate");
         q.setPayload(context.clone());
@@ -340,6 +347,7 @@ Controller::onConnected(bp::ipc::Channel * c, const std::string & name,
 
     m_service = name;
     m_version = version;
+    m_apiVersion = apiVersion;
     
     BPLOG_INFO_STRM("Received connected IPC channel for "
                     << name << " v" << version << " in "

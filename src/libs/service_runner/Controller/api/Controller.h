@@ -143,6 +143,10 @@ namespace ServiceRunner
         // This is currently only valid after IPC connection succeeds
         std::string serviceVersion() { return m_version; }
         
+        // return the api version of the service we manage.
+        // This is currently only valid after IPC connection succeeds
+        unsigned int apiVersion() { return m_apiVersion; }
+        
         void setListener(IControllerListener * listener);
 
         // spawn and run the service.  To do this a harness program is
@@ -210,6 +214,7 @@ namespace ServiceRunner
       private:
         std::string m_service;
         std::string m_version;
+        unsigned int m_apiVersion;
         bp::file::Path m_path;
         int m_pid;
         bp::process::spawnStatus m_spawnStatus;

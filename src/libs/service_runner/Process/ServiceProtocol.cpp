@@ -165,22 +165,40 @@ ServiceProtocol::onQuery(bp::ipc::Channel *, const bp::ipc::Query & query,
             context = *((bp::Map *) query.payload());
         }
 
-        if (!context.has("uri", BPTString) ||
-            !context.has("dataDir", BPTString) ||
-            !context.has("tempDir", BPTString) ||
-            !context.has("locale", BPTString) ||
-            !context.has("userAgent", BPTString) ||
-            !context.has("clientPid", BPTInteger))
-        {
-            BPLOG_ERROR_STRM("Malformed IPC payload to " << query.command()
-                             << " query");
-            return false;
+        bp::file::Path dataDir, tempDir;
+        if (m_lib->apiVersion() >= 5) {
+            if (!context.has("uri", BPTString) ||
+                !context.has("dataDir", BPTNativePath) ||
+                !context.has("tempDir", BPTNativePath) ||
+                !context.has("locale", BPTString) ||
+                !context.has("userAgent", BPTString) ||
+                !context.has("clientPid", BPTInteger)) {
+                BPLOG_ERROR_STRM("Malformed IPC payload to " << query.command()
+                                 << " query");
+                return false;
+            }
+            const bp::Path* p = dynamic_cast<const bp::Path*>(context.get("dataDir"));
+            dataDir = bp::file::Path(p->value());
+            p = dynamic_cast<const bp::Path*>(context.get("tempDir"));
+            tempDir = bp::file::Path(p->value());
+        } else {
+            if (!context.has("uri", BPTString) ||
+                !context.has("dataDir", BPTString) ||
+                !context.has("tempDir", BPTString) ||
+                !context.has("locale", BPTString) ||
+                !context.has("userAgent", BPTString) ||
+                !context.has("clientPid", BPTInteger)) {
+                BPLOG_ERROR_STRM("Malformed IPC payload to " << query.command()
+                                 << " query");
+                return false;
+            }
+            dataDir = bp::file::Path((std::string) *(context.get("dataDir")));
+            tempDir = bp::file::Path((std::string) *(context.get("tempDir")));
         }
 
         unsigned int id = m_lib->allocate(
             (std::string) *(context.get("uri")),
-            (std::string) *(context.get("dataDir")),
-            (std::string) *(context.get("tempDir")),
+            dataDir, tempDir,
             (std::string) *(context.get("locale")),
             (std::string) *(context.get("userAgent")),
             (unsigned int) (long long) *(context.get("clientPid")));
