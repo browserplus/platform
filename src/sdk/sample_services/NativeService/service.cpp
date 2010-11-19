@@ -243,8 +243,9 @@ static BPPFunctionTable funcTable = {
     myAllocate,
     myDestroy,
     myInvoke,
-    NULL,
-    NULL
+    NULL,             // cancel
+    NULL,             // install
+    NULL              // uninstall
 };
 
 /** The only external symbol! All we do in this function is return a
