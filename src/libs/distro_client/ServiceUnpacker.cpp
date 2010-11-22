@@ -34,6 +34,7 @@
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bptime.h"
+#include "BPUtils/bpprocess.h"
 #include "platform_utils/ProductPaths.h"
 
 using namespace std;
@@ -67,19 +68,7 @@ ServiceUnpacker::~ServiceUnpacker()
 bool
 ServiceUnpacker::unpack(string& errMsg)
 {
-    bool rval = Unpacker::unpack(errMsg);
-    if (!rval) {
-        BPTime now;
-        ofstream log;
-        if (openWritableStream(log, bp::paths::getServiceLogPath(), 
-                               std::ios_base::app | std::ios::binary)) {
-            log << now.asString() << ": Error unpacking service " << m_name << " " 
-                << m_version << ": " << errMsg << endl;
-            BPLOG_WARN_STRM("Error unpacking service " << m_name << " " 
-                            << m_version << ": " << errMsg);
-        }
-    }
-    return rval;
+    return Unpacker::unpack(errMsg);
 }
 
 
@@ -96,29 +85,37 @@ ServiceUnpacker::install(string& errMsg)
             throw ss.str();
         }
 
-        // nuke existing service and move this one into place
-        Path serviceTopDir = m_destDir / m_name;
-        try {
-            boost::filesystem::create_directories(serviceTopDir);
-        } catch(const tFileSystemError&) {
-            throw string("unable to create directory " 
-                         + serviceTopDir.externalUtf8());
+        // install by invoking service installer
+        Path serviceInstaller = bp::paths::getServiceInstallerPath();
+        if (serviceInstaller.empty()) {
+            throw "Unable to get service installer path";
         }
-        Path serviceDir = serviceTopDir / m_version;
-        bool rval = remove(serviceDir) && move(m_tmpDir, serviceDir);
-        if (rval) {
-            BPTime now;
-            ofstream log;
-
-            if (openWritableStream(log, bp::paths::getServiceLogPath(), 
-                                   std::ios_base::app | std::ios::binary)) {
-                log << now.asString() << ": Installed " << m_name 
-                    << " " << m_version << endl;
-            } 
-        } else {
-            BPLOG_INFO_STRM("unable to delete " << serviceDir << " or move "
-                            << m_tmpDir << " to " << serviceDir);
-            remove(serviceDir);
+        vector<string> args;
+        args.push_back("-f");
+        args.push_back("-v");
+        args.push_back("-t");
+        args.push_back("-log");
+        args.push_back("debug");
+        args.push_back("-logfile");
+        args.push_back(bp::paths::getDaemonLogPath().externalUtf8());
+        args.push_back(m_tmpDir.externalUtf8());
+        stringstream ss;
+        ss << serviceInstaller;
+        for (size_t i = 0; i < args.size(); i++) {
+            ss << " " << args[i];
+        }
+        string cmdLine = ss.str();
+        BPLOG_DEBUG_STRM("install service via '" << cmdLine << "'");
+        bp::process::spawnStatus s;
+        if (!bp::process::spawn(serviceInstaller, args, &s)) {
+            throw string("Unable to spawn ") + cmdLine;
+        }
+        int exitCode = 0;
+        (void) bp::process::wait(s, true, exitCode);
+        if (exitCode != 0) {
+            stringstream ss;
+            ss << cmdLine << " failed, exitCode = " << exitCode;
+            throw ss.str();
         }
     } catch(const string& s) {
         errMsg = s;
@@ -126,3 +123,5 @@ ServiceUnpacker::install(string& errMsg)
     }
     return rval;
 }
+
+

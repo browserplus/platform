@@ -318,6 +318,53 @@ Controller::invoke(unsigned int instanceId,
     return (unsigned int) -1;
 }
 
+
+void
+Controller::installHook(const bp::file::Path& serviceDir,
+                        const bp::file::Path& tempDir)
+{
+    try {
+        if (m_apiVersion < 5) throw "not supported";
+        if (m_chan == NULL) throw "No channel";
+        bp::ipc::Query q;
+        q.setCommand("installHook");
+        bp::Map* payload = new bp::Map;
+        payload->add("serviceDir", new bp::Path(serviceDir));
+        payload->add("tempDir", new bp::Path(tempDir));
+        q.setPayload(payload);
+        (void) m_chan->sendQuery(q);
+    } catch (const char* s) {
+        BPLOG_ERROR_STRM("installHook cannot be called: " << s);
+        if (m_listener) {
+            m_listener->onInstallHook(this, -1);
+        }
+    }
+}
+
+
+void
+Controller::uninstallHook(const bp::file::Path& serviceDir,
+                          const bp::file::Path& tempDir)
+{
+    try {
+        if (m_apiVersion < 5) throw "not supported";
+        if (m_chan == NULL) throw "No channel";
+        bp::ipc::Query q;
+        q.setCommand("uninstallHook");
+        bp::Map* payload = new bp::Map;
+        payload->add("serviceDir", new bp::Path(serviceDir));
+        payload->add("tempDir", new bp::Path(tempDir));
+        q.setPayload(payload);
+        (void) m_chan->sendQuery(q);
+    } catch (const char* s) {
+        BPLOG_ERROR_STRM("uninstallHook cannot be called: " << s);
+        if (m_listener) {
+            m_listener->onUninstallHook(this, -1);
+        }
+    }
+}
+
+
 void
 Controller::sendResponse(unsigned int promptId,
                          const bp::Object * arguments)
@@ -488,9 +535,7 @@ Controller::onResponse(bp::ipc::Channel *,
                 this, response.responseTo(),
                 (unsigned int) (long long int) *(response.payload()));
         }
-    }
-    else if (!response.command().compare("invoke"))
-    {
+    } else if (!response.command().compare("invoke")) {
         // first let's parse the payload.  we expect a 'success' member
         // which is a boolean.
         if (!response.payload() ||
@@ -524,6 +569,24 @@ Controller::onResponse(bp::ipc::Channel *,
                 m_listener->onInvokeError(this, instance,
                                           response.responseTo(),
                                           error, verboseError);
+            }
+        }
+    } else if (!response.command().compare("installHook")
+               || !response.command().compare("uninstallHook")) {
+        // first let's parse the payload
+        if (!response.payload() || response.payload()->type() != BPTInteger) {
+            BPLOG_ERROR_STRM("Malformed IPC response to "
+                             << response.command() << " query");
+        } else if (!m_listener) {
+            BPLOG_WARN_STRM("IPC response received ("
+                             << response.command() << ") with null listener, "
+                            "dropping...");
+        } else {
+            int code = (int) (long long int) (*(response.payload()));
+            if (!response.command().compare("installHook")) {
+                m_listener->onInstallHook(this, code);
+            } else {
+                m_listener->onUninstallHook(this, code);
             }
         }
     } else {

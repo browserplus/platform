@@ -61,9 +61,9 @@
 #include <string.h>
 #include <string>
 
-static const BPCFunctionTable * g_bpCoreFunctions;
+static const BPCFunctionTable* g_bpCoreFunctions;
 
-#define SAYHELLO_FUNCNAME ((char *) "SayHello")
+#define SAYHELLO_FUNCNAME ((char*) "SayHello")
 
 /**
  * a function called at the time a webpage calls a function on your
@@ -78,15 +78,20 @@ static const BPCFunctionTable * g_bpCoreFunctions;
  * distinct thread.  Any static data must be protected.
  */
 static int
-myAllocate(void ** instance, const BPString uri, const BPPath serviceDir,
-           const BPPath dataDir, const BPPath tempDir, const BPString locale,
-           const BPString userAgent, int clientPid)
+myAllocate(void** instance,
+           const BPString uri,
+           const BPPath serviceDir,
+           const BPPath dataDir,
+           const BPPath tempDir,
+           const BPString locale,
+           const BPString userAgent,
+           int clientPid)
 {
     /* 'instance' is a pointer to context that you control.  You can
      * allocate whatever session specific context you want and
      * it will later be passed to your invoke and destroy functions */
     *instance = malloc(4);
-    (*(unsigned int *)(*instance)) = 77;
+    (*(unsigned int*)(*instance)) = 77;
     printf("BPPAllocate %p\n", *instance);
     printf("uri: %s\n", uri);
     printf("serviceDir: %s\n", serviceDir);
@@ -98,6 +103,7 @@ myAllocate(void ** instance, const BPString uri, const BPPath serviceDir,
     return 0;
 }
 
+
 /**
  * a function called at the time a webpage is closed or reloaded.  Will
  * be invoked on the same thread as 'myAllocate' above.
@@ -106,11 +112,12 @@ myAllocate(void ** instance, const BPString uri, const BPPath serviceDir,
  * data that is allocated.
  */
 static void
-myDestroy(void * instance)
+myDestroy(void* instance)
 {
     printf("** (SampleService) BPPDestroy %p\n", instance);
     free(instance);
 }
+
 
 /**
  * a function called immediately before your service is unloaded. This
@@ -126,20 +133,54 @@ myShutdown(void)
     printf("** (SampleService) BPPShutdown\n");
 }
 
+
+/**
+ * a function called exactly once immediately after your service
+ * in installed on disk.  This is an opportunity to perform any
+ * one-time setup.
+ */
+static int
+myInstall(const BPPath serviceDir,
+          const BPPath dataDir) 
+{
+    printf("** (SampleService) BPPInstall\n");
+    printf("serviceDir = %s\n", serviceDir);
+    printf("dataDir = %s\n", serviceDir);
+    return 0;
+}
+
+
+/**
+ * a function called exactly once immediately after your service
+ * in installed on disk.  This is an opportunity to perform any
+ * one-time setup.
+ */
+static int
+myUninstall(const BPPath serviceDir,
+            const BPPath dataDir) 
+{
+    printf("** (SampleService) BPPUninstall\n");
+    printf("serviceDir = %s\n", serviceDir);
+    printf("dataDir = %s\n", serviceDir);
+    return 0;
+}
+
+
 /**
  * The implementation of a function.  This demonstrates how data is 
  * represented as it's transmitted into services, and how to return data.
  */
 static void
-helloWorldFunc(void * instance, unsigned int tid,
-               const BPElement * elem)
+helloWorldFunc(void* instance,
+               unsigned int tid,
+               const BPElement* elem)
 {
     printf("** (SampleService) [%u] helloWorldFunc %p\n", tid, instance);
     printf("** (SampleService) called with %u arguments\n",
            elem->value.mapVal.size);    
 
     // extract argument
-    const char * who = "unknown";
+    const char* who = "unknown";
     
     if (elem->value.mapVal.size == 1) {
         who = elem->value.mapVal.elements[0].value->value.stringVal;
@@ -152,11 +193,12 @@ helloWorldFunc(void * instance, unsigned int tid,
     std::string rv;
     rv.append("Welcome to the b+ world, ");
     rv += who;
-    retval.value.stringVal = (char *) rv.c_str();
+    retval.value.stringVal = (char*) rv.c_str();
 
     // post results
     g_bpCoreFunctions->postResults(tid, &retval);
 }
+
 
 /**
  * Everytime a webpage executes a function on a service, your
@@ -165,8 +207,10 @@ helloWorldFunc(void * instance, unsigned int tid,
  * requested by a webpage.
  */
 static void
-myInvoke(void * instance, const char * funcName,
-          unsigned int tid, const BPElement * elem)
+myInvoke(void* instance,
+         const char* funcName,
+         unsigned int tid,
+         const BPElement* elem)
 {
     if (!strcmp(SAYHELLO_FUNCNAME, funcName)) {
         helloWorldFunc(instance, tid, elem);
@@ -180,6 +224,7 @@ myInvoke(void * instance, const char * funcName,
     }
 }
 
+
 /**
  * Interfaces are defined in C structures.  The following static
  * memory describes the interface of this service and will be used
@@ -192,8 +237,8 @@ myInvoke(void * instance, const char * funcName,
  */
 static BPArgumentDefinition s_helloWorldArguments[] = {
     {
-        (char *) "who",
-        (char *) "Who we should welcome to the world",
+        (char*) "who",
+        (char*) "Who we should welcome to the world",
         BPTString,
         BP_FALSE
     }
@@ -202,19 +247,20 @@ static BPArgumentDefinition s_helloWorldArguments[] = {
 static BPFunctionDefinition s_myServiceFunctions[] = {
     {
         SAYHELLO_FUNCNAME,
-        (char *) "A simple function to say hello world.",
+        (char*) "A simple function to say hello world.",
         1,
         s_helloWorldArguments
     }
 };
 
 static BPServiceDefinition s_myServiceDef = {
-    (char *) "SampleService",
+    (char*) "SampleService",
     1, 0, 0,
     (char *) "A do-nothing service to see what writing a service is like.",
     1,
     s_myServiceFunctions
 };
+
 
 /**
  * initialize is called immediately after your service's dynamic library
@@ -222,17 +268,18 @@ static BPServiceDefinition s_myServiceDef = {
  * should allocated any service wide resources required and should not
  * block.
  */
-static const BPServiceDefinition *
-myInitialize(const BPCFunctionTable * bpCoreFunctions,
+static const BPServiceDefinition*
+myInitialize(const BPCFunctionTable* bpCoreFunctions,
              const BPPath serviceDir,
              const BPPath /* dependentDir -- not used in a standalone service */,
-             const BPElement * /* dependentParams -- not used in a standalone service */)
+             const BPElement* /* dependentParams -- not used in a standalone service */)
 {
     g_bpCoreFunctions = bpCoreFunctions;
     printf("** (SampleService) BPPInitialize (%p) (%s)\n", bpCoreFunctions,
            serviceDir);
     return &s_myServiceDef;
 }
+
 
 /* and finally, declare the entry point to the service, which is a
  * function table */
@@ -244,13 +291,14 @@ static BPPFunctionTable funcTable = {
     myDestroy,
     myInvoke,
     NULL,             // cancel
-    NULL,             // install
-    NULL              // uninstall
+    myInstall,        // install
+    myUninstall       // uninstall
 };
+
 
 /** The only external symbol! All we do in this function is return a
  *  table containing the api version and pointers to functions. */
-const BPPFunctionTable *
+const BPPFunctionTable*
 BPPGetEntryPoints(void)
 {
     return &funcTable;

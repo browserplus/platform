@@ -24,6 +24,7 @@
 #include "BPUtils/bptr1.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/OS.h"
+#include "BPUtils/bpprocess.h"
 #include "platform_utils/bplocalization.h"
 #include "platform_utils/bpplatformutil.h"
 #include "platform_utils/ProductPaths.h"
@@ -76,8 +77,11 @@ string Installer::s_locale;
 bpf::Path Installer::s_stringsPath;
 
 Installer::Installer(const bpf::Path& dir,
+                     const bpf::Path& logFile,
+                     bp::log::Level logLevel,
                      bool deleteWhenDone)
-    : m_dir(dir), m_deleteWhenDone(deleteWhenDone)
+    : m_dir(dir), m_logFile(logFile), m_logLevel(logLevel),
+      m_deleteWhenDone(deleteWhenDone)
 {
     string versionString = bpf::utf8FromNative(m_dir.filename());
     if (!m_version.parse(versionString)) {
@@ -375,28 +379,49 @@ Installer::installServices()
     try {
         bpf::tDirIter sit_end;
         for (bpf::tDirIter sit(servicesDir); sit != sit_end; ++sit) {
-            bpf::Path service = sit->path().filename();
             try {
+                bpf::Path serviceInstaller = bp::paths::getServiceInstallerPath();
+                if (serviceInstaller.empty()) {
+                    throw "Unable to get service installer path";
+                }
                 bpf::tDirIter vit_end;
                 for (bpf::tDirIter vit(sit->path()); vit != vit_end; ++vit) {
-                    bpf::Path version = vit->path().filename();
-                    bpf::Path source = sit->path();
-                    bpf::Path dest = getServiceDirectory() / service / version;
-                    try {
-                        bfs::create_directories(dest.parent_path());
-                    } catch(const bpf::tFileSystemError& e) {
-                        BPLOG_WARN_STRM("unable to create " << dest
-                                        << ": " << e.what());
-                        continue;
+                    // install by invoking service installer
+                    bpf::Path source(sit->path());
+                    vector<string> args;
+                    args.push_back("-f");
+                    args.push_back("-v");
+                    args.push_back("-t");
+                    args.push_back("-log");
+                    args.push_back(bp::log::levelToString(m_logLevel));
+                    if (!m_logFile.empty()) {
+                        args.push_back("-logfile");
+                        args.push_back(m_logFile.externalUtf8());
                     }
-                    (void) remove(dest);
-                    try {
-                        doCopy(source, dest.parent_path());
-                    } catch (const bp::error::Exception& e) {
-                        BPLOG_WARN(e.what());
-                        continue;
+                    args.push_back(source.externalUtf8());
+                    stringstream ss;
+                    ss << serviceInstaller;
+                    for (size_t i = 0; i < args.size(); i++) {
+                        ss << " " << args[i];
+                    }
+                    string cmdLine = ss.str();
+                    BPLOG_DEBUG_STRM("install service via '" << cmdLine << "'");
+                    bp::process::spawnStatus s;
+                    if (!bp::process::spawn(serviceInstaller, args, &s)) {
+                        throw string("Unable to spawn ") + cmdLine;
+                    }
+                    int exitCode = 0;
+                    (void) bp::process::wait(s, true, exitCode);
+                    if (exitCode != 0) {
+                        stringstream ss;
+                        ss << cmdLine << " failed, exitCode = " << exitCode;
+                        throw ss.str();
                     }
                 }
+            } catch (const string& e) {
+                bpf::Path p(sit->path());
+                BPLOG_WARN_STRM("unable to install " << p
+                                << ": " << e);
             } catch (const bpf::tFileSystemError& e) {
                 bpf::Path p(sit->path());
                 BPLOG_WARN_STRM("unable to iterate thru " << p

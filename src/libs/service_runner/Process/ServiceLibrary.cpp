@@ -219,6 +219,20 @@ ServiceLibrary::invoke(unsigned int id, unsigned int tid,
     return m_impl->invoke(id, tid, function, arguments, err);
 }
 
+int
+ServiceLibrary::installHook(const bp::file::Path& serviceDir,
+                            const bp::file::Path& tempDir)
+{
+    return m_impl->installHook(serviceDir, tempDir);
+}
+
+int
+ServiceLibrary::uninstallHook(const bp::file::Path& serviceDir,
+                              const bp::file::Path& tempDir)
+{
+    return m_impl->uninstallHook(serviceDir, tempDir);
+}
+
 void
 ServiceLibrary::promptResponse(unsigned int promptId,
                                const bp::Object * arguments)

@@ -140,6 +140,16 @@ bp::paths::getDaemonPath(int major,
 
 
 Path
+bp::paths::getDaemonLogPath(int major,
+                             int minor,
+                             int micro)
+{
+    Path path = getObfuscatedWritableDirectory(major, minor, micro) / "BrowserPlusCore.log";
+    return path;
+}
+
+
+Path
 bp::paths::getRunnerPath(int major,
                          int minor,
                          int micro)
@@ -150,18 +160,20 @@ bp::paths::getRunnerPath(int major,
 
 
 Path
-bp::paths::getUninstallerPath()
+bp::paths::getServiceInstallerPath(int major,
+                                   int minor,
+                                   int micro)
 {
-    Path p = getProductTopDirectory() / "BrowserPlusUninstaller";
+    Path p = getProductDirectory(major, minor, micro) / "ServiceInstaller";
     return bp::file::canonicalProgramPath(p);
 }
 
 
 Path
-bp::paths::getServiceLogPath()
+bp::paths::getUninstallerPath()
 {
-    Path path = getProductTopDirectory() / "ServiceInstallLog.txt";
-    return path;
+    Path p = getProductTopDirectory() / "BrowserPlusUninstaller";
+    return bp::file::canonicalProgramPath(p);
 }
 
 

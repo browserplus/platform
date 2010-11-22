@@ -69,6 +69,10 @@ class ControllerManager : public ServiceRunner::IControllerListener
                   unsigned int promptId,
                   const bp::file::Path & pathToDialog,
                   const bp::Object * arguments);
+    void onInstallHook(ServiceRunner::Controller * c,
+                       int code) { }
+    void onUninstallHook(ServiceRunner::Controller * c,
+                         int code) { }
 
     class CommandExecutor * m_callback;
 

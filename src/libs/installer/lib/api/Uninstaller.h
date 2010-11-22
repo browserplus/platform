@@ -22,6 +22,7 @@
 
 #include <string>
 #include "BPUtils/bpfile.h"
+#include "BPUtils/BPLog.h"
 
 
 namespace bp {
@@ -30,17 +31,21 @@ namespace install {
 class Uninstaller 
 {
  public:
-    Uninstaller();
+    Uninstaller(const bp::file::Path& logFile,
+				bp::log::Level logLevel);
     virtual ~Uninstaller();
 
     void run(bool fromRunonce = false);
 
  protected:
      bp::file::Path m_dir;
-    bool m_error;
-    void removeDirIfEmpty(const bp::file::Path& dir);
+	 bp::file::Path m_logFile;
+	 bp::log::Level m_logLevel;
+     bool m_error;
+     void removeDirIfEmpty(const bp::file::Path& dir);
+     void removeServices();
 #ifdef WIN32
-    void scheduleRunonce();
+     void scheduleRunonce();
 #endif
 };
 

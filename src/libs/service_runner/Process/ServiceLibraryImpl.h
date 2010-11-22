@@ -65,6 +65,12 @@ namespace ServiceRunner
                             const bp::Object * arguments,
                             std::string & err) = 0;
 
+        virtual int installHook(const bp::file::Path& serviceDir,
+								const bp::file::Path& tempDir) = 0;
+
+        virtual int uninstallHook(const bp::file::Path& serviceDir,
+								  const bp::file::Path& tempDir) = 0;
+
         virtual void promptResponse(unsigned int promptId,
                                     const bp::Object * arguments) = 0;
 

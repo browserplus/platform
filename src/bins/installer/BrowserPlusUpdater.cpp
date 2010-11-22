@@ -175,7 +175,7 @@ main(int argc, const char** argv)
         // being run on behalf of installer (proxy == NULL).  If we are
         // being run on behalf of installer, it will delete dir.
         shared_ptr<IInstallerListener> p;
-        Installer inst(dir, proxy == NULL);
+        Installer inst(dir, logFile, logLevel, proxy == NULL);
         if (proxy) {
             p.reset(proxy);
             inst.setListener(weak_ptr<IInstallerListener>(p));

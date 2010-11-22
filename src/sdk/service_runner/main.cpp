@@ -306,6 +306,10 @@ private:
                   unsigned int,
                   const bp::file::Path &,
                   const bp::Object *) { }
+    void onInstallHook(ServiceRunner::Controller * c,
+                       int code) { }
+    void onUninstallHook(ServiceRunner::Controller * c,
+                         int code) { }
 };
 
 class MyServiceFilter : public virtual IServiceFilter {

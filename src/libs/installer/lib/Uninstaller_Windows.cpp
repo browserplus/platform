@@ -43,7 +43,9 @@ namespace bfs = boost::filesystem;
 namespace bp {
 namespace install {
 
-Uninstaller::Uninstaller() : m_error(false)
+Uninstaller::Uninstaller(const bpf::Path& logFile,
+                         bp::log::Level logLevel)
+    : m_logFile(logFile), m_logLevel(logLevel), m_error(false)
 {
     m_dir = bpf::getTempPath(bpf::getTempDirectory(), "BrowserPlusUninstaller");
     try {
@@ -70,6 +72,9 @@ Uninstaller::run(bool fromRunonce)
 
     std::string osVersion = bp::os::PlatformVersion();
     bool isVistaOrLater = (osVersion.compare("6") >= 0);
+
+    // Remove all services
+    removeServices();
 
     // remove IE plugin and daemon registry gunk
     bpf::Path topDir = getProductTopDirectory();

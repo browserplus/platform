@@ -31,6 +31,7 @@
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
 #include "BPUtils/bpstrutil.h"
+#include "BPUtils/bpprocess.h"
 #include "DiskScanner.h"
 #include "platform_utils/bpexitcodes.h"
 #include "platform_utils/ProductPaths.h"
@@ -175,9 +176,39 @@ DynamicServiceManager::purgeService(const std::string & name,
     bp::serviceInterfaceCache::purge(summary.name(), summary.version());
 
     m_state.stopService(summary);
-    (void) bp::file::remove(summary.path());    
-    forceRescan();
 
+    // remove the service by invoking service uninstaller
+    bp::file::Path serviceInstaller = bp::paths::getServiceInstallerPath();
+    vector<string> args;
+    args.push_back("-u");
+    args.push_back("-v");
+    args.push_back("-t");
+    args.push_back("-log");
+    args.push_back("debug");
+    args.push_back("-logfile");
+    args.push_back(bp::paths::getDaemonLogPath().externalUtf8());
+    args.push_back(summary.name());
+    args.push_back(summary.version());
+    stringstream ss;
+    ss << serviceInstaller;
+    for (size_t i = 0; i < args.size(); i++) {
+        ss << " " << args[i];
+    }
+    string cmdLine = ss.str();
+    BPLOG_DEBUG_STRM("purge service via '" << cmdLine << "'");
+    bp::process::spawnStatus s;
+    if (!bp::process::spawn(serviceInstaller, args, &s)) {
+        BPLOG_DEBUG_STRM("Unable to spawn " << cmdLine);
+        return false;
+    }
+    int exitCode = 0;
+    (void) bp::process::wait(s, true, exitCode);
+    if (exitCode != 0) {
+        BPLOG_DEBUG_STRM(cmdLine << " failed, exitCode = " << exitCode);
+        return false;
+    }
+
+    forceRescan();
 	return true;
 }
 

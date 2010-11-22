@@ -253,7 +253,9 @@ int doWork( const vector<string>& vsArgs )
 
     // Perform the actual uninstall.
     BPLOG_INFO( "Invoking Uninstaller::run()." );
-    bp::install::Uninstaller unins;
+    Path logFile = getTempDirectory().parent_path() / "BrowserPlusUninstaller.log";
+    bp::log::Level level = bp::log::LEVEL_DEBUG;
+    bp::install::Uninstaller unins(logFile, level);
     unins.run();
 
     if (!bQuiet) {

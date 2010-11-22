@@ -168,6 +168,8 @@ private:
                     unsigned int, long long int, const bp::Object *) { }
     void onPrompt(ServiceRunner::Controller *, unsigned int,
                   unsigned int, const bp::file::Path &, const bp::Object *) { }
+    void onInstallHook(ServiceRunner::Controller *, int) { }
+    void onUninstallHook(ServiceRunner::Controller *, int) { }
 
     shared_ptr<APTArgParse> m_argParser;
 };

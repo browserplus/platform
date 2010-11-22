@@ -61,10 +61,13 @@ namespace ServiceRunner
     class IControllerListener  
     {
       public:
+        virtual ~IControllerListener() { }
+
         virtual void initialized(class Controller * c,
                                  const std::string & service,
                                  const std::string & version,
                                  unsigned int apiVersion) = 0;
+
 
         // Callback invoked when controller's service is determined to be gone.
         // - called if service process dies while waiting for IPC
@@ -96,9 +99,12 @@ namespace ServiceRunner
                               unsigned int promptId,
                               const bp::file::Path & pathToDialog,
                               const bp::Object * arguments) = 0;
-
-        virtual ~IControllerListener() { }
+        virtual void onInstallHook(class Controller * c,
+                                   int code) = 0;
+        virtual void onUninstallHook(class Controller * c,
+                                     int code) = 0;
     };
+
 
     /**
      *  A ServiceRunner::Controller is an object which manages
@@ -192,6 +198,15 @@ namespace ServiceRunner
         unsigned int invoke(unsigned int instanceId,
                             const std::string & function,
                             const bp::Object * arguments);
+
+        // Invoke a service's installHook if present (v5 and later)
+        // In all cases, listener's onUninstallHook will be called
+        void installHook(const bp::file::Path& serviceDir,
+                         const bp::file::Path& tempDir);
+
+        // invoke a service's uninstallHook if present (v5 and later)
+        void uninstallHook(const bp::file::Path& serviceDir,
+                           const bp::file::Path& tempDir);
 
         // send a user's response to an html prompt
         void sendResponse(unsigned int promptId,

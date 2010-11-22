@@ -703,9 +703,9 @@ ServiceLibrary_v4::destroy(unsigned int id)
 
 bool
 ServiceLibrary_v4::invoke(unsigned int id, unsigned int tid,
-                       const std::string & function,
-                       const bp::Object * arguments,
-                       std::string & err)
+                          const std::string & function,
+                          const bp::Object * arguments,
+                          std::string & err)
 {
     // first we'll add the transaction to the transaction map
     // (removed in postError or postResults functions)
@@ -769,6 +769,23 @@ ServiceLibrary_v4::invoke(unsigned int id, unsigned int tid,
 
     return true;
 }
+
+
+int
+ServiceLibrary_v4::installHook(const bp::file::Path&,
+                               const bp::file::Path&)
+{
+    return 0;
+}
+
+
+int
+ServiceLibrary_v4::uninstallHook(const bp::file::Path&,
+                                 const bp::file::Path&)
+{
+    return 0;
+}
+
 
 void
 ServiceLibrary_v4::promptResponse(unsigned int promptId,

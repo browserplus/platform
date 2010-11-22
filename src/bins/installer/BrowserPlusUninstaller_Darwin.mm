@@ -117,7 +117,7 @@ main(int argc, const char** argv)
         }
 
         // Actually do the uninstall
-        bp::install::Uninstaller unins;
+        bp::install::Uninstaller unins(logFile, bpLogLevel);
         unins.run();
 
         // perhaps let user know we're done

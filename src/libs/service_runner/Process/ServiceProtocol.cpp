@@ -34,20 +34,20 @@
 
 using namespace ServiceRunner;
 
-ServiceProtocol::ServiceProtocol(ServiceLibrary * lib,
-                                 bp::runloop::RunLoop * rl,
-                                 const std::string & ipcName)
+ServiceProtocol::ServiceProtocol(ServiceLibrary* lib,
+                                 bp::runloop::RunLoop* rl,
+                                 const std::string& ipcName)
     : m_lib(lib), m_rl(rl), m_ipcName(ipcName)
 {
     m_chan.setListener(this);
     m_lib->setListener(this);
 }
 
+
 bool
 ServiceProtocol::connect()
 {
-    if (!m_chan.connect(m_ipcName))
-    {
+    if (!m_chan.connect(m_ipcName)) {
         return false;
     }
 
@@ -55,7 +55,7 @@ ServiceProtocol::connect()
     // name and version 
     bp::ipc::Message m;
     m.setCommand("loaded");
-    bp::Map * payload = new bp::Map;
+    bp::Map* payload = new bp::Map;
     payload->add("service", new bp::String(m_lib->name()));
     payload->add("version", new bp::String(m_lib->version()));    
     payload->add("apiVersion", new bp::Integer(m_lib->apiVersion()));
@@ -72,27 +72,28 @@ ServiceProtocol::connect()
     return true;
 }
 
+
 ServiceProtocol::~ServiceProtocol()
 {
 }
 
+
 void
 ServiceProtocol::channelEnded(
-    bp::ipc::Channel *,
+    bp::ipc::Channel*,
     bp::ipc::IConnectionListener::TerminationReason,
-    const char *)
+    const char*)
 {
     BPLOG_INFO("connection ended!");
     m_rl->stop();
 }
 
+
 void
-ServiceProtocol::onMessage(bp::ipc::Channel *, const bp::ipc::Message & m)
+ServiceProtocol::onMessage(bp::ipc::Channel*, const bp::ipc::Message& m)
 {
-    if (!m.command().compare("destroy"))
-    {
-        if (NULL == m.payload() || m.payload()->type() != BPTInteger)
-        {
+    if (!m.command().compare("destroy")) {
+        if (NULL == m.payload() || m.payload()->type() != BPTInteger) {
             BPLOG_ERROR_STRM("Malformed IPC message to " << m.command()
                              << " message");
             // TODO: should something beyond logging be
@@ -101,12 +102,9 @@ ServiceProtocol::onMessage(bp::ipc::Channel *, const bp::ipc::Message & m)
             unsigned int id = (unsigned int) (long long) *(m.payload());
             m_lib->destroy(id);
         }
-    }
-    else if (!m.command().compare("promptResponse"))
-    {
+    } else if (!m.command().compare("promptResponse")) {
         if (NULL == m.payload() ||
-            !m.payload()->has("promptId", BPTInteger))
-        {
+            !m.payload()->has("promptId", BPTInteger)) {
             BPLOG_ERROR_STRM("Malformed IPC message to " << m.command()
                              << " message");
             // TODO: should something beyond logging be
@@ -114,25 +112,24 @@ ServiceProtocol::onMessage(bp::ipc::Channel *, const bp::ipc::Message & m)
         } else {
             unsigned int promptId  =
                 (unsigned int) (long long) *(m.payload()->get("promptId"));
-            const bp::Object * arguments = m.payload()->get("arguments");
+            const bp::Object* arguments = m.payload()->get("arguments");
 
             m_lib->promptResponse(promptId, arguments);
         }
     }
 }
 
+
 bool
-ServiceProtocol::onQuery(bp::ipc::Channel *, const bp::ipc::Query & query,
-                         bp::ipc::Response & response)
+ServiceProtocol::onQuery(bp::ipc::Channel*, const bp::ipc::Query& query,
+                         bp::ipc::Response& response)
 {
-    if (!query.command().compare("invoke"))
-    {
+    if (!query.command().compare("invoke")) {
         // validate
         if (NULL == query.payload() ||
             query.payload()->type() != BPTMap ||
             !query.payload()->has("function", BPTString) ||
-            !query.payload()->has("instance", BPTInteger))
-        {            
+            !query.payload()->has("instance", BPTInteger)) {            
             BPLOG_ERROR_STRM("Malformed IPC payload to " << query.command()
                              << " query");
             return true;
@@ -144,25 +141,19 @@ ServiceProtocol::onQuery(bp::ipc::Channel *, const bp::ipc::Query & query,
                 query.id(),
                 (std::string) *(query.payload()->get("function")),
                 query.payload()->get("arguments"),
-                err))
-        {
-            BPLOG_ERROR_STRM("Service method invocation fails: "
-                             << err);
+                err)) {
+            BPLOG_ERROR_STRM("Service method invocation fails: " << err);
         }
-    }
-    else if (!query.command().compare("getDescription"))
-    {
-        const bp::service::Description & desc = m_lib->description();
-        bp::Object * obj = desc.toBPObject();
+    } else if (!query.command().compare("getDescription")) {
+        const bp::service::Description& desc = m_lib->description();
+        bp::Object* obj = desc.toBPObject();
         response.setPayload(obj);
         return true;
-    }
-    else if (!query.command().compare("allocate"))
-    {
+    } else if (!query.command().compare("allocate")) {
         // extract context map
         bp::Map context;
         if (query.payload() && query.payload()->type() == BPTMap) {
-            context = *((bp::Map *) query.payload());
+            context = *((bp::Map*) query.payload());
         }
 
         bp::file::Path dataDir, tempDir;
@@ -196,12 +187,11 @@ ServiceProtocol::onQuery(bp::ipc::Channel *, const bp::ipc::Query & query,
             tempDir = bp::file::Path((std::string) *(context.get("tempDir")));
         }
 
-        unsigned int id = m_lib->allocate(
-            (std::string) *(context.get("uri")),
-            dataDir, tempDir,
-            (std::string) *(context.get("locale")),
-            (std::string) *(context.get("userAgent")),
-            (unsigned int) (long long) *(context.get("clientPid")));
+        unsigned int id = m_lib->allocate((std::string) *(context.get("uri")),
+                                          dataDir, tempDir,
+                                          (std::string) *(context.get("locale")),
+                                          (std::string) *(context.get("userAgent")),
+                                          (unsigned int) (long long) *(context.get("clientPid")));
 
         if (id) {
             response.setPayload(new bp::Integer(id));
@@ -209,9 +199,32 @@ ServiceProtocol::onQuery(bp::ipc::Channel *, const bp::ipc::Query & query,
         }
 
         return false;
-    }
-    else
-    {
+    } else if (!query.command().compare("installHook")
+               || !query.command().compare("uninstallHook")) {
+        // extract args
+        bp::Map args;
+        if (query.payload() && query.payload()->type() == BPTMap) {
+            args = *((bp::Map*) query.payload());
+        }
+        if (!args.has("serviceDir", BPTNativePath)
+            || !args.has("tempDir", BPTNativePath)) {
+            BPLOG_ERROR_STRM("Malformed IPC payload to " << query.command()
+                             << " query");
+            return false;
+        }
+        const bp::Path* p = dynamic_cast<const bp::Path*>(args.get("serviceDir"));
+        bp::file::Path serviceDir(bp::file::Path(p->value()));
+        p = dynamic_cast<const bp::Path*>(args.get("tempDir"));
+        bp::file::Path tempDir(bp::file::Path(p->value()));
+        int code = 0;
+        if (!query.command().compare("installHook")) {
+            code = m_lib->installHook(serviceDir, tempDir);
+        } else {
+            code = m_lib->uninstallHook(serviceDir, tempDir);
+        }
+        response.setPayload(new bp::Integer(code));
+        return true;
+    } else {
         BPLOG_ERROR_STRM("unsupported query received: " << query.command());
     }
         
@@ -219,8 +232,8 @@ ServiceProtocol::onQuery(bp::ipc::Channel *, const bp::ipc::Query & query,
 }
 
 void
-ServiceProtocol::onResponse(bp::ipc::Channel *,
-                            const bp::ipc::Response & r)
+ServiceProtocol::onResponse(bp::ipc::Channel*,
+                            const bp::ipc::Response& r)
 {
 	BPLOG_ERROR_STRM("unexpected response received: "
 		             << r.command());
@@ -228,11 +241,11 @@ ServiceProtocol::onResponse(bp::ipc::Channel *,
 
 void
 ServiceProtocol::onResults(unsigned int instance, unsigned int tid,
-                           const bp::Object * o)
+                           const bp::Object* o)
 {
     bp::ipc::Response r(tid);
     r.setCommand("invoke");
-    bp::Map * m = new bp::Map;
+    bp::Map* m = new bp::Map;
     m->add("success", new bp::Bool(true));
     m->add("instance", new bp::Integer(instance));
     if (o) m->add("results", o->clone());
@@ -246,12 +259,12 @@ ServiceProtocol::onResults(unsigned int instance, unsigned int tid,
 void
 ServiceProtocol::onError(unsigned int instance,
                          unsigned int tid,
-                         const std::string & error,
-                         const std::string & verboseError)
+                         const std::string& error,
+                         const std::string& verboseError)
 {
     bp::ipc::Response r(tid);
     r.setCommand("invoke");
-    bp::Map * m = new bp::Map;
+    bp::Map* m = new bp::Map;
     m->add("success", new bp::Bool(false));
     m->add("instance", new bp::Integer(instance));
     if (!error.empty()) {
@@ -271,8 +284,8 @@ ServiceProtocol::onError(unsigned int instance,
 void
 ServiceProtocol::onPrompt(unsigned int instance,
                           unsigned int promptId,
-                          const bp::file::Path & pathToDialog,
-                          const bp::Object * arguments)
+                          const bp::file::Path& pathToDialog,
+                          const bp::Object* arguments)
 {
     bp::ipc::Message m;
     m.setCommand("promptUser");
@@ -289,11 +302,11 @@ void
 ServiceProtocol::onCallback(unsigned int instance,
                             unsigned int tid,
                             long long int callbackId,
-                            const bp::Object * o)
+                            const bp::Object* o)
 {
     bp::ipc::Message m;
     m.setCommand("callback");
-    bp::Map * p = new bp::Map;
+    bp::Map* p = new bp::Map;
     p->add("instance", new bp::Integer(instance));
     p->add("tid", new bp::Integer(tid));
     p->add("id", new bp::Integer(callbackId));

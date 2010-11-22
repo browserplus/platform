@@ -94,6 +94,15 @@ namespace bp {
                                      int micro = -1);
 
         /**
+         *   Get path to daemon log
+         *   Throws a fatal exception on failure.
+         *   \return   path to daemon log
+         */
+        bp::file::Path getDaemonLogPath(int major = -1,
+										int minor = -1,
+										int micro = -1);
+
+        /**
          *  Get path to service runner binary (typically installed
          *  right next to daemon and renamed at install time, the whole
          *  point is to allow the end user to understand the purpose
@@ -105,6 +114,15 @@ namespace bp {
                                      int minor = -1,
                                      int micro = -1);
          
+        /**
+         *  Get path to service installer.
+         *  Throws a fatal exception on failure.
+         *  \return    path to service installer
+         */
+        bp::file::Path getServiceInstallerPath(int major = -1,
+                                               int minor = -1,
+                                               int micro = -1);
+
         /**
          *   Get path to service directory.
          *   Throws a fatal exception on failure.
@@ -133,13 +151,6 @@ namespace bp {
          *   \return   path to platform cache directory
          */
         bp::file::Path getPlatformCacheDirectory();
-        
-        /**
-         *   Get path to service install log.
-         *   Throws a fatal exception on failure.
-         *   \return   path to service install log
-         */
-        bp::file::Path getServiceLogPath();
 
         /**
          *   Get path to service data directory.

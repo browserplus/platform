@@ -193,6 +193,10 @@ class DynamicServiceManager : public ServiceRunner::IControllerListener
                   unsigned int instance, unsigned int promptId,
                   const bp::file::Path & pathToDialog,
                   const bp::Object * arguments);
+    void onInstallHook(ServiceRunner::Controller*,
+                       int) {}
+    void onUninstallHook(ServiceRunner::Controller*,
+						 int) {}
 
     /* how instances call back into us */
     void onInstanceShutdown(DynamicServiceInstance * instance);

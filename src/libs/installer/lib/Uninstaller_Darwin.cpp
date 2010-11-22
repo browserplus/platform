@@ -38,7 +38,9 @@ namespace bfs = boost::filesystem;
 namespace bp {
     namespace install {
 
-        Uninstaller::Uninstaller() : m_error(false)
+        Uninstaller::Uninstaller(const bp::file::Path& logFile,
+                                 bp::log::Level logLevel)
+        : m_logFile(logFile), m_logLevel(logLevel), m_error(false)
         {
             // empty
         }
@@ -54,6 +56,9 @@ namespace bp {
         Uninstaller::run(bool)
         {
             BPLOG_DEBUG("begin uninstall");
+
+            // Remove all services
+            removeServices();
 
             // Remove all BrowserPlus plugins
             Path dir = utils::getFolderPath(kInternetPlugInFolderType);

@@ -242,7 +242,7 @@ private:
     void initialized(ServiceRunner::Controller * c,
                      const std::string & service,
                      const std::string & version,
-                     unsigned int) 
+                     unsigned int)
     {
         c->describe();
     }
@@ -289,6 +289,11 @@ private:
     void onPrompt(ServiceRunner::Controller *, unsigned int, unsigned int,
                   const bp::file::Path &,
                   const bp::Object *) { }
+    void onInstallHook(ServiceRunner::Controller*,
+                       int) {}
+    void onUninstallHook(ServiceRunner::Controller*,
+                         int) {
+    }
 
     std::string m_logLevel;
     bp::file::Path m_logFile;    
@@ -417,7 +422,9 @@ DiskScanner::scanDiskForServices(
                         continue;
                     }
                     
-                    // if this service is blacklisted, nuke it
+                    // If this service is blacklisted, nuke it.  Don't
+                    // run ServiceInstaller to uninstall it, we don't
+                    // trust the service at all.
 
                     std::string version = bp::file::utf8FromNative(subpath.filename());
                     std::string name = bp::file::utf8FromNative(subpath.parent_path().filename());
@@ -426,17 +433,6 @@ DiskScanner::scanDiskForServices(
                         bp::file::remove(subpath);
                         BPLOG_WARN_STRM("blacklisted service " 
                                         << name << "/" << version << " removed");
-                        std::ofstream ofs;
-                        if (bp::file::openWritableStream(
-                                ofs, bp::paths::getServiceLogPath(),
-                                std::ios_base::app | std::ios::binary))
-                        {
-                            
-                            BPTime now;
-                            ofs << now.asString()
-                                << ": Removed blacklisted service " 
-                                << name << ", version " << version << std::endl;
-                        }
                     } 
                     else
                     {

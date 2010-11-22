@@ -166,9 +166,8 @@ FileUtils.install(bpClientExe, bpclientDir, :mode => 0755, :verbose => $beVerbos
 bpCoreExe = "#{buildDir}/dist/bin/#{$intDir}/BrowserPlusCore#{exeSuffix}"
 FileUtils.install(bpCoreExe, shippingBinsDir, :mode => 0755, :verbose => $beVerbose)
 
-# BrowserPlusInstaller, BrowserPlusUpdater, and BrowserPlusUninstaller
-# go into shipping binaries where they will be signed 
-# and makeInstaller will find it.
+# BrowserPlusInstaller, BrowserPlusUpdater, BrowserPlusUninstaller, and ServiceInstaller
+# go into shipping binaries where they will be signed and makeInstaller will find them.
 #
 installerExe = "#{buildDir}/dist/bin/#{$intDir}/BrowserPlusInstaller#{exeSuffix}"
 FileUtils.install(installerExe, shippingBinsDir, :mode => 0755, :verbose => $beVerbose)
@@ -176,7 +175,8 @@ updaterExe = "#{buildDir}/dist/bin/#{$intDir}/BrowserPlusUpdater#{exeSuffix}"
 FileUtils.install(updaterExe, shippingBinsDir, :mode => 0755, :verbose => $beVerbose)
 uninstallerExe = "#{buildDir}/dist/bin/#{$intDir}/BrowserPlusUninstaller#{exeSuffix}"
 FileUtils.install(uninstallerExe, shippingBinsDir, :mode => 0755, :verbose => $beVerbose)
-
+serviceInstallerExe = "#{buildDir}/dist/bin/#{$intDir}/ServiceInstaller#{exeSuffix}"
+FileUtils.install(serviceInstallerExe, shippingBinsDir, :mode => 0755, :verbose => $beVerbose)
 
 # Internal service validator and publisher
 #

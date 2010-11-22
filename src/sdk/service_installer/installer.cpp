@@ -39,6 +39,10 @@ using namespace std::tr1;
 
 
 static bp::runloop::RunLoop s_rl;
+static bp::file::Path s_harnessProgram;
+static bp::time::Stopwatch s_sw;
+static bool s_log = false;
+
 
 static APTArgDefinition g_args[] = {
     { "log", APT::TAKES_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
@@ -49,6 +53,10 @@ static APTArgDefinition g_args[] = {
       APT::NOT_INTEGER, APT::MAY_RECUR,
       "Enable file logging, argument is a path, when combined with '-log' "
       "logging will occur to a file at the level specified."
+    },
+    {"u", APT::NO_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
+      APT::NOT_INTEGER, APT::MAY_NOT_RECUR, 
+      "uninstall rather than install"
     },
     { "v", APT::NO_ARG, APT::NO_DEFAULT, APT::NOT_REQUIRED,
       APT::NOT_INTEGER, APT::MAY_NOT_RECUR,
@@ -68,49 +76,99 @@ static APTArgDefinition g_args[] = {
     }
 };
 
-// A class which will serve as a listener to the service
-// controller, primary responsibility is to extract the services
-// description and handle errors along the way.
-/** a class to listen for UserQuitEvents and stop the runloop upon
- *  their arrival */
+
+#define BPOUT(x) \
+{ \
+    if (s_log) { \
+        BPLOG_INFO_STRM(x); \
+    } else { \
+        cerr << x << endl; \
+    } \
+}
+
+
+// A class which will serve as a listener to the service controller.
 class ServiceManager :  public ServiceRunner::IControllerListener
 {
 public:
-    ServiceManager(shared_ptr<APTArgParse> argParser)
-        : m_argParser(argParser)
+    typedef enum {
+        eGetDescription,
+        eInstallHook,
+        eUninstallHook
+    } Action;
+    ServiceManager(shared_ptr<APTArgParse> argParser,
+                   Action a)
+        : m_argParser(argParser), m_apiVersion(0), m_action(a), m_code(0)
     {
     }
 
     bp::service::Description description() { return m_desc; }
+    unsigned int apiVersion() { return m_apiVersion; }
+    int code() const { return m_code; }
+    string actionStr() const {
+        switch (m_action) {
+        case eGetDescription:
+            return "getDescription";
+        case eInstallHook:
+            return "installHook";
+        case eUninstallHook:
+            return "uninstallHook";
+        }
+        return "unknown";
+    }
 
 private:   
     bp::service::Description m_desc;
 
-    void initialized(ServiceRunner::Controller * c,
-                     const std::string & service,
-                     const std::string & version,
-                     unsigned int) 
+    void initialized(ServiceRunner::Controller* c,
+                     const string& service,
+                     const string& version,
+                     unsigned int apiVersion)
     {
         if (m_argParser->argumentPresent("v")) {
-            std::cout << "service initialized: "
-                      << service << " v" << version << std::endl;        
+            BPOUT("service initialized: " << service << " v" << version);
         }
-        c->describe();
+        m_apiVersion = apiVersion;
+
+        bp::file::Path serviceDir = bp::paths::getServiceDirectory() / service / version;
+        bp::SemanticVersion v;
+        if (!v.parse(version)) {
+            BPOUT("Bad version " << version);
+            exit(-1);
+        }
+        bp::file::Path dataDir = bp::paths::getServiceDataDirectory(service,
+                                                                    v.majorVer());
+        switch (m_action) {
+        case eGetDescription:
+            c->describe();
+            break;
+        case eInstallHook:
+            c->installHook(serviceDir, dataDir);
+            break;
+        case eUninstallHook:
+            c->uninstallHook(serviceDir, dataDir);
+            break;
+        default:
+            BPOUT("Bad action code: " << m_action);
+            exit(-1);
+        }
     }
+
     void onEnded(ServiceRunner::Controller * c) 
     {
-        std::cerr << "Spawned service exited!  (enable logging for more "
-                  << "detailed diagnostics - '-log debug')."
-                  << std::endl;        
+        BPOUT("Spawned service exited!  (enable logging for more "
+              << "detailed diagnostics - '-log debug').");        
         // hard exit!
         exit (1);
     }
+
     void onDescribe(ServiceRunner::Controller *,
                     const bp::service::Description & desc)
     {
         // we've extracted a description of the service, let's save it.
         m_desc = desc;
-
+        m_code = 0;
+        
         // stop the runloop, returning control to main
         s_rl.stop();
     }
@@ -126,8 +184,8 @@ private:
     void onInvokeError(ServiceRunner::Controller *,
                          unsigned int,
                        unsigned int,
-                       const std::string &,
-                       const std::string &) { }
+                       const string &,
+                       const string &) { }
     void onCallback(ServiceRunner::Controller *, unsigned int,
                     unsigned int, long long int, const bp::Object *) { }
     void onPrompt(ServiceRunner::Controller *, unsigned int,
@@ -135,19 +193,44 @@ private:
                   const bp::file::Path &,
                   const bp::Object *) { }
 
+    void onInstallHook(ServiceRunner::Controller * c,
+                       int code)
+    {
+        if (m_argParser->argumentPresent("v")) {
+            BPOUT("installHook returned " << code);        
+        }
+        m_code = code;
+        // stop the runloop, returning control to main
+        s_rl.stop();
+    }
+
+    void onUninstallHook(ServiceRunner::Controller * c,
+                         int code)
+    {
+        if (m_argParser->argumentPresent("v")) {
+            BPOUT("uninstallHook returned " << code);        
+        }
+        m_code = code;
+        // stop the runloop, returning control to main
+        s_rl.stop();
+    }
+
     shared_ptr<APTArgParse> m_argParser;
+    unsigned int m_apiVersion;
+    Action m_action;
+    int m_code;
 };
 
 
-
-
 // Helper func to make timestamp strings.
-std::string timeStamp( bp::time::Stopwatch& sw )
+string
+timeStamp()
 {
-    std::stringstream ss;
-    ss << "[" << sw.elapsedSec() << "s] ";
+    stringstream ss;
+    ss << "[" << s_sw.elapsedSec() << "s] ";
     return ss.str();
 }
+
 
 static void 
 setupLogging(shared_ptr<APTArgParse> argParser)
@@ -155,33 +238,241 @@ setupLogging(shared_ptr<APTArgParse> argParser)
     // Clear out any existing appenders.
     bp::log::removeAllAppenders();
 
-    std::string level = argParser->argument("log");
+    string level = argParser->argument("log");
     bp::file::Path path(argParser->argument("logfile"));
 
     if (level.empty() && path.empty()) return;
-    
+
+    s_log = true;
+
     if (level.empty()) level = "info";
 
     bp::log::Level logLevel = bp::log::levelFromString(level);
 
     if (path.empty()) bp::log::setupLogToConsole(logLevel);
-    else bp::log::setupLogToFile(path, logLevel);
+    else bp::log::setupLogToFile(path, logLevel, bp::log::kAppend);
 }
 
-int main(int argc, const char ** argv)
+
+static int
+runService(shared_ptr<APTArgParse> argParser,
+           shared_ptr<ServiceManager> serviceMan,
+           const bp::file::Path& absPath,
+           const bp::service::Summary& summary)
+{
+    string error, processTitle, ignore;
+
+    /* TODO: extract and pass proper locale! */
+    if (!summary.localization("en", processTitle, ignore)) {
+        processTitle.append("BrowserPlus: Spawned Service");
+    } else {
+        processTitle = (string("BrowserPlus: ") + processTitle);
+    }
+    // now let's find a valid provider if this is a dependent
+    bp::file::Path providerPath;
+    if (summary.type() == bp::service::Summary::Dependent) {
+        providerPath = ServiceRunner::determineProviderPath(summary, error);
+        if (!error.empty()) {
+            BPOUT("Couldn't run service because I couldn't "
+                  << "find an appropriate installed "
+                  << "provider service.");
+            return(1);
+        }        
+    }
+
+    // run action.  runloop stops after action
+    if (argParser->argumentPresent("t")) {
+        BPOUT(timeStamp() << "start " << serviceMan->actionStr());
+    }
+    shared_ptr<ServiceRunner::Controller> controller(new ServiceRunner::Controller(absPath));
+    controller->setListener(serviceMan.get());
+    if (!controller->run(s_harnessProgram, providerPath,
+                         processTitle, argParser->argument("log"),
+                         bp::file::Path(argParser->argument("logfile")),
+                         error)) {
+        cerr << "Couldn't run service: " << error;
+        return(1);
+    }
+    s_rl.run();
+    if (argParser->argumentPresent("t")) {
+        BPOUT(timeStamp() << "finish " << serviceMan->actionStr());
+    }
+    return serviceMan->code();
+}
+
+
+static int 
+doUninstall(shared_ptr<APTArgParse> argParser,
+            const bp::file::Path& absPath,
+            const bp::service::Summary& summary,
+            int apiVersion)
+{
+    bool dryRun = argParser->argumentPresent("n");
+
+    if (!bp::file::isDirectory(absPath)) {
+        return 0;
+    }
+
+    // Possible uninstall hook?
+    if (apiVersion >= 5) {
+        if (!dryRun) {
+            shared_ptr<ServiceManager> serviceMan
+                (new ServiceManager(argParser, ServiceManager::eUninstallHook));
+            int rv = runService(argParser, serviceMan, absPath, summary);
+            if (rv != 0) {
+                BPOUT("Uninstall hook failed, code = " << rv
+                      << ", removing anyway");
+            }
+            serviceMan.reset();
+        } else {
+            BPOUT("would run any uninstall hook");
+        }
+    }
+
+    // actually nuke the service
+    if (argParser->argumentPresent("t")) {
+        BPOUT(timeStamp() << "start remove " << absPath);
+    }
+    if (!dryRun) {
+        bool rv = bp::file::remove(absPath);
+        if (argParser->argumentPresent("t")) {
+            BPOUT(timeStamp() << "remove " << absPath << " returns " << rv);
+        }
+    } else {
+        BPOUT("would remove " << absPath);
+    }
+
+    if (!dryRun) {
+        // now we'll indicate that services have changed for a running
+        // BrowserPlusCore daemon
+        ServicesUpdated::indicateServicesChanged();
+    }
+
+    return 0;
+}
+
+
+static int 
+doInstall(shared_ptr<APTArgParse> argParser,
+          const bp::file::Path& source,
+          const string& serviceName,
+          const string& serviceVersion,
+          const bp::service::Summary& summary,
+          int apiVersion)
+{
+    bool overwrote = false;
+    bool dryRun = argParser->argumentPresent("n");
+
+    // Now do the install.  We copy to the
+    // local service directory and call install hook
+    bp::file::Path destination = bp::paths::getServiceDirectory() / serviceName / serviceVersion;
+
+    // must we uninstall existing?
+    if (isDirectory(destination)) {
+        if (argParser->argumentPresent("f")) {
+            if (!dryRun) {
+                int rv = doUninstall(argParser, destination, summary, apiVersion);
+                if (rv != 0) {
+                    return rv;
+                }
+            } else {
+                BPOUT("would uninstall existing " << destination);
+            }
+        } else {
+            BPOUT("cannot overwrite " << destination << " without -f argument");
+            return -1;
+        }
+    }
+
+    if (!dryRun) {
+        if (argParser->argumentPresent("t")) {
+            BPOUT(timeStamp() << "preparing installation directory...");
+        }
+        try {
+            boost::filesystem::create_directories(destination);
+        } catch(const bp::file::tFileSystemError&) {
+            BPOUT("cannot create directory: '" << destination << "'");
+            return -1;
+        }
+    }
+
+    if (argParser->argumentPresent("v")) {
+        BPOUT("installing service locally: " << serviceName << ", ver "
+              << serviceVersion);
+    }
+    if (bp::file::isDirectory(source)) {
+        try {
+            bp::file::tDirIter end;
+            for (bp::file::tDirIter it(source); it != end; ++it) {
+                bp::file::Path p(it->path());
+                bp::file::Path relPath = p.relativeTo(source);
+                bp::file::Path fromPath = it->path();
+                bp::file::Path toPath = destination / relPath;
+                if (!dryRun) {
+                    if (!bp::file::copy(fromPath, toPath)) {
+                        BPOUT("error copying " << fromPath);
+                        return(1);
+                    } 
+                } else {
+                    BPOUT("would copy " << fromPath << " -> " << toPath);
+                }
+            }
+        } catch (const bp::file::tFileSystemError& e) {
+            BPOUT("unable to iterate thru " << source << ": " << e.what());
+            return -1;
+        }
+    }
+    if (argParser->argumentPresent("t")) {
+        BPOUT(timeStamp() << "copying complete");
+    }
+
+    // Possibility of an install hook?
+    if (apiVersion >= 5) {
+        if (!dryRun) {
+            shared_ptr<ServiceManager> serviceMan(
+                new ServiceManager(argParser, ServiceManager::eInstallHook));
+            int rv = runService(argParser, serviceMan, destination, summary);
+            if (rv != 0) {
+                BPOUT("Install hook failed, code = " << rv);
+                (void) bp::file::remove(destination);
+                return rv;
+            }
+        } else {
+            BPOUT("would invoke any install hook");
+        }
+    }
+
+    // let's update the moddate on the manifest.json to cause
+    // BrowserPlus to update this service.  This is only necessary
+    // if we overwrote the on-disk service
+    if (overwrote) {
+        bp::file::Path manifestPath = destination / "manifest.json";
+        bp::file::touch(manifestPath);
+    }
+    
+    // now we'll indicate that services have changed for a running
+    // BrowserPlusCore daemon
+    ServicesUpdated::indicateServicesChanged();
+    return 0;
+}
+
+
+int
+main(int argc,
+     const char** argv)
 {
     // handle non-ascii args on windows
     APT::ARGVConverter conv;
     conv.convert(argc, argv);
 
     // which mode are we running in?
-    if (argc > 1 && !std::string("-runService").compare(argv[1])) {
+    if (argc > 1 && !string("-runService").compare(argv[1])) {
         // optional -breakpoint arguments set forced breaks
-        std::list<std::string> breakpoints;
+        list<string> breakpoints;
         for (int i = 2; i < argc; i++) {
-            if (!std::string(argv[i]).compare("-breakpoint")) {
+            if (!string(argv[i]).compare("-breakpoint")) {
                 if ((i + 1) < argc) {
-                    breakpoints.push_back(std::string(argv[i + 1]));
+                    breakpoints.push_back(string(argv[i + 1]));
                     i++; // go past this value
                 }
             }
@@ -194,8 +485,7 @@ int main(int argc, const char ** argv)
     s_rl.init();
 
     // a stopwatch for timing
-    bp::time::Stopwatch sw;
-    sw.start();
+    s_sw.start();
 
     // win32 specific call to prevent display to user of useless
     // dialog boxes
@@ -205,7 +495,7 @@ int main(int argc, const char ** argv)
 #endif
 
     // make a usage string
-    std::string usage("Install a BrowserPlus service.\n    ");
+    string usage("Install a BrowserPlus service.\n    ");
     usage.append(argv[0]);
     usage.append(" [opts] <service dir>");
 
@@ -215,201 +505,98 @@ int main(int argc, const char ** argv)
     int x = argParser->parse(sizeof(g_args)/sizeof(g_args[0]), g_args,
                              argc, argv);
     if (x < 0) {
-        std::cerr << argParser->error() << std::endl;
+        BPOUT(argParser->error());
         exit(1);
     }
-    else if (x != (argc - 1))
-    {
-        std::cerr << "invalid arguments: ";
-        if (x > (argc - 1)) { 
-            std::cerr << "path to service required";
-        } else {
-            std::cerr << "extra command line arguments detected";
+
+    // pathToHarness is ourself
+    s_harnessProgram = bp::file::canonicalProgramPath(bp::file::Path(argv[0]));
+
+    bool dryRun = argParser->argumentPresent("n");
+    bool uninstall = argParser->argumentPresent("u");
+
+    if (uninstall) {
+        if (x != (argc - 2)) {
+            BPOUT("invalid arguments: ");
+            if (x > (argc - 2)) { 
+                BPOUT("path to service and version required");
+            } else {
+                BPOUT("extra command line arguments detected");
+            }
+            exit(1);
         }
-        std::cerr << std::endl;
+    } else if (x != (argc - 1)) {
+        BPOUT("invalid arguments: ");
+        if (x > (argc - 1)) { 
+            BPOUT("path to service required");
+        } else {
+            BPOUT("extra command line arguments detected");
+        }
         exit(1);
     }
 
     setupLogging(argParser);
 
-    std::string error;
-    bp::file::Path absPath = bp::file::canonicalPath(bp::file::Path(argv[x]));
+    bp::file::Path absPath;
+    string serviceName, serviceVersion;
+    if (uninstall) {
+        serviceName = argv[x];
+        serviceVersion = argv[x+1];
+        absPath = bp::paths::getServiceDirectory() / serviceName / serviceVersion;
+    } else {
+        absPath = bp::file::canonicalPath(bp::file::Path(argv[x]));
+    }
 
+    // get service summary
     bp::service::Summary summary;
-    
+    string error;
     if (argParser->argumentPresent("t")) {
-        std::cout << timeStamp(sw)
-                  << "detecting service at: " << absPath << "\n";
+        BPOUT(timeStamp() << "detecting service at: " << absPath);
     }
-    
-    if (!summary.detectService(absPath, error))
-    {
-        std::cerr << "Invalid service: "
-                  << std::endl << "  " << error << std::endl;
+    if (!summary.detectService(absPath, error)) {
+        BPOUT("Invalid service: " << endl << "  " << error);
         exit(1);
     }
-    
-    bp::file::Path providerPath;
-    
-    // now let's find a valid provider if this is a dependent
-    if (summary.type() == bp::service::Summary::Dependent)
-    {
-        std::string err;
-        
-        providerPath = ServiceRunner::determineProviderPath(summary, err);
-    
-        if (!err.empty()) {
-            std::cerr << "Couldn't run service because I couldn't "
-                      << "find an appropriate installed " << std::endl
-                      << "provider service."  << std::endl;
-            exit(1);
-        }        
+
+    // get service description
+    shared_ptr<ServiceManager> serviceMan(new ServiceManager(argParser,
+                                                             ServiceManager::eGetDescription));
+    int rv = runService(argParser, serviceMan, absPath, summary);
+    if (rv != 0) {
+        BPOUT("Unable to get service description, code = " << rv);
+        if (uninstall) {
+            BPOUT("Removing anyway");
+        } else {
+            exit(rv);
+        }
     }
-
-    if (argParser->argumentPresent("t")) {
-        std::cout << timeStamp(sw) << "service valid.\n";
-    }
-
-    // we're ready to load the service and extract it description
-    shared_ptr<ServiceManager> serviceMan(new ServiceManager(argParser));
-    shared_ptr<ServiceRunner::Controller> controller(
-        new ServiceRunner::Controller(absPath));
-    controller->setListener(serviceMan.get());
-    
-    // pathToHarness is ourself
-    bp::file::Path harnessProgram = bp::file::canonicalProgramPath(bp::file::Path(argv[0]));
-
-    // determine a reasonable title for the spawned service
-    std::string processTitle, ignore;
-    /* TODO: extract and pass proper locale! */
-    if (!summary.localization("en", processTitle, ignore))
-    {
-        processTitle.append("BrowserPlus: Spawned Service");
-    }
-    else
-    {
-        processTitle = (std::string("BrowserPlus: ") + processTitle);
-    }
-
-    if (!controller->run(harnessProgram, providerPath,
-                         processTitle, argParser->argument("log"),
-                         bp::file::Path(argParser->argument("logfile")),
-                         error))
-    {
-        std::cerr << "Couldn't run service: " << error.c_str()
-                  << std::endl;
-        exit(1);
-    }
-    
-
-    // now run.  by the time the runloop is stopped we'll have a service
-    // description available
-    s_rl.run();
-
-    if (argParser->argumentPresent("t")) {
-        std::cout << timeStamp(sw) << "description received.\n";
-    }
-
-    // extract the description and clean up what we no longer need
-    controller.reset();
     bp::service::Description desc = serviceMan->description();
+    int apiVersion = serviceMan->apiVersion();
     serviceMan.reset();
-    s_rl.shutdown();
 
-    // attain convenient representation of name and version of service
-    // we're publishing
-    std::string serviceName(desc.name());
-    std::string serviceVersion(desc.versionString());
-
-    // now switch between local installation and pushing to distribution
-    // server
-    if (!argParser->argumentPresent("n")) {
-        bp::file::Path source = summary.path();
-
-        if (argParser->argumentPresent("t")) {
-            std::cout << timeStamp(sw)
-                      << "preparing installation directory...\n";
-        }
-
-        bool overwrote = false;
-        bp::file::Path destination = bp::paths::getServiceDirectory() /serviceName / serviceVersion;
-        if (bp::file::exists(destination)) {
-            if (argParser->argumentPresent("f")) {
-                if (!bp::file::remove(destination)) {
-                    std::cerr << "error deleting '" << destination << "'"
-                              << std::endl;
-                    exit(1);
-                } 
-                overwrote = true;
-            } else {
-                std::cerr << "can't install service, directory already "
-                          << "exists and -f not specfied" << std::endl;
-                exit(1);
-            }
-        }
-
-        // for local service installation all we do is copy it to the
-        // local service directory.
-        try {
-            boost::filesystem::create_directories(destination);
-        } catch(const bp::file::tFileSystemError&) {
-            std::cerr << "cannot create directory: '" << destination << "'"
-                      << std::endl;
-            exit(1);
-        }
-
-        if (argParser->argumentPresent("v")) {
-            std::cout << "installing service locally: "
-                      << serviceName << ", ver "
-                      << serviceVersion
-                      << std::endl;
-        }
-        
-        if (bp::file::isDirectory(source)) {
-            try {
-                bp::file::tDirIter end;
-                for (bp::file::tDirIter it(source); it != end; ++it) {
-                    bp::file::Path p(it->path());
-                    bp::file::Path relPath = p.relativeTo(source);
-                    bp::file::Path fromPath = it->path();
-                    bp::file::Path toPath = destination / relPath;
-                    if (!bp::file::copy(fromPath, toPath)) {
-                        std::cerr << "error copying " << fromPath << std::endl;
-                        exit(1);
-                    }
-                }
-            } catch (const bp::file::tFileSystemError& e) {
-                std::cerr << "unable to iterate thru " << source.externalUtf8()
-                        << ": " << e.what();
-            }
-        }
-
-        if (argParser->argumentPresent("t")) {
-            std::cout << timeStamp(sw) << "copying complete.\n";
-        }
-
-        // let's update the moddate on the manifest.json to cause
-        // BrowserPlus to update this service.  This is only necessary
-        // if we overwrote the on-disk service
-        if (overwrote) {
-            bp::file::Path manifestPath = destination / "manifest.json";
-            bp::file::touch(manifestPath);
-        }
-
-        // now we'll indicate that services have changed for a running
-        // BrowserPlusCore daemon
-        ServicesUpdated::indicateServicesChanged();
+    // An uninstall?
+    if (uninstall) {
+        rv = doUninstall(argParser, absPath, summary, apiVersion);
+    } else {
+        // attain convenient representation of name and version of service
+        // we're publishing
+        serviceName = desc.name();
+        serviceVersion = desc.versionString();
+        rv = doInstall(argParser, summary.path(), desc.name(),
+                       desc.versionString(), summary, apiVersion);
     }
     
     // all done!
-    if (argParser->argumentPresent("v")) {    
-        std::cout << serviceName << " "
-                  << serviceVersion
-                  << " validated "
-                  << (argParser->argumentPresent("n") ? "" : "and installed ")
-                  << "in "
-                  << sw.elapsedSec() << "s" << std::endl;
-    }
+    s_rl.shutdown();
 
-    return 0;
+    if (argParser->argumentPresent("v")) {    
+        stringstream ss;
+        ss << serviceName << " " << serviceVersion << " validated ";
+        if (!dryRun) {
+            ss << "and " << (uninstall ? "uninstalled" : "installed");
+        }
+        ss << " in " << s_sw.elapsedSec() << "s";
+        BPOUT(ss.str());
+    }
+    exit(rv);
 }

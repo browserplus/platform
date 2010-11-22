@@ -67,7 +67,7 @@ main(int argc, const char** argv)
                 bp::log::setupLogToFile(logFile, l, bp::log::kSizeRollover);
             }
         }
-        bp::install::Uninstaller unins;
+        bp::install::Uninstaller unins(logFile, bp::log::levelFromString(logLevel));
         unins.run();
         return bp::exit::kOk;
     } catch (const std::exception& exc) {

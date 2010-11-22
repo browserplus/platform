@@ -16,7 +16,7 @@
 #  NOTE!!
 # 
 #  If you add files to the update package, make sure to update
-#  the platform install/update scripts in libs/installer/
+#  the platform install/update stuff in libs/installer/
 #
 ###########################################
 
@@ -106,6 +106,8 @@ FileUtils.install("#{shippingBinsDir}/BrowserPlusCore#{exeSuffix}",
 FileUtils.install("#{topDir}/bins/browserpluscore/BrowserPlus.config",
                   updateDaemonDir, :verbose => $beVerbose)
 FileUtils.install("#{$buildDir}/bins/browserpluscore/strings.json",
+                  updateDaemonDir, :verbose => $beVerbose)
+FileUtils.install("#{shippingBinsDir}/ServiceInstaller#{exeSuffix}",
                   updateDaemonDir, :verbose => $beVerbose)
 
 # install HTML user interface next to the daemon

@@ -25,6 +25,7 @@
 #include "BPUtils/bpsemanticversion.h"
 #include "BPUtils/bptr1.h"
 #include "BPUtils/bpfile.h"
+#include "BPUtils/BPLog.h"
 
 
 // The installer/updater depends upon having the following directory
@@ -109,6 +110,8 @@ class Installer
     static const char* kNewerVersionInstalled;
 
     Installer(const bp::file::Path& dir,
+			  const bp::file::Path& logFile,
+			  bp::log::Level logLevel,
               bool deleteWhenDone = false);
     virtual ~Installer();
 
@@ -151,6 +154,8 @@ class Installer
                            const bp::file::Path& f2);
 
     bp::file::Path m_dir;
+	bp::file::Path m_logFile;
+	bp::log::Level m_logLevel;
     bool m_deleteWhenDone;
     bp::SemanticVersion m_version;
     std::tr1::weak_ptr<IInstallerListener> m_listener;

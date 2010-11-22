@@ -621,6 +621,41 @@ ServiceLibrary_v5::invoke(unsigned int id, unsigned int tid,
     return true;
 }
 
+
+int
+ServiceLibrary_v5::installHook(const bp::file::Path& serviceDir,
+                               const bp::file::Path& tempDir)
+{
+    int rval = 0;
+    const BPPFunctionTable* funcTable = (const BPPFunctionTable*) m_funcTable;
+    if (funcTable->installFunc != NULL) {
+        BPLOG_INFO_STRM("calling installHook for " << name() << " / " << version());
+        rval = funcTable->installFunc(
+                   (const BPPath) serviceDir.external_file_string().c_str(),
+                   (const BPPath) tempDir.external_file_string().c_str());
+        BPLOG_INFO_STRM("installHook returned " << rval);
+    }
+    return rval;
+}
+
+
+int
+ServiceLibrary_v5::uninstallHook(const bp::file::Path& serviceDir,
+                                 const bp::file::Path& tempDir)
+{
+    int rval = 0;
+    const BPPFunctionTable* funcTable = (const BPPFunctionTable*) m_funcTable;
+    if (funcTable->uninstallFunc != NULL) {
+        BPLOG_INFO_STRM("calling uninstallHook for " << name() << " / " << version());
+        rval = funcTable->uninstallFunc(
+                  (const BPPath) serviceDir.external_file_string().c_str(),
+                  (const BPPath) tempDir.external_file_string().c_str());
+        BPLOG_INFO_STRM("uninstallHook returned " << rval);
+    }
+    return rval;
+}
+
+
 void
 ServiceLibrary_v5::promptResponse(unsigned int promptId,
                                   const bp::Object * arguments)
