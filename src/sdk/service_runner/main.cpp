@@ -96,12 +96,12 @@ private:
             std::cout << std::endl;
         }
         pair<string, string> p = m_neededServices.front();
-        ServiceUnpacker unpacker(buf, m_downloadPath, p.first, p.second, m_certFile);
+        ServiceUnpacker unpacker(buf, m_certFile);
         string errMsg;
         std::stringstream ss;
         ss << "Installing service: " << p.first << " v" << p.second;
         output::puts(output::T_INFO, ss.str());
-        m_downloadSuccess = unpacker.unpack(errMsg) && unpacker.install(errMsg);
+        m_downloadSuccess = unpacker.unpackTo(m_downloadPath, errMsg) && unpacker.install(errMsg);
         if (m_downloadSuccess) {
             m_neededServices.pop_front();
             m_completedServices.push_back(p);

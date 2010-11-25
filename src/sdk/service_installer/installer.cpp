@@ -150,7 +150,7 @@ private:
             break;
         default:
             BPOUT("Bad action code: " << m_action);
-            exit(-1);
+            exit(-2);
         }
     }
 
@@ -159,7 +159,7 @@ private:
         BPOUT("Spawned service exited!  (enable logging for more "
               << "detailed diagnostics - '-log debug').");        
         // hard exit!
-        exit (1);
+        exit (3);
     }
 
     void onDescribe(ServiceRunner::Controller *,
@@ -506,7 +506,7 @@ main(int argc,
                              argc, argv);
     if (x < 0) {
         BPOUT(argParser->error());
-        exit(1);
+        exit(-4);
     }
 
     // pathToHarness is ourself
@@ -523,7 +523,7 @@ main(int argc,
             } else {
                 BPOUT("extra command line arguments detected");
             }
-            exit(1);
+            exit(-5);
         }
     } else if (x != (argc - 1)) {
         BPOUT("invalid arguments: ");
@@ -532,7 +532,7 @@ main(int argc,
         } else {
             BPOUT("extra command line arguments detected");
         }
-        exit(1);
+        exit(-6);
     }
 
     setupLogging(argParser);
@@ -555,7 +555,7 @@ main(int argc,
     }
     if (!summary.detectService(absPath, error)) {
         BPOUT("Invalid service: " << endl << "  " << error);
-        exit(1);
+        exit(-7);
     }
 
     // get service description
@@ -567,7 +567,7 @@ main(int argc,
         if (uninstall) {
             BPOUT("Removing anyway");
         } else {
-            exit(rv);
+            exit(-9);
         }
     }
     bp::service::Description desc = serviceMan->description();

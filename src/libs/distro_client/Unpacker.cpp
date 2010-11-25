@@ -39,35 +39,35 @@ using namespace bp::file;
 
 
 Unpacker::Unpacker(const Path& bpkgFile,
-                   const Path& destDir,
                    const Path& certFile)
-: m_bpkg(bpkgFile), m_destDir(destDir),
-  m_certFile(certFile), m_unpackError(false)
+: m_bpkg(bpkgFile), m_certFile(certFile), m_unpackError(false)
 {
 }
 
 
 Unpacker::Unpacker(const std::vector<unsigned char> & buf,
-                   const Path& destDir, 
                    const Path& certFile)
-: m_buf(buf), m_destDir(destDir),
-  m_certFile(certFile), m_unpackError(false)
+: m_buf(buf), m_certFile(certFile), m_unpackError(false)
 {
 }
 
 
 Unpacker::~Unpacker()
 {
-    remove(m_tmpDir);
 }
 
 
 bool
-Unpacker::unpack(string& errMsg)
+Unpacker::unpackTo(const bp::file::Path& dir,
+                   string& errMsg)
 {
     errMsg.clear();
-    m_tmpDir = getTempPath(getTempDirectory(), "Unpacker");
+
     try {
+        if (dir.empty()) {
+            string s("empty dir argument");
+            throw runtime_error(s);
+        }
         BPTime ts;
         if (m_buf.size() > 0) {
             // get an input iterator from the vector
@@ -78,14 +78,14 @@ Unpacker::unpack(string& errMsg)
             std::string s;
             s.append((const char *) &(m_buf[0]), m_buf.size());
             std::stringstream ss(s, ios_base::in);
-            if (!bp::pkg::unpackToDirectory(ss, m_tmpDir, ts, errMsg,
+            if (!bp::pkg::unpackToDirectory(ss, dir, ts, errMsg,
                                             m_certFile))
             {
                 string s("unable to unpack package: " + errMsg);
                 throw runtime_error(s);
             }
         } else {
-            if (!bp::pkg::unpackToDirectory(m_bpkg, m_tmpDir, ts, errMsg,
+            if (!bp::pkg::unpackToDirectory(m_bpkg, dir, ts, errMsg,
                                             m_certFile))
             {
                 string s("unable to unpack package: " + errMsg);

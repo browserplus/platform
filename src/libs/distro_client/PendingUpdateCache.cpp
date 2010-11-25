@@ -84,22 +84,13 @@ bool
 PendingUpdateCache::save(std::string name, std::string version,
                          const std::vector<unsigned char> & buf)
 {
-    // unpack & install, aborting everything if this fails. 
-    ServiceUnpacker unpacker(
-        buf, bp::paths::getServiceCacheDirectory(), name, version);
-
+    // unpack, aborting everything if this fails.
+    bp::file::Path dest = bp::paths::getServiceCacheDirectory() / name / version;
+    ServiceUnpacker unpacker(buf);
     std::string errMsg;
-                
-    if (!unpacker.unpack(errMsg)) {
+    if (!unpacker.unpackTo(dest, errMsg)) {
         BPLOG_ERROR_STRM("Error unpacking " << name << " service: "
                          << errMsg << ", ABORTING cache update");
-        return false;
-    }
-
-    if (!unpacker.install(errMsg)) {
-        BPLOG_ERROR_STRM("Error installing " << name 
-                         << " service: "  << errMsg
-                         << ", ABORTING cache update");
         return false;
     }
 
@@ -117,25 +108,16 @@ bool
 PendingUpdateCache::install(std::string name, std::string version)
 {
     bp::file::Path source = bp::paths::getServiceCacheDirectory() / name / version;
-    bp::file::Path dest = bp::paths::getServiceDirectory()/ name /version;
-    bp::file::Path shortDest = bp::paths::getServiceDirectory() / name;
-
-    // if source doesn't exist, fail
     if (!bp::file::isDirectory(source)) return false;
 
-    // kill dest if it exists
-    (void) bp::file::remove(dest);
-
-    // create dest
-    try {
-        boost::filesystem::create_directories(shortDest);
-    } catch(const bp::file::tFileSystemError&) {
-        BPLOG_WARN_STRM("unable to create " << shortDest);
+    ServiceUnpacker unpacker(source, 0);
+    std::string errMsg;
+    if (!unpacker.install(errMsg)) {
+        BPLOG_ERROR_STRM("cached service install " << name
+                         << " / " << version << " failed : " << errMsg);
         return false;
     }
-    
-    // move it!
-    return bp::file::move(source, dest);
+    return true;
 }
 
 bool

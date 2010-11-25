@@ -61,12 +61,14 @@ class PlatformUnpacker : virtual public Unpacker
     // On error, error msg returned in errMsg    
     bool unpack(std::string& errMsg);
 
-    // installs platform update to cache            
+    // after an unpack(), installs platform update to cache            
     // On error, error msg returned in errMsg    
     bool install(std::string& errMsg);
 
  private:
     std::string m_version;
+    bp::file::Path m_destDir;
+    bp::file::Path m_tmpDir;
 };
 
 #endif

@@ -23,6 +23,7 @@
 #include "api/Fetcher.h"
 #include "BPUtils/OS.h"
 #include "BPUtils/bpfile.h"
+#include "BPUtils/BPLog.h"
 #include "platform_utils/ProductPaths.h"
 
 using namespace std;
@@ -137,18 +138,16 @@ namespace bp {
             if (m_state == eFetchingService) {
                 try {
                     pair<string, string> p = m_neededServices.front();
-                    bpf::Path destDir = m_destDir / "services";
-                    ServiceUnpacker unpacker(buf, destDir, p.first,
-                                             p.second, m_keyPath);
+                    bpf::Path destDir = m_destDir / "services" / p.first / p.second;
                     string errMsg;
-                    bool rval = (unpacker.unpack(errMsg) && unpacker.install(errMsg));
-                    if (rval) {
-                        m_neededServices.pop_front();
-                        m_completedServices++;
-                        fetchNextService();
-                    } else {
+                    ServiceUnpacker unpacker(buf, m_keyPath);
+                    BPLOG_DEBUG_STRM("unpack service to " << destDir);
+                    if (!unpacker.unpackTo(destDir, errMsg)) {
                         BP_THROW(errMsg);
                     }
+                    m_neededServices.pop_front();
+                    m_completedServices++;
+                    fetchNextService();
                 } catch (const bp::error::Exception& e) {
                     if (l) {
                         l->onTransactionFailed(m_tid, e.what());

@@ -81,7 +81,6 @@ namespace ServiceInstaller
      *
      * \param name - the name of the service
      * \param version - string representation of full service version
-     * \param dir - directory into which to install service
      * \param listener - who to tell when the work is done
      *
      * \returns zero on failure, otherwise a transaction id that will be
@@ -95,7 +94,6 @@ namespace ServiceInstaller
      */
     unsigned int installService(const std::string & name,
                                 const std::string & version,
-                                const bp::file::Path & dir,
                                 std::tr1::weak_ptr<IListener> listener);
     
     /**
@@ -105,7 +103,6 @@ namespace ServiceInstaller
      * \param name - the name of the service
      * \param version - string representation of full service version
      * \param buffer - bpkg buffer
-     * \param dir - directory in which to install
      * \param listener - who to tell when the work is done
      *
      * \returns zero on failure, otherwise a transaction id that will be
@@ -116,7 +113,6 @@ namespace ServiceInstaller
     unsigned int installService(const std::string & name,
                                 const std::string & version,
                                 const std::vector<unsigned char> & buffer,
-                                const bp::file::Path & dir,
                                 std::tr1::weak_ptr<IListener> listener);
 
     /**

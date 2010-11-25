@@ -43,7 +43,6 @@ public:
         std::list<std::string> distroServers,
         const std::string & name,
         const std::string & version,
-        const bp::file::Path & dir,
         unsigned int iid,
         weak_ptr<ServiceInstaller::IListener> listener);
     
@@ -52,7 +51,6 @@ public:
         const std::string & name,
         const std::string & version,
         const std::vector<unsigned char> & buffer,
-        const bp::file::Path & dir,
         unsigned int iid,
         weak_ptr<ServiceInstaller::IListener> listener);
 
@@ -82,7 +80,6 @@ private:
     void removeSelfFromQueue();
     std::list<weak_ptr<ServiceInstaller::IListener> > m_listeners;
     DistQuery * m_distQuery;
-    bp::file::Path m_dir;
     unsigned int m_iid;
     std::vector<unsigned char> m_pkgBuffer;
 };
@@ -99,16 +96,8 @@ static InstallerContext * s_context = NULL;
 
 static bool
 preflight(const std::string & name,
-          const std::string & version,
-          const bp::file::Path & dir)
+          const std::string & version)
 {
-    if (dir.empty()) {
-        BPLOG_WARN_STRM("Bogus install directory, service "
-                        << name << "/"
-                        << version << " not installed");
-        return false;
-    }
-    
     // don't bother with a blacklisted service
     PermissionsManager* pmgr = PermissionsManager::get();
     if (pmgr->serviceMayRun(name, version) == false) {
@@ -156,10 +145,9 @@ unsigned int
 ServiceInstaller::installService(
     const std::string & name,
     const std::string & version,
-    const bp::file::Path & dir,
     weak_ptr<ServiceInstaller::IListener> listener)
 {
-    if (!preflight(name, version, dir)) {
+    if (!preflight(name, version)) {
         return 0;
     }
     if (s_context == NULL) return 0;
@@ -191,9 +179,7 @@ ServiceInstaller::installService(
     
     shared_ptr<SingleServiceInstaller> installer(
         new SingleServiceInstaller(s_context->m_distroServers,
-                                   name, version, dir,
-                                   iid,
-                                   listener));
+                                   name, version, iid, listener));
 
     s_context->m_installQueue.push_back(installer);
     
@@ -218,10 +204,9 @@ ServiceInstaller::installService(
     const std::string & name,
     const std::string & version,
     const std::vector<unsigned char> & buffer,
-    const bp::file::Path & dir,
     weak_ptr<ServiceInstaller::IListener> listener)
 {
-    if (!preflight(name, version, dir)) {
+    if (!preflight(name, version)) {
         return 0;
     }
                
@@ -229,13 +214,12 @@ ServiceInstaller::installService(
     unsigned int iid = s_context->m_currentTransaction++;
     shared_ptr<SingleServiceInstaller> installer(
         new SingleServiceInstaller(name, version,
-                                   buffer, dir, iid, listener));
+                                   buffer, iid, listener));
     s_context->m_installQueue.push_back(installer);
         
     BPLOG_INFO_STRM("enqueued prefetched " << name
                     << "/" << version 
-                    << " for installation onto "
-                    << dir << ", "
+                    << " for installation "
                     << s_context->m_installQueue.size() << " on queue");
     
     // and if we're not doing an install right now, we should start it
@@ -264,17 +248,15 @@ SingleServiceInstaller::SingleServiceInstaller(
     std::list<std::string> distroServers,
     const std::string & name,
     const std::string & version,
-    const bp::file::Path & dir,
     unsigned int iid,
     weak_ptr<ServiceInstaller::IListener> listener)
-    : m_name(name), m_version(version), m_distQuery(NULL), m_dir(),
+    : m_name(name), m_version(version), m_distQuery(NULL),
       m_iid(0), m_pkgBuffer()
 {
     m_distQuery = new DistQuery(distroServers, PermissionsManager::get());
     m_distQuery->setListener(this);
     m_listeners.push_back(listener);
     m_iid = iid;
-    m_dir = dir;;
 }
 
 
@@ -282,11 +264,10 @@ SingleServiceInstaller::SingleServiceInstaller(
     const std::string & name,
     const std::string & version,
     const std::vector<unsigned char> & buffer,
-    const bp::file::Path & dir,
     unsigned int iid,
     weak_ptr<ServiceInstaller::IListener> listener)
     :  m_name(name), m_version(version), m_listeners(),
-       m_distQuery(NULL), m_dir(dir), m_iid(iid), m_pkgBuffer(buffer)
+       m_distQuery(NULL), m_iid(iid), m_pkgBuffer(buffer)
 {
     m_listeners.push_back(listener);
 }
@@ -339,7 +320,7 @@ SingleServiceInstaller::installService(const std::vector<unsigned char> buf)
     BPLOG_INFO_STRM("("<< sw.elapsedSec() <<"s) Installing service");
 
     // unpack and install
-    ServiceUnpacker unpacker(buf, m_dir, m_name, m_version);
+    ServiceUnpacker unpacker(buf);
     string errMsg;
     bool rval = unpacker.unpack(errMsg);
 

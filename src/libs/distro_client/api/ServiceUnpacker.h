@@ -41,9 +41,6 @@ class ServiceUnpacker : virtual public Unpacker
      * Create an instance to unpack a bpkg file
      */
     ServiceUnpacker(const bp::file::Path& pkgFile,
-                    const bp::file::Path& destDir,
-                    const std::string& name,
-                    const std::string& version,
                     const bp::file::Path& certFile = bp::file::Path());
     
     /** 
@@ -51,23 +48,31 @@ class ServiceUnpacker : virtual public Unpacker
      * a bpkg
      */
     ServiceUnpacker(const std::vector<unsigned char> & buf,
-                    const bp::file::Path& destDir,
-                    const std::string& name,
-                    const std::string& version,
                     const bp::file::Path& certFile = bp::file::Path());
+
+    /**
+     * Create an instance from a directory.  Second arg
+     * is ignored, just lets us disambiguate constructors
+     */
+    ServiceUnpacker(const bp::file::Path& dir,
+                    int);
                 
     virtual ~ServiceUnpacker(); 
 
     // unpacks, returns true on success
     bool unpack(std::string& errMsg);
 
-    // installs to servicedir            
+    // after an unpack(), installs service
     // On error, error msg returned in errMsg    
     bool install(std::string& errMsg);
 
+    // unpacks to dir, returns true on success
+    bool unpackTo(const bp::file::Path& dir,
+                  std::string& errMsg);
+
  private:
-    std::string m_name;
-    std::string m_version;
+    bp::file::Path m_tmpDir;
+    bp::file::Path m_dir;
 };
 
 #endif

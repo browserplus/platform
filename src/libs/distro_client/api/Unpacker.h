@@ -43,22 +43,21 @@ class Unpacker
      * Create an instance to unpack a bpkg package
      */
     Unpacker(const bp::file::Path& bpkgFile,
-             const bp::file::Path& destDir,
              const bp::file::Path& certFile = bp::file::Path());
     
     /** 
      * Create an instance to unpack a bpkg package
      */
     Unpacker(const std::vector<unsigned char> & buf,
-             const bp::file::Path& destDir,
              const bp::file::Path& certFile = bp::file::Path());
                 
     // cleans tmpdir     
     virtual ~Unpacker(); 
 
-    // unpacks to tmpdir, returns true on success
+    // unpacks to dir, returns true on success
     // On error, error msg returned in errMsg    
-    virtual bool unpack(std::string& errMsg);
+    virtual bool unpackTo(const bp::file::Path& dir,
+                          std::string& errMsg);
 
     // installs            
     // On error, error msg returned in errMsg    
@@ -67,8 +66,6 @@ class Unpacker
  protected:
     bp::file::Path m_bpkg;
     std::vector<unsigned char> m_buf;
-    bp::file::Path m_tmpDir;
-    bp::file::Path m_destDir;
     bp::file::Path m_certFile;
     bool m_unpackError;
 };

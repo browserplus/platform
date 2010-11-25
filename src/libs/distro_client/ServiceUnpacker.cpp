@@ -41,47 +41,54 @@ using namespace std;
 using namespace bp::file;
 
 ServiceUnpacker::ServiceUnpacker(const Path& pkgFile,
-                                 const Path& destDir,
-                                 const std::string& name,
-                                 const std::string& version,
                                  const Path& certFile)
-: Unpacker(pkgFile, destDir, certFile),  m_name(name), m_version(version)
+    : Unpacker(pkgFile, certFile)
 {
 }
 
 
-ServiceUnpacker::ServiceUnpacker(const std::vector<unsigned char> & buf,
-                                 const Path& destDir,
-                                 const std::string& name,
-                                 const std::string& version,
+ServiceUnpacker::ServiceUnpacker(const std::vector<unsigned char>& buf,
                                  const Path& certFile)
-: Unpacker(buf, destDir, certFile), m_name(name), m_version(version)
+    : Unpacker(buf, certFile)
+{
+}
+
+
+ServiceUnpacker::ServiceUnpacker(const Path& dir,
+                                 int)
+    : Unpacker(Path(), Path()), m_dir(dir)
 {
 }
 
 
 ServiceUnpacker::~ServiceUnpacker()
 {
+    if (!m_tmpDir.empty()) {
+        remove(m_tmpDir);
+    }
 }
 
 
 bool
 ServiceUnpacker::unpack(string& errMsg)
 {
-    return Unpacker::unpack(errMsg);
+    m_tmpDir = getTempPath(getTempDirectory(), "ServiceUnpacker");
+    return Unpacker::unpackTo(m_tmpDir, errMsg);
 }
 
 
 bool
 ServiceUnpacker::install(string& errMsg)
 {
+    Path dir = m_dir.empty() ? m_tmpDir : m_dir;
+    BPLOG_DEBUG_STRM("install service from " << dir);
     errMsg.clear();
     bool rval = true;
     try {
-        if (m_unpackError || !isDirectory(m_tmpDir)) {
+        if (m_unpackError || !isDirectory(dir)) {
             stringstream ss;
             ss << "error, m_unpackError = " << m_unpackError
-               << ", m_tmpDir = " << m_tmpDir;
+               << ", dir = " << dir;
             throw ss.str();
         }
 
@@ -98,7 +105,7 @@ ServiceUnpacker::install(string& errMsg)
         args.push_back("debug");
         args.push_back("-logfile");
         args.push_back(bp::paths::getDaemonLogPath().externalUtf8());
-        args.push_back(m_tmpDir.externalUtf8());
+        args.push_back(dir.externalUtf8());
         stringstream ss;
         ss << serviceInstaller;
         for (size_t i = 0; i < args.size(); i++) {
@@ -123,5 +130,15 @@ ServiceUnpacker::install(string& errMsg)
     }
     return rval;
 }
+
+
+bool
+ServiceUnpacker::unpackTo(const Path& dir,
+                          string& errMsg)
+{
+    return Unpacker::unpackTo(dir, errMsg);
+}
+
+
 
 

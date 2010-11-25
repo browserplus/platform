@@ -40,7 +40,7 @@ PlatformUnpacker::PlatformUnpacker(const std::vector<unsigned char> & buf,
                                    const Path& destDir,
                                    const std::string& version,
                                    const Path& certFile)
-: Unpacker(buf, destDir, certFile), m_version(version)
+    : Unpacker(buf, certFile), m_version(version), m_destDir(destDir)
 {
 }
 
@@ -49,25 +49,24 @@ PlatformUnpacker::PlatformUnpacker(const Path& pkgFile,
                                    const Path& destDir,
                                    const std::string& version,
                                    const Path& certFile)
-: Unpacker(pkgFile, destDir, certFile), m_version(version)
+    : Unpacker(pkgFile, certFile), m_version(version), m_destDir(destDir)
 {
 }
 
 
 PlatformUnpacker::~PlatformUnpacker()
 {
+    if (!m_tmpDir.empty()) {
+        remove(m_tmpDir);
+    }
 }
 
 
 bool
 PlatformUnpacker::unpack(string& errMsg)
 {
-    bool rval = Unpacker::unpack(errMsg);
-    if (!rval) {
-        BPLOG_ERROR_STRM("Error unpacking platform update "
-                         << m_version << ": " << errMsg);
-    }
-    return rval;
+    m_tmpDir = getTempPath(getTempDirectory(), "PlatformUnpacker");
+    return Unpacker::unpackTo(m_tmpDir, errMsg);
 }
 
 

@@ -369,9 +369,9 @@ Installer::installPermissions()
 void
 Installer::installServices()
 {
-    BPLOG_DEBUG("begin Installer::installServices");
-
     bpf::Path servicesDir = m_dir / "services";
+    BPLOG_DEBUG_STRM("begin Installer::installServices from "<< servicesDir);
+
     if (!bpf::isDirectory(servicesDir)) {
         BPLOG_DEBUG_STRM(servicesDir << " does not exist, no services installed");
         return;
@@ -380,14 +380,14 @@ Installer::installServices()
         bpf::tDirIter sit_end;
         for (bpf::tDirIter sit(servicesDir); sit != sit_end; ++sit) {
             try {
-                bpf::Path serviceInstaller = bp::paths::getServiceInstallerPath();
+                bpf::Path serviceInstaller = bpf::canonicalProgramPath(m_dir/"daemon"/"ServiceInstaller");
                 if (serviceInstaller.empty()) {
                     throw "Unable to get service installer path";
                 }
                 bpf::tDirIter vit_end;
                 for (bpf::tDirIter vit(sit->path()); vit != vit_end; ++vit) {
                     // install by invoking service installer
-                    bpf::Path source(sit->path());
+                    bpf::Path source(vit->path());
                     vector<string> args;
                     args.push_back("-f");
                     args.push_back("-v");

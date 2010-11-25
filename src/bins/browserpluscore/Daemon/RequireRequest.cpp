@@ -588,8 +588,7 @@ RequireRequest::installNextService()
             installNextService();
         } else {
             m_installTid = ServiceInstaller::installService(
-                item.first, item.second, bp::paths::getServiceDirectory(),
-                shared_from_this());
+                item.first, item.second, shared_from_this());
             if (m_installTid == 0) {
                 stringstream ss;
                 ss << "error installing service " << item.first
