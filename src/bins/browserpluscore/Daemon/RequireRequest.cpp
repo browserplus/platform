@@ -166,6 +166,7 @@ bool
 RequireRequest::silentServiceUpdate(const std::string& service,
                                     const std::string& version)
 {
+    BPLOG_DEBUG_STRM("silent update of " << service << " / " << version);
     shared_ptr<ActiveSession> asp = m_activeSession.lock();
     if (asp == NULL) {
         BPLOG_WARN_STRM("no active session");

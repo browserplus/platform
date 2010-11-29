@@ -360,6 +360,8 @@ doInstall(shared_ptr<APTArgParse> argParser,
           const bp::service::Summary& summary,
           int apiVersion)
 {
+    BPLOG_DEBUG_STRM("install " << serviceName << " / " << serviceVersion
+                     << " from " << source);
     bool overwrote = false;
     bool dryRun = argParser->argumentPresent("n");
 

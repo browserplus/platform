@@ -58,6 +58,7 @@ PendingUpdateCache::cached()
                     if (!bp::file::isDirectory(p)) continue;
                     
                     // check to see if this is a valid service
+                    BPLOG_DEBUG_STRM("check to see if " << p << " is a valid service");
                     std::string error;
                     bp::service::Summary summary;
                     
@@ -68,6 +69,7 @@ PendingUpdateCache::cached()
                     
                     // cool, got a summary, add it to the set of currently
                     // available services.
+                    BPLOG_DEBUG_STRM("yes, push summary: " << summary.toHumanReadableString());
                     currentServices.push_back(summary);
                 }
             } catch (bp::file::tFileSystemError& e) {
@@ -108,6 +110,7 @@ bool
 PendingUpdateCache::install(std::string name, std::string version)
 {
     bp::file::Path source = bp::paths::getServiceCacheDirectory() / name / version;
+    BPLOG_DEBUG_STRM("cached service install from " << source);
     if (!bp::file::isDirectory(source)) return false;
 
     ServiceUnpacker unpacker(source, 0);
