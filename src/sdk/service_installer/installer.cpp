@@ -102,10 +102,20 @@ public:
     {
     }
 
-    bp::service::Description description() { return m_desc; }
-    unsigned int apiVersion() { return m_apiVersion; }
-    int code() const { return m_code; }
-    string actionStr() const {
+    bp::service::Description description()
+    {
+        return m_desc;
+    }
+    unsigned int apiVersion() 
+    {
+        return m_apiVersion;
+    }
+    int code() const 
+    {
+        return m_code;
+    }
+    string actionStr() const 
+    {
         switch (m_action) {
         case eGetDescription:
             return "getDescription";
@@ -119,6 +129,12 @@ public:
 
 private:   
     bp::service::Description m_desc;
+
+    void stop(int code)
+    {
+        m_code = code;
+        s_rl.stop();
+    }
 
     void initialized(ServiceRunner::Controller* c,
                      const string& service,
@@ -134,7 +150,7 @@ private:
         bp::SemanticVersion v;
         if (!v.parse(version)) {
             BPOUT("Bad version " << version);
-            exit(-1);
+            stop(-1);
         }
         bp::file::Path dataDir = bp::paths::getServiceDataDirectory(service,
                                                                     v.majorVer());
@@ -150,7 +166,7 @@ private:
             break;
         default:
             BPOUT("Bad action code: " << m_action);
-            exit(-2);
+            stop(-2);
         }
     }
 
@@ -158,61 +174,68 @@ private:
     {
         BPOUT("Spawned service exited!  (enable logging for more "
               << "detailed diagnostics - '-log debug').");        
-        // hard exit!
-        exit (3);
+        stop(-3);
     }
 
-    void onDescribe(ServiceRunner::Controller *,
-                    const bp::service::Description & desc)
+    void onDescribe(ServiceRunner::Controller*,
+                    const bp::service::Description& desc)
     {
         // we've extracted a description of the service, let's save it.
         m_desc = desc;
-        m_code = 0;
-        
-        // stop the runloop, returning control to main
-        s_rl.stop();
+        stop(0);
     }
 
     // unused overrides (because we pass off the controller to
     // the controller manager once it's initialized)
-    void onAllocated(ServiceRunner::Controller *, unsigned int,
-                     unsigned int) { }
-    void onInvokeResults(ServiceRunner::Controller *,
+    void onAllocated(ServiceRunner::Controller*,
+                     unsigned int,
+                     unsigned int) 
+    {
+    }
+    void onInvokeResults(ServiceRunner::Controller*,
                          unsigned int,
                          unsigned int,
-                         const bp::Object *) { }
-    void onInvokeError(ServiceRunner::Controller *,
-                         unsigned int,
+                         const bp::Object*) 
+    {
+    }
+    void onInvokeError(ServiceRunner::Controller*,
                        unsigned int,
-                       const string &,
-                       const string &) { }
-    void onCallback(ServiceRunner::Controller *, unsigned int,
-                    unsigned int, long long int, const bp::Object *) { }
-    void onPrompt(ServiceRunner::Controller *, unsigned int,
+                       unsigned int,
+                       const string&,
+                       const string&) 
+    {
+    }
+    void onCallback(ServiceRunner::Controller*,
+                    unsigned int,
+                    unsigned int,
+                    long long int,
+                    const bp::Object*) 
+    {
+    }
+    void onPrompt(ServiceRunner::Controller*,
                   unsigned int,
-                  const bp::file::Path &,
-                  const bp::Object *) { }
+                  unsigned int,
+                  const bp::file::Path&,
+                  const bp::Object*) 
+    {
+    }
 
-    void onInstallHook(ServiceRunner::Controller * c,
+    void onInstallHook(ServiceRunner::Controller* c,
                        int code)
     {
         if (m_argParser->argumentPresent("v")) {
             BPOUT("installHook returned " << code);        
         }
-        m_code = code;
-        // stop the runloop, returning control to main
-        s_rl.stop();
+        stop(code);
     }
 
-    void onUninstallHook(ServiceRunner::Controller * c,
+    void onUninstallHook(ServiceRunner::Controller* c,
                          int code)
     {
         if (m_argParser->argumentPresent("v")) {
             BPOUT("uninstallHook returned " << code);        
         }
-        m_code = code;
-        // stop the runloop, returning control to main
-        s_rl.stop();
+        stop(code);
     }
 
     shared_ptr<APTArgParse> m_argParser;
@@ -348,6 +371,7 @@ doUninstall(shared_ptr<APTArgParse> argParser,
         ServicesUpdated::indicateServicesChanged();
     }
 
+    // we always succeed, even when we fail...
     return 0;
 }
 
@@ -367,16 +391,15 @@ doInstall(shared_ptr<APTArgParse> argParser,
 
     // Now do the install.  We copy to the
     // local service directory and call install hook
-    bp::file::Path destination = bp::paths::getServiceDirectory() / serviceName / serviceVersion;
+    bp::file::Path destination = bp::paths::getServiceDirectory()
+                                 / serviceName / serviceVersion;
 
     // must we uninstall existing?
     if (isDirectory(destination)) {
         if (argParser->argumentPresent("f")) {
             if (!dryRun) {
                 int rv = doUninstall(argParser, destination, summary, apiVersion);
-                if (rv != 0) {
-                    return rv;
-                }
+                BPOUT("uninstall of existing service returns " << rv);
             } else {
                 BPOUT("would uninstall existing " << destination);
             }
@@ -557,6 +580,10 @@ main(int argc,
     }
     if (!summary.detectService(absPath, error)) {
         BPOUT("Invalid service: " << endl << "  " << error);
+        if (uninstall) {
+            BPOUT("removing anyway");
+            (void) bp::file::remove(absPath);
+        }
         exit(-7);
     }
 
