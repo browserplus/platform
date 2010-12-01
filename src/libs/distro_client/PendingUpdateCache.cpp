@@ -115,12 +115,15 @@ PendingUpdateCache::install(std::string name, std::string version)
 
     ServiceUnpacker unpacker(source, 0);
     std::string errMsg;
-    if (!unpacker.install(errMsg)) {
+    bool rval = unpacker.install(errMsg);
+    if (rval) {
+        BPLOG_DEBUG_STRM("cached service installed");
+    } else {
         BPLOG_ERROR_STRM("cached service install " << name
                          << " / " << version << " failed : " << errMsg);
-        return false;
     }
-    return true;
+    (void) bp::file::remove(source);
+    return rval;
 }
 
 bool
