@@ -175,7 +175,7 @@ processCommandLine(APTArgParse& argParser, int argc, const char ** argv)
 static void 
 setupLogging(const APTArgParse& argParser,
              std::string& logLevel,
-             bp::file::Path& logFile,
+             boost::filesystem::path& logFile,
              const bp::config::ConfigReader& reader)
 {
     bp::log::Configurator cfg;
@@ -216,7 +216,7 @@ BPDaemon::BPDaemon(int argc, const char** argv)
     s_singletonDaemon = this;
     
     // Setup a config file reader.
-    bp::file::Path configFilePath = bp::paths::getConfigFilePath();
+    boost::filesystem::path configFilePath = bp::paths::getConfigFilePath();
     if (!m_configReader.load(configFilePath)) {
         std::cerr << "couldn't read config file at: "
                   << configFilePath << std::endl;
@@ -321,19 +321,18 @@ BPDaemon::run()
     // Don't freak out, removePlatform() only removes
     // uninstalled, non-running platforms
     BPLOG_INFO("removing uninstalled platforms...");
-    bp::file::Path dir = getProductTopDirectory();
+    boost::filesystem::path dir = getProductTopDirectory();
     if (bp::file::isDirectory(dir)) {
         try {
-            bp::file::tDirIter end;
-            for (bp::file::tDirIter iter(dir); iter != end; ++iter) {
-                string s = bp::file::utf8FromNative(iter->path().filename());
+            boost::filesystem::directory_iterator end;
+            for (boost::filesystem::directory_iterator iter(dir); iter != end; ++iter) {
                 bp::SemanticVersion version;
-                if (version.parse(s)) {
+                if (version.parse(iter->path().filename().string())) {
                     BPLOG_DEBUG_STRM("examine " << version.asString());
                     bp::platformutil::removePlatform(version, false);
                 }
             }
-        } catch (const bp::file::tFileSystemError& e) {
+        } catch (const boost::filesystem::filesystem_error& e) {
             BPLOG_WARN_STRM("unable to iterate thru " << dir
                             << ": " << e.what());
         }
@@ -371,7 +370,7 @@ BPDaemon::setupServiceRegistry()
         std::vector<std::string>::iterator it;
         for (it = serviceDirs.begin(); it != serviceDirs.end(); it++)
         {
-            m_registry->setPluginDirectory(bp::file::Path(*it));
+            m_registry->setPluginDirectory(boost::filesystem::path(*it));
         }
     }
 

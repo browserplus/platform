@@ -52,17 +52,18 @@
 #include <windows.h>
 
 using namespace std;
+namespace bfs = boost::filesystem;
 
 namespace bp { namespace file {
 
 
-static Path
-readShortcut(const Path& path)
+static bfs::path
+readShortcut(const bfs::path& path)
 {
-    Path rval;
+    bfs::path rval;
 
     // shortcuts on windows don't work unless they have the .lnk suffix
-    if (path.extension().compare(L".lnk") != 0) {
+    if (path.extension().string().compare(".lnk")) {
         return rval;
     }
     IShellLinkW* psl = NULL; 
@@ -82,7 +83,7 @@ readShortcut(const Path& path)
 		if (FAILED(hr)) break;
 
 		// Load the shortcut. 
-		hr = ppf->Load((wchar_t*)path.external_file_string().c_str(), STGM_READ); 
+		hr = ppf->Load((wchar_t*)path.c_str(), STGM_READ); 
 		if (FAILED(hr)) break;
 
         // Resolve the link (msdn lies, return value is S_FALSE on failure,
@@ -109,66 +110,13 @@ readShortcut(const Path& path)
 }
 
 
-string
-utf8FromNative(const tString& native)
+bfs::path
+canonicalPath(const bfs::path& path,
+              const bfs::path& root)
 {
-    string rval;
-    // See how much space we need.
-    // TODO: On Vista, it might be nice to specify WC_ERR_INVALID_CHARS
-    int nChars = WideCharToMultiByte(CP_UTF8, 0, native.c_str(), -1,
-                                     0, 0, 0, 0);
-
-    // Do the conversion.
-    char* paBuf = new char[nChars];
-    int nRtn = WideCharToMultiByte(CP_UTF8, 0, native.c_str(), -1,
-                                   paBuf, nChars, 0, 0);
-
-    if (nRtn==0) {
-        delete[] paBuf;
-        boost::system::error_code ec(GetLastError(),
-                                     boost::system::system_category);
-        throw tFileSystemError("WideCharToMultiByte failed",
-                               Path(native), Path(), ec);
-    } else {
-        rval = paBuf;
-        delete[] paBuf;
-    }
-    return rval;
-}
-
-
-tString
-nativeFromUtf8(const string& utf8)
-{
-    wstring rval;
-    // See how much space we need.
-    int nChars = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, utf8.c_str(), 
-                                     -1, 0, 0);
-
-    // Do the conversion.
-    wchar_t* pawBuf = new wchar_t[nChars];
-    int nRtn = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, utf8.c_str(), 
-                                   -1, pawBuf, nChars);
-    if (nRtn==0) {
-        delete[] pawBuf;
-        boost::system::error_code ec(GetLastError(),
-                                     boost::system::system_category);
-        throw tFileSystemError("MultiByteToWideChar failed", Path(utf8), Path(), ec);
-    } else {
-        rval = pawBuf;
-        delete[] pawBuf;
-    }
-    return rval;
-}
-
-
-Path
-canonicalPath(const Path& path,
-              const Path& root)
-{
-    Path rval = root;
+    bfs::path rval = root;
     if (root.empty() 
-        && PathIsRelativeW((wchar_t*) path.external_file_string().c_str())) {
+        && PathIsRelativeW((wchar_t*) path.c_str())) {
         wchar_t* curDir = _wgetcwd(NULL, 0);
         if (!curDir) return path;
         rval = curDir;
@@ -177,34 +125,34 @@ canonicalPath(const Path& path,
     if (rval.empty()) return path;
 
     rval /= path;
-    rval = rval.canonical();
+    rval = canonical(rval);
     return rval;
 }
 
 
-Path
-canonicalProgramPath(const Path& path,
-                     const Path& root)
+bfs::path
+canonicalProgramPath(const bfs::path& path,
+                     const bfs::path& root)
 {
-    Path name = canonicalPath(path, root);
-    (void) name.replace_extension(L".exe");
+    bfs::path name = canonicalPath(path, root);
+    (void) name.replace_extension(".exe");
     return name;
 }
 
 
-Path
+bfs::path
 getTempDirectory()
 {
-    Path tempDir;
+    bfs::path tempDir;
     WCHAR buf[MAX_PATH] = {0};
     if (!GetTempPathW(MAX_PATH, buf)) {
         boost::system::error_code ec(GetLastError(),
-                                     boost::system::system_category);
-        throw tFileSystemError("GetTempPathW fails", Path(), Path(), ec);
+                                     boost::system::system_category());
+        throw bfs::filesystem_error("GetTempPathW fails", bfs::path(), bfs::path(), ec);
     }
     tempDir = buf;
     tempDir /= "YahooBrowserPlus";
-    boost::filesystem::create_directories(tempDir);
+    bfs::create_directories(tempDir);
     return tempDir;
 }
 
@@ -212,11 +160,11 @@ getTempDirectory()
 
 
 bool
-isSymlink(const Path& p)
+isSymlink(const bfs::path& p)
 {
     bool rval = false;
     WIN32_FIND_DATAW findData;
-    HANDLE h = FindFirstFileW(p.external_file_string().c_str(), &findData);
+    HANDLE h = FindFirstFileW(p.c_str(), &findData);
     if (h) {
         if ((findData.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)
             && (findData.dwReserved0 == IO_REPARSE_TAG_SYMLINK)) {
@@ -229,20 +177,20 @@ isSymlink(const Path& p)
 
     
 bool 
-isLink(const Path& path)
+isLink(const bfs::path& path)
 {
     if (isSymlink(path)) {
         return true;
     }
 
     // shortcuts have .lnk suffix
-    return extension(path) == L".lnk";
+    return path.extension().string() == ".lnk";
 }
 
 
 bool
-createLink(const Path& path,
-           const Path& target)
+createLink(const bfs::path& path,
+           const bfs::path& target)
 {
 	bool rval = false;
     IShellLinkW* psl = NULL; 
@@ -268,13 +216,13 @@ createLink(const Path& path,
 		}
 
 		// set shortcut path
-		hr = psl->SetPath(target.external_file_string().c_str());
+		hr = psl->SetPath(target.c_str());
 		if (FAILED(hr)) {
 			throw string("unable to set shortcut");
 		}
 
 		// persist it
-		hr = ppf->Save((LPCOLESTR) path.external_file_string().c_str(), TRUE);
+		hr = ppf->Save((LPCOLESTR) path.c_str(), TRUE);
 		if (FAILED(hr)) {
 			throw string("unable to persist shortcut");
 		}
@@ -295,12 +243,12 @@ createLink(const Path& path,
 
 
 bool
-resolveLink(const Path& path,
-            Path& target)
+resolveLink(const bfs::path& path,
+            bfs::path& target)
 {
     target.clear();
     if (isSymlink(path)) {
-        HANDLE h = CreateFileW(path.external_file_string().c_str(),
+        HANDLE h = CreateFileW(path.c_str(),
                                0, FILE_SHARE_DELETE|FILE_SHARE_READ|FILE_SHARE_WRITE,
                                NULL, OPEN_EXISTING, 
                                FILE_FLAG_BACKUP_SEMANTICS, NULL);
@@ -331,31 +279,31 @@ resolveLink(const Path& path,
 }
 
 
-Path
-getTempPath(const Path& tempDir,
+bfs::path
+getTempPath(const bfs::path& tempDir,
             const string& prefix)
 {
-    wstring wprefix = nativeFromUtf8(prefix);
+    bfs::path prefixPath(prefix);
 	wchar_t outBuf[MAX_PATH];
-	UINT x = GetTempFileNameW(tempDir.external_file_string().c_str(),
-                              wprefix.c_str(), 0, outBuf);
+	UINT x = GetTempFileNameW(tempDir.c_str(),
+                              prefixPath.c_str(), 0, outBuf);
     if (!x) {
         boost::system::error_code ec(GetLastError(),
-                                     boost::system::system_category);
-        throw tFileSystemError("GetTempFileNameW fails",
-                               tempDir, Path(prefix), ec);
+                                     boost::system::system_category());
+        throw bfs::filesystem_error("GetTempFileNameW fails",
+                                    tempDir, prefixPath, ec);
     }
-    Path path(outBuf);
-    (void) remove(path);    
+    bfs::path path(outBuf);
+    (void) safeRemove(path);
 	return path;
 }
 
 
 bool
-touch(const Path& path)
+touch(const bfs::path& path)
 {
     HANDLE file = NULL;
-    file = CreateFileW(path.external_file_string().c_str(), GENERIC_WRITE,
+    file = CreateFileW(path.c_str(), GENERIC_WRITE,
                        FILE_SHARE_DELETE | FILE_SHARE_READ |
                        FILE_SHARE_WRITE, NULL,
                        OPEN_ALWAYS, FILE_ATTRIBUTE_HIDDEN, NULL);
@@ -382,7 +330,7 @@ touch(const Path& path)
 
 
 bool
-statFile(const Path& p,
+statFile(const bfs::path& p,
          FileInfo& fi)
 {
     // init to zero
@@ -393,13 +341,13 @@ statFile(const Path& p,
     HANDLE h = NULL;
     try {
         // strip off trailing slash
-        tString nativePath = p.external_file_string();
+        wstring nativePath = p.native();
         if (nativePath[nativePath.size() - 1] == '\\') {
             nativePath.erase(nativePath.size() - 1);
         }
         struct _stat s;
         if (_wstat(nativePath.c_str(), &s) != 0) {
-            throw string("stat(" + p.utf8() + ") failed");
+            throw string("stat(" + p.string() + ") failed");
         }
 
         // set times
@@ -421,16 +369,16 @@ statFile(const Path& p,
         // FILE_FLAG_BACKUP_SEMANTICS to get a handle to a dir.
         // Intuitive.
         h = CreateFileW(nativePath.c_str(),
-                          0, FILE_SHARE_DELETE|FILE_SHARE_READ|FILE_SHARE_WRITE,
-                          NULL, OPEN_EXISTING, 
-                          FILE_FLAG_BACKUP_SEMANTICS, NULL);
+                        0, FILE_SHARE_DELETE|FILE_SHARE_READ|FILE_SHARE_WRITE,
+                        NULL, OPEN_EXISTING, 
+                        FILE_FLAG_BACKUP_SEMANTICS, NULL);
         if (h == INVALID_HANDLE_VALUE) {
-            throw string("CreateFileW(" + p.utf8() + ") failed");
+            throw string("CreateFileW(" + p.string() + ") failed");
         }
         BY_HANDLE_FILE_INFORMATION info;
         ZeroMemory(&info, sizeof(info));
         if (!GetFileInformationByHandle(h, &info)) {
-            throw string("GetFileInformation(" + p.utf8() + ") failed");
+            throw string("GetFileInformation(" + p.string() + ") failed");
         }
         fi.deviceId = info.dwVolumeSerialNumber;
         fi.fileIdHigh = info.nFileIndexHigh;
@@ -447,14 +395,12 @@ statFile(const Path& p,
 
 
 bool
-setFileProperties(const Path& p,
+setFileProperties(const bfs::path& p,
                   const FileInfo& fi)
 {
     if (p.empty()) return false;
 
-    tString nativePath = p.external_file_string();
-
-    DWORD attr = GetFileAttributesW(nativePath.c_str());
+    DWORD attr = GetFileAttributesW(p.c_str());
     if (attr == INVALID_FILE_ATTRIBUTES) attr = 0;
     bool readOnly = ((fi.mode & 0200) == 0 && (fi.mode & 020) == 0 
                      && (fi.mode & 02) == 0);
@@ -463,7 +409,7 @@ setFileProperties(const Path& p,
     } else {
         attr &= ~FILE_ATTRIBUTE_READONLY;
     }
-    if (!SetFileAttributesW(nativePath.c_str(), attr)) {
+    if (!SetFileAttributesW(p.c_str(), attr)) {
         BPLOG_WARN_STRM("SetFileAttribute(" << p
                         << ", " << attr << ") failed: "
                         << bp::error::lastErrorString());
@@ -472,23 +418,23 @@ setFileProperties(const Path& p,
     // set file times
     try {
         boost::filesystem::last_write_time(p, fi.mtime);
-    } catch(const tFileSystemError&) {
+    } catch(const bfs::filesystem_error&) {
         // empty
     }
     return true;
 }
 
-Path
+bfs::path
 programPath()
 {
-    Path rv("");
+    bfs::path rv("");
     WCHAR szFilename[(MAX_PATH * 4) + 1];
     memset(szFilename, 0, sizeof(szFilename));
     if (0 != GetModuleFileNameW(NULL, szFilename, (MAX_PATH * 4)))
     {
         rv = szFilename;
     }
-    return rv.canonical();
+    return canonical(rv);
 }
 
 

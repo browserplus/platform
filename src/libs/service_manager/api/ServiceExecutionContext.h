@@ -93,7 +93,7 @@ public:
     virtual void promptUser(
         std::tr1::weak_ptr<IServiceExecutionContextListener> listener,
         unsigned int cookie,
-        const bp::file::Path& pathToHTMLDialog,
+        const boost::filesystem::path& pathToHTMLDialog,
         const bp::Object * arguments);  
 
     virtual void invokeCallback(unsigned int tid, const bp::Map* cbInfo);

@@ -70,7 +70,7 @@ struct DataToCore
 
     // elements specific to T_PromptUser
     unsigned int promptId;
-    bp::file::Path pathToHTMLDialog;
+    boost::filesystem::path pathToHTMLDialog;
 
     // elements specific to T_ExecutionFailure
     std::string error;
@@ -112,7 +112,7 @@ ServiceInstance::invokeCallback(unsigned int tid,
 void
 ServiceInstance::sendUserPrompt(
     unsigned int cookie,
-    const bp::file::Path& pathToHTMLDialog,
+    const boost::filesystem::path& pathToHTMLDialog,
     const bp::Object * arguments)
 {
     DataToCore * dtc = new DataToCore(DataToCore::T_PromptUser);

@@ -25,7 +25,8 @@
 #include "BPUtils/bpstrutil.h"
 #include "platform_utils/bpurlcollection.h"
 
-using namespace bp::file;
+namespace bpf = bp::file;
+namespace bfs = boost::filesystem;
 
 
 CPPUNIT_TEST_SUITE_REGISTRATION(URLCollectionTest);
@@ -34,7 +35,7 @@ void
 URLCollectionTest::bogusPath()
 {
     bp::URLCollection coll;
-    CPPUNIT_ASSERT(coll.init(Path("/this/path/cant/possibly/exist")) == false);
+    CPPUNIT_ASSERT(coll.init(bfs::path("/this/path/cant/possibly/exist")) == false);
     // after a failed init, other functions should fail too
     CPPUNIT_ASSERT(coll.add("http://www.yahoo.com") == false);    
     CPPUNIT_ASSERT(coll.has("http://www.yahoo.com") == false);    
@@ -56,7 +57,7 @@ URLCollectionTest::malformedJSON()
     };
 
     // ensure we can delete test file
-    CPPUNIT_ASSERT(remove(m_path));
+    CPPUNIT_ASSERT(bpf::safeRemove(m_path));
 
     for (unsigned int i = 0;  i < sizeof(badJson) / sizeof(badJson[0]); i++)
     {
@@ -72,7 +73,7 @@ URLCollectionTest::malformedJSON()
         CPPUNIT_ASSERT(coll.has("http://www.yahoo.com") == false);    
 
         // ensure we can delete test file
-        CPPUNIT_ASSERT(bp::file::remove(m_path));
+        CPPUNIT_ASSERT(bpf::safeRemove(m_path));
     }
 
     // now as a sanity check, let's try some valid json
@@ -89,7 +90,7 @@ URLCollectionTest::malformedJSON()
         CPPUNIT_ASSERT(coll.has("http://www.yahoo.com"));    
 
         // ensure we can delete test file
-        CPPUNIT_ASSERT(bp::file::remove(m_path));
+        CPPUNIT_ASSERT(bpf::safeRemove(m_path));
     }
 }
 
@@ -126,7 +127,7 @@ URLCollectionTest::fullTest()
     unsigned int i;
 
     // ensure we can delete test file
-    CPPUNIT_ASSERT(bp::file::remove(m_path));
+    CPPUNIT_ASSERT(bp::file::safeRemove(m_path));
     
     {
         bp::URLCollection coll;
@@ -171,22 +172,22 @@ URLCollectionTest::fullTest()
     }
 
     // ensure we can delete test file
-    CPPUNIT_ASSERT(bp::file::remove(m_path));
+    CPPUNIT_ASSERT(bpf::safeRemove(m_path));
 }
 
 
 void 
 URLCollectionTest::setUp()
 {
-	m_path = getTempPath(getTempDirectory(), "URLCollectionTest")
+	m_path = bpf::getTempPath(bpf::getTempDirectory(), "URLCollectionTest")
              / "URLCollectionTest.json";
-    boost::filesystem::create_directories(m_path.parent_path());
+    bfs::create_directories(m_path.parent_path());
 }
 
 
 void 
 URLCollectionTest::tearDown()
 {
-    CPPUNIT_ASSERT(remove(m_path.parent_path()));
+    CPPUNIT_ASSERT(bpf::safeRemove(m_path.parent_path()));
 }
 

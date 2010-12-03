@@ -41,17 +41,17 @@ namespace bp {
         Uninstaller::removeServices()
         {
             BPLOG_DEBUG("begin service uninstall");
-            bpf::Path serviceInstaller = bp::paths::getServiceInstallerPath();
-            bpf::Path serviceDir = bp::paths::getServiceDirectory();
+            bfs::path serviceInstaller = bp::paths::getServiceInstallerPath();
+            bfs::path serviceDir = bp::paths::getServiceDirectory();
             try {
-                bpf::tDirIter end;
-                for (bpf::tDirIter iter(serviceDir); iter != end; ++iter) {
-                    bpf::Path service(iter->path());
-                    string serviceName = bpf::utf8FromNative(service.filename());
+                bfs::directory_iterator end;
+                for (bfs::directory_iterator iter(serviceDir); iter != end; ++iter) {
+                    bfs::path service(iter->path());
+                    string serviceName = service.filename().string();
                     try {
-                        bpf::tDirIter vend;
-                        for (bpf::tDirIter viter(service); viter != vend; ++viter) {
-                            string serviceVersion = bpf::utf8FromNative(viter->path().filename());
+                        bfs::directory_iterator vend;
+                        for (bfs::directory_iterator viter(service); viter != vend; ++viter) {
+                            string serviceVersion = viter->path().filename().string();
                             bp::SemanticVersion v;
                             if (v.parse(serviceVersion)) {
                                 vector<string> args;
@@ -62,7 +62,7 @@ namespace bp {
                                 args.push_back(bp::log::levelToString(m_logLevel));
                                 if (!m_logFile.empty()) {
                                     args.push_back("-logfile");
-                                    args.push_back(m_logFile.externalUtf8());
+                                    args.push_back(m_logFile.string());
                                 }
                                 args.push_back(serviceName);
                                 args.push_back(serviceVersion);
@@ -85,12 +85,12 @@ namespace bp {
                                 }
                             }                            
                         }
-                    } catch (const bpf::tFileSystemError& e) {
+                    } catch (const bfs::filesystem_error& e) {
                         BPLOG_WARN_STRM("unable to iterate thru " << service
                                         << ": " << e.what());
                     }
                 }
-            } catch (const bpf::tFileSystemError& e) {
+            } catch (const bfs::filesystem_error& e) {
                 BPLOG_WARN_STRM("unable to iterate thru " << serviceDir
                                 << ": " << e.what());
             }

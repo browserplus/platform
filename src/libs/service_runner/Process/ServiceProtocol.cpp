@@ -156,7 +156,7 @@ ServiceProtocol::onQuery(bp::ipc::Channel*, const bp::ipc::Query& query,
             context = *((bp::Map*) query.payload());
         }
 
-        bp::file::Path dataDir, tempDir;
+        boost::filesystem::path dataDir, tempDir;
         if (m_lib->apiVersion() >= 5) {
             if (!context.has("uri", BPTString) ||
                 !context.has("dataDir", BPTNativePath) ||
@@ -169,9 +169,9 @@ ServiceProtocol::onQuery(bp::ipc::Channel*, const bp::ipc::Query& query,
                 return false;
             }
             const bp::Path* p = dynamic_cast<const bp::Path*>(context.get("dataDir"));
-            dataDir = bp::file::Path(p->value());
+            dataDir = p->value();
             p = dynamic_cast<const bp::Path*>(context.get("tempDir"));
-            tempDir = bp::file::Path(p->value());
+            tempDir = p->value();
         } else {
             if (!context.has("uri", BPTString) ||
                 !context.has("dataDir", BPTString) ||
@@ -183,8 +183,8 @@ ServiceProtocol::onQuery(bp::ipc::Channel*, const bp::ipc::Query& query,
                                  << " query");
                 return false;
             }
-            dataDir = bp::file::Path((std::string) *(context.get("dataDir")));
-            tempDir = bp::file::Path((std::string) *(context.get("tempDir")));
+            dataDir = boost::filesystem::path((std::string) *(context.get("dataDir")));
+            tempDir = boost::filesystem::path((std::string) *(context.get("tempDir")));
         }
 
         unsigned int id = m_lib->allocate((std::string) *(context.get("uri")),
@@ -213,9 +213,9 @@ ServiceProtocol::onQuery(bp::ipc::Channel*, const bp::ipc::Query& query,
             return false;
         }
         const bp::Path* p = dynamic_cast<const bp::Path*>(args.get("serviceDir"));
-        bp::file::Path serviceDir(bp::file::Path(p->value()));
+        boost::filesystem::path serviceDir(p->value());
         p = dynamic_cast<const bp::Path*>(args.get("tempDir"));
-        bp::file::Path tempDir(bp::file::Path(p->value()));
+        boost::filesystem::path tempDir(p->value());
         int code = 0;
         if (!query.command().compare("installHook")) {
             code = m_lib->installHook(serviceDir, tempDir);
@@ -284,7 +284,7 @@ ServiceProtocol::onError(unsigned int instance,
 void
 ServiceProtocol::onPrompt(unsigned int instance,
                           unsigned int promptId,
-                          const bp::file::Path& pathToDialog,
+                          const boost::filesystem::path& pathToDialog,
                           const bp::Object* arguments)
 {
     bp::ipc::Message m;
@@ -292,7 +292,7 @@ ServiceProtocol::onPrompt(unsigned int instance,
     bp::Map p;
     p.add("instance", new bp::Integer(instance));
     p.add("id", new bp::Integer(promptId));
-    p.add("path", new bp::String(pathToDialog.utf8()));    
+    p.add("path", new bp::String(pathToDialog.generic_string()));
     if (arguments) p.add("arguments", arguments->clone());
     m.setPayload(p.clone());
     m_chan.sendMessage(m);    

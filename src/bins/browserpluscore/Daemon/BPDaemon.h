@@ -72,7 +72,7 @@ private:
     void cantGetUpToDate();
     
     std::string m_logLevel;
-    bp::file::Path m_logFile;
+    boost::filesystem::path m_logFile;
     bp::config::ConfigReader m_configReader;
     APTArgParse m_argParser;
     std::list<std::string> m_distroServers;

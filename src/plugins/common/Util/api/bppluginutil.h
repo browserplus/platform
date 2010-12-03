@@ -61,7 +61,7 @@ namespace pluginutil {
     
     // apply filtering and recursion to a selection, returning the 
     // approprate bp::Object.  Caller assumes ownership.
-    bp::Object* applyFilters(const std::vector<bp::file::Path>& selection,
+    bp::Object* applyFilters(const std::vector<boost::filesystem::path>& selection,
                              const std::set<std::string>& mimeTypes,
                              unsigned int flags,
                              unsigned int limit);    

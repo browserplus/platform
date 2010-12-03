@@ -111,7 +111,7 @@ storeToCache(const bp::service::Description & description)
 // given a dependant summary and a set of provider summaries, attain
 // the path to the best match.  returns empty string if there is
 // no viable match
-static bp::file::Path
+static boost::filesystem::path
 getBestProvider(const bp::service::Summary & dep,
                 const std::set<bp::service::Summary> & providers)
 {
@@ -140,7 +140,7 @@ getBestProvider(const bp::service::Summary & dep,
 
     if (!winner.name().empty()) return winner.path();
     
-    return bp::file::Path();
+    return boost::filesystem::path();
 }
 
 
@@ -152,7 +152,7 @@ class DescriptionAggregator :  public ServiceRunner::IControllerListener
 public:
     DescriptionAggregator(bp::runloop::RunLoopThread * rlt,
                           const std::string & logLevel,
-                          const bp::file::Path & logFile)
+                          const boost::filesystem::path & logFile)
         : m_rlt(rlt), m_logLevel(logLevel), m_logFile(logFile)
     {
     }
@@ -192,7 +192,7 @@ private:
             controller->setListener(this);
 
             // get a provider for dependent services
-            bp::file::Path providerPath;
+            boost::filesystem::path providerPath;
             if (s.type() == bp::service::Summary::Dependent)
             {
                 providerPath = getBestProvider(s, providers);
@@ -287,7 +287,7 @@ private:
                     unsigned int, unsigned int,
                     long long int, const bp::Object *) { }
     void onPrompt(ServiceRunner::Controller *, unsigned int, unsigned int,
-                  const bp::file::Path &,
+                  const boost::filesystem::path &,
                   const bp::Object *) { }
     void onInstallHook(ServiceRunner::Controller*,
                        int) {}
@@ -296,7 +296,7 @@ private:
     }
 
     std::string m_logLevel;
-    bp::file::Path m_logFile;    
+    boost::filesystem::path m_logFile;    
 };
 
 // attain descriptions of the specified services by spawning an
@@ -314,7 +314,7 @@ attainDescriptions(const std::set<bp::service::Summary> & summaries,
                      & descriptions,
                    std::set<bp::service::Summary> & bogusSummaries,
                    const std::string &logLevel,
-                   const bp::file::Path &logFile)
+                   const boost::filesystem::path &logFile)
 {
     bp::runloop::RunLoopThread rlt;
     DescriptionAggregator dag(&rlt, logLevel, logFile);
@@ -334,11 +334,11 @@ attainDescriptions(const std::set<bp::service::Summary> & summaries,
 
 std::map<bp::service::Summary, bp::service::Description>
 DiskScanner::scanDiskForServices(
-    const bp::file::Path & pathArg,
+    const boost::filesystem::path & pathArg,
     std::map<bp::service::Summary, bp::service::Description> lastScan,
     std::set<bp::service::Summary> running,
     const std::string & logLevel,
-    const bp::file::Path & logFile)
+    const boost::filesystem::path & logFile)
 {
     // stats about what we loaded
 
@@ -383,12 +383,12 @@ DiskScanner::scanDiskForServices(
     PermissionsManager* pmgr = PermissionsManager::get();
 
     // first let's just build a list of summaries
-    std::stack<bp::file::Path> dirStack;
+    std::stack<boost::filesystem::path> dirStack;
     dirStack.push(pathArg);
     
     while (dirStack.size() > 0)
     {
-        bp::file::Path path = dirStack.top();
+        boost::filesystem::path path = dirStack.top();
         dirStack.pop();
         
         if (!bp::file::isDirectory(path))
@@ -401,11 +401,11 @@ DiskScanner::scanDiskForServices(
             unsigned int subDirectories = 0;
 
             try {
-                bp::file::tDirIter end;
-                for (bp::file::tDirIter it(path); it != end; ++it) {
-                    bp::file::Path subpath(it->path());
+                boost::filesystem::directory_iterator end;
+                for (boost::filesystem::directory_iterator it(path); it != end; ++it) {
+                    boost::filesystem::path subpath(it->path());
                     // silently skip dot directories
-                    if (subpath.string().compare(0, 1, bp::file::nativeFromUtf8(".")) == 0) 
+                    if (subpath.string().compare(0, 1, ".") == 0) 
                         continue;
 
                     // verify it's a directory
@@ -426,11 +426,11 @@ DiskScanner::scanDiskForServices(
                     // run ServiceInstaller to uninstall it, we don't
                     // trust the service at all.
 
-                    std::string version = bp::file::utf8FromNative(subpath.filename());
-                    std::string name = bp::file::utf8FromNative(subpath.parent_path().filename());
+                    std::string version = subpath.filename().string();
+                    std::string name = subpath.parent_path().filename().string();
                     if (!pmgr->serviceMayRun(name, version))
                     {
-                        bp::file::remove(subpath);
+                        bp::file::safeRemove(subpath);
                         BPLOG_WARN_STRM("blacklisted service " 
                                         << name << "/" << version << " removed");
                     } 
@@ -493,12 +493,12 @@ DiskScanner::scanDiskForServices(
                     }
                 }
                 if (!loadedServices && !subDirectories) {
-                    bp::file::Path fullPath(bp::file::canonicalPath(path));
+                    boost::filesystem::path fullPath(bp::file::canonicalPath(path));
 
                     BPLOG_WARN_STRM("removing empty directory: " << fullPath);
-                    bp::file::remove(fullPath);
+                    bp::file::safeRemove(fullPath);
                 }
-            } catch (const bp::file::tFileSystemError& e) {
+            } catch (const boost::filesystem::filesystem_error& e) {
                 BPLOG_WARN_STRM("unable to iterate thru " << path
                                 << ": " << e.what());
             }
@@ -655,7 +655,7 @@ DiskScanner::scanDiskForServices(
         for (i = bogusServices.begin(); i != bogusServices.end(); i++)
         {
             BPLOG_WARN_STRM("removing damaged service: " << i->path());
-            bp::file::remove(i->path());
+            bp::file::safeRemove(i->path());
         }
     }
     

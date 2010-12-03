@@ -106,8 +106,8 @@ toJsonRecurse(const Object* obj,
         }
         case BPTNativePath:
         case BPTWritableNativePath: {
-			bp::file::Path p = *((Path*) obj);
-			std::string str = p.utf8();
+			boost::filesystem::path p = *((Path*) obj);
+			std::string str = p.generic_string();
             yajl_gen_string(ghand, (const unsigned char*) str.c_str(),
                             str.length()); 
             break;

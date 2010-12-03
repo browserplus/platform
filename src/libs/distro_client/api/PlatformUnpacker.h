@@ -42,18 +42,18 @@ class PlatformUnpacker : virtual public Unpacker
      * a platform update bpkg.
      */
     PlatformUnpacker(const std::vector<unsigned char> & buf,
-                     const bp::file::Path& destDir,
+                     const boost::filesystem::path& destDir,
                      const std::string& version,
-                     const bp::file::Path& certFile = bp::file::Path());
+                     const boost::filesystem::path& certFile = boost::filesystem::path());
                      
     /** 
      * Create an instance to unpack a file containing
      * a platform update bpkg.
      */
-    PlatformUnpacker(const bp::file::Path& pkgFile,
-                     const bp::file::Path& destDir,
+    PlatformUnpacker(const boost::filesystem::path& pkgFile,
+                     const boost::filesystem::path& destDir,
                      const std::string& version,
-                     const bp::file::Path& certFile = bp::file::Path());
+                     const boost::filesystem::path& certFile = boost::filesystem::path());
                      
     virtual ~PlatformUnpacker(); 
 
@@ -67,8 +67,8 @@ class PlatformUnpacker : virtual public Unpacker
 
  private:
     std::string m_version;
-    bp::file::Path m_destDir;
-    bp::file::Path m_tmpDir;
+    boost::filesystem::path m_destDir;
+    boost::filesystem::path m_tmpDir;
 };
 
 #endif

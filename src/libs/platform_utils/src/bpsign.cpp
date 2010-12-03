@@ -45,37 +45,38 @@
 
 using namespace std;
 using namespace bp::file;
+namespace bfs = boost::filesystem;
 
 namespace bp {
 namespace sign {
 
 static BIO*
-openReadBIOFromPath(const Path & path)
+openReadBIOFromPath(const bfs::path & path)
 {
     BIO * b = NULL;
 #ifdef WIN32
 	FILE * f = NULL;
-	(void) ::_wfopen_s(&f, path.external_file_string().c_str(), L"rb");
+	(void) ::_wfopen_s(&f, path.c_str(), L"rb");
     if (f != NULL) {
         b = BIO_new_fp(f, BIO_CLOSE);
     }
 #else
-    b = BIO_new_file(path.external_file_string().c_str(), "rb");
+    b = BIO_new_file(path.c_str(), "rb");
 #endif
     return b;
 }
 
-map<Path, Signer*> Signer::s_singletons;
+map<bfs::path, Signer*> Signer::s_singletons;
 
 Signer*
-Signer::get(const Path& publicKeyPath) 
+Signer::get(const bfs::path& publicKeyPath)
 {
     Signer* rval = NULL;
-    Path path = publicKeyPath;
+    bfs::path path = publicKeyPath;
     if (path.empty()) {
         path = bp::paths::getCertFilePath();
     }
-    map<Path, Signer*>::const_iterator it;
+    map<bfs::path, Signer*>::const_iterator it;
     it = s_singletons.find(path);
     if (it == s_singletons.end()) {
         try {
@@ -94,10 +95,10 @@ Signer::get(const Path& publicKeyPath)
 
 
 string
-Signer::getSignature(const Path& privateKeyPath, 
-                     const Path& publicKeyPath,
+Signer::getSignature(const bfs::path& privateKeyPath,
+                     const bfs::path& publicKeyPath,
                      const string& password,
-                     const Path& inFile)
+                     const bfs::path& inFile)
 {
     string rval;
     BIO* outBio = NULL;
@@ -131,7 +132,7 @@ Signer::getSignature(const Path& privateKeyPath,
 
 bool 
 Signer::verifyFile(const string& signature,
-                   const Path& contentPath,
+                   const bfs::path& contentPath,
                    BPTime& timestamp)
 {
     BIO* content = openReadBIOFromPath(contentPath);
@@ -190,7 +191,7 @@ Signer::SSLException::what() const throw()
 }
 
 
-Signer::Signer(const Path& publicKeyPath) 
+Signer::Signer(const bfs::path& publicKeyPath)
     : m_publicKeyPath(publicKeyPath)
 {
     // ensure that we are getting the openssl that we expect
@@ -228,10 +229,10 @@ Signer::~Signer()
 
 
 bool
-Signer::doSign(const Path& privateKeyPath, 
-               const Path& publicKeyPath,
+Signer::doSign(const bfs::path& privateKeyPath,
+               const bfs::path& publicKeyPath,
                const string& password,
-               const Path& inFile,
+               const bfs::path& inFile,
                BIO* outBio,
                bool detached)
 {
@@ -243,8 +244,7 @@ Signer::doSign(const Path& privateKeyPath,
         // read private key
         pvkBio = openReadBIOFromPath(privateKeyPath);
         if (pvkBio == NULL) {
-            string s("unable to open ");
-            s += privateKeyPath.externalUtf8();
+            string s = "unable to open " + privateKeyPath.string();
             throw SSLException(s);
         }
         (void) BIO_set_close(pvkBio, BIO_CLOSE);
@@ -253,32 +253,28 @@ Signer::doSign(const Path& privateKeyPath,
                                                  password.empty() ?
                                                  NULL : (void*)password.c_str());
         if (pkey == NULL) {
-            string s = "Error reading signer private key "
-                       + privateKeyPath.externalUtf8();
+            string s = "Error reading signer private key " + privateKeyPath.string();
             throw SSLException(s);
         }
         
         // now for signer certificate
         certBio = openReadBIOFromPath(publicKeyPath);
         if (certBio == NULL) {
-            string s("unable to open ");
-            s += publicKeyPath.externalUtf8();
+            string s = "unable to open " + publicKeyPath.string();
             throw SSLException(s);
         }
         (void) BIO_set_close(certBio, BIO_CLOSE);
         
         X509* cert = PEM_read_bio_X509(certBio, NULL, NULL, NULL);
         if (cert == NULL) {
-            string s = "Error reading signer certificate in "
-                       + publicKeyPath.externalUtf8();
+            string s = "Error reading signer certificate in " + publicKeyPath.string();
             throw SSLException(s);
         }
         
         // input stream
         in = openReadBIOFromPath(inFile);
         if (in == NULL) {
-            string s("unable to open ");
-            s += inFile.externalUtf8();
+            string s = "unable to open " + inFile.string();
             throw SSLException(s);
         }
         (void) BIO_set_close(in, BIO_CLOSE);

@@ -51,7 +51,7 @@ public:
      * load configuration from a file.  This will flush any
      * previous configuration loaded even if the call fails.
      */
-    bool load(const bp::file::Path& path);
+    bool load(const boost::filesystem::path& path);
 
     /**
      *   dtor

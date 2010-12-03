@@ -45,12 +45,13 @@
 using std::string;
 using std::vector;
 using namespace bp::file;
+namespace bfs = boost::filesystem;
 
 
 // Forward Declarations
 static bool
-forkAndExec(const Path & path,
-            const Path & pwd,
+forkAndExec(const bfs::path & path,
+            const bfs::path & pwd,
             char *const argv[],
             bp::process::spawnStatus* pStat);
 
@@ -63,10 +64,10 @@ bp::process::currentPid()
 
 
 bool
-bp::process::spawn(const Path& path,
+bp::process::spawn(const bfs::path& path,
                    const vector<string>& vsArgs,
                    spawnStatus* pStatus,
-                   const Path& wd,
+                   const bfs::path& wd,
                    const string& sTitle,
                    bool /*inheritWin32StdHandles*/)
 {
@@ -75,7 +76,7 @@ bp::process::spawn(const Path& path,
 
     // argv[0] = name used to invoke the program.
     if (sTitle.empty() || true) {
-        vArgs.push_back(const_cast<char*>(path.externalUtf8().c_str()));
+        vArgs.push_back(const_cast<char*>(path.c_str()));
     } else {
         vArgs.push_back(const_cast<char*>(sTitle.c_str()));
     }
@@ -95,8 +96,8 @@ bp::process::spawn(const Path& path,
 
 
 bool
-forkAndExec(const Path & path,
-            const Path & pwd,
+forkAndExec(const bfs::path & path,
+            const bfs::path & pwd,
             char *const argv[],
             bp::process::spawnStatus* pStat)
 {
@@ -104,7 +105,7 @@ forkAndExec(const Path & path,
     if (pid == 0)
     {
         // if a pwd is provided, now is the time to chdir
-        if (!pwd.empty() && 0 != chdir(pwd.external_directory_string().c_str())) {
+        if (!pwd.empty() && 0 != chdir(pwd.c_str())) {
             // TODO: we need a good way to return error!
             // a convention around return codes??
             std::cerr << "failed to chdir()" << std::endl;
@@ -112,7 +113,7 @@ forkAndExec(const Path & path,
         }
 
         // We're the child.  Now execute the desired image.
-        int nRet = execv(path.external_file_string().c_str(), argv);
+        int nRet = execv(path.c_str(), argv);
         if (nRet == -1)
         {
             // TODO: perhaps notify parent of child execve failure.

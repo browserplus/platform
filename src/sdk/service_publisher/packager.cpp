@@ -167,7 +167,7 @@ private:
     void onCallback(ServiceRunner::Controller *, unsigned int,
                     unsigned int, long long int, const bp::Object *) { }
     void onPrompt(ServiceRunner::Controller *, unsigned int,
-                  unsigned int, const bp::file::Path &, const bp::Object *) { }
+                  unsigned int, const boost::filesystem::path &, const bp::Object *) { }
     void onInstallHook(ServiceRunner::Controller *, int) { }
     void onUninstallHook(ServiceRunner::Controller *, int) { }
 
@@ -189,7 +189,7 @@ setupLogging(shared_ptr<APTArgParse> argParser)
     bp::log::removeAllAppenders();
 
     string level = argParser->argument("log");
-    bp::file::Path path(argParser->argument("logfile"));
+    boost::filesystem::path path(argParser->argument("logfile"));
 
     if (level.empty() && path.empty()) return;
     
@@ -258,7 +258,7 @@ int main(int argc, const char ** argv)
         setupLogging(argParser);
 
         string error;
-        bp::file::Path absPath = bp::file::canonicalPath(bp::file::Path(argv[x]));
+        boost::filesystem::path absPath = bp::file::canonicalPath(boost::filesystem::path(argv[x]));
 
         bp::service::Summary summary;
     
@@ -279,7 +279,7 @@ int main(int argc, const char ** argv)
 
         string baseURL(argv[x+1]);
 
-        bp::file::Path providerPath;
+        boost::filesystem::path providerPath;
     
         // now let's find a valid provider if this is a dependent
         if (summary.type() == bp::service::Summary::Dependent)
@@ -307,7 +307,7 @@ int main(int argc, const char ** argv)
         controller->setListener(serviceMan.get());
     
         // pathToHarness is ourself
-        bp::file::Path harnessProgram = bp::file::canonicalProgramPath(bp::file::Path(argv[0]));
+        boost::filesystem::path harnessProgram = bp::file::canonicalProgramPath(boost::filesystem::path(argv[0]));
 
         // determine a reasonable title for the spawned service
         string processTitle, ignore;
@@ -324,7 +324,7 @@ int main(int argc, const char ** argv)
 
         if (!controller->run(harnessProgram, providerPath,
                              processTitle, argParser->argument("log"),
-                             bp::file::Path(argParser->argument("logfile")),
+                             boost::filesystem::path(argParser->argument("logfile")),
                              error))
             {
                 cerr << "Couldn't run service: " << error.c_str() << endl;
@@ -360,14 +360,14 @@ int main(int argc, const char ** argv)
                  << "specified with -privateKey option" << endl;
             exit(1);
         }
-        bp::file::Path privateKey(argParser->argument("privateKey"));
+        boost::filesystem::path privateKey(argParser->argument("privateKey"));
     
         if (!argParser->argumentPresent("publicKey")) {
             cerr << "Public signing key must be "
                  << "specified with -publicKey option" << endl;
             exit(1);
         }
-        bp::file::Path publicKey(argParser->argument("publicKey"));
+        boost::filesystem::path publicKey(argParser->argument("publicKey"));
 
         string password;
         if (argParser->argumentPresent("password")) {
@@ -404,7 +404,7 @@ int main(int argc, const char ** argv)
              << prettyName(serviceName,serviceVersion,platform)
              << " at " << summary.path() << endl;
 
-        bp::file::Path targetPath = bp::file::getTempDirectory();
+        boost::filesystem::path targetPath = bp::file::getTempDirectory();
 
         // get a good name for the intermediate directory
         targetPath = bp::file::getTempPath(targetPath, TMPDIR_PREFIX);
@@ -455,7 +455,7 @@ int main(int argc, const char ** argv)
             
             buf = m->toPlainJsonString();
 
-            bp::file::Path descPath = targetPath / DESC_FNAME;
+            boost::filesystem::path descPath = targetPath / DESC_FNAME;
 
             if (!bp::strutil::storeToFile(descPath, buf)) {
                 cerr << "error writing " << descPath << endl;
@@ -486,7 +486,7 @@ int main(int argc, const char ** argv)
                 }
 
             string buf = stringsMap.toPlainJsonString();
-            bp::file::Path path = targetPath / STRINGS_FNAME;
+            boost::filesystem::path path = targetPath / STRINGS_FNAME;
             
             // strings.json is deprecated as of 2.0.7 and above
             if (!bp::strutil::storeToFile(path, buf)) {
@@ -521,8 +521,8 @@ int main(int argc, const char ** argv)
         }
     
         // now package service directory to <output directory>/service.bpkg
-        bp::file::Path servicePath = summary.path();
-        bp::file::Path pkgPath = targetPath / "service.bpkg";
+        boost::filesystem::path servicePath = summary.path();
+        boost::filesystem::path pkgPath = targetPath / "service.bpkg";
         if (!bp::pkg::packDirectory(privateKey, publicKey, password,
                                     servicePath, pkgPath)) {
             cerr << "error packaging service contents to " << pkgPath << endl;
@@ -530,7 +530,7 @@ int main(int argc, const char ** argv)
         }
     
         // now package results
-        bp::file::Path finalPkgPath = bp::file::getTempPath(targetPath, TMPDIR_PREFIX); 
+        boost::filesystem::path finalPkgPath = bp::file::getTempPath(targetPath, TMPDIR_PREFIX); 
         if (!bp::pkg::packDirectory(privateKey, publicKey, password,
                                     targetPath, finalPkgPath)) {
             cerr << "error packaging service to " << finalPkgPath << endl;
@@ -545,7 +545,7 @@ int main(int argc, const char ** argv)
         }
         
         // now delete intermediate directory 
-        if (!bp::file::remove(targetPath)) {
+        if (!bp::file::safeRemove(targetPath)) {
             cerr << "warning: unable to delete directory "
                  << targetPath << endl;
             // warning only - no exit here.
@@ -556,10 +556,10 @@ int main(int argc, const char ** argv)
             cout << prettyName(serviceName,serviceVersion,platform)
                  << " published in " << sw.elapsedSec() << "s" << endl;
         }
-    } catch (const bp::file::tFileSystemError& e) {
+    } catch (const boost::filesystem::filesystem_error& e) {
         cerr << "filesystem error: " << e.what()
-             << ", path1 = " << bp::file::Path(e.path1())
-             << ", path2 = " << bp::file::Path(e.path2());
+             << ", path1 = " << boost::filesystem::path(e.path1())
+             << ", path2 = " << boost::filesystem::path(e.path2());
         exit(1);
     }
 

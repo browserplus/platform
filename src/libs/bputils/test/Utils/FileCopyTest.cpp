@@ -2,7 +2,7 @@
  * ***** BEGIN LICENSE BLOCK *****
  * The contents of this file are subject to the Mozilla Public License
  * Version 1.1 (the "License"); you may not use this file except in
- * compliance with the License. You may obtain a copy of the License at
+ * compliance with the License. You may obtain a bpf::safeCopy of the License at
  * http://www.mozilla.org/MPL/
  * 
  * Software distributed under the License is distributed on an "AS IS"
@@ -26,7 +26,7 @@
 #include "BPUtils/bpfile.h"
 #include "BPUtils/bpstrutil.h"
 
-using namespace bp::file;
+namespace bpf = bp::file;
 namespace bfs = boost::filesystem;
 
 CPPUNIT_TEST_SUITE_REGISTRATION(FileCopyTest);
@@ -47,51 +47,47 @@ void
 FileCopyTest::sourceFile()
 {
     // case 4
-    Path src = m_testSourceDir / "foo.txt";
-    Path dst = m_testDestDir / "foo.txt";
-    CPPUNIT_ASSERT(copy(src, dst));
-    CPPUNIT_ASSERT(exists(dst));
+    bfs::path src = m_testSourceDir / "foo.txt";
+    bfs::path dst = m_testDestDir / "foo.txt";
+    CPPUNIT_ASSERT(bpf::safeCopy(src, dst));
+    CPPUNIT_ASSERT(bpf::pathExists(dst));
 
     // case 2
-    CPPUNIT_ASSERT(!copy(src, dst));    
+    CPPUNIT_ASSERT(!bpf::safeCopy(src, dst));
 
     // case 1
-    tString str = src.string();
-    str.append(nativeFromUtf8("/"));
-    src = str;
+    src = src.string() + "/";
     dst /= "unique";
-    CPPUNIT_ASSERT(!bp::file::copy(src, dst));    
+    CPPUNIT_ASSERT(!bpf::safeCopy(src, dst));
 
     // case 4:  a bit redunant, but ensure renaming works taking
     // the basename from the destination as the new filename
     src = m_testSourceDir / "foo.txt";
     dst = m_testDestDir / "bar.txt";
-    CPPUNIT_ASSERT(copy(src, dst));
-    CPPUNIT_ASSERT(exists(dst));
+    CPPUNIT_ASSERT(bpf::safeCopy(src, dst));
+    CPPUNIT_ASSERT(bpf::pathExists(dst));
 
     // case 3
     src = m_testSourceDir / "foo.txt";
     dst = m_testDestDir / "testDir1";
     bfs::create_directories(dst);
-    CPPUNIT_ASSERT(isDirectory(dst));
-    CPPUNIT_ASSERT(bp::file::copy(src, dst));    
+    CPPUNIT_ASSERT(bpf::isDirectory(dst));
+    CPPUNIT_ASSERT(bpf::safeCopy(src, dst));
     dst /= "foo.txt";
-    CPPUNIT_ASSERT(exists(dst));
+    CPPUNIT_ASSERT(bpf::pathExists(dst));
 
     // trailing / on dst dir shouldn't affect operation
     src = m_testSourceDir / "foo.txt";
     dst = m_testDestDir / "testDir2";
     CPPUNIT_ASSERT(bfs::create_directories(dst));
-    tString dstStr = dst.string();
-    dstStr.append(nativeFromUtf8("/"));
-    dst = dstStr;
-    CPPUNIT_ASSERT(copy(src, dst));    
+    dst = dst.string() + "/";
+    CPPUNIT_ASSERT(bpf::safeCopy(src, dst));
     dst /= "foo.txt";
-    CPPUNIT_ASSERT(exists(dst));
+    CPPUNIT_ASSERT(bpf::pathExists(dst));
 
     // source is a file, destination dir and it's parent don't exist (fail)
     dst = m_testDestDir / "doesnt" / "exist";
-    CPPUNIT_ASSERT(!copy(src, dst));
+    CPPUNIT_ASSERT(!bpf::safeCopy(src, dst));
 }
 
 
@@ -110,30 +106,26 @@ FileCopyTest::sourceFile()
 void
 FileCopyTest::sourceDir()
 {
-    // case 1: first try to copy a directory hierarchy into a file (fail)
-    Path src = m_testSourceDir / "fooDir";
-    Path dst = m_testDestDir / "exists.txt";
+    // case 1: first try to bpf::safeCopy a directory hierarchy into a file (fail)
+    bfs::path src = m_testSourceDir / "fooDir";
+    bfs::path dst = m_testDestDir / "exists.txt";
 
     // make the file
     CPPUNIT_ASSERT(bp::strutil::storeToFile(dst, "this is a test file\n"));
 
-    // ensure the copy fails
-    CPPUNIT_ASSERT(!copy(src, dst));    
+    // ensure the bpf::safeCopy fails
+    CPPUNIT_ASSERT(!bpf::safeCopy(src, dst));
 
-    // case 3: now obliterate the target file and ensure that the copy succeeds
-    CPPUNIT_ASSERT(remove(dst));    
-    CPPUNIT_ASSERT(copy(src, dst));        
+    // case 3: now obliterate the target file and ensure that the bpf::safeCopy succeeds
+    CPPUNIT_ASSERT(bpf::safeRemove(dst));
+    CPPUNIT_ASSERT(bpf::safeCopy(src, dst));
     CPPUNIT_ASSERT(dirsAreSame(src, dst));    
 
-    // ensure a copy works with a trailing slash on source and destination
+    // ensure a bpf::safeCopy works with a trailing slash on source and destination
     dst = m_testDestDir / "dirCopyTest2";
-    tString s = dst.string();
-    s.append(nativeFromUtf8("/"));
-    dst = s;
-    s = src.string();
-    s.append(nativeFromUtf8("/"));
-    src = s;
-    CPPUNIT_ASSERT(copy(src, dst));        
+    dst = dst.string() + "/";
+    src = src.string() + "/";
+    CPPUNIT_ASSERT(bpf::safeCopy(src, dst));
     CPPUNIT_ASSERT(dirsAreSame(src, dst));    
 
     // case 2: test copying source dir into an existing dest dir
@@ -141,62 +133,62 @@ FileCopyTest::sourceDir()
     dst = m_testDestDir / "dirCopyTest3";    
 
     bfs::create_directories(dst);
-    CPPUNIT_ASSERT(isDirectory(dst));
-    CPPUNIT_ASSERT(copy(src, dst));        
+    CPPUNIT_ASSERT(bpf::isDirectory(dst));
+    CPPUNIT_ASSERT(bpf::safeCopy(src, dst));
     dst /= "fooDir";        
     CPPUNIT_ASSERT(dirsAreSame(src, dst));    
 
     // copying to non-existent path should fail
     dst = m_testDestDir / "doesnt" / "exist";
-    CPPUNIT_ASSERT(!copy(src, dst));
+    CPPUNIT_ASSERT(!bpf::safeCopy(src, dst));
 }
 
 
 void
 FileCopyTest::sourceDNE()
 {
-    // first try to copy a directory hierarchy into a file (fail)
-    Path src = m_testSourceDir / "yerMomma.DNE";
-    Path dst = m_testDestDir;
+    // first try to bpf::safeCopy a directory hierarchy into a file (fail)
+    bfs::path src = m_testSourceDir / "yerMomma.DNE";
+    bfs::path dst = m_testDestDir;
 
-    // ensure the copy fails
-    CPPUNIT_ASSERT(!copy(src, dst));    
+    // ensure the bpf::safeCopy fails
+    CPPUNIT_ASSERT(!bpf::safeCopy(src, dst));
 }
 
 
 bool
-FileCopyTest::dirsAreSame(Path lhs, Path rhs)
+FileCopyTest::dirsAreSame(bfs::path lhs, bfs::path rhs)
 {
-    CPPUNIT_ASSERT(isDirectory(lhs));
-    CPPUNIT_ASSERT(isDirectory(rhs));
+    CPPUNIT_ASSERT(bpf::isDirectory(lhs));
+    CPPUNIT_ASSERT(bpf::isDirectory(rhs));
 
     // get contents of lhs relative to lhs
-    std::vector<Path> lhsKids;
-    tRecursiveDirIter end;
-    for (tRecursiveDirIter it(lhs); it != end; ++it) {
-        lhsKids.push_back(Path(it->path()).relativeTo(lhs));
+    std::vector<bfs::path> lhsKids;
+    bfs::recursive_directory_iterator end;
+    for (bfs::recursive_directory_iterator it(lhs); it != end; ++it) {
+        lhsKids.push_back(bpf::relativeTo(it->path(), lhs));
     }
 
     // get contents of rhs relative to rhs
-    std::vector<Path> rhsKids;
-    for (tRecursiveDirIter it(rhs); it != end; ++it) {
-        rhsKids.push_back(Path(it->path()).relativeTo(rhs));
+    std::vector<bfs::path> rhsKids;
+    for (bfs::recursive_directory_iterator it(rhs); it != end; ++it) {
+        rhsKids.push_back(bpf::relativeTo(it->path(), rhs));
     }
 
     CPPUNIT_ASSERT(lhsKids.size() == rhsKids.size());
 
     // build a set of RHS entries, and 
-    std::set<Path> rhsSet;
+    std::set<bfs::path> rhsSet;
     rhsSet.insert(rhsKids.begin(), rhsKids.end());
 
     for (unsigned int i = 0; i < lhsKids.size(); i++) {
-        std::set<Path>::iterator it;
+        std::set<bfs::path>::iterator it;
         it = rhsSet.find(lhsKids[i]);
         CPPUNIT_ASSERT(it != rhsSet.end());
 
         // build up absolute paths for the two
-        Path src = lhs / lhsKids[i];
-        Path dst = rhs / *it;
+        bfs::path src = lhs / lhsKids[i];
+        bfs::path dst = rhs / *it;
 
         // both should be of same type, craft a nice
         // message for failure
@@ -228,17 +220,17 @@ FileCopyTest::setUp()
     //
     // <m_testDestDir>/
 
-    Path src = getTempDirectory();
-    Path dst = getTempPath(src, "FileCopyTest");
-    src = getTempPath(src, "FileCopyTest");    
+    bfs::path src = bpf::getTempDirectory();
+    bfs::path dst = bpf::getTempPath(src, "FileCopyTest");
+    src = bpf::getTempPath(src, "FileCopyTest");
 
     // now src and dst have dirnames.  create them anew
-    CPPUNIT_ASSERT(remove(src));
-    CPPUNIT_ASSERT(remove(dst));
+    CPPUNIT_ASSERT(bpf::safeRemove(src));
+    CPPUNIT_ASSERT(bpf::safeRemove(dst));
     bfs::create_directories(src);
     bfs::create_directories(dst);
-    CPPUNIT_ASSERT(isDirectory(src));
-    CPPUNIT_ASSERT(isDirectory(dst));
+    CPPUNIT_ASSERT(bpf::isDirectory(src));
+    CPPUNIT_ASSERT(bpf::isDirectory(dst));
 
     m_testSourceDir = src;
     m_testDestDir = dst;    
@@ -253,7 +245,7 @@ FileCopyTest::setUp()
     CPPUNIT_ASSERT(bfs::create_directories(src));
     
     // m_testSourceDir/fooDir/bar/baz/fiddle.txt 
-    Path baz = src / "fiddle.txt";
+    bfs::path baz = src / "fiddle.txt";
     CPPUNIT_ASSERT( bp::strutil::storeToFile(baz, "this is fiddle\n") );    
     // m_testSourceDir/fooDir/bar/baz/faddle.txt 
     baz = src / "faddle.txt";
@@ -272,7 +264,7 @@ FileCopyTest::setUp()
 void
 FileCopyTest::tearDown()
 {
-    CPPUNIT_ASSERT(remove(m_testSourceDir));
-    CPPUNIT_ASSERT(remove(m_testDestDir));
+    CPPUNIT_ASSERT(bpf::safeRemove(m_testSourceDir));
+    CPPUNIT_ASSERT(bpf::safeRemove(m_testDestDir));
 }
 

@@ -70,7 +70,7 @@ public:
 };
 
 static PHashConfigReader s_cache;
-static bp::file::Path s_phashPath;
+static boost::filesystem::path s_phashPath;
 static BPTime s_lastRead = 0L;
 
 static bool
@@ -84,7 +84,7 @@ updateCache()
     BPTime modTime((long)0);
     try {
         modTime.set(boost::filesystem::last_write_time(s_phashPath));
-    } catch (const bp::file::tFileSystemError&) {
+    } catch (const boost::filesystem::filesystem_error&) {
         // empty
     }
 

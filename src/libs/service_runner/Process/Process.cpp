@@ -43,10 +43,12 @@
 #include "ServiceProtocol.h"
 
 using namespace std;
+namespace bfs = boost::filesystem;
+namespace bpf = bp::file;
 
 
 static void 
-setupLogging(std::string levelArg, bp::file::Path pathArg)
+setupLogging(std::string levelArg, bfs::path pathArg)
 {
     bp::log::Configurator cfg;
     cfg.loadConfigFile();
@@ -131,14 +133,14 @@ ServiceRunner::runServiceProcess(int argc, const char ** argv)
     }
 
     std::string ipcName = argParser.argument("ipcName");
-    bp::file::Path providerPath(argParser.argument("providerPath"));
+    bfs::path providerPath(argParser.argument("providerPath"));
 
     // absolute first order of business, enable logging!
     if (argParser.argumentPresent("log") ||
         argParser.argumentPresent("logfile"))
     {
         std::string loglevel = argParser.argument("log");
-        bp::file::Path logfile(argParser.argument("logfile"));
+        bfs::path logfile(argParser.argument("logfile"));
         setupLogging(loglevel, logfile);
 
         // if we're redirecting to a file we'll intercept stdout && stderr  

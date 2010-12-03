@@ -44,6 +44,7 @@
 
 using namespace std;
 namespace bpf = bp::file;
+namespace bfs = boost::filesystem;
 namespace bpl = bp::localization;
 
 
@@ -55,7 +56,7 @@ namespace bpl = bp::localization;
 
 static void
 getVistaSelection(IFileOpenDialog* pDlg,
-                  vector<bpf::Path>* paths)
+                  vector<bfs::path>* paths)
 {
     paths->clear();
     if (!pDlg) {
@@ -84,7 +85,7 @@ getVistaSelection(IFileOpenDialog* pDlg,
             wstr.append(pwsz);
         }
         CoTaskMemFree(pwsz);
-        bpf::Path path(wstr);
+        bfs::path path(wstr);
         if (!path.empty()) {
             paths->push_back(path);
         }
@@ -186,18 +187,18 @@ public:
         return S_OK;
     }
 
-    void setPaths(vector<bpf::Path>* paths)
+    void setPaths(vector<bfs::path>* paths)
     {
         m_paths = paths;
     }
 
 private:
-    vector<bpf::Path>* m_paths;
+    vector<bfs::path>* m_paths;
 };
 
 
 bool runFileOpenDialog(const FileOpenDialogParms& parms,
-                       vector<bpf::Path>& vPaths)
+                       vector<bfs::path>& vPaths)
 {
     CComPtr<IFileOpenDialog> pDlg;
     COMDLG_FILTERSPEC filters[] = {
@@ -261,7 +262,7 @@ bool runFileOpenDialog(const FileOpenDialogParms& parms,
 
 
 bool runFileSaveDialog(const FileSaveDialogParms& parms,
-                       bp::file::Path& path)
+                       boost::filesystem::path& path)
 {
     // Setup the openfilename structure.
     OPENFILENAMEW ofn;

@@ -76,11 +76,12 @@ namespace process {
      *           inherit parents stdin/out/err handles.  (win32 only)
      * \return Success or failure
      */
-    bool spawn(const bp::file::Path& path,
+    bool spawn(const boost::filesystem::path& path,
                const std::vector<std::string>& vsArgs =
                      std::vector<std::string>(),
                spawnStatus* status = NULL,
-               const bp::file::Path& workingDirectory = bp::file::Path(),
+               const boost::filesystem::path& workingDirectory = 
+                     boost::filesystem::path(),
                const std::string& sTitle = std::string(),
                bool inheritWin32StdHandles = false );
         

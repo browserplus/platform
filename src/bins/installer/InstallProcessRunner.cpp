@@ -32,7 +32,7 @@
 #define TIMER_MSECS 1000
 #define MAX_TIMER_FIRES 10
 
-InstallProcessRunner::InstallProcessRunner(const bp::file::Path& logPath,
+InstallProcessRunner::InstallProcessRunner(const boost::filesystem::path& logPath,
                                            const std::string& logLevel)
     : m_logPath(logPath), m_logLevel(logLevel), m_listener(), m_ipcName(), m_server(),
       m_procStatus(), m_timer(), m_timerFires(0),
@@ -58,7 +58,7 @@ InstallProcessRunner::setListener(std::tr1::weak_ptr<bp::install::IInstallerList
 
 // allocate the underlying installer and get it running
 void
-InstallProcessRunner::start(const bp::file::Path& dir,
+InstallProcessRunner::start(const boost::filesystem::path& dir,
                             bool deleteWhenDone)
 {
     m_server.reset(new bp::ipc::ChannelServer);
@@ -73,12 +73,12 @@ InstallProcessRunner::start(const bp::file::Path& dir,
                         << " will be lost");
     }
 
-    bp::file::Path updaterExe = bp::file::canonicalProgramPath(dir/"BrowserPlusUpdater");
+    boost::filesystem::path updaterExe = bp::file::canonicalProgramPath(dir/"BrowserPlusUpdater");
     std::vector<std::string> args;
     args.push_back("-ipcName=" + m_ipcName);
-    args.push_back("-logPath=" + m_logPath.externalUtf8());
+    args.push_back("-logPath=" + m_logPath.string());
     args.push_back("-logLevel=" + m_logLevel);
-    args.push_back(dir.externalUtf8());
+    args.push_back(dir.string());
     if (bp::process::spawn(updaterExe, args, &m_procStatus,
                            dir, "BrowserPlusUpdater")) {
         // set a timer to catch non-responsive updater

@@ -58,13 +58,13 @@ namespace bp {
          *   will be kept.  Throws a fatal exception on failure.
          *   \return   path to product base directory
          */
-        bp::file::Path getProductTopDirectory();
+        boost::filesystem::path getProductTopDirectory();
 
         /**
          *   Get path to product temp directory
          *   \return   path to product temp directory
          */
-        bp::file::Path getProductTempDirectory();
+        boost::filesystem::path getProductTempDirectory();
 
         /**
          *   Get path to "base" directory for specified version.
@@ -73,34 +73,34 @@ namespace bp {
          *   current version.  Throws a fatal exception on failure.
          *   \return   path to versioned product base directory 
          */
-        bp::file::Path getProductDirectory(int major = -1, 
-                                           int minor = -1, 
-                                           int micro = -1);  
+        boost::filesystem::path getProductDirectory(int major = -1, 
+                                                    int minor = -1, 
+                                                    int micro = -1);  
 
         /**
          *  Get path to product permissions directory
          *  Throws a fatal exception on failure.
          *  \return   path to product permissions directory 
          */
-        bp::file::Path getPermissionsDirectory();
+        boost::filesystem::path getPermissionsDirectory();
         
         /**
          *  Get path to daemon.
          *  Throws a fatal exception on failure.
          *  \return    path to daemon
          */
-        bp::file::Path getDaemonPath(int major = -1,
-                                     int minor = -1,
-                                     int micro = -1);
+        boost::filesystem::path getDaemonPath(int major = -1,
+                                              int minor = -1,
+                                              int micro = -1);
 
         /**
          *   Get path to daemon log
          *   Throws a fatal exception on failure.
          *   \return   path to daemon log
          */
-        bp::file::Path getDaemonLogPath(int major = -1,
-										int minor = -1,
-										int micro = -1);
+        boost::filesystem::path getDaemonLogPath(int major = -1,
+                                                 int minor = -1,
+                                                 int micro = -1);
 
         /**
          *  Get path to service runner binary (typically installed
@@ -110,32 +110,32 @@ namespace bp {
          *  Throws a fatal exception on failure.
          *  \return    path to service runner binary
          */
-        bp::file::Path getRunnerPath(int major = -1,
-                                     int minor = -1,
-                                     int micro = -1);
+        boost::filesystem::path getRunnerPath(int major = -1,
+                                              int minor = -1,
+                                              int micro = -1);
          
         /**
          *  Get path to service installer.
          *  Throws a fatal exception on failure.
          *  \return    path to service installer
          */
-        bp::file::Path getServiceInstallerPath(int major = -1,
-                                               int minor = -1,
-                                               int micro = -1);
+        boost::filesystem::path getServiceInstallerPath(int major = -1,
+                                                        int minor = -1,
+                                                        int micro = -1);
 
         /**
          *   Get path to service directory.
          *   Throws a fatal exception on failure.
          *   \return   path to service directory
          */
-        bp::file::Path getServiceDirectory();
+        boost::filesystem::path getServiceDirectory();
         
         /**
          *   Get path to service cache directory.
          *   Throws a fatal exception on failure.
          *   \return   path to service cache directory
          */
-        bp::file::Path getServiceCacheDirectory();
+        boost::filesystem::path getServiceCacheDirectory();
         
         /**
          *   Get path to cached service interface (stored on disk in json
@@ -143,22 +143,22 @@ namespace bp {
          *   Throws a fatal exception on failure.
          *   \return path to pid file
          */
-        bp::file::Path getServiceInterfaceCachePath();
+        boost::filesystem::path getServiceInterfaceCachePath();
         
         /**
          *   Get path to platform cache directory.
          *   Throws a fatal exception on failure.
          *   \return   path to platform cache directory
          */
-        bp::file::Path getPlatformCacheDirectory();
+        boost::filesystem::path getPlatformCacheDirectory();
 
         /**
          *   Get path to service data directory.
          *   Throws a fatal exception on failure.
          *   \return   path to service data directory
          */
-        bp::file::Path getServiceDataDirectory(std::string name,
-                                               unsigned int major_ver);
+        boost::filesystem::path getServiceDataDirectory(std::string name,
+                                                        unsigned int major_ver);
         
         /**
          *   Get path to sandboxed directory to which plugin can write.
@@ -167,9 +167,9 @@ namespace bp {
          *   Throws a fatal exception on failure.
          *   \return   path to writable directory
          */
-        bp::file::Path getPluginWritableDirectory(int major = -1, 
-                                                  int minor = -1, 
-                                                  int micro = -1);
+        boost::filesystem::path getPluginWritableDirectory(int major = -1, 
+                                                           int minor = -1, 
+                                                           int micro = -1);
 
         /**
          *   Get path to a writable directory whose path is obfuscated
@@ -177,9 +177,9 @@ namespace bp {
          *   Throws a fatal exception on failure.
          *   \return   path to writable directory
          */
-        bp::file::Path getObfuscatedWritableDirectory(int major = -1,
-                                                      int minor = -1,
-                                                      int micro = -1);
+        boost::filesystem::path getObfuscatedWritableDirectory(int major = -1,
+                                                               int minor = -1,
+                                                               int micro = -1);
 
         /**
          *   Get path to configfile, as a side effect creates 
@@ -188,9 +188,9 @@ namespace bp {
          *   Throws a fatal exception on failure.
          *   \return path to pid file
          */
-        bp::file::Path getConfigFilePath(int major = -1, 
-                                         int minor = -1, 
-                                         int micro = -1);
+        boost::filesystem::path getConfigFilePath(int major = -1, 
+                                                  int minor = -1, 
+                                                  int micro = -1);
         
         /**
          *  Get path to platform scoped localized strings file.  
@@ -198,23 +198,23 @@ namespace bp {
          *  Throws a fatal exception on failure.
          *  Use bp::localization methods to interact with localized strings.
          */
-        bp::file::Path getLocalizedStringsPath(int major = -1,
-                                               int minor = -1,
-                                               int micro = -1,
-                                               bool useUpdateCache = false);
+        boost::filesystem::path getLocalizedStringsPath(int major = -1,
+                                                        int minor = -1,
+                                                        int micro = -1,
+                                                        bool useUpdateCache = false);
         
         /**
          *   Get path to certificate file. 
          *   Throws a fatal exception on failure.
          *   \return path to certificates file
          */
-        bp::file::Path getCertFilePath();
+        boost::filesystem::path getCertFilePath();
         
         /**
          *   Get path to cached permissions.
          *   Throws a fatal exception on failure.
          */
-        bp::file::Path getPermissionsPath();
+        boost::filesystem::path getPermissionsPath();
 
         /**
          *   Get path to persistent state file.  Usage of the persistent
@@ -222,20 +222,20 @@ namespace bp {
          *   interact with this file directly.  
          *   Throws a fatal exception on failure.
          */
-        bp::file::Path getPersistentStatePath(int major = -1,
-                                              int minor = -1,
-                                              int micro = -1);
+        boost::filesystem::path getPersistentStatePath(int major = -1,
+                                                       int minor = -1,
+                                                       int micro = -1);
         
         /**
          *  Get path to domain permissions file.  
          *  Throws a fatal exception on failure.
          */
-        bp::file::Path getDomainPermissionsPath();
+        boost::filesystem::path getDomainPermissionsPath();
         
         /**
          *  Get path to installation ID file.  
          */
-        bp::file::Path getInstallIDPath();
+        boost::filesystem::path getInstallIDPath();
         
         /**
          *   Form version string (e.g. "1.0.1")
@@ -295,9 +295,9 @@ namespace bp {
          *   Letting all args default gets current version.
          *   Throws a fatal exception on failure.
          */
-        bp::file::Path getBPInstalledPath(int major = -1, 
-                                          int minor = -1, 
-                                          int micro = -1);
+        boost::filesystem::path getBPInstalledPath(int major = -1, 
+                                                   int minor = -1, 
+                                                   int micro = -1);
         
         /** 
          *   Get path to file which is written at the very beginning of 
@@ -307,9 +307,9 @@ namespace bp {
          *   Letting all args default gets current version.
          *   Throws a fatal exception on failure.
          */
-        bp::file::Path getBPInstallingPath(int major = -1, 
-                                           int minor = -1, 
-                                           int micro = -1);
+        boost::filesystem::path getBPInstallingPath(int major = -1, 
+                                                    int minor = -1, 
+                                                    int micro = -1);
         
         /** 
          *   Get path to file whose presence indicates that BrowserPlus
@@ -317,34 +317,34 @@ namespace bp {
          *   Letting all args default gets current version.
          *   Throws a fatal exception on failure.
          */
-        bp::file::Path getBPDisabledPath(int major = -1, 
-                                         int minor = -1, 
-                                         int micro = -1);
+        boost::filesystem::path getBPDisabledPath(int major = -1, 
+                                                  int minor = -1, 
+                                                  int micro = -1);
         
         /**
          *   Get path to uninstaller executable
          *   Throws a fatal exception on failure.
          */
-        bp::file::Path getUninstallerPath();
+        boost::filesystem::path getUninstallerPath();
         
         /** 
          *   Get path to the HTML file which contains the component
          *   install dialog.
          */
-        bp::file::Path getComponentInstallDialogPath(const std::string & locale);
+        boost::filesystem::path getComponentInstallDialogPath(const std::string & locale);
 
         /** 
          *   Get path to the HTML file which contains the preference
          *   panel
          */
-        bp::file::Path getPreferencePanelUIPath(const std::string & locale);
+        boost::filesystem::path getPreferencePanelUIPath(const std::string & locale);
         
         /**
          *   Get paths to plugins
          */
-        std::vector<bp::file::Path> getPluginPaths(int major = -1,
-                                                   int minor = -1,
-                                                   int micro = -1);
+        std::vector<boost::filesystem::path> getPluginPaths(int major = -1,
+                                                            int minor = -1,
+                                                            int micro = -1);
 
         /**
          *   Make sure that all needed directories exist, creating

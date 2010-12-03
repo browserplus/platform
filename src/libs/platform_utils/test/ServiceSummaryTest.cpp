@@ -56,8 +56,8 @@ ServiceSummaryTest::standaloneTest()
         "    ]"
         "}";
 
-    std::vector<bp::file::Path> filesToTouch;
-    filesToTouch.push_back(bp::file::Path(("lib.dll")));
+    std::vector<boost::filesystem::path> filesToTouch;
+    filesToTouch.push_back(boost::filesystem::path(("lib.dll")));
 
     // now create it
     createService(manifestJson, filesToTouch);
@@ -135,8 +135,8 @@ ServiceSummaryTest::shutdownDelayTest()
         "    \"shutdownDelaySecs\": 42"
         "}";
 
-    std::vector<bp::file::Path> filesToTouch;
-    filesToTouch.push_back(bp::file::Path("lib.dll"));
+    std::vector<boost::filesystem::path> filesToTouch;
+    filesToTouch.push_back(boost::filesystem::path("lib.dll"));
 
     // now create it
     createService(manifestJson, filesToTouch);
@@ -154,13 +154,13 @@ ServiceSummaryTest::shutdownDelayTest()
 
 void
 ServiceSummaryTest::createService(const char * manifestJson,
-                                  std::vector<bp::file::Path> filesToTouch)
+                                  std::vector<boost::filesystem::path> filesToTouch)
 {
-    bp::file::Path mPath = m_testServiceDir / "manifest.json";
+    boost::filesystem::path mPath = m_testServiceDir / "manifest.json";
     CPPUNIT_ASSERT(bp::strutil::storeToFile(mPath, manifestJson));
     
     for (unsigned int i = 0; i < filesToTouch.size(); i++) {
-        bp::file::Path fPath = m_testServiceDir / filesToTouch[i];
+        boost::filesystem::path fPath = m_testServiceDir / filesToTouch[i];
         CPPUNIT_ASSERT(bp::strutil::storeToFile(fPath, "foo"));
     }
 }
@@ -168,7 +168,7 @@ ServiceSummaryTest::createService(const char * manifestJson,
 void ServiceSummaryTest::setUp()
 {
     // now create our a test directory
-    bp::file::Path dir = bp::file::getTempDirectory();
+    boost::filesystem::path dir = bp::file::getTempDirectory();
     dir = bp::file::getTempPath(dir, "ServiceSummaryTest");
     CPPUNIT_ASSERT( boost::filesystem::create_directories(dir) );
     m_testServiceDir = dir;
@@ -176,5 +176,5 @@ void ServiceSummaryTest::setUp()
 
 void ServiceSummaryTest::tearDown()
 {
-    CPPUNIT_ASSERT(bp::file::remove(m_testServiceDir));
+    CPPUNIT_ASSERT(bp::file::safeRemove(m_testServiceDir));
 }

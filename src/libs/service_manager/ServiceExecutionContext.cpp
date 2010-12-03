@@ -76,7 +76,7 @@ void
 ServiceExecutionContext::promptUser(
         weak_ptr<IServiceExecutionContextListener> l,
         unsigned int id,
-        const bp::file::Path&,
+        const boost::filesystem::path&,
         const bp::Object *)  
 {
     if(shared_ptr<IServiceExecutionContextListener> r = l.lock()) {

@@ -47,7 +47,7 @@ static std::string s_singleFileContents("this is a test file.  It's"
 
 // create a directory and hierarchy under it with test data files
 static
-bool createDirectoryTestData(const bpf::Path & dirPath)
+bool createDirectoryTestData(const bfs::path & dirPath)
 {
     // create the directory
     if (!bfs::create_directories(dirPath)) {
@@ -55,24 +55,24 @@ bool createDirectoryTestData(const bpf::Path & dirPath)
     }
     
     // create a single file underneath
-    bpf::Path singleFilePath = dirPath / "singlefile";
+    bfs::path singleFilePath = dirPath / "singlefile";
     if (!bp::strutil::storeToFile(singleFilePath, s_singleFileContents)) {
         return false;
     }
 
     // create a read only file
-    bpf::Path readOnlyFilePath = dirPath / "readonly.foo";
+    bfs::path readOnlyFilePath = dirPath / "readonly.foo";
     if (!bp::strutil::storeToFile(readOnlyFilePath, std::string("foo"))) {
         return false;
     }
 
     // toggle bits to make this thing read only
-    if (!bp::file::makeReadOnly(readOnlyFilePath)) {
+    if (!bpf::makeReadOnly(readOnlyFilePath)) {
         return false;
     }
 
     // create a nested file
-    bpf::Path nestedFilePath = dirPath/"levelone"/"leveltwo"/"levelthree";
+    bfs::path nestedFilePath = dirPath/"levelone"/"leveltwo"/"levelthree";
     if (!bfs::create_directories(nestedFilePath)) {
         return false;
     }
@@ -87,13 +87,13 @@ bool createDirectoryTestData(const bpf::Path & dirPath)
 // validate that a directory hierarchy contains data properly generated
 // by createTestData
 static
-bool verifyDirectoryTestData(const bpf::Path & dirPath)
+bool verifyDirectoryTestData(const bfs::path & dirPath)
 {
     if (!bpf::isDirectory(dirPath)) return false;
 
     // verify existence and contents of top level file
     {
-        bpf::Path singleFilePath = dirPath / "singlefile";
+        bfs::path singleFilePath = dirPath / "singlefile";
         std::string fileContents;
         if (!bp::strutil::loadFromFile(singleFilePath, fileContents)) {
             return false;
@@ -105,10 +105,10 @@ bool verifyDirectoryTestData(const bpf::Path & dirPath)
 
     // verify existence and perms on  read only file
     {
-        bpf::Path readOnlyFilePath = dirPath / "readonly.foo";
+        bfs::path readOnlyFilePath = dirPath / "readonly.foo";
 
-        bp::file::FileInfo fi;
-        if (!bp::file::statFile(readOnlyFilePath, fi)) {
+        bpf::FileInfo fi;
+        if (!bpf::statFile(readOnlyFilePath, fi)) {
             return false;
         }
         
@@ -119,9 +119,9 @@ bool verifyDirectoryTestData(const bpf::Path & dirPath)
 
     // verify existence of nested file
     {
-        bpf::Path nestedFilePath = dirPath/"levelone"/"leveltwo"/"levelthree"/"thefile.txt";
+        bfs::path nestedFilePath = dirPath/"levelone"/"leveltwo"/"levelthree"/"thefile.txt";
 
-        if (!bpf::exists(nestedFilePath)) {
+        if (!bpf::pathExists(nestedFilePath)) {
             return false;
         }
     }
@@ -130,7 +130,7 @@ bool verifyDirectoryTestData(const bpf::Path & dirPath)
 }
 
 static
-bool createFileTestData(const bpf::Path & filePath)
+bool createFileTestData(const bfs::path & filePath)
 {
     return bp::strutil::storeToFile(filePath, s_testString);
 }
@@ -146,11 +146,12 @@ BPTARTest::testDirectoryRoundTrip()
         bp::tar::Create tc;
         CPPUNIT_ASSERT(tc.open(m_tarPath));
 
-        bpf::tRecursiveDirIter end;
-        for (bpf::tRecursiveDirIter it(m_testDirPath); it != end; ++it) 
+        bfs::recursive_directory_iterator end;
+
+        for (bfs::recursive_directory_iterator it(m_testDirPath); it != end; ++it)
         {
-            bpf::Path rel = bpf::Path(it->path()).relativeTo(m_testDirPath);
-            CPPUNIT_ASSERT(tc.addFile(bpf::Path(*it), rel));
+            bfs::path rel = bpf::relativeTo(it->path(), m_testDirPath);
+            CPPUNIT_ASSERT(tc.addFile(bfs::path(*it), rel));
         }
         
         CPPUNIT_ASSERT(tc.close());
@@ -161,10 +162,10 @@ BPTARTest::testDirectoryRoundTrip()
     {
         bp::tar::Extract te;        
         CPPUNIT_ASSERT(te.open(m_tarPath));
-        std::vector<bpf::Path> contents = te.enumerateContents();
+        std::vector<bfs::path> contents = te.enumerateContents();
         bool haveTheFileTxt = false;
         bool haveSinglefile = false;        
-        bpf::Path thefile("levelone/leveltwo/levelthree/thefile.txt");
+        bfs::path thefile("levelone/leveltwo/levelthree/thefile.txt");
         
         for (unsigned int i = 0; i < contents.size(); i++) {
             if (thefile == contents[i]) 
@@ -173,7 +174,7 @@ BPTARTest::testDirectoryRoundTrip()
                 continue;
             }
 
-            if (bpf::Path("singlefile") == contents[i]) 
+            if (bfs::path("singlefile") == contents[i])
             {
                 haveSinglefile = true;
                 continue;
@@ -198,27 +199,26 @@ BPTARTest::testDirectoryRoundTrip()
 void
 BPTARTest::setUp()
 {
-    m_testDirPath = bp::file::getTempPath(bp::file::getTempDirectory(), "BPTAR")/"не_е_англиски";
+    m_testDirPath = bpf::getTempPath(bpf::getTempDirectory(), "BPTAR")/"не_е_англиски";
     
     m_testFilePath =
-        bp::file::getTempPath(bp::file::getTempDirectory(), "BPTAR_file");
+        bpf::getTempPath(bpf::getTempDirectory(), "BPTAR_file");
 
     (void) createDirectoryTestData(m_testDirPath);
     (void) createFileTestData(m_testFilePath);
     
-    m_tarPath = bp::file::getTempPath(bp::file::getTempDirectory(), "BPTAR");
+    m_tarPath = bpf::getTempPath(bpf::getTempDirectory(), "BPTAR");
     m_tarPath.replace_extension(bp::pkg::extension());
 
-    m_unpackPath = 
-        bp::file::getTempPath(bp::file::getTempDirectory(), "BPTAR");
+    m_unpackPath = bpf::getTempPath(bpf::getTempDirectory(), "BPTAR");
 }
 
 void
 BPTARTest::tearDown()
 {
-    (void) bp::file::remove(m_testDirPath.parent_path());
-    (void) bp::file::remove(m_testFilePath);
-    (void) bp::file::remove(m_tarPath);
-    (void) bp::file::remove(m_unpackPath);
+    (void) bpf::safeRemove(m_testDirPath.parent_path());
+    (void) bpf::safeRemove(m_testFilePath);
+    (void) bpf::safeRemove(m_tarPath);
+    (void) bpf::safeRemove(m_unpackPath);
 }
 

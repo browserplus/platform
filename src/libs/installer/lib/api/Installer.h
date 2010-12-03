@@ -109,8 +109,8 @@ class Installer
     static const char* kServicesDownloading;
     static const char* kNewerVersionInstalled;
 
-    Installer(const bp::file::Path& dir,
-			  const bp::file::Path& logFile,
+    Installer(const boost::filesystem::path& dir,
+			  const boost::filesystem::path& logFile,
 			  bp::log::Level logLevel,
               bool deleteWhenDone = false);
     virtual ~Installer();
@@ -122,7 +122,7 @@ class Installer
     // begin installation, inside this call the listener's 
     void run(); // throws std::string
 
-    static void setLocalizedStringsPath(const bp::file::Path& path,
+    static void setLocalizedStringsPath(const boost::filesystem::path& path,
                                         const std::string& locale) {
         s_locale = locale;
         s_stringsPath = path;
@@ -144,24 +144,24 @@ class Installer
     void sendStatus(const std::string& s);
     void sendError(const std::string&s);
     void sendDone();
-    void doCopy(const bp::file::Path& src,
-                const bp::file::Path& dest);  // throws
-    void doSingleFileCopy(const bp::file::Path& src,
-                          const bp::file::Path& dest);
+    void doCopy(const boost::filesystem::path& src,
+                const boost::filesystem::path& dest);  // throws
+    void doSingleFileCopy(const boost::filesystem::path& src,
+                          const boost::filesystem::path& dest);
     void removePlatform(const bp::SemanticVersion& version);
     void disablePlugins(const bp::SemanticVersion& version);
-    bool filesAreIdentical(const bp::file::Path& f1,
-                           const bp::file::Path& f2);
+    bool filesAreIdentical(const boost::filesystem::path& f1,
+                           const boost::filesystem::path& f2);
 
-    bp::file::Path m_dir;
-	bp::file::Path m_logFile;
+    boost::filesystem::path m_dir;
+	boost::filesystem::path m_logFile;
 	bp::log::Level m_logLevel;
     bool m_deleteWhenDone;
     bp::SemanticVersion m_version;
     std::tr1::weak_ptr<IInstallerListener> m_listener;
 
     static std::string s_locale;
-    static bp::file::Path s_stringsPath;
+    static boost::filesystem::path s_stringsPath;
 };
 
 }}

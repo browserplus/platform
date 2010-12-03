@@ -41,12 +41,14 @@
 
 using namespace std;
 using namespace std::tr1;
+namespace bfs = boost::filesystem;
+namespace bpf = bp::file;
 
 bp::runloop::RunLoop s_rl;
 
 class ServiceUpdateListener : public IDistQueryListener {
 public:
-    ServiceUpdateListener(DistQuery* dq, bp::file::Path& downloadPath, bp::file::Path& certFile)
+    ServiceUpdateListener(DistQuery* dq, bfs::path& downloadPath, bfs::path& certFile)
         : m_distQuery(dq)
         , m_downloadSuccess(false)
         , m_downloadPath(downloadPath)
@@ -121,11 +123,11 @@ private:
         // is removed, the directory and dll will still exist,
         // but the manifest file won't (since windows can't remove
         // open files or their containing dirs).
-        bp::file::Path serviceDir(m_downloadPath);
+        bfs::path serviceDir(m_downloadPath);
         ServiceList::const_iterator it;
         for (it = clist.begin(); it != clist.end(); ++it) {
-            bp::file::Path path = serviceDir / it->first / it->second / "manifest.json";
-            if (bp::file::exists(path)) {
+            bfs::path path = serviceDir / it->first / it->second / "manifest.json";
+            if (bpf::pathExists(path)) {
                 m_completedServices.push_back(*it);
             }
             else {
@@ -150,8 +152,8 @@ private:
 private:
     DistQuery* m_distQuery;
     bool m_downloadSuccess;
-    bp::file::Path m_downloadPath;
-    bp::file::Path m_certFile;
+    bfs::path m_downloadPath;
+    bfs::path m_certFile;
     std::string m_serviceName;
     std::string m_serviceVersion;
     ServiceList m_neededServices;
@@ -222,7 +224,7 @@ setupLogging(const APTArgParse& argParser)
     bp::log::removeAllAppenders();
 
     std::string config = argParser.argument("log");
-    bp::file::Path path(argParser.argument("logfile"));
+    bfs::path path(argParser.argument("logfile"));
 
     if (config.empty() && path.empty()) return;
     if (config.empty()) config = "info";
@@ -304,7 +306,7 @@ private:
                     const bp::Object *) { }
     void onPrompt(ServiceRunner::Controller *, unsigned int,
                   unsigned int,
-                  const bp::file::Path &,
+                  const bfs::path &,
                   const bp::Object *) { }
     void onInstallHook(ServiceRunner::Controller * c,
                        int code) { }
@@ -319,7 +321,7 @@ public:
 };
 
 bool
-downloadRequires(const std::list<std::string>& distroServers, bp::service::Summary s, bp::file::Path& downloadPath, bp::file::Path& certFile, ServiceList& pathList, bool useInstalled) {
+downloadRequires(const std::list<std::string>& distroServers, bp::service::Summary s, bfs::path& downloadPath, bfs::path& certFile, ServiceList& pathList, bool useInstalled) {
     // generate list of ServiceRequireStatements
     std::list<ServiceRequireStatement> reqStmts;
     ServiceRequireStatement reqStmt;
@@ -426,7 +428,7 @@ main(int argc, const char ** argv)
             std::string service(argv[argc - 2]), version(argv[argc - 1]);
             controller.reset(new ServiceRunner::Controller(service, version));
         } else {
-            bp::file::Path path(argv[argc - 1]);
+            bfs::path path(argv[argc - 1]);
             controller.reset(new ServiceRunner::Controller(path));            
         }
 
@@ -447,7 +449,7 @@ main(int argc, const char ** argv)
             exit(1);
         }
 
-        bp::file::Path providerPath;
+        bfs::path providerPath;
         // if a path was specified on the command line, we'll
         // use that
         if (argParser.argumentPresent("providerPath")) {
@@ -457,7 +459,7 @@ main(int argc, const char ** argv)
         // for dependent services we'll need to concoct a reasonable
         // path to the provider service
         if (s.type() == bp::service::Summary::Dependent) {
-            bp::file::Path downloadPath;
+            bfs::path downloadPath;
             // This should be the location to the provider services.
             std::list<std::string> distroServers;
             if (argParser.argumentPresent("distroServer")) {
@@ -470,14 +472,14 @@ main(int argc, const char ** argv)
                 ServiceList pathList;
                 downloadPath = argParser.argument("downloadPath");
                 // This should be the location to the provider services.
-                bp::file::Path certFile;
+                bfs::path certFile;
                 if (argParser.argumentPresent("certFile")) {
                     certFile = argParser.argument("certFile");
                 }
                 else {
                     // Default cert file distributes in same directory as current executable.
                     // Try that one if none passed in with command-line arguments.
-                    bp::file::Path p1 = bp::file::programPath();
+                    bfs::path p1 = bpf::programPath();
                     certFile = p1.parent_path() / "BrowserPlus.crt";
                 }
                 if (!downloadRequires(distroServers, s, downloadPath, certFile, pathList, false)) {
@@ -517,7 +519,7 @@ main(int argc, const char ** argv)
         s_rl.init();
 
         // specify our own binary as the "harness program"
-        bp::file::Path harnessProgram = bp::file::canonicalProgramPath(bp::file::Path(argv[0]));
+        bfs::path harnessProgram = bpf::canonicalProgramPath(bfs::path(argv[0]));
 
         // let's try to figure out a meaningful process title
         std::string processTitle, summary;
@@ -535,7 +537,7 @@ main(int argc, const char ** argv)
         // now start the controller
         if (!controller->run(harnessProgram, providerPath, processTitle,
                              argParser.argument("log"),
-                             bp::file::Path(argParser.argument("logfile")),
+                             bfs::path(argParser.argument("logfile")),
                              err))
         {
             std::stringstream ss;

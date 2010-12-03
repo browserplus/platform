@@ -402,13 +402,13 @@ BPSession::variantToBPObject( const plugin::Variant* input,
                 }
 
                 if (0 == std::string("writablePath").compare(type)) {
-                    bp::file::Path path = BPHandleMapper::writableHandleValue(
+                    boost::filesystem::path path = BPHandleMapper::writableHandleValue(
                         BPHandle(type, id, name, size, mimeTypes, true));
                     if (!path.empty()) {
                         output = new bp::WritablePath(path);
                     }
                 } else {
-                    bp::file::Path path = BPHandleMapper::handleValue(
+                    boost::filesystem::path path = BPHandleMapper::handleValue(
                         BPHandle(type, id, name, size, mimeTypes, false));
                     if (!path.empty()) {
                         output = new bp::Path(path);

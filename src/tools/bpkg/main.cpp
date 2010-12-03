@@ -27,6 +27,8 @@
 #include "BPUtils/bpfile.h"
 #include "platform_utils/APTArgParse.h"
 
+namespace bfs = boost::filesystem;
+namespace bpf = bp::file;
 
 static APTArgDefinition s_packArgs[] =
 {
@@ -111,13 +113,13 @@ main(int argc, const char ** argv)
             return 1;
         }
         
-        bp::file::Path inPath(packArgParser.argument("in"));
-        bp::file::Path outPath(packArgParser.argument("out"));
+        bfs::path inPath(packArgParser.argument("in"));
+        bfs::path outPath(packArgParser.argument("out"));
         if (outPath.empty()) outPath = "contents.bpkg";
-        bp::file::Path publicKey(packArgParser.argument("publicKey"));
-        bp::file::Path privateKey(packArgParser.argument("privateKey"));
+        bfs::path publicKey(packArgParser.argument("publicKey"));
+        bfs::path privateKey(packArgParser.argument("privateKey"));
 
-        if (bp::file::isRegularFile(packArgParser.argument("in")))
+        if (bpf::isRegularFile(packArgParser.argument("in")))
         {
             if (!bp::pkg::packFile(privateKey, publicKey, 
                                    packArgParser.argument("password"), 
@@ -127,7 +129,7 @@ main(int argc, const char ** argv)
                 return 1;
             }
         }
-        else if (bp::file::isDirectory(inPath))
+        else if (bpf::isDirectory(inPath))
         {
             if (!bp::pkg::packDirectory(privateKey, publicKey,
                                         packArgParser.argument("password"),
@@ -151,10 +153,10 @@ main(int argc, const char ** argv)
             return 1;
         }
 
-        bp::file::Path inPath(packArgParser.argument("in"));
-        bp::file::Path outPath(packArgParser.argument("out"));
+        bfs::path inPath(packArgParser.argument("in"));
+        bfs::path outPath(packArgParser.argument("out"));
         if (outPath.empty()) outPath = "contents";
-        bp::file::Path publicKey(packArgParser.argument("publicKey"));
+        bfs::path publicKey(packArgParser.argument("publicKey"));
 
         std::string ign;
         BPTime timestamp;

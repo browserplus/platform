@@ -59,10 +59,10 @@ stringRefToUTF8(CFStringRef cfStr)
 
 // Get a path via FSFindFolder
 //
-bp::file::Path
+boost::filesystem::path
 bp::install::utils::getFolderPath(int selector)
 {
-    bp::file::Path rval;
+    boost::filesystem::path rval;
     FSRef fref;
     OSErr err = FSFindFolder(kUserDomain, selector, kCreateFolder, &fref);
     if (err != noErr) {

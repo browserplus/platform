@@ -145,7 +145,7 @@ NP_Initialize(NPNetscapeFuncs* browserFuncs,
     // create needed directories
     bp::paths::createDirectories();
 
-    bp::plugin::setupLogging( bp::file::Path("bpnpapi.log") );
+    bp::plugin::setupLogging( boost::filesystem::path("bpnpapi.log") );
     BPInitialize();
     gBrowserFuncs = *browserFuncs;
     return NPERR_NO_ERROR;

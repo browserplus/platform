@@ -46,8 +46,9 @@
 
 using namespace std;
 using namespace bp::file;
+namespace bfs = boost::filesystem;
 
-static Path
+static bfs::path
 getCSIDL(int csidl)
 {
     wchar_t wcPath[MAX_PATH] = {0};
@@ -62,29 +63,28 @@ getCSIDL(int csidl)
         BP_THROW_FATAL(ss.str());
     }
 
-    Path productDir(wcPath);
-
+    bfs::path productDir(wcPath);
     return productDir;
 }
 
 
-Path
+bfs::path
 bp::paths::getProductTopDirectory()
 {
-    Path prodDir = getCSIDL(CSIDL_LOCAL_APPDATA) 
-                   / getCompanyName() / getProductName();
+    bfs::path prodDir = getCSIDL(CSIDL_LOCAL_APPDATA) 
+                        / getCompanyName() / getProductName();
     return prodDir;
 }
 
 
-Path
+bfs::path
 bp::paths::getPluginWritableDirectory(int major,
                                       int minor,
                                       int micro)
 {
     string osVersion = bp::os::PlatformVersion();
     bool isVistaOrLater = (osVersion.compare("6") >= 0);
-    Path productDir;
+    bfs::path productDir;
     if (isVistaOrLater) {
 #ifdef NOTDEF
         // Protected mode Internet Explorer can read/write to
@@ -108,7 +108,7 @@ bp::paths::getPluginWritableDirectory(int major,
     } else {
         productDir = getCSIDL(CSIDL_LOCAL_APPDATA);
     }
-    productDir /= Path(getCompanyName())/getProductName()/versionString(major, minor, micro);
+    productDir /= bfs::path(getCompanyName())/getProductName()/versionString(major, minor, micro);
     return productDir;
 }
 
@@ -152,21 +152,21 @@ bp::paths::getIPCLockName(int major,
 }
 
 
-vector<Path> 
+vector<bfs::path> 
 bp::paths::getPluginPaths(int major,
                           int minor,
                           int micro)
 {
-    vector<Path> rval;
-    Path pluginDir = getProductDirectory(major, minor, micro);
+    vector<bfs::path> rval;
+    bfs::path pluginDir = getProductDirectory(major, minor, micro);
     pluginDir /= "Plugins";
 
-    Path ax(pluginDir);
-    ax /= Path("YBPAddon_" + versionString(major, minor, micro) + ".dll");
+    bfs::path ax(pluginDir);
+    ax /= bfs::path("YBPAddon_" + versionString(major, minor, micro) + ".dll");
     rval.push_back(ax);
 
-    Path npapi(pluginDir);
-    npapi /= Path("npybrowserplus_" + versionString(major, minor, micro) + ".dll");
+    bfs::path npapi(pluginDir);
+    npapi /= bfs::path("npybrowserplus_" + versionString(major, minor, micro) + ".dll");
     rval.push_back(npapi);
 
     return rval;

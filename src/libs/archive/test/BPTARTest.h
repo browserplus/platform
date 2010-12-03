@@ -49,10 +49,10 @@ class BPTARTest : public CPPUNIT_NS::TestCase
     void testDirectoryRoundTrip();
     
   private:
-    bp::file::Path m_testDirPath;
-    bp::file::Path m_testFilePath;
-    bp::file::Path m_tarPath;
-    bp::file::Path m_unpackPath;
+    boost::filesystem::path m_testDirPath;
+    boost::filesystem::path m_testFilePath;
+    boost::filesystem::path m_tarPath;
+    boost::filesystem::path m_unpackPath;
 };
 
 #endif

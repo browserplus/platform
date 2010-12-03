@@ -44,7 +44,7 @@ namespace log {
 class FileAppender : public Appender
 {
 public:
-    FileAppender( const bp::file::Path& path,
+    FileAppender( const boost::filesystem::path& path,
                   LayoutPtr layout,
                   FileMode mode,
                   unsigned int nRolloverSizeKB,
@@ -56,7 +56,7 @@ public:
     
 private:
     // path to log file
-    bp::file::Path  m_path;
+    boost::filesystem::path  m_path;
 
     // file stream - stays open between appends
     std::ofstream   m_fstream;

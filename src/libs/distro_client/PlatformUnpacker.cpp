@@ -32,23 +32,23 @@
 #include "BPUtils/BPLog.h"
 
 using namespace std;
-using namespace bp::file;
+namespace bpf = bp::file;
 namespace bfs = boost::filesystem;
 
 
 PlatformUnpacker::PlatformUnpacker(const std::vector<unsigned char> & buf,
-                                   const Path& destDir,
+                                   const bfs::path& destDir,
                                    const std::string& version,
-                                   const Path& certFile)
+                                   const bfs::path& certFile)
     : Unpacker(buf, certFile), m_version(version), m_destDir(destDir)
 {
 }
 
 
-PlatformUnpacker::PlatformUnpacker(const Path& pkgFile,
-                                   const Path& destDir,
+PlatformUnpacker::PlatformUnpacker(const bfs::path& pkgFile,
+                                   const bfs::path& destDir,
                                    const std::string& version,
-                                   const Path& certFile)
+                                   const bfs::path& certFile)
     : Unpacker(pkgFile, certFile), m_version(version), m_destDir(destDir)
 {
 }
@@ -57,7 +57,7 @@ PlatformUnpacker::PlatformUnpacker(const Path& pkgFile,
 PlatformUnpacker::~PlatformUnpacker()
 {
     if (!m_tmpDir.empty()) {
-        remove(m_tmpDir);
+        (void) bpf::safeRemove(m_tmpDir);
     }
 }
 
@@ -65,7 +65,7 @@ PlatformUnpacker::~PlatformUnpacker()
 bool
 PlatformUnpacker::unpack(string& errMsg)
 {
-    m_tmpDir = getTempPath(getTempDirectory(), "PlatformUnpacker");
+    m_tmpDir = bpf::getTempPath(bpf::getTempDirectory(), "PlatformUnpacker");
     return Unpacker::unpackTo(m_tmpDir, errMsg);
 }
 
@@ -74,35 +74,35 @@ bool
 PlatformUnpacker::install(string& errMsg)
 {
     errMsg.clear();
-    Path platformDir = m_destDir / m_version;
+    bfs::path platformDir = m_destDir / m_version;
     try {
-        if (m_unpackError || !isDirectory(m_tmpDir)) {
+        if (m_unpackError || !bpf::isDirectory(m_tmpDir)) {
             throw string("unpack error or no tmp dir");
         }
         
         // nuke existing platform update and move this one into place
         try {
             bfs::create_directories(m_destDir);
-        } catch(const tFileSystemError&) {
-            string s("unable to create " + m_destDir.externalUtf8());
+        } catch(const bfs::filesystem_error&) {
+            string s("unable to create " + m_destDir.string());
             throw bp::error::lastErrorString(s.c_str());
         }
-        if (!remove(platformDir)) {
-            string s("unable to delete existing " + platformDir.externalUtf8());
+        if (!bpf::safeRemove(platformDir)) {
+            string s("unable to delete existing " + platformDir.string());
             throw bp::error::lastErrorString(s.c_str());
         }
-        if (!move(m_tmpDir, platformDir)) {
-            string s("unable to move " + m_tmpDir.externalUtf8() 
-                      + " to " + platformDir.externalUtf8());
+        if (!bpf::safeMove(m_tmpDir, platformDir)) {
+            string s("unable to move " + m_tmpDir.string()
+                     + " to " + platformDir.string());
             throw bp::error::lastErrorString(s.c_str());
         }
         BPLOG_INFO_STRM("Platform update " << m_version 
-                        << " installed to " << m_destDir.externalUtf8());
+                        << " installed to " << m_destDir.string());
     } catch (const string& s) {
         BPLOG_ERROR_STRM("Error installing platform update "
-                         << m_version << " to " << m_destDir.externalUtf8()
+                         << m_version << " to " << m_destDir
                          << ": " << s);
-        remove(platformDir);
+        bpf::safeRemove(platformDir);
         errMsg = s;
         return false;
     }

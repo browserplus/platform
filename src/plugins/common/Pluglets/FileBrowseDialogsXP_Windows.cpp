@@ -43,6 +43,7 @@
 using namespace std;
 using namespace bp::strutil;
 namespace bpf = bp::file;
+namespace bfs = boost::filesystem;
 namespace bpl = bp::localization;
 
 
@@ -71,7 +72,7 @@ namespace bpl = bp::localization;
 // A context passed into hook and then winproc
 typedef struct {
     WNDPROC m_winProc;             // original dialog winproc
-    vector<bpf::Path>* m_paths;    // selected files/folders
+    vector<bfs::path>* m_paths;    // selected files/folders
     string m_locale;
 } Context;
 
@@ -118,8 +119,8 @@ MyWinProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                     wstr = wstr + L"\\" + comboText;
                 }
 
-                bpf::Path path(wstr);
-                if (bpf::exists(path)) {
+                bfs::path path(wstr);
+                if (bpf::pathExists(path)) {
                     ctx->m_paths->push_back(path);
                     valid = true;
                 }
@@ -159,8 +160,8 @@ MyWinProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                         SHGDN_NORMAL | SHGDN_FORPARSING,
                         &str);
                     if (SUCCEEDED(hr)) {
-                        bpf::Path path(str.pOleStr);
-                        if (bpf::exists(path)) {
+                        bfs::path path(str.pOleStr);
+                        if (bpf::pathExists(path)) {
                             ctx->m_paths->push_back(path);
                             valid = true;
                         }
@@ -263,7 +264,7 @@ MyHook(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 
 bool runFileOpenDialogXP(const FileOpenDialogParms& parms,
-                         vector<bpf::Path>& vPaths)
+                         vector<bfs::path>& vPaths)
 {
     // Setup the openfilename structure.
     OPENFILENAMEW ofn;
@@ -318,7 +319,7 @@ bool runFileOpenDialogXP(const FileOpenDialogParms& parms,
     // a single item (in spite of what msdn claims).  In the case
     // of double-clicking broken shortcuts which were "fixed", 
     // it contains the fixed path, so use it.
-    bpf::Path selPath(ofn.lpstrFile);
+    bfs::path selPath(ofn.lpstrFile);
     if (!selPath.empty() && vPaths.size() == 1) {
         vPaths[0] = selPath;
     }

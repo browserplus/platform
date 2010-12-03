@@ -78,7 +78,7 @@ int APIENTRY WinMain( HINSTANCE hInst, HINSTANCE /*hinstPrev*/,
 
         string sLocale = getUsersLocale();
         
-        bp::file::Path path = bp::paths::getPreferencePanelUIPath( sLocale );
+        boost::filesystem::path path = bp::paths::getPreferencePanelUIPath( sLocale );
         if (path.empty())
         {
             // TODO: localize
@@ -105,7 +105,7 @@ int APIENTRY WinMain( HINSTANCE hInst, HINSTANCE /*hinstPrev*/,
         string title;
         getLocalizedString( "configPanelTitle", sLocale, title );
         
-        bp::html::HtmlDialog dlg( title, path.externalUtf8(), hIcon, &gateway );
+        bp::html::HtmlDialog dlg( title, path.string(), hIcon, &gateway );
 
         dlg.DoModal();
 

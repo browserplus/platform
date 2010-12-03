@@ -67,7 +67,7 @@ BOOL WINAPI CYBPAddonModule::DllMain(DWORD dwReason, LPVOID lpReserved)
             // create needed directories
 		    bp::paths::createDirectories();
 
-            bp::plugin::setupLogging( bp::file::Path( L"bpactivex.log" ) );
+            bp::plugin::setupLogging( boost::filesystem::path( "bpactivex.log" ) );
             
             BPInitialize();
             break;

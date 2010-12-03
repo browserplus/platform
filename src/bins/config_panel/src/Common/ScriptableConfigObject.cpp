@@ -49,6 +49,7 @@
 
 using namespace std;
 using namespace bp::file;
+namespace bfs = boost::filesystem;
 
 // a prompt handler which grants all permissions
 void
@@ -270,19 +271,18 @@ ScriptableConfigObject::invoke(const string & functionName,
             rv = new bp::Bool(bpEnabled);
         } else if (!strcmp(key->value(), "logSize")) {
             boost::uintmax_t totalSize = 0;
-            Path dir = bp::paths::getObfuscatedWritableDirectory();
+            bfs::path dir = bp::paths::getObfuscatedWritableDirectory();
             if (isDirectory(dir)) {
                 try {
-                    tDirIter end;
-                    tString logExt = nativeFromUtf8(".log");
-                    for (tDirIter iter(dir); iter != end; ++iter) {
+                    bfs::directory_iterator end;
+                    for (bfs::directory_iterator iter(dir); iter != end; ++iter) {
                         if (isRegularFile(iter->path())) {
-                            if (boost::filesystem::extension(*iter).compare(logExt) == 0) {
+                            if (iter->path().extension() == ".log") {
                                 totalSize += size(iter->path());
                             }
                         }
                     }
-                } catch (tFileSystemError& e) {
+                } catch (bfs::filesystem_error& e) {
                     BPLOG_WARN_STRM("unable to iterate thru " << dir
                                     << ": " << e.what());
                 }
@@ -308,12 +308,12 @@ ScriptableConfigObject::invoke(const string & functionName,
 
         // setting enabled doesn't go to server
         if (!strcmp(key->value(), "enabled")) {
-            Path path = bp::paths::getBPDisabledPath();
+            bfs::path path = bp::paths::getBPDisabledPath();
             if (args[1]->type() != BPTBoolean) {
                 return new bp::Bool(false);
             }
             if ((bool) *(args[1])) {
-                bp::file::remove(path);
+                safeRemove(path);
             } else {
                 BPTime now;
                 string s = "BrowserPlus disabled at: " 
@@ -337,13 +337,13 @@ ScriptableConfigObject::invoke(const string & functionName,
     {
         string cmd;
         vector<string> uninstArgs;
-        Path uninstaller = bp::paths::getUninstallerPath();
+        bfs::path uninstaller = bp::paths::getUninstallerPath();
         
         // Forcefully kill daemon and don't let us reconnect
         // This helps prevent cruft after the uninstall, although
         // the side effect is that the config panel closes
         m_dontReconnect = true;
-        string daemon = utf8FromNative(bp::paths::getDaemonPath().filename());
+        string daemon = bp::paths::getDaemonPath().filename().string();
         bp::process::kill(daemon, true);
 
         bp::ProcessLock lock =  NULL;
@@ -379,7 +379,7 @@ ScriptableConfigObject::invoke(const string & functionName,
         if (!isEnabled()) {
             return new bp::Bool(false);
         }
-        string daemon = utf8FromNative(bp::paths::getDaemonPath().filename());
+        string daemon = bp::paths::getDaemonPath().filename().string();
         // forceful kill here.  Restart should work even when the daemon
         // is hung
         bool b = bp::process::kill(daemon, true);
@@ -389,9 +389,9 @@ ScriptableConfigObject::invoke(const string & functionName,
     {
         using namespace bp::http;
         
-        Path tarball;
-        Path postBodyPath;
-        Path userReportPath;
+        bfs::path tarball;
+        bfs::path postBodyPath;
+        bfs::path userReportPath;
         try {
             if (!isEnabled()) {
                 throw("BrowserPlus is disabled");
@@ -421,39 +421,38 @@ ScriptableConfigObject::invoke(const string & functionName,
             tarball = getTempPath(getTempDirectory(), "BrowserPlusErrorTar_");
             bp::tar::Create tar;
             if (!tar.open(tarball)) {
-                throw string("unable to open " + tarball.externalUtf8());
+                throw string("unable to open " + tarball.string());
             }
             userReportPath = getTempPath(getTempDirectory(), "BrowserPlusErrorReport_");
             if (!bp::strutil::storeToFile(userReportPath, reportObj->value())) {
-                throw string("unable to save report to " + userReportPath.externalUtf8());
+                throw string("unable to save report to " + userReportPath.string());
             }
-            if (!tar.addFile(userReportPath, Path("error_report.txt"))) {
-                throw string("unable to add " + userReportPath.externalUtf8());
+            if (!tar.addFile(userReportPath, bfs::path("error_report.txt"))) {
+                throw string("unable to add " + userReportPath.string());
             }
             
             if (includeLogs->value()) {
-                tString logExt = nativeFromUtf8(".log");
-                Path dir = bp::paths::getObfuscatedWritableDirectory();
+                bfs::path dir = bp::paths::getObfuscatedWritableDirectory();
                 if (isDirectory(dir)) {
                     try {
-                        tDirIter end;
-                        for (tDirIter iter(dir); iter != end; ++iter) {
-                            if (boost::filesystem::extension(*iter).compare(logExt) == 0) {
-                                Path log(iter->path());
-                                Path relPath = log.relativeTo(dir);
+                        bfs::directory_iterator end;
+                        for (bfs::directory_iterator iter(dir); iter != end; ++iter) {
+                            if (iter->path().extension() == ".log") {
+                                bfs::path log(iter->path());
+                                bfs::path relPath = relativeTo(log, dir);
                                 if (!tar.addFile(log, relPath)) {
-                                    throw string("unable to add " + log.externalUtf8());
+                                    throw string("unable to add " + log.string());
                                 }
                             }
                         }
-                    } catch (const tFileSystemError& e) {
-                        BPLOG_WARN_STRM("unable to iterate thru " << dir
+                    } catch (const bfs::filesystem_error& e) {
+                        BPLOG_WARN_STRM("unable to iterate thru " << dir.string()
                                         << ": " << e.what());
                     }
                 }
             }
             if (!tar.close()) {
-                throw("unable to close tarball " + tarball.externalUtf8());
+                throw("unable to close tarball " + tarball.string());
             }
 
             // Now compress tarball
@@ -461,18 +460,18 @@ ScriptableConfigObject::invoke(const string & functionName,
             bp::lzma::Compress compress;
             ifstream ifs;
             if (!openReadableStream(ifs, tarball, ifstream::in | ifstream::binary)) {
-                throw string("unable to open stream for " + tarball.externalUtf8());
+                throw string("unable to open stream for " + tarball.string());
             }
             ofstream ofs;
             if (!openWritableStream(ofs, postBodyPath, 
                                     ofstream::out | ofstream::binary | ofstream::trunc)) {
-                throw string("unable to open stream for " + postBodyPath.externalUtf8());
+                throw string("unable to open stream for " + postBodyPath.string());
             }
             compress.setInputStream(ifs);
             compress.setOutputStream(ofs);
             if (!compress.run()) {
-                throw string("unable to compress " + tarball.externalUtf8()
-                             + " to " + postBodyPath.externalUtf8());
+                throw string("unable to compress " + tarball.string()
+                             + " to " + postBodyPath.string());
             }
             ifs.close();
             ofs.close();
@@ -487,7 +486,7 @@ ScriptableConfigObject::invoke(const string & functionName,
             string filevar("errorTar");
             req->headers.add("Content-Disposition: form-data; name=\""
                              + filevar + "\"; filename=\"" + 
-                             utf8FromNative(postBodyPath.filename()) + "\"");
+                             postBodyPath.filename().string() + "\"");
             req->headers.add(Headers::ksContentType, "application/x-lzip");
             boost::uintmax_t contentLength = size(postBodyPath);
             req->headers.add(Headers::ksContentLength,
@@ -512,9 +511,9 @@ ScriptableConfigObject::invoke(const string & functionName,
         }
         
         // clean up
-        remove(tarball);
-        remove(postBodyPath);
-        remove(userReportPath);
+        safeRemove(tarball);
+        safeRemove(postBodyPath);
+        safeRemove(userReportPath);
     }
     else if (!functionName.compare("deleteService")) 
     {
@@ -546,12 +545,12 @@ ScriptableConfigObject::invoke(const string & functionName,
 bool
 ScriptableConfigObject::isInstalled()
 {
-    return exists(bp::paths::getBPInstalledPath());
+    return pathExists(bp::paths::getBPInstalledPath());
 }
 
 
 bool
 ScriptableConfigObject::isEnabled()
 {
-    return isInstalled() && !exists(bp::paths::getBPDisabledPath());
+    return isInstalled() && !pathExists(bp::paths::getBPDisabledPath());
 }

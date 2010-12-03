@@ -30,15 +30,15 @@ CPPUNIT_TEST_SUITE_REGISTRATION(i18nTest);
 void
 i18nTest::storeLoadFileToString()
 {
-    bp::file::Path bgFilePath("булгарски_FileName.txt");
+    boost::filesystem::path bgFilePath("булгарски_FileName.txt");
     std::string fileText("hello\nthere\nworld\n");
     std::string fileTextRead;
-    bp::file::Path path = bp::file::getTempDirectory() / bgFilePath;
+    boost::filesystem::path path = bp::file::getTempDirectory() / bgFilePath;
 
     CPPUNIT_ASSERT(bp::strutil::storeToFile(path, fileText));
     CPPUNIT_ASSERT(bp::strutil::loadFromFile(path, fileTextRead));
     CPPUNIT_ASSERT(!fileText.compare(fileTextRead));    
-    CPPUNIT_ASSERT(bp::file::exists(path));
-    CPPUNIT_ASSERT(bp::file::remove(path));
-    CPPUNIT_ASSERT(!bp::file::exists(path));
+    CPPUNIT_ASSERT(bp::file::pathExists(path));
+    CPPUNIT_ASSERT(bp::file::safeRemove(path));
+    CPPUNIT_ASSERT(!bp::file::pathExists(path));
 }

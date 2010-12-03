@@ -54,8 +54,8 @@ namespace ServiceRunner
 
         /** returns zero on failure (client allocate() function failed), or non-zero id
          *  upon success */
-        virtual unsigned int allocate(std::string uri, bp::file::Path dataDir,
-                                      bp::file::Path tempDir, std::string locale,
+        virtual unsigned int allocate(std::string uri, boost::filesystem::path dataDir,
+                                      boost::filesystem::path tempDir, std::string locale,
                                       std::string userAgent, unsigned int clientPid) = 0;
 
         virtual void destroy(unsigned int id) = 0;
@@ -65,11 +65,11 @@ namespace ServiceRunner
                             const bp::Object * arguments,
                             std::string & err) = 0;
 
-        virtual int installHook(const bp::file::Path& serviceDir,
-								const bp::file::Path& tempDir) = 0;
+        virtual int installHook(const boost::filesystem::path& serviceDir,
+								const boost::filesystem::path& tempDir) = 0;
 
-        virtual int uninstallHook(const bp::file::Path& serviceDir,
-								  const bp::file::Path& tempDir) = 0;
+        virtual int uninstallHook(const boost::filesystem::path& serviceDir,
+								  const boost::filesystem::path& tempDir) = 0;
 
         virtual void promptResponse(unsigned int promptId,
                                     const bp::Object * arguments) = 0;

@@ -67,7 +67,7 @@ class ControllerManager : public ServiceRunner::IControllerListener
     void onPrompt(ServiceRunner::Controller * c, 
                   unsigned int instance,
                   unsigned int promptId,
-                  const bp::file::Path & pathToDialog,
+                  const boost::filesystem::path & pathToDialog,
                   const bp::Object * arguments);
     void onInstallHook(ServiceRunner::Controller * c,
                        int code) { }

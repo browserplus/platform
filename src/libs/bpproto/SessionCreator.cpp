@@ -133,16 +133,16 @@ static std::string
 getNewestInstalledPlatform()
 {
     bp::SemanticVersion newest;
-    bp::file::Path dir = bp::paths::getProductTopDirectory();
+    boost::filesystem::path dir = bp::paths::getProductTopDirectory();
     if (bp::file::isDirectory(dir)) {
         try {
-            bp::file::tDirIter end;
-            for (bp::file::tDirIter it(dir); it != end; ++it)
+            boost::filesystem::directory_iterator end;
+            for (boost::filesystem::directory_iterator it(dir); it != end; ++it)
             {
                 bp::SemanticVersion version;
-                std::string s = bp::file::utf8FromNative(it->path().filename());
+                std::string s = it->path().filename().string();
                 if (version.parse(s) && version.compare(newest) >= 0 &&
-                    bp::file::exists(bp::paths::getBPInstalledPath(
+                    bp::file::pathExists(bp::paths::getBPInstalledPath(
                                          version.majorVer(),
                                          version.minorVer(),
                                          version.microVer())))
@@ -150,7 +150,7 @@ getNewestInstalledPlatform()
                     newest = version;
                 }
             }
-        } catch (const bp::file::tFileSystemError& e) {
+        } catch (const boost::filesystem::filesystem_error& e) {
             BPLOG_WARN_STRM("unable to iterate thru " << dir
                             << ": " << e.what());
         }
@@ -167,7 +167,7 @@ SessionCreator::tryConnect()
     // Make sure that bp is fully installed.  The installer's last
     // act is to create the file at BPInstalledPath.  This test
     // prevents us from trying to launch before our install is complete.
-    if (!bp::file::exists(bp::paths::getBPInstalledPath())) {
+    if (!bp::file::pathExists(bp::paths::getBPInstalledPath())) {
         // not installed!  now either there's a newer version that
         // just got installed, or we were just uninstalled but still
         // loaded into browser memory.
@@ -184,7 +184,7 @@ SessionCreator::tryConnect()
         }
     }
     
-    if (bp::file::exists(bp::paths::getBPDisabledPath())) {
+    if (bp::file::pathExists(bp::paths::getBPDisabledPath())) {
         BPLOG_ERROR("BrowserPlus disabled");
         reportError(BP_EC_PLATFORM_DISABLED,
                     "The BrowserPlus platform has been disabled");

@@ -24,7 +24,7 @@
 #include "platform_utils/ProductPaths.h"
 #include "Controller.h"
 
-bp::file::Path
+boost::filesystem::path
 ServiceRunner::determineProviderPath(const bp::service::Summary & s,
                                      std::string & err)
 {
@@ -33,26 +33,25 @@ ServiceRunner::determineProviderPath(const bp::service::Summary & s,
     bp::SemanticVersion minversion = s.usesMinversion();
 
     // build directory where versions of this service should be
-    bp::file::Path d = bp::paths::getServiceDirectory() / name;
+    boost::filesystem::path d = bp::paths::getServiceDirectory() / name;
 
     if (!bp::file::isDirectory(d)) {
         err.append("No such service installed: ");
         err.append(name);
-        return bp::file::Path();
+        return boost::filesystem::path();
     }
 
     // list all subdirectories
     bp::SemanticVersion winner;
     try {
-        bp::file::tDirIter end;
-        for (bp::file::tDirIter it(d); it != end; ++it) 
+        boost::filesystem::directory_iterator end;
+        for (boost::filesystem::directory_iterator it(d); it != end; ++it) 
         {
-            bp::file::Path p(it->path().filename());
             bp::SemanticVersion current;
-            if (!current.parse(p.utf8()))
+            if (!current.parse(it->path().filename().string()))
             {
-                std::cerr << "skipping bogus version dir: " << p.utf8()
-                << std::endl;
+                std::cerr << "skipping bogus version dir: " << it->path().filename()
+                          << std::endl;
                 continue;
             }
             
@@ -62,9 +61,8 @@ ServiceRunner::determineProviderPath(const bp::service::Summary & s,
                 winner = current;
             }
         }
-    } catch (bp::file::tFileSystemError& e) {
-        std::cerr << "unable to iterate thru " 
-            << d.externalUtf8() << ": " << e.what();
+    } catch (boost::filesystem::filesystem_error& e) {
+        std::cerr << "unable to iterate thru " << d << ": " << e.what();
     }
     if (winner.majorVer() >= 0) {
         d /= winner.asString();
@@ -72,5 +70,5 @@ ServiceRunner::determineProviderPath(const bp::service::Summary & s,
     }
     
     err.append("no satisfying service installed");
-    return bp::file::Path();
+    return boost::filesystem::path();
 }

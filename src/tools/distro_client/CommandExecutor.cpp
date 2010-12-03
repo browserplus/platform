@@ -48,7 +48,7 @@ public:
         : m_dqHand(distroServers, PermissionsManager::get())
     {
         m_dqHand.setListener(this);
-        m_registry.reset(new ServiceRegistry(std::string(), bp::file::Path()));
+        m_registry.reset(new ServiceRegistry(std::string(), boost::filesystem::path()));
         m_registry->setPluginDirectory(bp::paths::getServiceDirectory());
     }
 
@@ -531,13 +531,14 @@ CommandExecutorRunner::gotPermissions(unsigned int tid,
     using namespace bp::strutil;
     using namespace bp;
     namespace bpf = bp::file;
+    namespace bfs = boost::filesystem;
         
-    bpf::Path tmpPath = bpf::getTempPath(bpf::getTempDirectory(), "perms_pkg");
+    bfs::path tmpPath = bpf::getTempPath(bpf::getTempDirectory(), "perms_pkg");
     try {
         // payload is bpkg of json
         string pkgStr((const char *) &(permBundle[0]), permBundle.size());
         if (!bp::strutil::storeToFile(tmpPath, pkgStr)) {
-            throw runtime_error("unable to save data to " + tmpPath.externalUtf8());
+            throw runtime_error("unable to save data to " + tmpPath.string());
         }
         string errMsg;
         string jsonStr;
@@ -588,7 +589,7 @@ CommandExecutorRunner::gotPermissions(unsigned int tid,
     } catch (const runtime_error& e) {
         cerr << "ERROR: " << e.what() << endl;
     }
-    remove(tmpPath);
+    bp::file::safeRemove(tmpPath);
     onSuccess();
 }
 

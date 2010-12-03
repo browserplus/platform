@@ -40,21 +40,21 @@ class ServiceUnpacker : virtual public Unpacker
     /** 
      * Create an instance to unpack a bpkg file
      */
-    ServiceUnpacker(const bp::file::Path& pkgFile,
-                    const bp::file::Path& certFile = bp::file::Path());
+    ServiceUnpacker(const boost::filesystem::path& pkgFile,
+                    const boost::filesystem::path& certFile = boost::filesystem::path());
     
     /** 
      * Create an instance to unpack a buffer containing
      * a bpkg
      */
     ServiceUnpacker(const std::vector<unsigned char> & buf,
-                    const bp::file::Path& certFile = bp::file::Path());
+                    const boost::filesystem::path& certFile = boost::filesystem::path());
 
     /**
      * Create an instance from a directory.  Second arg
      * is ignored, just lets us disambiguate constructors
      */
-    ServiceUnpacker(const bp::file::Path& dir,
+    ServiceUnpacker(const boost::filesystem::path& dir,
                     int);
                 
     virtual ~ServiceUnpacker(); 
@@ -67,12 +67,12 @@ class ServiceUnpacker : virtual public Unpacker
     bool install(std::string& errMsg);
 
     // unpacks to dir, returns true on success
-    bool unpackTo(const bp::file::Path& dir,
+    bool unpackTo(const boost::filesystem::path& dir,
                   std::string& errMsg);
 
  private:
-    bp::file::Path m_tmpDir;
-    bp::file::Path m_dir;
+    boost::filesystem::path m_tmpDir;
+    boost::filesystem::path m_dir;
 };
 
 #endif

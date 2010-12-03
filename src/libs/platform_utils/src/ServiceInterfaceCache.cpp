@@ -37,11 +37,11 @@
 #include "ProductPaths.h"
 
 
-static bp::file::Path buildPath(const std::string & name,
-                                const std::string & version)
+static boost::filesystem::path buildPath(const std::string & name,
+                                         const std::string & version)
 {
-    bp::file::Path cachePath = bp::paths::getServiceInterfaceCachePath();
-    cachePath /= bp::file::Path(name + "_" + version + ".json");
+    boost::filesystem::path cachePath = bp::paths::getServiceInterfaceCachePath();
+    cachePath /= boost::filesystem::path(name + "_" + version + ".json");
     return cachePath;
 }
 
@@ -52,13 +52,13 @@ bp::serviceInterfaceCache::isNewerThan(const std::string & name,
 {
     if (name.empty() || version.empty()) return false;
 
-    bp::file::Path path = buildPath(name, version);    
+    boost::filesystem::path path = buildPath(name, version);    
     bool rval = false;
     BPTime pathTime((long)0);
-    if (bp::file::exists(path)) {
+    if (bp::file::pathExists(path)) {
         try {
             pathTime.set(boost::filesystem::last_write_time(path));
-        } catch (const bp::file::tFileSystemError&) {
+        } catch (const boost::filesystem::filesystem_error&) {
             pathTime = BPTime();
         }
         rval = pathTime.compare(t) >= 0;
@@ -73,10 +73,10 @@ bp::serviceInterfaceCache::get(const std::string & name,
 {
     if (name.empty() || version.empty()) return NULL;
 
-    bp::file::Path path = buildPath(name, version);
+    boost::filesystem::path path = buildPath(name, version);
     bp::Object * obj = NULL;
 
-    if (bp::file::exists(path)) {
+    if (bp::file::pathExists(path)) {
         // read cache
         std::string jsonRep;
         if (bp::strutil::loadFromFile(path, jsonRep)) {
@@ -93,7 +93,7 @@ bp::serviceInterfaceCache::set(const std::string & name,
                                const bp::Object * obj)
 {
     if (name.empty() || version.empty() || obj == NULL) return false;
-    bp::file::Path path = buildPath(name, version);
+    boost::filesystem::path path = buildPath(name, version);
     std::string jsonRep = obj->toPlainJsonString();
     bool ok = bp::strutil::storeToFile(path, jsonRep);
     if (!ok) {
@@ -108,8 +108,8 @@ bp::serviceInterfaceCache::purge(const std::string & name,
 {
     if (name.empty() || version.empty()) return false;
 
-    bp::file::Path path = buildPath(name, version);
+    boost::filesystem::path path = buildPath(name, version);
 
-    return bp::file::remove( path );
+    return bp::file::safeRemove( path );
 }
 

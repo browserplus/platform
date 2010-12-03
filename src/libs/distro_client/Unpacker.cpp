@@ -35,18 +35,18 @@
 
 
 using namespace std;
-using namespace bp::file;
+namespace bfs = boost::filesystem;
 
 
-Unpacker::Unpacker(const Path& bpkgFile,
-                   const Path& certFile)
+Unpacker::Unpacker(const bfs::path& bpkgFile,
+                   const bfs::path& certFile)
 : m_bpkg(bpkgFile), m_certFile(certFile), m_unpackError(false)
 {
 }
 
 
 Unpacker::Unpacker(const std::vector<unsigned char> & buf,
-                   const Path& certFile)
+                   const bfs::path& certFile)
 : m_buf(buf), m_certFile(certFile), m_unpackError(false)
 {
 }
@@ -58,7 +58,7 @@ Unpacker::~Unpacker()
 
 
 bool
-Unpacker::unpackTo(const bp::file::Path& dir,
+Unpacker::unpackTo(const bfs::path& dir,
                    string& errMsg)
 {
     errMsg.clear();

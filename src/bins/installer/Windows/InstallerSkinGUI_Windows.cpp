@@ -35,7 +35,7 @@
 [module(name="BrowserPlusInstaller")];
 CAppModule _Module;
 
-InstallerSkinGUI::InstallerSkinGUI(const bp::file::Path & uiDirectory)
+InstallerSkinGUI::InstallerSkinGUI(const boost::filesystem::path & uiDirectory)
 : m_uiDirectory(uiDirectory)
 {
 }
@@ -56,7 +56,7 @@ InstallerSkinGUI::startUp(unsigned int width, unsigned int height,
     gateway = new bp::html::ScriptGateway(*(m_sio.getScriptableObject()),
                                           "BPInstaller");
 
-    bp::file::Path path = m_uiDirectory / "index.html";
+    boost::filesystem::path path = m_uiDirectory / "index.html";
     BPLOG_DEBUG_STRM("path to ui: " << path);;
 
     HICON hIcon = (HICON)::LoadImage(_Module.GetResourceInstance(),
@@ -66,7 +66,7 @@ InstallerSkinGUI::startUp(unsigned int width, unsigned int height,
                                      ::GetSystemMetrics(SM_CYSMICON),
                                      LR_DEFAULTCOLOR);
     
-    dlg = new bp::html::HtmlDialog(title.c_str(), path.url(), hIcon, gateway);
+    dlg = new bp::html::HtmlDialog(title.c_str(), bp::file::urlFromPath(path), hIcon, gateway);
 
     dlg->Create( NULL );
     if (! *dlg) {

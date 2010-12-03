@@ -49,12 +49,12 @@ bp::URLCollection::~URLCollection()
 }
 
 bool
-bp::URLCollection::init(const bp::file::Path & path,
+bp::URLCollection::init(const boost::filesystem::path & path,
                         bool useDomainForHTTP)
 {
     m_path = path;
 
-    if (boost::filesystem::is_regular(m_path)) {
+    if (boost::filesystem::is_regular_file(m_path)) {
         // attempt to read
         std::string s;
         if (bp::strutil::loadFromFile(m_path, s)) {

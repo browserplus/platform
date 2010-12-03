@@ -39,9 +39,9 @@
 CPPUNIT_TEST_SUITE_REGISTRATION(HTMLRenderTest);
 
 static
-bp::file::Path writeToTempFile(const std::string & content)
+boost::filesystem::path writeToTempFile(const std::string & content)
 {
-    bp::file::Path path = bp::file::getTempPath(bp::file::getTempDirectory(), "foobar");
+    boost::filesystem::path path = bp::file::getTempPath(bp::file::getTempDirectory(), "foobar");
     CPPUNIT_ASSERT( bp::strutil::storeToFile(path, content) );
     return path;
 }
@@ -69,7 +69,7 @@ private:
 
 void HTMLRenderTest::basicScriptingTest()
 {
-    bp::file::Path path = writeToTempFile(
+    boost::filesystem::path path = writeToTempFile(
         "<html><body>"
         "hello world" 
         "<script>"
@@ -100,7 +100,7 @@ void HTMLRenderTest::basicScriptingTest()
     
     rl.shutdown();
 
-    CPPUNIT_ASSERT(bp::file::remove(path));
+    CPPUNIT_ASSERT(bp::file::safeRemove(path));
 }
 
 
@@ -131,7 +131,7 @@ private:
 
 void HTMLRenderTest::exceptionForUndefinedMethod()
 {
-    bp::file::Path path = writeToTempFile(
+    boost::filesystem::path path = writeToTempFile(
         "<html><body>"
         "hello world" 
         "<script>"
@@ -171,7 +171,7 @@ void HTMLRenderTest::exceptionForUndefinedMethod()
     rl.shutdown();
 
     CPPUNIT_ASSERT( funcHost.gotException );
-    CPPUNIT_ASSERT(bp::file::remove(path));
+    CPPUNIT_ASSERT(bp::file::safeRemove(path));
 }
 
 class ArgsTestScriptableFuncHost : public bp::html::ScriptableFunctionHost
@@ -213,7 +213,7 @@ private:
 
 void HTMLRenderTest::argsJSToNative()
 {
-    bp::file::Path path = writeToTempFile(
+    boost::filesystem::path path = writeToTempFile(
         "<html><body>"
         "hello world" 
         "<script>"
@@ -249,7 +249,7 @@ void HTMLRenderTest::argsJSToNative()
 
     rl.shutdown();
 
-    CPPUNIT_ASSERT( bp::file::remove(path) );
+    CPPUNIT_ASSERT( bp::file::safeRemove(path) );
 }
 
 class ArgsTwoScriptableFuncHost : public bp::html::ScriptableFunctionHost
@@ -282,7 +282,7 @@ private:
 
 void HTMLRenderTest::argsNativeToJS()
 {
-    bp::file::Path path = writeToTempFile(
+    boost::filesystem::path path = writeToTempFile(
         "<html><body>"
         "hello world" 
         "<script>"
@@ -331,7 +331,7 @@ void HTMLRenderTest::argsNativeToJS()
     rl.shutdown();
 
     CPPUNIT_ASSERT( funcHost.happy );
-    CPPUNIT_ASSERT(bp::file::remove(path));
+    CPPUNIT_ASSERT(bp::file::safeRemove(path));
 }
 
 
@@ -409,7 +409,7 @@ HTMLRenderTest::basicCallbackTest()
     bp::runloop::RunLoop rl;
     rl.init();
 
-    bp::file::Path path = writeToTempFile(
+    boost::filesystem::path path = writeToTempFile(
         "<html><body>"
         "hello world" 
         "<script>"
@@ -450,7 +450,7 @@ HTMLRenderTest::basicCallbackTest()
     
     rl.shutdown();
 
-    CPPUNIT_ASSERT(bp::file::remove(path));
+    CPPUNIT_ASSERT(bp::file::safeRemove(path));
 }
 
 class CallbackTypeScriptableFuncHost : public bp::html::ScriptableFunctionHost
@@ -509,7 +509,7 @@ HTMLRenderTest::callbackTypeMappingTest()
     bp::runloop::RunLoop rl;
     rl.init();
 
-    bp::file::Path path = writeToTempFile(
+    boost::filesystem::path path = writeToTempFile(
         "<html><body>"
         "hello world" 
         "<script>"
@@ -562,5 +562,5 @@ HTMLRenderTest::callbackTypeMappingTest()
     rl.shutdown();
 
     CPPUNIT_ASSERT( funcHost.happy );
-    CPPUNIT_ASSERT(bp::file::remove(path));
+    CPPUNIT_ASSERT(bp::file::safeRemove(path));
 }

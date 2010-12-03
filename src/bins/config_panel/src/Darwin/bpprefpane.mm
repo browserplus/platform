@@ -141,11 +141,11 @@ didFailProvisionalLoadWithError: (NSError *) error
     // get status messages
     [m_webView setUIDelegate: self];
 
-    bp::file::Path resourcePath(
+    boost::filesystem::path resourcePath(
         [[[NSBundle bundleForClass: [self class]] resourcePath] UTF8String]);
-    bp::file::Path bundlePath(
+    boost::filesystem::path bundlePath(
         [[[NSBundle bundleForClass: [self class]] bundlePath] UTF8String]);
-    bp::file::Path path(
+    boost::filesystem::path path(
         [[[NSBundle bundleForClass: [self class]] resourcePath] UTF8String]);
 
     path /= "ui";
@@ -154,7 +154,7 @@ didFailProvisionalLoadWithError: (NSError *) error
 
     BPLOG_INFO_STRM("Rendering config panel ui from path: " << path);
     
-    NSString * nsPath = [[NSString alloc] initWithUTF8String: path.external_file_string().c_str()];
+    NSString * nsPath = [[NSString alloc] initWithUTF8String: path.string().c_str()];
     NSURL * url = [[NSURL alloc] initFileURLWithPath: nsPath];
     [[m_webView mainFrame] loadRequest: [NSURLRequest requestWithURL: url]];
 

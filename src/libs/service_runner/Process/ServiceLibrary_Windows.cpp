@@ -32,7 +32,7 @@
 using namespace ServiceRunner;
 
 void * 
-ServiceLibrary::dlopenNP(const bp::file::Path & path)
+ServiceLibrary::dlopenNP(const boost::filesystem::path & path)
 {
     // At the time we load a library, it must be able to find
     // DLLs that it uses.  Additionally, the service should not be
@@ -41,19 +41,16 @@ ServiceLibrary::dlopenNP(const bp::file::Path & path)
     // LOAD_WITH_ALTERED_SEARCH_PATH argument
   
     // determine the target directory
-    std::wstring nativePath = path.external_file_string();
-
-    void * libptr = (void *) LoadLibraryExW(nativePath.c_str(),
+    void * libptr = (void *) LoadLibraryExW(path.c_str(),
                                             (HANDLE) NULL,
                                             LOAD_WITH_ALTERED_SEARCH_PATH);
     if (libptr == NULL) {
-        std::string utf8path = bp::strutil::wideToUtf8(nativePath);
-        BPLOG_ERROR_STRM("LoadLibraryExW for " << utf8path << " failed: "
+        BPLOG_ERROR_STRM("LoadLibraryExW for " << path.string() << " failed: "
                          << bp::error::lastErrorString());
 
         bp::file::FileInfo fi;
         if (statFile(path, fi)) {
-            BPLOG_ERROR_STRM("Size of " << utf8path << ": "
+            BPLOG_ERROR_STRM("Size of " << path.string() << ": "
                              << fi.sizeInBytes << " bytes.");
         }
     }

@@ -148,7 +148,7 @@ bool UsageReporter::configure()
     using namespace bp;
     
     bp::config::ConfigReader cfg;
-    bp::file::Path cfgPath = bp::paths::getConfigFilePath();
+    boost::filesystem::path cfgPath = bp::paths::getConfigFilePath();
     if (!cfg.load( cfgPath ))
     {
         BPLOG_ERROR_STRM("Couldn't read config file at: " << cfgPath);

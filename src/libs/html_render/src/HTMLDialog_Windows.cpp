@@ -204,7 +204,7 @@ BOOL HtmlDialog::OnInitDialog( HWND hwndFocus, LPARAM /*lParam*/ )
     m_spBrowser->put_RegisterAsDropTarget( VARIANT_FALSE );
     
     // Navigate to the proper content.
-    std::wstring wsNativePath = bp::file::nativeFromUtf8( m_sPathToHtml );
+    std::wstring wsNativePath = bp::strutil::utf8ToWide(m_sPathToHtml);
     _bstr_t bsPath( wsNativePath.c_str() );
     CComVariant vt;
     HRESULT hr = m_spBrowser->Navigate( bsPath, &vt, &vt, &vt, &vt );

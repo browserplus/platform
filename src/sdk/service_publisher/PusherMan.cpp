@@ -35,7 +35,7 @@ using namespace std;
 
 
 bool
-pushFile(bp::file::Path file, string baseurl,
+pushFile(boost::filesystem::path file, string baseurl,
          string serviceName, string serviceVersion,
          string platform)
 {

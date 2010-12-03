@@ -65,7 +65,7 @@ Controller::Controller(const std::string & service,
     m_path = bp::paths::getServiceDirectory() / service / version;
 }
 
-Controller::Controller(const bpf::Path & path) :
+Controller::Controller(const bfs::path & path) :
     m_service(),
     m_version(),
     m_apiVersion(0),
@@ -102,7 +102,7 @@ Controller::~Controller()
     m_serviceConnector.reset();
 
     // Delete any temp dirs that may have been left around by the service.
-    std::for_each(m_tempDirs.begin(), m_tempDirs.end(), bp::file::remove);
+    std::for_each(m_tempDirs.begin(), m_tempDirs.end(), bp::file::safeRemove);
 }
 
 void
@@ -112,11 +112,11 @@ Controller::setListener(IControllerListener * listener)
 }
 
 bool
-Controller::run(const bpf::Path & pathToHarness,
-                const bpf::Path & providerPath,
+Controller::run(const bfs::path & pathToHarness,
+                const bfs::path & providerPath,
                 const std::string & serviceTitle,
                 const std::string & logLevel,
-                const bpf::Path & logFile,
+                const bfs::path & logFile,
                 std::string & err)
 {
     if (m_pid != 0 || m_id != 0) {
@@ -127,17 +127,17 @@ Controller::run(const bpf::Path & pathToHarness,
     // ensure that the target directory exists
     if (!bpf::isDirectory(m_path)) {
         err.append("no such directory: ");
-        err.append(m_path.externalUtf8());
+        err.append(m_path.string());
         return false;
     }
 
     // what binary will we be using as a ipc harness program?
-    bpf::Path executable = pathToHarness;
+    bfs::path executable = pathToHarness;
     if (executable.empty()) executable = bp::paths::getRunnerPath();
 
-    if (!bpf::exists(executable)) {
+    if (!bpf::pathExists(executable)) {
         err.append("no such file: ");
-        err.append(executable.externalUtf8());
+        err.append(executable.string());
         return false;
     }
 
@@ -164,7 +164,7 @@ Controller::run(const bpf::Path & pathToHarness,
     if (!providerPath.empty())
     {
         args.push_back("-providerPath");    
-        args.push_back(bpf::canonicalPath(providerPath).utf8());
+        args.push_back(bpf::canonicalPath(providerPath).string());
     }
 
     if (!logLevel.empty())
@@ -176,7 +176,7 @@ Controller::run(const bpf::Path & pathToHarness,
     if (!logFile.empty())
     {
         args.push_back("-logfile");    
-        args.push_back(bpf::canonicalPath(logFile).utf8());
+        args.push_back(bpf::canonicalPath(logFile).string());
     }
     
     m_sw.reset();
@@ -246,8 +246,8 @@ Controller::describe()
 
 unsigned int
 Controller::allocate(const std::string & uri,
-                     const bpf::Path & data_dir,
-                     const bpf::Path & temp_dir,
+                     const bfs::path & data_dir,
+                     const bfs::path & temp_dir,
                      const std::string & locale,
                      const std::string & userAgent,
                      unsigned int clientPid)
@@ -261,8 +261,8 @@ Controller::allocate(const std::string & uri,
             context.add("dataDir", new bp::Path(data_dir));
             context.add("tempDir", new bp::Path(temp_dir));
         } else {
-            context.add("dataDir", new bp::String(data_dir.externalUtf8()));
-            context.add("tempDir", new bp::String(temp_dir.externalUtf8()));
+            context.add("dataDir", new bp::String(data_dir.string()));
+            context.add("tempDir", new bp::String(temp_dir.string()));
         }
         context.add("locale", new bp::String(locale));
         context.add("userAgent", new bp::String(userAgent));
@@ -320,8 +320,8 @@ Controller::invoke(unsigned int instanceId,
 
 
 void
-Controller::installHook(const bp::file::Path& serviceDir,
-                        const bp::file::Path& tempDir)
+Controller::installHook(const boost::filesystem::path& serviceDir,
+                        const boost::filesystem::path& tempDir)
 {
     try {
         if (m_apiVersion < 5) throw "not supported";
@@ -343,8 +343,8 @@ Controller::installHook(const bp::file::Path& serviceDir,
 
 
 void
-Controller::uninstallHook(const bp::file::Path& serviceDir,
-                          const bp::file::Path& tempDir)
+Controller::uninstallHook(const boost::filesystem::path& serviceDir,
+                          const boost::filesystem::path& tempDir)
 {
     try {
         if (m_apiVersion < 5) throw "not supported";
@@ -490,7 +490,7 @@ Controller::onMessage(bp::ipc::Channel *, const bp::ipc::Message & m)
         {
             long long int promptId = *(m.payload()->get("id"));
             long long int instance = *(m.payload()->get("instance"));
-            bpf::Path path(std::string(*(m.payload()->get("path"))));
+            bfs::path path(std::string(*(m.payload()->get("path"))));
             const bp::Object * arguments = m.payload()->get("arguments");
             m_listener->onPrompt(this, (unsigned int) instance,
                                  (unsigned int) promptId, path, arguments);

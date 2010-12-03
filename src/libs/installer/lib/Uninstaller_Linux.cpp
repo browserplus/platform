@@ -34,7 +34,7 @@ namespace bfs = boost::filesystem;
 
 namespace bp {
     namespace install {
-        Uninstaller::Uninstaller(const bp::file::Path& logFile,
+        Uninstaller::Uninstaller(const bfs::path& logFile,
                                  bp::log::Level logLevel)
         : m_logFile(logFile), m_logLevel(logLevel), m_error(false)
         {
@@ -60,13 +60,13 @@ namespace bp {
 
 
         void
-        Uninstaller::removeDirIfEmpty(const Path& dir)
+        Uninstaller::removeDirIfEmpty(const bfs::path& dir)
         {
             if (dir.empty()) {
                 try {
                     BPLOG_DEBUG_STRM("remove " << dir);
                     bfs::remove(dir);
-                } catch(const tFileSystemError&) {
+                } catch(const bfs::filesystem_error&) {
                     BPLOG_WARN_STRM("unable to remove empty dir " << dir);
                 }
             }

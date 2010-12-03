@@ -69,7 +69,7 @@ protected:
         JavascriptRunner();
         ~JavascriptRunner();        
 
-        void run(const bp::file::Path & path,
+        void run(const boost::filesystem::path & path,
                  bp::html::ScriptableObject & so,
                  const std::string & soName);
 

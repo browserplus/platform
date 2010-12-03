@@ -451,6 +451,7 @@ void
 RequireRequest::checkPlatformUpdates()
 {
     using namespace bp::file;
+    namespace bfs = boost::filesystem;
     
     bp::SemanticVersion thisVersion;
     bool b = thisVersion.parse(bp::paths::versionString());
@@ -462,15 +463,15 @@ RequireRequest::checkPlatformUpdates()
     
     // Get all subdirs of platform cache dir
     vector<string> updates;
-    tDirIter end;
-    Path platCache = bp::paths::getPlatformCacheDirectory();
+    bfs::path platCache = bp::paths::getPlatformCacheDirectory();
     if (isDirectory(platCache)) {
         try {
-            for (tDirIter iter(platCache); iter != end; ++iter) {
-                updates.push_back(utf8FromNative(iter->path().filename()));;
+            bfs::directory_iterator end;
+            for (bfs::directory_iterator iter(platCache); iter != end; ++iter) {
+                updates.push_back(iter->path().filename().string());
             }
-        } catch (const tFileSystemError& e) {
-            BPLOG_WARN_STRM("unable to iterate thru " << platCache
+        } catch (const bfs::filesystem_error& e) {
+            BPLOG_WARN_STRM("unable to iterate thru " << platCache.string()
                             << ": " << e.what());
         }
     }
@@ -480,18 +481,18 @@ RequireRequest::checkPlatformUpdates()
         if (v.parse(*it)) {
             // remove any updates which have already been installed or are 
             // older than our current version
-            Path installedPath = bp::paths::getBPInstalledPath(v.majorVer(),
-                                                               v.minorVer(), 
-                                                               v.microVer());
-            bool alreadyInstalled = bp::file::exists(installedPath);
+            bfs::path installedPath = bp::paths::getBPInstalledPath(v.majorVer(),
+                                                                    v.minorVer(),
+                                                                    v.microVer());
+            bool alreadyInstalled = bp::file::pathExists(installedPath);
             bool olderThanCurrent = (v.compare(thisVersion) < 0);
             if (alreadyInstalled || olderThanCurrent) {
                 BPLOG_INFO_STRM("version " << *it
                                 << (alreadyInstalled ? "already installed" 
                                                      : "older than current version")
                                 << ", removing update");
-                Path updatePath = bp::paths::getPlatformCacheDirectory() / *it;
-                bp::file::remove(updatePath);
+                bfs::path updatePath = bp::paths::getPlatformCacheDirectory() / *it;
+                bp::file::safeRemove(updatePath);
                 it = updates.erase(it);
                 continue;
             } 
@@ -547,8 +548,8 @@ RequireRequest::checkPlatformUpdates()
                             << m_platformUpdates[i].asString());
         }
         for (unsigned int i = 0; i < toDelete.size(); i++) {
-            Path p = bp::paths::getPlatformCacheDirectory() / toDelete[i].asString();
-            bp::file::remove(p);
+            bfs::path p = bp::paths::getPlatformCacheDirectory() / toDelete[i].asString();
+            bp::file::safeRemove(p);
             BPLOG_INFO_STRM("delete outdated platform update "
                             << toDelete[i].asString());
         }

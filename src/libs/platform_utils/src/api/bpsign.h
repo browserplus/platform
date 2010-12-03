@@ -54,17 +54,17 @@ namespace sign {
 
 class Signer {
 public:
-    static Signer* get(const bp::file::Path& publicKeyPath = bp::file::Path());
+    static Signer* get(const boost::filesystem::path& publicKeyPath = boost::filesystem::path());
     
     // sign a file and return the signature
-    std::string getSignature(const bp::file::Path& privateKeyPath,
-                             const bp::file::Path& publicKeyPath,
+    std::string getSignature(const boost::filesystem::path& privateKeyPath,
+                             const boost::filesystem::path& publicKeyPath,
                              const std::string& password,
-                             const bp::file::Path& inFile);
+                             const boost::filesystem::path& inFile);
 
     // verify signature with content in a file
     bool verifyFile(const std::string& signature,
-                    const bp::file::Path& contentPath,
+                    const boost::filesystem::path& contentPath,
                     BPTime& timestamp);
 
     // verify signature with content in a string
@@ -82,14 +82,14 @@ private:
         std::string m_str;
     };
     
-    Signer(const bp::file::Path& publicKeyPath); // throw(SSLException)
+    Signer(const boost::filesystem::path& publicKeyPath); // throw(SSLException)
     ~Signer();
     void createStore(); // throw(SSLException)
     void readSignerFile();
-    bool doSign(const bp::file::Path& keyFile, 
-                const bp::file::Path& certFile,
+    bool doSign(const boost::filesystem::path& keyFile, 
+                const boost::filesystem::path& certFile,
                 const std::string& password,
-                const bp::file::Path& inFile,
+                const boost::filesystem::path& inFile,
                 BIO* outBio,
                 bool detached);
     bool doVerify(BIO* contentBio,
@@ -100,10 +100,10 @@ private:
     static int verify_callback(int ok, 
                                X509_STORE_CTX* store);
         
-    bp::file::Path m_publicKeyPath;
+    boost::filesystem::path m_publicKeyPath;
     X509_STORE* m_store;
     STACK_OF(X509)* m_certStack;
-    static std::map<bp::file::Path, Signer*> s_singletons;
+    static std::map<boost::filesystem::path, Signer*> s_singletons;
 };
 
 }};

@@ -38,6 +38,7 @@ using namespace std;
 using namespace std::tr1;
 using namespace bp::file;
 using namespace bp::install;
+namespace bfs = boost::filesystem;
 
 // For platform 2.6 and later, standalone install invokes BrowserPlusUpdater
 // and status/progress/error is sent back to installer via IPC.  This listener
@@ -129,11 +130,12 @@ main(int argc, const char** argv)
 
         // set the appropriate locale for strings generated from the Installer
         string locale = bp::localization::getUsersLocale();
-        Path stringsPath = canonicalPath(Path(argv[0])).parent_path() / "strings.json";
+        bfs::path exe(argv[0]);
+        bfs::path stringsPath = canonicalPath(exe.parent_path() / "strings.json");
         Installer::setLocalizedStringsPath(stringsPath, locale);
 
         // setup logging, may be overridden by -logPath=<path> and/or -logLevel=<level>
-        Path logFile = getTempDirectory().parent_path() / "BrowserPlusUpdater.log";
+        bfs::path logFile = getTempDirectory().parent_path() / "BrowserPlusUpdater.log";
         bp::log::Level logLevel = bp::log::LEVEL_ALL;
 
         // crack argv
@@ -161,7 +163,7 @@ main(int argc, const char** argv)
                            curArg.substr(strlen("-logLevel=")));
             curArg = argv[++argIndex];
         }
-        Path dir(argv[argIndex++]);
+        bfs::path dir(argv[argIndex++]);
 
         if (!logFile.empty()) {
             // TODO: size, layout, time format

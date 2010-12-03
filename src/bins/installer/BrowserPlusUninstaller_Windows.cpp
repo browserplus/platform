@@ -40,6 +40,7 @@ using namespace bp::file;
 using namespace bp::localization;
 using namespace bp::strutil;
 using namespace std;
+namespace bfs = boost::filesystem;
 
 
 // Forward Declarations
@@ -52,7 +53,7 @@ void forkChild( const string& sChildName, const vector<string>& vsArgs );
 
 void setupLogging( bool bIsParent )
 {
-    Path logFile = getTempDirectory().parent_path() / "BrowserPlusUninstaller.log";
+    bfs::path logFile = getTempDirectory().parent_path() / "BrowserPlusUninstaller.log";
     bp::log::Level level = bp::log::LEVEL_DEBUG;
 
     bp::log::FileMode mode = bIsParent ?
@@ -125,16 +126,16 @@ void forkChild( const string& sChildName, const vector<string>& vsParentArgs )
     GetModuleFileNameW( NULL, wszParentPath, MAX_PATH );
 
     // Copy parent exe into temp file in system temp dir.
-    Path tempDir = getTempDirectory().parent_path();
+    bfs::path tempDir = getTempDirectory().parent_path();
     HANDLE hChild = NULL;
-    Path childPath;
+    bfs::path childPath;
     vector<string> vsChildArgs;
     wchar_t* wszChildCmd = NULL;
     try {
         childPath = tempDir / sChildName;
 
         // Setup the child's command line.
-        vsChildArgs.push_back( "\"" + childPath.externalUtf8() + "\""); 
+        vsChildArgs.push_back( "\"" + childPath.string() + "\""); 
         vsChildArgs.push_back("/child");
 
         // Add all the parent's args.
@@ -144,15 +145,15 @@ void forkChild( const string& sChildName, const vector<string>& vsParentArgs )
         }
 
         // Create a deleteOnClose copy of ourselves and launch it
-        CopyFileW( wszParentPath, childPath.external_file_string().c_str(), FALSE );
+        CopyFileW( wszParentPath, childPath.c_str(), FALSE );
 
         // Open temp file with delete-on-close.
-        hChild = CreateFileW( childPath.external_file_string().c_str(),
+        hChild = CreateFileW( childPath.c_str(),
                               GENERIC_READ,
                               FILE_SHARE_READ|FILE_SHARE_DELETE, 0,
                               OPEN_EXISTING, FILE_FLAG_DELETE_ON_CLOSE, 0 );
         if ( !hChild ) {
-            throw string( "unable to create handle for " + childPath.externalUtf8() );
+            throw string( "unable to create handle for " + childPath.string() );
         }
 
         // Convert arg vec to wide string.
@@ -187,7 +188,7 @@ void forkChild( const string& sChildName, const vector<string>& vsParentArgs )
         // but it's the best we can do.
         BPLOG_ERROR( "error launching child uninstall (\'" + s 
                      + "\'), completing uninstall in parent" );
-        remove( childPath );
+        safeRemove( childPath );
         doWork( vsChildArgs );
     }
 
@@ -253,7 +254,7 @@ int doWork( const vector<string>& vsArgs )
 
     // Perform the actual uninstall.
     BPLOG_INFO( "Invoking Uninstaller::run()." );
-    Path logFile = getTempDirectory().parent_path() / "BrowserPlusUninstaller.log";
+    bfs::path logFile = getTempDirectory().parent_path() / "BrowserPlusUninstaller.log";
     bp::log::Level level = bp::log::LEVEL_DEBUG;
     bp::install::Uninstaller unins(logFile, level);
     unins.run();

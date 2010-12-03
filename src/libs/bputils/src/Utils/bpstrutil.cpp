@@ -400,7 +400,7 @@ quoteJsonString(const std::string& str)
 
 
 bool
-loadFromFile(const bp::file::Path& path, std::string& sOut)
+loadFromFile(const boost::filesystem::path& path, std::string& sOut)
 {
     if (!bp::file::isRegularFile(path)) {
         return false;
@@ -422,7 +422,7 @@ loadFromFile(const bp::file::Path& path, std::string& sOut)
 }
 
 bool
-storeToFile(const bp::file::Path& path, const std::string& sIn)
+storeToFile(const boost::filesystem::path& path, const std::string& sIn)
 {
     std::ofstream ofs;
     if (!bp::file::openWritableStream(ofs, path, std::ios::trunc | std::ios::binary)) {

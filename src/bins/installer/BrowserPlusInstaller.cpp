@@ -44,6 +44,7 @@ using namespace std;
 using namespace std::tr1;
 using namespace bp::file;
 using namespace bp::install;
+namespace bfs = boost::filesystem;
 
 // localization keys
 //
@@ -67,10 +68,10 @@ public:
         eDownloadServices
     } tCommand;
 
-    AsyncHelper(const Path& keyPath,
+    AsyncHelper(const bfs::path& keyPath,
 				const list<ServiceRequireStatement>& services,
                 const list<string>& distroServers,
-                const Path& destDir,
+                const bfs::path& destDir,
                 bp::runloop::RunLoop* rl)
     : m_fetcher(keyPath, distroServers, destDir),
       m_services(services), m_rl(rl), m_errorMsg()
@@ -184,9 +185,9 @@ private:
 static boost::tuple<string, size_t, string>
 runIt(AsyncHelper::tCommand command,
       weak_ptr<IFetcherListener> listener,
-	  const Path& keyPath,
+	  const bfs::path& keyPath,
       const list<string>& servers,
-      const Path& destDir,
+      const bfs::path& destDir,
       list<ServiceRequireStatement> services = list<ServiceRequireStatement>())
 { 
     bp::runloop::RunLoop rl;
@@ -223,10 +224,10 @@ class InstallManager : virtual public IFetcherListener,
                        public enable_shared_from_this<InstallManager>
 {
 public:
-    InstallManager(const Path & exeDir,
-                   const Path & destDir,
-                   const Path & updatePkg,
-                   const Path& keyPath,
+    InstallManager(const bfs::path & exeDir,
+                   const bfs::path & destDir,
+                   const bfs::path & updatePkg,
+                   const bfs::path& keyPath,
                    const list<string>& servers,
                    const string& version,
                    const list<ServiceRequireStatement> & services,
@@ -237,7 +238,7 @@ public:
                    unsigned int width,
                    unsigned int height,
                    const string& title,
-                   const Path& logPath,
+                   const bfs::path& logPath,
                    const string& logLevel)
         : m_exeDir(exeDir), m_destDir(destDir), m_updatePkg(updatePkg),
           m_keyPath(keyPath), m_servers(servers), m_platformVersion(version),
@@ -276,10 +277,10 @@ public:
     }
           
 private:
-    Path m_exeDir;
-    Path m_destDir;
-    Path m_updatePkg;
-    Path m_keyPath;
+    bfs::path m_exeDir;
+    bfs::path m_destDir;
+    bfs::path m_updatePkg;
+    bfs::path m_keyPath;
     list<string> m_servers;
     string m_platformVersion;
     size_t m_platformSize;
@@ -312,7 +313,7 @@ private:
     } m_state;
     bool m_downloadingServices;
 
-    Path m_logPath;
+    bfs::path m_logPath;
     string m_logLevel;
     shared_ptr<DistQuery> m_distQuery; // only set for new installs
 
@@ -325,7 +326,7 @@ private:
         boost::tuple<string, size_t, string> runItResult;
         string errMsg;
 
-        if (exists(bp::paths::getInstallIDPath()) == false) {
+        if (pathExists(bp::paths::getInstallIDPath()) == false) {
             m_distQuery.reset(new DistQuery(m_servers, NULL));
         }
 
@@ -339,7 +340,7 @@ private:
         if (m_skin) {
             m_skin->statusMessage(Installer::getString(kPlatformDownloading));
         }
-        Path platformDir = m_destDir;
+        bfs::path platformDir = m_destDir;
         if (m_updatePkg.empty()) {
             {
                 ss.clear();
@@ -377,7 +378,7 @@ private:
             if (m_skin) m_skin->progress(5);
 
             platformDir /= m_platformVersion;
-            Path destPkg = m_destDir / m_updatePkg.filename();
+            bfs::path destPkg = m_destDir / m_updatePkg.filename();
             {
                 ss.clear();
                 ss << "installing from " << destPkg;
@@ -387,13 +388,13 @@ private:
 
             try {
                 boost::filesystem::create_directories(m_destDir);
-            } catch(const tFileSystemError&) {
-                BP_THROW("unable to create " + m_destDir.externalUtf8());
+            } catch(const bfs::filesystem_error&) {
+                BP_THROW("unable to create " + m_destDir.string());
             }
-            (void) remove(destPkg);
-            if (!copy(m_updatePkg, destPkg)) {
-                BP_THROW("unable to copy " + m_updatePkg.externalUtf8()
-                         + " -> " + destPkg.externalUtf8());
+            (void) safeRemove(destPkg);
+            if (!safeCopy(m_updatePkg, destPkg)) {
+                BP_THROW("unable to copy " + m_updatePkg.string()
+                         + " -> " + destPkg.string());
             }
             if (m_skin) m_skin->progress(15);
             PlatformUnpacker unpacker(destPkg, m_destDir,
@@ -406,7 +407,7 @@ private:
                 BP_THROW(Installer::getString(Installer::kErrorEncountered)
                          + ": " + errMsg);
             }
-            remove(destPkg);
+            safeRemove(destPkg);
             if (m_skin) m_skin->progress(35);
         }
 
@@ -436,9 +437,9 @@ private:
         // where Installer will find them
         // 
         if (!m_permissions.empty()) {
-            Path permsPath = platformDir / "permissions" / "configDomainPermissions";
+            bfs::path permsPath = platformDir / "permissions" / "configDomainPermissions";
             if (!bp::strutil::storeToFile(permsPath, m_permissions)) {
-                BP_THROW("unable to write " + permsPath.externalUtf8());
+                BP_THROW("unable to write " + permsPath.string());
             }
         }
 
@@ -446,22 +447,22 @@ private:
         // where Installer will find them
         // 
         if (!m_autoUpdatePermissions.empty()) {
-            Path permsPath = platformDir / "permissions" / "configAutoUpdatePermissions";
+            bfs::path permsPath = platformDir / "permissions" / "configAutoUpdatePermissions";
             if (!bp::strutil::storeToFile(permsPath, m_autoUpdatePermissions)) {
-                BP_THROW("unable to write " + permsPath.externalUtf8());
+                BP_THROW("unable to write " + permsPath.string());
             }
         }
 
         if (m_skin) m_skin->progress(67);    
 
         // Copy uninstallers into  platformDir
-        Path uninsScript = bp::paths::getUninstallerPath().filename();
-        Path uninsSrc = m_exeDir / uninsScript;
-        if (exists(uninsSrc)) {
-            Path uninsDst = platformDir / uninsScript;
-            if (!copy(uninsSrc, uninsDst)) {
-                BP_THROW("unable to copy " + uninsSrc.externalUtf8()
-                         + " -> " + uninsDst.externalUtf8());
+        bfs::path uninsScript = bp::paths::getUninstallerPath().filename();
+        bfs::path uninsSrc = m_exeDir / uninsScript;
+        if (pathExists(uninsSrc)) {
+            bfs::path uninsDst = platformDir / uninsScript;
+            if (!safeCopy(uninsSrc, uninsDst)) {
+                BP_THROW("unable to copy " + uninsSrc.string()
+                         + " -> " + uninsDst.string());
             }
         }
 
@@ -469,20 +470,18 @@ private:
 
         // platformDir is all set up, install from it
         // by invoking dir/BrowserPlusUpdater.
-        string s = bp::file::utf8FromNative(platformDir.filename());
         BPLOG_DEBUG_STRM("platformDir = " << platformDir
-                         << ", nativeLeaf = " << s);
+                         << ", nativeLeaf = " << platformDir.filename().string());
         bp::SemanticVersion version;
         weak_ptr<IInstallerListener> wp(shared_from_this());
-        if (!version.parse(s)) {
+        if (!version.parse(platformDir.filename().string())) {
             BPLOG_WARN_STRM("bad version: children of " << platformDir
                             << " are: ");
-            bp::file::tDirIter endIter;
-            for (bp::file::tDirIter iter(platformDir); iter != endIter; ++iter) {
-                bp::file::Path p(iter->path());
-                BPLOG_WARN_STRM("\t" << p);
+            bfs::directory_iterator endIter;
+            for (bfs::directory_iterator iter(platformDir); iter != endIter; ++iter) {
+                BPLOG_WARN_STRM("\t" << iter->path());
             }
-            BP_THROW("bad version: " + s);
+            BP_THROW("bad version: " + platformDir.filename().string());
         }
         bp::paths::createDirectories(version.majorVer(),
                                      version.minorVer(),
@@ -507,11 +506,11 @@ private:
         BPLOG_DEBUG_STRM("exit with status " << status);
 
         m_rl->stop();            
-        bp::file::remove(m_destDir);
+        safeRemove(m_destDir);
         if (m_skin) m_skin->ended();
 
 #ifdef MACOSX
-        if (m_exeDir.utf8().find("/Volumes/BrowserPlusInstaller") == 0) {
+        if (m_exeDir.string().find("/Volumes/BrowserPlusInstaller") == 0) {
             BPLOG_DEBUG("detach /Volumes/BrowserPlusInstaller");
             system("hdiutil detach /Volumes/BrowserPlusInstaller -force &");
         } else {
@@ -632,11 +631,10 @@ private:
 
 
 static string
-versionFromPackage(const Path& pkg)
+versionFromPackage(const bfs::path& pkg)
 {
     // name must be BrowserPlus_x.x.xx.bpkg
-    Path fname = pkg.filename();
-    string pkgStr = fname.utf8();
+    string pkgStr = pkg.filename().string();
     string rval;
     size_t start = pkgStr.find("_");
     size_t end = pkgStr.find(".bpkg");
@@ -648,9 +646,9 @@ versionFromPackage(const Path& pkg)
 
         
 static void
-readConfig(const Path& configPath,
+readConfig(const bfs::path& configPath,
 		   list<string>& servers,
-           Path& updatePackage,
+           bfs::path& updatePackage,
            string& version,
            list<ServiceRequireStatement>& services,
            string& permissions,
@@ -661,7 +659,7 @@ readConfig(const Path& configPath,
 {
     string json, errMsg;
     if (!bp::strutil::loadFromFile(configPath, json)) {
-        BP_THROW("unable to read " + configPath.externalUtf8());
+        BP_THROW("unable to read " + configPath.string());
     }
     bp::Object* configObj = bp::Object::fromPlainJsonString(json, &errMsg);
     if (!configObj) {
@@ -772,20 +770,20 @@ usage()
     exit(-1);
 }
 
-static Path
-resolvePath(Path pathToBinary,
-            Path updatePkg)
+static bfs::path
+resolvePath(bfs::path pathToBinary,
+            bfs::path updatePkg)
 {
-    Path resolvedPath = updatePkg;
+    bfs::path resolvedPath = updatePkg;
     
-    if (!updatePkg.empty() && !exists(updatePkg))
+    if (!updatePkg.empty() && !pathExists(updatePkg))
     {
         resolvedPath = pathToBinary.parent_path() / updatePkg;
         
         // if that file doesn't exist, then we won't change the updatePkg
         // path, primarily to keep suspicious looking unexpected changes
         // out of the logfile
-        if (!exists(resolvedPath)) {
+        if (!bp::file::pathExists(resolvedPath)) {
             resolvedPath = updatePkg;
         }
     }
@@ -799,17 +797,18 @@ int
 main(int argc, const char** argv)
 {
     int rval = 0;
-    Path destDir;
+    bfs::path destDir;
     try {
         // on win32, may have non-ascii chars in args.  deal with it
         APT::ARGVConverter conv;
         conv.convert(argc, argv);
 
-        Path exeDir = canonicalPath(Path(argv[0])).parent_path();
+        bfs::path exe(argv[0]);
+        bfs::path exeDir = canonicalPath(exe).parent_path();
     
         // debug logging on be default.  logfile cannot be in same dir
         // as executable since a mounted mac .dmg is read-only
-        Path logFile = getTempDirectory().parent_path() / "BrowserPlusInstaller.log";
+        bfs::path logFile = getTempDirectory().parent_path() / "BrowserPlusInstaller.log";
         string logLevel = bp::log::levelToString(bp::log::LEVEL_ALL);
 
         // we must get current user's locale, this may be overridded with the
@@ -820,7 +819,7 @@ main(int argc, const char** argv)
         // to cmd line with flags.
         shared_ptr<InstallerSkin> skin;
 
-        Path updatePkg;
+        bfs::path updatePkg;
         string version;
 
         vector<string> args;
@@ -834,7 +833,7 @@ main(int argc, const char** argv)
                 if (!args[1].compare("console")) {
                     logFile.clear();
                 } else {
-                    logFile = Path(args[1]);
+                    logFile = args[1];
                 }
             } else if (!args[0].compare("-log")) {
                 logLevel = args[1];
@@ -845,17 +844,16 @@ main(int argc, const char** argv)
             } else if (!args[0].compare("-silent")) {
                 skin.reset(new InstallerSkin);
             } else if (!args[0].compare("-pkg")) {
-                updatePkg = Path(args[1]);
+                updatePkg = bfs::path(args[1]);
                 version = versionFromPackage(updatePkg);
                 if (version.empty()) {
                     usage();
                 }
                 // handle the case where the path is relative to the binary
                 // (YIB-2917492)
-                updatePkg = resolvePath(Path(argv[0]), updatePkg);
-                if (!exists(updatePkg)) {
-                    BP_THROW("update package " + updatePkg.externalUtf8()
-                             + " not found");
+                updatePkg = resolvePath(exe, updatePkg);
+                if (!pathExists(updatePkg)) {
+                    BP_THROW("update package " + updatePkg.string() + " not found");
                 }
             } else if (!args[0].compare("-version")) {
                 version = args[1];
@@ -867,7 +865,7 @@ main(int argc, const char** argv)
         }
     
         // set the appropriate locale for strings generated from the Installer
-        Path stringsPath = exeDir / "strings.json";
+        bfs::path stringsPath = exeDir / "strings.json";
         Installer::setLocalizedStringsPath(stringsPath, locale);
 
         bp::log::Level bpLogLevel = bp::log::levelFromString(logLevel);
@@ -883,9 +881,9 @@ main(int argc, const char** argv)
         // UI based on locale, then we'll 
         if (skin == NULL) 
             {
-                Path uiDir = exeDir / "ui";
-                Path uiPath = bp::localization::getLocalizedUIPath(uiDir,
-                                                                   locale);
+                bfs::path uiDir = exeDir / "ui";
+                bfs::path uiPath = bp::localization::getLocalizedUIPath(uiDir,
+                                                                        locale);
                 if (uiPath.empty()) {
                     stringstream ss;
                     ss << "Running in GUI mode, no interface found in '"
@@ -899,22 +897,22 @@ main(int argc, const char** argv)
                 BPLOG_INFO("got GUI installer skin");
             }
 
-        Path configPath = exeDir / "installer.config";
-        Path keyPath = exeDir / "BrowserPlus.crt";
+        bfs::path configPath = exeDir / "installer.config";
+        bfs::path keyPath = exeDir / "BrowserPlus.crt";
 
         // Unpack into product temp dir.  Doze sometimes has
         // issues executing .exe files out of system temp.
-        Path prodTempDir = bp::paths::getProductTempDirectory();
+        bfs::path prodTempDir = bp::paths::getProductTempDirectory();
         if (!isDirectory(prodTempDir)) {
-            (void) remove(prodTempDir);
+            (void) safeRemove(prodTempDir);
             try {
                 boost::filesystem::create_directories(prodTempDir);
-            } catch(const tFileSystemError&) {
-                BP_THROW("unable to create " + prodTempDir.externalUtf8());
+            } catch(const bfs::filesystem_error&) {
+                BP_THROW("unable to create " + prodTempDir.string());
             }
         }
         destDir = getTempPath(prodTempDir, "BrowserPlusInstaller");
-        (void) remove(destDir);  // doze re-uses same dir.  sigh
+        (void) safeRemove(destDir);  // doze re-uses same dir.  sigh
 
         list<string> servers;
         list<ServiceRequireStatement> services;
@@ -926,7 +924,7 @@ main(int argc, const char** argv)
         
         // Dig stuff out of config file.  Command line args for 
         // updatePackage and version take precedence
-        Path tmpPkg;
+        bfs::path tmpPkg;
         string tmpVersion;
         string autoUpdatePermissions;
         readConfig(configPath, servers, tmpPkg, tmpVersion,
@@ -940,7 +938,7 @@ main(int argc, const char** argv)
             version = tmpVersion;
             // handle the case where the path is relative to the
             // binary (YIB-2917492)
-            updatePkg = resolvePath(Path(argv[0]), updatePkg);
+            updatePkg = resolvePath(exe, updatePkg);
         }
         BPLOG_INFO_STRM("update package: " << updatePkg);
         BPLOG_INFO_STRM("update version: " << version);
@@ -973,6 +971,6 @@ main(int argc, const char** argv)
 
     // Note, we will only get here on exceptions.  Otherwise, 
     // InstallerManager exits
-    bp::file::remove(destDir);
+    safeRemove(destDir);
     exit(rval);
 }

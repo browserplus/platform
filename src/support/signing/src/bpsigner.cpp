@@ -48,11 +48,11 @@ namespace bfs = boost::filesystem;
 void 
 usage(const char* s)
 {
-    Path exe(s);
+    bfs::path exe(s);
     fprintf(stderr, "usage: OR %s sign -publicKey=<path> -privateKey=<path> -in=<contentPath> -out=<signaturePath> [-password=<password>]\n",
-            utf8FromNative(exe.filename()).c_str());
+            exe.filename().c_str());
     fprintf(stderr, "usage: OR %s verify [-certStore=<path>] -in=<contentPath> -signature=<signaturePath>\n",
-            utf8FromNative(exe.filename()).c_str());
+            exe.filename().c_str());
     exit(-1);
 }
 
@@ -65,29 +65,29 @@ main(int argc, const char* argv[])
     }
 
     string cmd(argv[1]);
-    Path input;
-    Path output;
-    Path publicKey;
-    Path privateKey;
-    Path certStore;
+    bfs::path input;
+    bfs::path output;
+    bfs::path publicKey;
+    bfs::path privateKey;
+    bfs::path certStore;
     string password;
-    Path signature;
+    bfs::path signature;
     for (int i = 2; i < argc; i++) {
         vector<string> args = bp::strutil::splitAndTrim(argv[i], "=");
         if (args[0].compare("-in") == 0) {
-            input = Path(args[1]);
+            input = bfs::path(args[1]);
         } else if (args[0].compare("-out") == 0) {
-            output = Path(args[1]);
+            output = bfs::path(args[1]);
         } else if (args[0].compare("-publicKey") == 0) {
-            publicKey = Path(args[1]);
+            publicKey = bfs::path(args[1]);
         } else if (args[0].compare("-privateKey") == 0) {
-            privateKey = Path(args[1]);
+            privateKey = bfs::path(args[1]);
         } else if (args[0].compare("-certStore") == 0) {
-            certStore = Path(args[1]);
+            certStore = bfs::path(args[1]);
         } else if (args[0].compare("-password") == 0) {
             password = args[1];
         } else if (args[0].compare("-signature") == 0) {
-            signature = Path(args[1]);
+            signature = bfs::path(args[1]);
         } else {
             usage(argv[0]);
         }
@@ -110,7 +110,7 @@ main(int argc, const char* argv[])
             fprintf(stderr, "signing failed\n");
         } else {
             if (!bp::strutil::storeToFile(output, sig)) {
-                BP_THROW("unable to store to file" + output.externalUtf8());
+                BP_THROW("unable to store to file" + output.string());
             }
             fprintf(stderr, "signing succeeded\n");
         }
@@ -121,7 +121,7 @@ main(int argc, const char* argv[])
         BPTime signingTime;
         string sig;
         if (!bp::strutil::loadFromFile(signature, sig)) {
-            BP_THROW("unable to read signature path " + signature.externalUtf8());
+            BP_THROW("unable to read signature path " + signature.string());
         }
         bool ok = signer->verifyFile(sig, input, signingTime);
         fprintf(stderr, "verification %s\n", ok ? "succeeded" : "failed");

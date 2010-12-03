@@ -37,82 +37,82 @@ namespace bp { namespace pkg {
 
         // get the file extension to be used for browserplus package
         // files
-        bp::file::tString extension();
+        std::string extension();
         
         // get the content tarball name
-        bp::file::Path contentsPath();
+        boost::filesystem::path contentsPath();
 
         // get the single file content name
-        bp::file::Path contentsDataPath();
+        boost::filesystem::path contentsDataPath();
         
         // get the signature file name
-        bp::file::Path signaturePath();
+        boost::filesystem::path signaturePath();
         
         // Given a directory as input (inDir) and a path to write a file
         // to, create a browserplus package.
         // NOTE, by convention the outFile should have bp::pkg::extension()
         // appended to it.
-        bool packDirectory(const bp::file::Path& keyFile, 
-                           const bp::file::Path& certFile,
+        bool packDirectory(const boost::filesystem::path& keyFile, 
+                           const boost::filesystem::path& certFile,
                            const std::string& password,
-                           const bp::file::Path& inDir,
-                           const bp::file::Path& outFile);
+                           const boost::filesystem::path& inDir,
+                           const boost::filesystem::path& outFile);
 
         // Given a path to a .bpkg file as input (bpkgPath), validate
         // and extract a signed browserplus package bundle
         // empty certPath uses installed certificate store
-        bool unpackToDirectory(const bp::file::Path& bpkgPath,
-                               const bp::file::Path& destDir,
+        bool unpackToDirectory(const boost::filesystem::path& bpkgPath,
+                               const boost::filesystem::path& destDir,
                                BPTime& timestamp,
                                std::string & oError,
-                               const bp::file::Path& certPath = bp::file::Path());
+                               const boost::filesystem::path& certPath = boost::filesystem::path());
 
         // Given an istream to .bpkg data in memory (bpkgStrm), validate
         // and extract a signed browserplus package bundle
         // empty certPath uses installed certificate store
         bool unpackToDirectory(std::istream & bpkgStrm,
-                               const bp::file::Path& destDir,
+                               const boost::filesystem::path& destDir,
                                BPTime& timestamp,
                                std::string & oError,
-                               const bp::file::Path& certPath = bp::file::Path());
+                               const boost::filesystem::path& certPath = boost::filesystem::path());
 
         // Given a single file as input (inFile) and a path to write a file
         // to, create a browserplus package.
         // NOTE, by convention the outFile should have bp::pkg::extension()
         // appended to it.
-        bool packFile(const bp::file::Path& keyFile, 
-                      const bp::file::Path& certFile,
+        bool packFile(const boost::filesystem::path& keyFile, 
+                      const boost::filesystem::path& certFile,
                       const std::string& password,
-                      const bp::file::Path& inFile,
-                      const bp::file::Path& outFile);
+                      const boost::filesystem::path& inFile,
+                      const boost::filesystem::path& outFile);
 
         // Given a path to a .bpkg file as input (bpkgPath), validate
         // and extract a signed browserplus package bundle
         // empty certPath uses installed certificate store
-        bool unpackToFile(const bp::file::Path& bpkgPath,
-                          const bp::file::Path& destFile,
+        bool unpackToFile(const boost::filesystem::path& bpkgPath,
+                          const boost::filesystem::path& destFile,
                           BPTime& timestamp,
                           std::string & oError,
-                          const bp::file::Path& certPath = bp::file::Path());
+                          const boost::filesystem::path& certPath = boost::filesystem::path());
 
         // Given a string as input (inStr) and a path to write a file
         // to, create a browserplus package.
         // NOTE, by convention the outFile should have bp::pkg::extension()
         // appended to it.
-        bool packString(const bp::file::Path& keyFile, 
-                        const bp::file::Path& certFile,
+        bool packString(const boost::filesystem::path& keyFile, 
+                        const boost::filesystem::path& certFile,
                         const std::string& password,
                         const std::string& inStr,
-                        const bp::file::Path& outFile);
+                        const boost::filesystem::path& outFile);
 
         // Given a path to a .bpkg file as input (bpkgPath), validate
         // and extract a signed browserplus package bundle into a string
         // empty certPath uses installed certificate store
-        bool unpackToString(const bp::file::Path& bpkgPath,
+        bool unpackToString(const boost::filesystem::path& bpkgPath,
                             std::string& resultStr,
                             BPTime& timestamp,
                             std::string& oError,
-                            const bp::file::Path& certPath = bp::file::Path());
+                            const boost::filesystem::path& certPath = boost::filesystem::path());
 
 }; };
 

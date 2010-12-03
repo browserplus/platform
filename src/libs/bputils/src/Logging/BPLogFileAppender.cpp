@@ -42,7 +42,7 @@ namespace bp {
 namespace log {
 
 
-FileAppender::FileAppender( const bp::file::Path& path,
+FileAppender::FileAppender( const boost::filesystem::path& path,
                             LayoutPtr layout,
                             FileMode mode,
                             unsigned int nRolloverSizeKB,
@@ -73,13 +73,13 @@ void FileAppender::append( LoggingEventPtr event )
     if (!m_fstream.is_open())
     {
         // Truncate/rollover existing file if appropriate.
-        if (bp::file::exists( m_path ))
+        if (bp::file::pathExists( m_path ))
         {
             if (m_mode == kTruncate) {
-                (void) bp::file::remove( m_path );
+                (void) bp::file::safeRemove( m_path );
             } else if (m_mode == kSizeRollover) {
                 if (bp::file::size( m_path ) > m_nRolloverSizeKB*1000) {
-                    (void) bp::file::remove( m_path );
+                    (void) bp::file::safeRemove( m_path );
                 }
             } else {
             }

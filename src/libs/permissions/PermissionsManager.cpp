@@ -70,15 +70,14 @@ PermissionsManager::get(int major,
 {
     if (m_singleton == NULL) {
         bp::config::ConfigReader configReader;
-        bp::file::Path configFilePath = bp::paths::getConfigFilePath(major, minor, micro);
+        boost::filesystem::path configFilePath = bp::paths::getConfigFilePath(major, minor, micro);
         if (!configReader.load(configFilePath)) {
-            BP_THROW_FATAL("couldn't read config file at: " 
-                           + configFilePath.externalUtf8());
+            BP_THROW_FATAL("couldn't read config file at: " + configFilePath.string());
         }
         string baseURL;
         if (!configReader.getStringValue("DistServer", baseURL)) {
             BP_THROW_FATAL("No DistServerUrl key in config file at: "
-                           + configFilePath.externalUtf8());
+                           + configFilePath.string());
         }
         m_singleton = new PermissionsManager(baseURL);
     }
@@ -383,12 +382,12 @@ PermissionsManager::queryDomainPermissions(const string& domain) const
 
     // Disallow any local page coming from any product dir.  We don't want 
     // evil.org somehow writing a page and using it against us.
-    if (domain.find(bp::paths::getProductTopDirectory().utf8()) == 0) {
+    if (domain.find(bp::paths::getProductTopDirectory().generic_string()) == 0) {
         return rval;
     }
 
     // Disallow any local page coming from plugin writable dir.
-    if (domain.find(bp::paths::getPluginWritableDirectory().utf8()) == 0) {
+    if (domain.find(bp::paths::getPluginWritableDirectory().generic_string()) == 0) {
         return rval;
     }
 
@@ -636,7 +635,7 @@ PermissionsManager::load()
         // permissions file is a bunch 'o json
         // with a map for blacklist, platform blacklist,
         // and permission localizations
-        bp::file::Path inFile = getPermissionsPath();
+        boost::filesystem::path inFile = getPermissionsPath();
         if (!loadFromFile(inFile, json)) {
             BP_THROW("unable to read permissions file");
         }
@@ -683,10 +682,10 @@ PermissionsManager::load()
         // publicKeys is a list of public keys to be added to certs
         objPtr = m["publicKeys"];
         if (objPtr) {
-            bp::file::Path certPath = getCertFilePath();
+            boost::filesystem::path certPath = getCertFilePath();
             string certs;
             if (!loadFromFile(certPath, certs)) {
-                BP_THROW("unable to read " + certPath.externalUtf8());
+                BP_THROW("unable to read " + certPath.string());
             }
             bool dirty = false;
             vector<const bp::Object*>v = *objPtr;
@@ -700,7 +699,7 @@ PermissionsManager::load()
             }
             if (dirty){
                 if (!storeToFile(certPath, certs)) {
-                    BP_THROW("unable to write " + certPath.externalUtf8());
+                    BP_THROW("unable to write " + certPath.string());
                 }
             }
         }
@@ -865,7 +864,7 @@ PermissionsManager::load()
     // domain permissions are a map of maps
     // not a fatal error if it's missing or hosed
     bool domainPermsBad = false;
-    bp::file::Path domainPermsFile = getDomainPermissionsPath();
+    boost::filesystem::path domainPermsFile = getDomainPermissionsPath();
     if (loadFromFile(domainPermsFile, json)) {
         try {
             boost::scoped_ptr<bp::Object> obj(
@@ -1042,10 +1041,9 @@ PermissionsManager::load()
     
     if (domainPermsBad) {
         m_domainPermissions.clear();
-        bp::file::Path badFile(domainPermsFile.string() 
-                               + bp::file::nativeFromUtf8("_bad"));
-        (void) move(domainPermsFile, badFile);
-        (void) remove(domainPermsFile);
+        boost::filesystem::path badFile(domainPermsFile.string() + "_bad");
+        (void) safeMove(domainPermsFile, badFile);
+        (void) bp::file::safeRemove(domainPermsFile);
     }
 
     try {
@@ -1084,10 +1082,10 @@ PermissionsManager::saveDomainPermissions()
     using namespace bp::paths;
     using namespace bp::strutil;
     
-    bp::file::Path path = getDomainPermissionsPath();
+    boost::filesystem::path path = getDomainPermissionsPath();
     
     if (m_domainPermissions.empty()) {
-        remove(path);
+        bp::file::safeRemove(path);
         return;
     }
 
@@ -1337,7 +1335,7 @@ PermissionsManager::gotPermissions(unsigned int tid,
     IPermissionsManagerListener * listener = it->second;
     m_listeners.erase(it);
 
-    bp::file::Path tmpPath = getTempPath(getTempDirectory(), "perms_pkg");
+    boost::filesystem::path tmpPath = getTempPath(getTempDirectory(), "perms_pkg");
     try {
         // extract perms
         if (permBundle.size() == 0) {
@@ -1345,7 +1343,7 @@ PermissionsManager::gotPermissions(unsigned int tid,
         }
         string bpkgStr((const char *) &(permBundle[0]), permBundle.size());
         if (!bp::strutil::storeToFile(tmpPath, bpkgStr)) {
-            throw runtime_error("unable to save perms to " + tmpPath.externalUtf8());
+            throw runtime_error("unable to save perms to " + tmpPath.string());
         }
         string permsStr;
         string errMsg;
@@ -1388,7 +1386,7 @@ PermissionsManager::gotPermissions(unsigned int tid,
         BPLOG_ERROR_STRM("Error getting updated permissions: " << e.what());
         ok = false;
     }   
-    (void) remove(tmpPath);
+    (void) bp::file::safeRemove(tmpPath);
     
     // Whew!  We're done
     if (ok) {

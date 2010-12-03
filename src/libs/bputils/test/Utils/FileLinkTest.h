@@ -59,7 +59,7 @@ class FileLinkTest : public CPPUNIT_NS::TestCase
     void circularLink();
 
   private:
-    bp::file::Path m_dir;
+	boost::filesystem::path m_dir;
 };
 
 #endif

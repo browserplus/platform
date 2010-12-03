@@ -373,11 +373,10 @@ private:
         
             NSData* body = nil;
             NSError* error = nil;
-            bp::file::Path path = request->body.path();
+            boost::filesystem::path path = request->body.path();
             if (!path.empty()) {
-                std::string pstr = path.external_file_string();
-                m_pathFd = ::open(pstr.c_str(), O_RDONLY);
-                body = [NSData dataWithContentsOfFile: [NSString stringWithUTF8String: pstr.c_str()]
+                m_pathFd = ::open(path.c_str(), O_RDONLY);
+                body = [NSData dataWithContentsOfFile: [NSString stringWithUTF8String: path.c_str()]
                                options: NSUncachedRead | NSMappedRead
                                error: &error];
             } else {

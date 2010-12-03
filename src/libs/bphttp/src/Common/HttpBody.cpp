@@ -43,14 +43,14 @@ Body::Body() : m_vbBody(), m_path()
 }
 
 
-void Body::fromPath( const bp::file::Path& path )
+void Body::fromPath( const boost::filesystem::path& path )
 {
     m_vbBody.clear();
     m_path = path;
 }
 
 
-bp::file::Path Body::path() const
+boost::filesystem::path Body::path() const
 {
     return m_path;
 }

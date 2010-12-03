@@ -112,7 +112,7 @@ private:
 // Support
 private:    
     // Save specified http body to binary file.
-    void saveBodyToBinaryFile( const bp::file::Path& path,
+    void saveBodyToBinaryFile( const boost::filesystem::path& path,
                                const bp::http::Body& body );
     
 private:    

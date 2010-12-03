@@ -42,9 +42,7 @@ class UrlTest : public CPPUNIT_NS::TestCase
     CPPUNIT_TEST(testUrlFromPath);
     CPPUNIT_TEST(testPathRoundtrip);
     CPPUNIT_TEST(testUrlRoundtrip);
-#ifdef WIN32
     CPPUNIT_TEST(testNonAscii);
-#endif
     CPPUNIT_TEST(testUrlAppendPath);
     CPPUNIT_TEST(testUrlDirname);
     CPPUNIT_TEST_SUITE_END();
@@ -58,9 +56,7 @@ protected:
     void testUrlFromPath();
     void testPathRoundtrip();
     void testUrlRoundtrip();
-#ifdef WIN32
     void testNonAscii();
-#endif
     void testUrlAppendPath();
     void testUrlDirname();
 };

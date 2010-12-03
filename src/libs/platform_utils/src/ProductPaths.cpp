@@ -46,10 +46,10 @@ namespace bfs = boost::filesystem;
 
 
 // common code to create a top-level product dir
-static Path
+static bfs::path
 doGetTopDir(const string& s)
 {
-    Path rval(bp::paths::getProductTopDirectory());
+    bfs::path rval(bp::paths::getProductTopDirectory());
     rval /= s;
     return rval;
 }
@@ -69,12 +69,12 @@ bp::paths::getProductName()
 }
 
 
-Path 
+bfs::path
 bp::paths::getProductDirectory(int major,
                                int minor,
                                int micro)
 {
-    Path rval = getProductTopDirectory();
+    bfs::path rval = getProductTopDirectory();
 
     // append version
     if (major == -1 && minor == -1 && micro == -1) {
@@ -87,114 +87,114 @@ bp::paths::getProductDirectory(int major,
 }
 
 
-bp::file::Path
+boost::filesystem::path
 bp::paths::getProductTempDirectory()
 {
     return doGetTopDir("Temp");
 }
 
     
-Path
+bfs::path
 bp::paths::getPermissionsDirectory()
 {
     return doGetTopDir("Permissions");
 }
 
 
-Path
+bfs::path
 bp::paths::getServiceDirectory()
 {
     return doGetTopDir("Corelets");
 }
 
 
-Path
+bfs::path
 bp::paths::getServiceCacheDirectory()
 {
     return doGetTopDir("PendingUpdateCache");
 }
 
 
-Path
+bfs::path
 bp::paths::getServiceInterfaceCachePath()
 {
     return doGetTopDir("CoreletInterfaceCache");
 }
 
 
-Path
+bfs::path
 bp::paths::getPlatformCacheDirectory()
 {
     return doGetTopDir("PlatformUpdateCache");
 }
 
 
-Path
+bfs::path
 bp::paths::getDaemonPath(int major,
                          int minor,
                          int micro)
 {
-    Path p = getProductDirectory(major, minor, micro) / "BrowserPlusCore";
+    bfs::path p = getProductDirectory(major, minor, micro) / "BrowserPlusCore";
     return bp::file::canonicalProgramPath(p);
 }
 
 
-Path
+bfs::path
 bp::paths::getDaemonLogPath(int major,
                              int minor,
                              int micro)
 {
-    Path path = getObfuscatedWritableDirectory(major, minor, micro) / "BrowserPlusCore.log";
+    bfs::path path = getObfuscatedWritableDirectory(major, minor, micro) / "BrowserPlusCore.log";
     return path;
 }
 
 
-Path
+bfs::path
 bp::paths::getRunnerPath(int major,
                          int minor,
                          int micro)
 {
-    Path p = getProductDirectory(major, minor, micro) / "BrowserPlusService";
+    bfs::path p = getProductDirectory(major, minor, micro) / "BrowserPlusService";
     return bp::file::canonicalProgramPath(p);
 }
 
 
-Path
+bfs::path
 bp::paths::getServiceInstallerPath(int major,
                                    int minor,
                                    int micro)
 {
-    Path p = getProductDirectory(major, minor, micro) / "ServiceInstaller";
+    bfs::path p = getProductDirectory(major, minor, micro) / "ServiceInstaller";
     return bp::file::canonicalProgramPath(p);
 }
 
 
-Path
+bfs::path
 bp::paths::getUninstallerPath()
 {
-    Path p = getProductTopDirectory() / "BrowserPlusUninstaller";
+    bfs::path p = getProductTopDirectory() / "BrowserPlusUninstaller";
     return bp::file::canonicalProgramPath(p);
 }
 
 
-Path
+bfs::path
 bp::paths::getServiceDataDirectory(string name,
                                    unsigned int major_ver)
 {
-    Path serviceDataDir(getProductTopDirectory());
+    bfs::path serviceDataDir(getProductTopDirectory());
     stringstream ss;
     ss << major_ver;
-    serviceDataDir /= Path("CoreletData")/name/ss.str();
+    serviceDataDir /= bfs::path("CoreletData")/name/ss.str();
     return serviceDataDir;
 }
 
 
-Path
+bfs::path
 bp::paths::getObfuscatedWritableDirectory(int major,
                                           int minor,
                                           int micro)
 {
-    Path dir(getPluginWritableDirectory(major, minor, micro));
+    bfs::path dir(getPluginWritableDirectory(major, minor, micro));
     string sInstallId = bp::plat::getInstallID();
     if (sInstallId.empty()) {
         return dir;
@@ -204,23 +204,23 @@ bp::paths::getObfuscatedWritableDirectory(int major,
 }
 
 
-Path
+bfs::path
 bp::paths::getConfigFilePath(int major,
                              int minor,
                              int micro)
 {
-    Path path= getProductDirectory(major, minor, micro) / "BrowserPlus.config";
+    bfs::path path= getProductDirectory(major, minor, micro) / "BrowserPlus.config";
     return path;
 }
 
 
-Path
+bfs::path
 bp::paths::getLocalizedStringsPath(int major,
                                    int minor,
                                    int micro,
                                    bool useUpdateCache)
 {
-    Path path;
+    bfs::path path;
     if (!useUpdateCache) {
         path = getProductDirectory(major, minor, micro);
     } else {
@@ -229,51 +229,51 @@ bp::paths::getLocalizedStringsPath(int major,
         v.setMajor(major);
         v.setMinor(minor);
         v.setMicro(micro);
-        path /= Path(v.asString()) / "daemon";
+        path /= bfs::path(v.asString()) / "daemon";
     }
     path /= "strings.json";
     return path;
 }
 
 
-Path
+bfs::path
 bp::paths::getPersistentStatePath(int major,
                                   int minor,
                                   int micro)
 {
-    Path path = getPluginWritableDirectory(major, minor, micro) / "bpstate.data";
+    bfs::path path = getPluginWritableDirectory(major, minor, micro) / "bpstate.data";
     return path;
 }
 
 
-Path
+bfs::path
 bp::paths::getCertFilePath()
 {
-    Path certPath = getPermissionsDirectory() / "BrowserPlus.crt";
+    bfs::path certPath = getPermissionsDirectory() / "BrowserPlus.crt";
     return certPath;
 }
 
 
-Path
+bfs::path
 bp::paths::getPermissionsPath()
 {
-    Path path = getPermissionsDirectory() / "Permissions";
+    bfs::path path = getPermissionsDirectory() / "Permissions";
     return path;
 }
 
 
-Path
+bfs::path
 bp::paths::getDomainPermissionsPath()
 {
-    Path path = getPermissionsDirectory() / "domainPermissions.json";
+    bfs::path path = getPermissionsDirectory() / "domainPermissions.json";
     return path;
 }
 
 
-Path
+bfs::path
 bp::paths::getInstallIDPath()
 {
-    Path path = getPluginWritableDirectory().parent_path() / "InstallID";
+    bfs::path path = getPluginWritableDirectory().parent_path() / "InstallID";
     return path;
 }
 
@@ -295,46 +295,46 @@ bp::paths::versionString(int major,
 }
 
 
-Path
+bfs::path
 bp::paths::getBPInstalledPath(int major,
                               int minor,
                               int micro)
 {
-    Path path = getProductDirectory(major, minor, micro) / ".installed";
+    bfs::path path = getProductDirectory(major, minor, micro) / ".installed";
     return path;
 }
 
 
-Path
+bfs::path
 bp::paths::getBPInstallingPath(int major,
                                int minor,
                                int micro)
 {
-    Path path = getProductDirectory(major, minor, micro) / ".installing";
+    bfs::path path = getProductDirectory(major, minor, micro) / ".installing";
     return path;
 }
 
 
-Path
+bfs::path
 bp::paths::getBPDisabledPath(int major,
                              int minor,
                              int micro)
 {
-    Path path = getProductDirectory(major, minor, micro) / ".disabled";
+    bfs::path path = getProductDirectory(major, minor, micro) / ".disabled";
     return path;
 }
 
 
-Path
+bfs::path
 bp::paths::getComponentInstallDialogPath(const string & locale)
 {
-    Path rval;
+    bfs::path rval;
     vector<string> locales = 
         bp::localization::getLocaleCandidates(locale);
     
     for (unsigned int i = 0; i < locales.size(); i++) {
-        Path path = getProductDirectory()/"ui"/"install_dialog"/locales[i]/"index.html";
-        if (exists(path)) {
+        bfs::path path = getProductDirectory()/"ui"/"install_dialog"/locales[i]/"index.html";
+        if (pathExists(path)) {
             rval = path;
             break;
         }
@@ -343,16 +343,16 @@ bp::paths::getComponentInstallDialogPath(const string & locale)
 }
 
 
-Path
+bfs::path
 bp::paths::getPreferencePanelUIPath(const string & locale)
 {
-    Path rval;
+    bfs::path rval;
     vector<string> locales = 
         bp::localization::getLocaleCandidates(locale);
     
     for (unsigned int i = 0; i < locales.size(); i++) {
-        Path path = getProductDirectory()/"ui"/"preference_panel"/locales[i]/"index.html";
-        if (exists(path)) {
+        bfs::path path = getProductDirectory()/"ui"/"preference_panel"/locales[i]/"index.html";
+        if (pathExists(path)) {
             rval = path;
             break;
         }
@@ -378,9 +378,8 @@ bp::paths::createDirectories(int major,
         bfs::create_directories(getPluginWritableDirectory(major, minor, micro));
         bfs::create_directories(getObfuscatedWritableDirectory(major, minor, micro));
         bfs::create_directories(getPlatformCacheDirectory());
-    } catch (const tFileSystemError& e) {
-        string msg = "unable to create " + Path(e.path1()).utf8()
-                     + ": " + e.what();
+    } catch (const bfs::filesystem_error& e) {
+        string msg = "unable to create " + e.path1().string() + ": " + e.what();
         BP_THROW_FATAL(msg);
     }
 }

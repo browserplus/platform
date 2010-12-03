@@ -49,25 +49,25 @@ void
 Installer::installPlugins()
 {
     BPLOG_DEBUG_STRM("begin Installer::installPlugins()");
-    Path pluginPath = "BrowserPlus_" + m_version.asString()  + ".plugin";
+    bfs::path pluginPath = "BrowserPlus_" + m_version.asString()  + ".plugin";
     
     // Get path to plugins
-    Path pluginDir = utils::getFolderPath(kInternetPlugInFolderType) / pluginPath;
+    bfs::path pluginDir = utils::getFolderPath(kInternetPlugInFolderType) / pluginPath;
 
     // remove existing version of our plugin
-    if (!remove(pluginDir)) {
-        BPLOG_WARN(lastErrorString("unable to delete " + pluginDir.externalUtf8()));
+    if (!safeRemove(pluginDir)) {
+        BPLOG_WARN(lastErrorString("unable to delete " + pluginDir.string()));
     }
 
     // create plugin dir
     try {
         bfs::create_directories(pluginDir);
-    } catch(const tFileSystemError&) {
-        BP_THROW(lastErrorString("unable to create " + pluginDir.externalUtf8()));
+    } catch(const bfs::filesystem_error&) {
+        BP_THROW(lastErrorString("unable to create " + pluginDir.string()));
     }
 
     // copy plugin into plugins dir
-    Path src = m_dir / "plugins" / pluginPath;
+    bfs::path src = m_dir / "plugins" / pluginPath;
     doCopy(src, pluginDir);
     BPLOG_DEBUG_STRM("complete Installer::installPlugins()");
 }
@@ -80,23 +80,23 @@ Installer::installPrefPanel()
 {
     BPLOG_DEBUG_STRM("begin Installer::installPrefPanel()");
     // Get path to PreferencePanels
-    Path prefPaneDir = utils::getFolderPath(kPreferencePanesFolderType)
+    bfs::path prefPaneDir = utils::getFolderPath(kPreferencePanesFolderType)
         / "BrowserPlusPrefs.prefPane";
 
     // remove existing version of our prefpane
-    if (!remove(prefPaneDir)) {
-        BPLOG_WARN(lastErrorString("unable to delete " + prefPaneDir.externalUtf8()));
+    if (!safeRemove(prefPaneDir)) {
+        BPLOG_WARN(lastErrorString("unable to delete " + prefPaneDir.string()));
     }
 
     // create dir
     try {
         bfs::create_directories(prefPaneDir);
-    } catch(const tFileSystemError&) {
-        BP_THROW(lastErrorString("unable to create " + prefPaneDir.externalUtf8()));
+    } catch(const bfs::filesystem_error&) {
+        BP_THROW(lastErrorString("unable to create " + prefPaneDir.string()));
     }
 
     // copy prefpane
-    Path src= m_dir / "prefPane" / "BrowserPlusPrefs.prefPane";
+    bfs::path src= m_dir / "prefPane" / "BrowserPlusPrefs.prefPane";
     doCopy(src, prefPaneDir);
     BPLOG_DEBUG_STRM("complete Installer::installPrefPanel()");
 }
@@ -143,10 +143,10 @@ Installer::disablePlugins(const bp::SemanticVersion& version)
 {
     // Must physically remove OSX plugins to keep them from
     // being found by browser
-    vector<Path> plugins = getPluginPaths(version.majorVer(),
-                                          version.minorVer(),
-                                          version.microVer());
+    vector<bfs::path> plugins = getPluginPaths(version.majorVer(),
+                                               version.minorVer(),
+                                               version.microVer());
     for (size_t i = 0; i < plugins.size(); i++) {
-        (void) remove(plugins[i]);
+        (void) safeRemove(plugins[i]);
     }
 }

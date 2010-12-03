@@ -54,11 +54,11 @@ class FileCopyTest : public CPPUNIT_NS::TestCase
     void sourceDNE();
 
   private:
-    bool dirsAreSame(bp::file::Path lhs,
-                     bp::file::Path rhs);
+    bool dirsAreSame(boost::filesystem::path lhs,
+					 boost::filesystem::path rhs);
 
-    bp::file::Path m_testSourceDir;
-    bp::file::Path m_testDestDir;
+	boost::filesystem::path m_testSourceDir;
+	boost::filesystem::path m_testDestDir;
 };
 
 #endif

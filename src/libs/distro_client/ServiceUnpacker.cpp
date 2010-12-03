@@ -39,24 +39,25 @@
 
 using namespace std;
 using namespace bp::file;
+namespace bfs = boost::filesystem;
 
-ServiceUnpacker::ServiceUnpacker(const Path& pkgFile,
-                                 const Path& certFile)
+ServiceUnpacker::ServiceUnpacker(const bfs::path& pkgFile,
+                                 const bfs::path& certFile)
     : Unpacker(pkgFile, certFile)
 {
 }
 
 
 ServiceUnpacker::ServiceUnpacker(const std::vector<unsigned char>& buf,
-                                 const Path& certFile)
+                                 const bfs::path& certFile)
     : Unpacker(buf, certFile)
 {
 }
 
 
-ServiceUnpacker::ServiceUnpacker(const Path& dir,
+ServiceUnpacker::ServiceUnpacker(const bfs::path& dir,
                                  int)
-    : Unpacker(Path(), Path()), m_dir(dir)
+    : Unpacker(bfs::path(), bfs::path()), m_dir(dir)
 {
 }
 
@@ -64,7 +65,7 @@ ServiceUnpacker::ServiceUnpacker(const Path& dir,
 ServiceUnpacker::~ServiceUnpacker()
 {
     if (!m_tmpDir.empty()) {
-        remove(m_tmpDir);
+        safeRemove(m_tmpDir);
     }
 }
 
@@ -80,7 +81,7 @@ ServiceUnpacker::unpack(string& errMsg)
 bool
 ServiceUnpacker::install(string& errMsg)
 {
-    Path dir = m_dir.empty() ? m_tmpDir : m_dir;
+    bfs::path dir = m_dir.empty() ? m_tmpDir : m_dir;
     BPLOG_DEBUG_STRM("install service from " << dir);
     errMsg.clear();
     bool rval = true;
@@ -93,7 +94,7 @@ ServiceUnpacker::install(string& errMsg)
         }
 
         // install by invoking service installer
-        Path serviceInstaller = bp::paths::getServiceInstallerPath();
+        bfs::path serviceInstaller = bp::paths::getServiceInstallerPath();
         if (serviceInstaller.empty()) {
             throw "Unable to get service installer path";
         }
@@ -104,8 +105,8 @@ ServiceUnpacker::install(string& errMsg)
         args.push_back("-log");
         args.push_back("debug");
         args.push_back("-logfile");
-        args.push_back(bp::paths::getDaemonLogPath().externalUtf8());
-        args.push_back(dir.externalUtf8());
+        args.push_back(bp::paths::getDaemonLogPath().string());
+        args.push_back(dir.string());
         stringstream ss;
         ss << serviceInstaller;
         for (size_t i = 0; i < args.size(); i++) {
@@ -133,7 +134,7 @@ ServiceUnpacker::install(string& errMsg)
 
 
 bool
-ServiceUnpacker::unpackTo(const Path& dir,
+ServiceUnpacker::unpackTo(const bfs::path& dir,
                           string& errMsg)
 {
     return Unpacker::unpackTo(dir, errMsg);

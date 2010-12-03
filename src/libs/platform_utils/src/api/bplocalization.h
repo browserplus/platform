@@ -82,7 +82,7 @@ namespace bp {
         bool getLocalizedString(const std::string& key, 
                                 const std::string& locale,
                                 std::string & outVal,
-                                const bp::file::Path& stringsPath);
+                                const boost::filesystem::path& stringsPath);
 
         /**
          *  get all localizations for a given key
@@ -109,8 +109,8 @@ namespace bp {
          * per supported locale, and the user's locale, return the best
          * match, or an empty string if no match was found.
          */
-        bp::file::Path getLocalizedUIPath(const bp::file::Path & uiDir,
-                                          const std::string & locale);
+        boost::filesystem::path getLocalizedUIPath(const boost::filesystem::path & uiDir,
+                                                   const std::string & locale);
     }
 }
 

@@ -125,7 +125,7 @@ class ActiveSession : public virtual RequireLock::ILockListener,
     virtual void promptUser(
         std::tr1::weak_ptr<IServiceExecutionContextListener> listener,
         unsigned int cookie,
-        const bp::file::Path& pathToHTMLDialog,
+        const boost::filesystem::path& pathToHTMLDialog,
         const bp::Object * obj);
     
     virtual void invokeCallback(unsigned int tid,

@@ -33,13 +33,13 @@
 using namespace ServiceRunner;
 
 void * 
-ServiceLibrary::dlopenNP(const bp::file::Path & path)
+ServiceLibrary::dlopenNP(const boost::filesystem::path & path)
 {
     int flag = RTLD_NOW | RTLD_LOCAL;
 #ifdef RTLD_DEEPBIND
     flag |= RTLD_DEEPBIND;
 #endif
-    void * hand = dlopen(path.external_file_string().c_str(), flag);
+    void * hand = dlopen(path.c_str(), flag);
     // if dlopen fails, lets' try to log some helpful hints for potentially
     // befuddled service engineers.
     if (hand == NULL) {

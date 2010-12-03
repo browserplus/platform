@@ -51,6 +51,7 @@ using namespace std;
 using namespace std::tr1;
 using namespace ServiceRunner;
 namespace bpf = bp::file;
+namespace bfs = boost::filesystem;
 
 
 ServiceLibrary::ServiceLibrary() : m_handle(NULL)
@@ -83,7 +84,7 @@ ServiceLibrary::parseManifest(std::string & err)
     //      to the location where the service api version *really* lives.
     //      (yeah, we could include a version in manifest too, but that would
     //       be a DRY violation)
-    return m_summary.detectService(bpf::canonicalPath(bpf::Path(".")), err);
+    return m_summary.detectService(bpf::canonicalPath(bfs::path(".")), err);
 }
 
 std::string
@@ -111,13 +112,13 @@ struct FunctionTableBase
 
 // load the service
 bool
-ServiceLibrary::load(const bpf::Path & providerPath, std::string & err)
+ServiceLibrary::load(const bfs::path & providerPath, std::string & err)
 {
     BPASSERT(m_handle == NULL);
     
     // now let's determine the path to the shared library.  For
     // dependent services this will be extracted from the manifest
-    bpf::Path path;
+    bfs::path path;
     bp::service::Summary provider;
     
     if (m_summary.type() == bp::service::Summary::Dependent)
@@ -136,7 +137,7 @@ ServiceLibrary::load(const bpf::Path & providerPath, std::string & err)
 
     // now path contains the path to the shared library, regardless of whether
     // this is a native or dependent service.
-    BPLOG_INFO_STRM("loading service library: " << bpf::utf8FromNative(path.filename()));
+    BPLOG_INFO_STRM("loading service library: " << path.filename());
 
     m_handle = dlopenNP(path);
 
@@ -197,8 +198,8 @@ ServiceLibrary::load(const bpf::Path & providerPath, std::string & err)
 }
 
 unsigned int
-ServiceLibrary::allocate(std::string uri, bpf::Path dataDir,
-                         bpf::Path tempDir, std::string locale,
+ServiceLibrary::allocate(std::string uri, bfs::path dataDir,
+                         bfs::path tempDir, std::string locale,
                          std::string userAgent, unsigned int clientPid)
 {
     return m_impl->allocate(uri, dataDir, tempDir, locale, userAgent, clientPid);
@@ -220,15 +221,15 @@ ServiceLibrary::invoke(unsigned int id, unsigned int tid,
 }
 
 int
-ServiceLibrary::installHook(const bp::file::Path& serviceDir,
-                            const bp::file::Path& tempDir)
+ServiceLibrary::installHook(const boost::filesystem::path& serviceDir,
+                            const boost::filesystem::path& tempDir)
 {
     return m_impl->installHook(serviceDir, tempDir);
 }
 
 int
-ServiceLibrary::uninstallHook(const bp::file::Path& serviceDir,
-                              const bp::file::Path& tempDir)
+ServiceLibrary::uninstallHook(const boost::filesystem::path& serviceDir,
+                              const boost::filesystem::path& tempDir)
 {
     return m_impl->uninstallHook(serviceDir, tempDir);
 }

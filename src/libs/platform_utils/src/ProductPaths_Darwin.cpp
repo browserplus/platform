@@ -71,7 +71,7 @@ stringRefToUTF8(CFStringRef cfStr)
 }
 
 
-Path
+bfs::path
 bp::paths::getProductTopDirectory()
 {
     // Get application support dir
@@ -83,7 +83,7 @@ bp::paths::getProductTopDirectory()
     }
     CFURLRef tmpUrl = CFURLCreateFromFSRef(kCFAllocatorSystemDefault, &fref);
     CFStringRef ctmpDir = CFURLCopyFileSystemPath(tmpUrl, kCFURLPOSIXPathStyle);
-    Path productDir(stringRefToUTF8(ctmpDir));
+    bfs::path productDir(stringRefToUTF8(ctmpDir));
     CFRelease(ctmpDir);
     CFRelease(tmpUrl);
     if (productDir.empty()) {
@@ -97,7 +97,7 @@ bp::paths::getProductTopDirectory()
 }
 
 
-Path
+bfs::path
 bp::paths::getPluginWritableDirectory(int major,
                                       int minor,
                                       int micro)
@@ -110,16 +110,16 @@ bp::paths::getPluginWritableDirectory(int major,
 string 
 bp::paths::getIPCName()
 {
-    Path p = getProductDirectory() / "bp.pipe";
-    return p.utf8();
+    bfs::path p = getProductDirectory() / "bp.pipe";
+    return p.string();
 }
 
 
 string 
 bp::paths::getEphemeralIPCName()
 {
-    Path p = getTempPath(getTempDirectory(), "BPIPC");
-    return p.utf8();
+    bfs::path p = getTempPath(getTempDirectory(), "BPIPC");
+    return p.string();
 }
 
 
@@ -128,16 +128,16 @@ bp::paths::getIPCLockName(int major,
                           int minor,
                           int micro)
 {
-    return getDaemonPath(major, minor, micro).utf8();
+    return getDaemonPath(major, minor, micro).string();
 }
 
 
-vector<Path> 
+vector<bfs::path>
 bp::paths::getPluginPaths(int major,
                           int minor,
                           int micro)
 {
-    vector<Path> rval;
+    vector<bfs::path> rval;
     FSRef fref;
     OSErr err = FSFindFolder(kUserDomain, kInternetPlugInFolderType,
                              kDontCreateFolder, &fref);
@@ -146,7 +146,7 @@ bp::paths::getPluginPaths(int major,
     }
     CFURLRef tmpUrl = CFURLCreateFromFSRef(kCFAllocatorSystemDefault, &fref);
     CFStringRef ctmpDir = CFURLCopyFileSystemPath(tmpUrl, kCFURLPOSIXPathStyle);
-    Path pluginDir = stringRefToUTF8(ctmpDir);
+    bfs::path pluginDir = stringRefToUTF8(ctmpDir);
     CFRelease(ctmpDir);
     CFRelease(tmpUrl);
     

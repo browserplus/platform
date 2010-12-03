@@ -59,7 +59,7 @@ setupLogging(const APTArgParse& argParser)
     bp::log::removeAllAppenders();
 
     std::string level = argParser.argument("log");
-    bp::file::Path path(argParser.argument("logfile"));
+    boost::filesystem::path path(argParser.argument("logfile"));
 
     if (level.empty() && path.empty()) return;
     
@@ -118,7 +118,7 @@ main(int argc, const char ** argv)
         parser->setListener(&ql);
 
         // allocate a class that handles commands
-        bp::file::Path logfile(argParser.argument("logfile"));
+        boost::filesystem::path logfile(argParser.argument("logfile"));
         shared_ptr<CommandExecutor> chp(
             new CommandExecutor(argParser.argument("log"), logfile));
         

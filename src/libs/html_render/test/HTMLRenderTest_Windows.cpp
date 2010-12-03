@@ -75,13 +75,13 @@ HTMLRenderTest::JavascriptRunner::~JavascriptRunner()
 }
 
 
-void HTMLRenderTest::JavascriptRunner::run( const bp::file::Path& path,
+void HTMLRenderTest::JavascriptRunner::run( const boost::filesystem::path& path,
                                             ScriptableObject& so,
                                             const std::string& sScriptObjName)
 {
     // Create dialog and listener.
     ScriptGateway* pGateway = new ScriptGateway( so, sScriptObjName );
-    HtmlDialog* pDlg = new HtmlDialog( "HTMLRenderTest", path.url(), 0, pGateway );
+    HtmlDialog* pDlg = new HtmlDialog( "HTMLRenderTest", bp::file::urlFromPath(path), 0, pGateway );
 
     // Store them in our state variable for later destruction.
     m_osSpecific = new RunnerState( pGateway, pDlg );

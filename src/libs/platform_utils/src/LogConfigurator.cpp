@@ -54,7 +54,7 @@ Configurator::Configurator() :
 }
 
 
-void Configurator::loadConfigFile( const bp::file::Path& path )
+void Configurator::loadConfigFile( const boost::filesystem::path& path )
 {
     bp::config::ConfigReader reader;
     if (!reader.load( path )) 
@@ -160,12 +160,12 @@ void Configurator::setDestination( const Destination& dest )
     m_dest = dest;
 }
 
-const bp::file::Path& Configurator::getPath() const
+const boost::filesystem::path& Configurator::getPath() const
 {
     return m_path;
 }
 
-void Configurator::setPath( const bp::file::Path& path )
+void Configurator::setPath( const boost::filesystem::path& path )
 {
     m_path = path;
 }

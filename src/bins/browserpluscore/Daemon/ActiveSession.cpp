@@ -301,12 +301,12 @@ void
 ActiveSession::promptUser(
     weak_ptr<IServiceExecutionContextListener> listener,
     unsigned int cookie,
-    const bp::file::Path& pathToHTMLDialog,
+    const boost::filesystem::path& pathToHTMLDialog,
     const bp::Object * arguments)
 {
     bp::Map m;
 
-    m.add("path", new bp::String(pathToHTMLDialog.utf8()));
+    m.add("path", new bp::String(pathToHTMLDialog.generic_string()));
     if (arguments != NULL) m.add("arguments", arguments->clone());
     
     sendPromptUserMessage(listener, cookie, &m);

@@ -62,7 +62,7 @@ Extract::load(const std::string& tarData)
 }
 
 bool
-Extract::open(const bp::file::Path& tarFile)
+Extract::open(const bfs::path& tarFile)
 {
     if (m_state != NULL) return false;
 
@@ -101,10 +101,10 @@ Extract::close()
     return true;
 }
 
-std::vector<bp::file::Path>
+std::vector<bfs::path>
 Extract::enumerateContents()
 {
-    std::vector<bp::file::Path> contents;
+    std::vector<bfs::path> contents;
 
     struct archive * a = (struct archive *) m_state;
     struct archive_entry * ae = NULL;
@@ -116,7 +116,7 @@ Extract::enumerateContents()
 
         // and what if it IS null?
         if (pn != NULL && strlen(pn) > 0) {
-            contents.push_back(bp::file::Path(pn));
+            contents.push_back(bfs::path(pn));
         }
     }
 
@@ -129,7 +129,7 @@ Extract::enumerateContents()
 }
 
 bool
-Extract::extractSingle(const bp::file::Path& itemName,
+Extract::extractSingle(const bfs::path& itemName,
                        std::ostream & os)
 {
     unsigned char buf[BP_TAR_BUF_SIZE];
@@ -145,7 +145,7 @@ Extract::extractSingle(const bp::file::Path& itemName,
 
         // and what if it IS null?
         if (pn != NULL && strlen(pn) > 0 &&
-            !itemName.utf8().compare(std::string(pn)))
+            !itemName.generic_string().compare(std::string(pn)))
         {
             // key off the tar header for file type
             unsigned int type = archive_entry_filetype(ae);
@@ -175,7 +175,7 @@ Extract::extractSingle(const bp::file::Path& itemName,
 }
 
 bool
-Extract::extract(const bp::file::Path& destDir)
+Extract::extract(const bfs::path& destDir)
 {
     // TODO: add progress extraction progress
     
@@ -191,7 +191,7 @@ Extract::extract(const bp::file::Path& destDir)
 
         // and what if it IS null?
         if (pn != NULL && strlen(pn) > 0) {
-            bp::file::Path path = destDir / pn;
+            bfs::path path = destDir / pn;
 
             // key off the tar header for file type
             unsigned int type = archive_entry_filetype(ae);
@@ -200,7 +200,7 @@ Extract::extract(const bp::file::Path& destDir)
             if (AE_IFDIR == type) {
                 try {
                     bfs::create_directories(path);
-                } catch(const bp::file::tFileSystemError&) {
+                } catch(const bfs::filesystem_error&) {
                     return false;
                 }
             } else if (AE_IFREG == type) {
@@ -273,7 +273,7 @@ Create::writeCallback(void *,  bp::tar::Create * cobj,
 
 
 bool
-Create::open(const bp::file::Path& tarFile)
+Create::open(const bfs::path& tarFile)
 {
     if (m_state != NULL) return false;
 
@@ -316,8 +316,8 @@ Create::close()
 }
 
 bool
-Create::addFile(const bp::file::Path& fileToAdd,
-                const bp::file::Path& fileNameInTarIn)
+Create::addFile(const bfs::path& fileToAdd,
+                const bfs::path& fileNameInTarIn)
 {
     if (m_state == NULL) return false;
     struct archive *a = (struct archive *) m_state;
@@ -339,11 +339,11 @@ Create::addFile(const bp::file::Path& fileToAdd,
     archive_entry_set_ctime(ae, fi.ctime, 0);
     archive_entry_set_mode(ae, static_cast<unsigned short>(fi.mode));
 
-    bp::file::Path fileNameInTar = fileNameInTarIn;
+    bfs::path fileNameInTar = fileNameInTarIn;
     if (bp::file::isDirectory(fileToAdd)) {
         // append a trailing pathsep to directories, this seems to be
         // a convention
-        std::string s = fileNameInTar.utf8();
+        std::string s = fileNameInTar.generic_string();
         if (s[s.length()-1] != '/') {
             s.append("/");
             fileNameInTar = s;
@@ -355,7 +355,7 @@ Create::addFile(const bp::file::Path& fileToAdd,
         archive_entry_set_filetype(ae, AE_IFREG);
     }
 
-    archive_entry_set_pathname(ae, fileNameInTar.utf8().c_str());
+    archive_entry_set_pathname(ae, fileNameInTar.generic_string().c_str());
 
     
 	int rv = archive_write_header(a, ae);

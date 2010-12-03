@@ -224,7 +224,7 @@ void setupLogToDebugger( const Level& level,
  *
  *        The setupLogTo... functions may be invoked cumulatively.
  */
-void setupLogToFile( const bp::file::Path& logFilePath,
+void setupLogToFile( const boost::filesystem::path& logFilePath,
                      const Level& level,
                      const FileMode& fileMode=kTruncate,
                      const TimeFormat& timeFormat=TIME_UTC,

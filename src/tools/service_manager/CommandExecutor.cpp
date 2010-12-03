@@ -39,7 +39,7 @@ using namespace std::tr1;
 #endif
     
 CommandExecutor::CommandExecutor(const std::string & ll,
-                                 const bp::file::Path & lf)
+                                 const boost::filesystem::path & lf)
     : CommandHandler(), m_servMan(new DynamicServiceManager(ll, lf)),
       m_currentTid(1)
 {

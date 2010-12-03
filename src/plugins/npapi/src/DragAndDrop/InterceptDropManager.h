@@ -85,7 +85,7 @@ protected:
     void updateBounds();
 
     // handle mouse entering/exiting the browser window
-    void handleMouseEnter(const std::vector<bp::file::Path>& dragItems);
+    void handleMouseEnter(const std::vector<boost::filesystem::path>& dragItems);
     void handleMouseExit(bool freeDragItems);
 
     // handle a mouse drag, where X,Y are browser relative coords,
@@ -131,7 +131,7 @@ protected:
 
     std::map<std::string, DropTargetContext> m_targets;
     
-    std::vector<bp::file::Path> m_dragItems;
+    std::vector<boost::filesystem::path> m_dragItems;
 
     // a handle to the getXY function which attains the element's bounds
     NPObject* m_getXYFunction;

@@ -226,7 +226,7 @@ typedef std::tr1::shared_ptr<AsyncHttp> AsyncHttpPtr;
 void HttpClientTest::testTextGet()
 {
     bp::log::removeAllAppenders();
-    bp::log::setupLogToFile(bp::file::Path("textGet.log"),
+    bp::log::setupLogToFile(boost::filesystem::path("textGet.log"),
                             bp::log::LEVEL_DEBUG, bp::log::kTruncate,
                             bp::log::TIME_MSEC);
     
@@ -254,7 +254,7 @@ void HttpClientTest::testTextGet()
 void HttpClientTest::testRedirect()
 {
     bp::log::removeAllAppenders();
-    bp::log::setupLogToFile(bp::file::Path("redirect.log"),
+    bp::log::setupLogToFile(boost::filesystem::path("redirect.log"),
                             bp::log::LEVEL_DEBUG, bp::log::kTruncate,
                             bp::log::TIME_MSEC);
     
@@ -283,7 +283,7 @@ void HttpClientTest::testRedirect()
 void HttpClientTest::testTextGetAsync()
 {
     bp::log::removeAllAppenders();
-    bp::log::setupLogToFile(bp::file::Path("textGetAsync.log"),
+    bp::log::setupLogToFile(boost::filesystem::path("textGetAsync.log"),
                             bp::log::LEVEL_DEBUG, bp::log::kTruncate,
                             bp::log::TIME_MSEC);
 
@@ -342,7 +342,7 @@ void HttpClientTest::testChunkedResponseProgress()
 {
 #if 0    
     bp::log::removeAllAppenders();
-    bp::log::setupLogToFile(bp::file::Path("chunkedResponseProgress.log"),
+    bp::log::setupLogToFile(boost::filesystem::path("chunkedResponseProgress.log"),
                             bp::log::LEVEL_DEBUG, bp::log::kTruncate, bp::log::TIME_MSEC);
 
     string sUrl = "http://browserplus.org";
@@ -388,7 +388,7 @@ void HttpClientTest::testChunkedResponseProgress()
 void HttpClientTest::testSlowGetAsync()
 {
     bp::log::removeAllAppenders();
-    bp::log::setupLogToFile(bp::file::Path("slowGetAsync.log"),
+    bp::log::setupLogToFile(boost::filesystem::path("slowGetAsync.log"),
                             bp::log::LEVEL_DEBUG, bp::log::kTruncate,
                             bp::log::TIME_MSEC);
 
@@ -449,7 +449,7 @@ void HttpClientTest::testSlowGetAsync()
 void HttpClientTest::testNotFound()
 {
     bp::log::removeAllAppenders();
-    bp::log::setupLogToFile(bp::file::Path("notFound.log"),
+    bp::log::setupLogToFile(boost::filesystem::path("notFound.log"),
                             bp::log::LEVEL_DEBUG, bp::log::kTruncate,
                             bp::log::TIME_MSEC);
 
@@ -471,7 +471,7 @@ void HttpClientTest::testNotFound()
 }
 
 
-void HttpClientTest::saveBodyToBinaryFile(const bp::file::Path& path,
+void HttpClientTest::saveBodyToBinaryFile(const boost::filesystem::path& path,
                                           const Body& body)
 {
     ofstream ofs;
@@ -486,7 +486,7 @@ void HttpClientTest::saveBodyToBinaryFile(const bp::file::Path& path,
 void HttpClientTest::testBinaryGet()
 {
     bp::log::removeAllAppenders();
-    bp::log::setupLogToFile(bp::file::Path("binaryGet.log"),
+    bp::log::setupLogToFile(boost::filesystem::path("binaryGet.log"),
                             bp::log::LEVEL_DEBUG, bp::log::kTruncate,
                             bp::log::TIME_MSEC);
 
@@ -516,7 +516,7 @@ void HttpClientTest::testBinaryGet()
 void HttpClientTest::testBinaryGetAsync()
 {
     bp::log::removeAllAppenders();
-    bp::log::setupLogToFile(bp::file::Path("binaryGetAsync.log"),
+    bp::log::setupLogToFile(boost::filesystem::path("binaryGetAsync.log"),
                             bp::log::LEVEL_DEBUG, bp::log::kTruncate,
                             bp::log::TIME_MSEC);
 
@@ -556,7 +556,7 @@ void HttpClientTest::testBinaryGetAsync()
 void HttpClientTest::testPost()
 {
     bp::log::removeAllAppenders();
-    bp::log::setupLogToFile(bp::file::Path("post.log"),
+    bp::log::setupLogToFile(boost::filesystem::path("post.log"),
                             bp::log::LEVEL_DEBUG, bp::log::kTruncate,
                             bp::log::TIME_MSEC);
 
@@ -579,7 +579,7 @@ void HttpClientTest::testPost()
 void HttpClientTest::testPostAsync()
 {
     bp::log::removeAllAppenders();
-    bp::log::setupLogToFile(bp::file::Path("postAsync.log"),
+    bp::log::setupLogToFile(boost::filesystem::path("postAsync.log"),
                             bp::log::LEVEL_DEBUG, bp::log::kTruncate,
                             bp::log::TIME_MSEC);
 
@@ -617,7 +617,7 @@ void HttpClientTest::testPostAsync()
 void HttpClientTest::testPostCRLF()
 {
     bp::log::removeAllAppenders();
-    bp::log::setupLogToFile(bp::file::Path("postCRLF.log"),
+    bp::log::setupLogToFile(boost::filesystem::path("postCRLF.log"),
                             bp::log::LEVEL_DEBUG, bp::log::kTruncate,
                             bp::log::TIME_MSEC);
 
@@ -640,7 +640,7 @@ void HttpClientTest::testPostCRLF()
 void HttpClientTest::testServerDelay()
 {    
     bp::log::removeAllAppenders();
-    bp::log::setupLogToFile(bp::file::Path("serverDelay.log"),
+    bp::log::setupLogToFile(boost::filesystem::path("serverDelay.log"),
                             bp::log::LEVEL_DEBUG, bp::log::kTruncate,
                             bp::log::TIME_MSEC);
 
@@ -688,7 +688,7 @@ void HttpClientTest::testServerDelay()
 void HttpClientTest::testTimeout()
 {
     bp::log::removeAllAppenders();
-    bp::log::setupLogToFile(bp::file::Path("timeout.log"),
+    bp::log::setupLogToFile(boost::filesystem::path("timeout.log"),
                             bp::log::LEVEL_DEBUG, bp::log::kTruncate,
                             bp::log::TIME_MSEC);
 
@@ -719,7 +719,7 @@ void HttpClientTest::testTimeout()
 void HttpClientTest::testTimeoutAsync()
 {
     bp::log::removeAllAppenders();
-    bp::log::setupLogToFile(bp::file::Path("timeoutAsync.log"),
+    bp::log::setupLogToFile(boost::filesystem::path("timeoutAsync.log"),
                             bp::log::LEVEL_DEBUG, bp::log::kTruncate,
                             bp::log::TIME_MSEC);
 
@@ -778,7 +778,7 @@ typedef std::tr1::shared_ptr<MyAsync> MyAsyncPtr;
 void HttpClientTest::testCancelAsync()
 {
     bp::log::removeAllAppenders();
-    bp::log::setupLogToFile(bp::file::Path("cancelAsync.log"),
+    bp::log::setupLogToFile(boost::filesystem::path("cancelAsync.log"),
                             bp::log::LEVEL_DEBUG, bp::log::kTruncate,
                             bp::log::TIME_MSEC);
 
@@ -805,7 +805,7 @@ void HttpClientTest::testCancelAsync()
 void HttpClientTest::testCookies()
 {
     bp::log::removeAllAppenders();
-    bp::log::setupLogToFile(bp::file::Path("cookies.log"),
+    bp::log::setupLogToFile(boost::filesystem::path("cookies.log"),
                             bp::log::LEVEL_DEBUG, bp::log::kTruncate,
                             bp::log::TIME_MSEC);
 

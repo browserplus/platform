@@ -43,15 +43,15 @@ namespace bfs = boost::filesystem;
 namespace bp {
 namespace install {
 
-Uninstaller::Uninstaller(const bpf::Path& logFile,
+Uninstaller::Uninstaller(const bfs::path& logFile,
                          bp::log::Level logLevel)
     : m_logFile(logFile), m_logLevel(logLevel), m_error(false)
 {
     m_dir = bpf::getTempPath(bpf::getTempDirectory(), "BrowserPlusUninstaller");
     try {
         bfs::create_directories(m_dir);
-    } catch(const bpf::tFileSystemError&) {
-        BP_THROW("unable to create " + m_dir.externalUtf8());
+    } catch(const bfs::filesystem_error&) {
+        BP_THROW("unable to create " + m_dir.string());
     }  
 }
 
@@ -59,8 +59,8 @@ Uninstaller::Uninstaller(const bpf::Path& logFile,
 Uninstaller::~Uninstaller() 
 {
     BPLOG_DEBUG_STRM("remove " << m_dir);
-    if (!bpf::remove(m_dir)) {
-        BPLOG_WARN(lastErrorString("unable to delete " + m_dir.externalUtf8()));
+    if (!bpf::safeRemove(m_dir)) {
+        BPLOG_WARN(lastErrorString("unable to delete " + m_dir.string()));
     }
 }
 
@@ -77,19 +77,19 @@ Uninstaller::run(bool fromRunonce)
     removeServices();
 
     // remove IE plugin and daemon registry gunk
-    bpf::Path topDir = getProductTopDirectory();
+    bfs::path topDir = getProductTopDirectory();
     if (bpf::isDirectory(topDir)) {
-        bpf::tDirIter topEnd;
-        for (bpf::tDirIter topIter(topDir); topIter != topEnd; ++topIter) {
+        bfs::directory_iterator topEnd;
+        for (bfs::directory_iterator topIter(topDir); topIter != topEnd; ++topIter) {
             // Unregister our IE plugins
-            bpf::Path pluginsDir = topIter->path() / "Plugins";
+            bfs::path pluginsDir = topIter->path() / "Plugins";
             if (bpf::isDirectory(pluginsDir)) {
-                bpf::tDirIter pluginEnd;
-                for (bpf::tDirIter pluginIter(pluginsDir); pluginIter != pluginEnd;
+                bfs::directory_iterator pluginEnd;
+                for (bfs::directory_iterator pluginIter(pluginsDir); pluginIter != pluginEnd;
                      ++pluginIter) {
                     // IE
-                    bpf::Path plugin(pluginIter->path());
-                    if (plugin.utf8().find("YBPAddon_") != string::npos) {
+                    bfs::path plugin(pluginIter->path());
+                    if (plugin.string().find("YBPAddon_") != string::npos) {
                         string version, typeLibGuid, activeXGuid;
                         vector<string> mtypes;
                         if (getControlInfo(plugin, version, typeLibGuid,
@@ -139,18 +139,16 @@ Uninstaller::run(bool fromRunonce)
                     try {
                         // find path to npapi and remove it.
                         // make sure that path is in top dir or ugly dir
-                        bpf::Path path = bpf::Path(keys[i].readString("Path"));
+                        bfs::path path(keys[i].readString("Path"));
                         if (path.string().find(topDir.string()) != 0
                             && path.string().find(kUglyNpapiDir.string()) != 0) {
-                            BPLOG_WARN_STRM("registry path to npapi was unexpected: "
-                                            << path);
+                            BPLOG_WARN_STRM("registry path to npapi was unexpected: " << path);
                             m_error = true;
                             continue;
                         }
                         BPLOG_DEBUG_STRM("remove " << path);
-                        if (!bpf::remove(path)) {
-                            BPLOG_DEBUG_STRM(lastErrorString("unable to delete "
-                                                             + path.externalUtf8()));
+                        if (!bpf::safeRemove(path)) {
+                            BPLOG_DEBUG_STRM(lastErrorString("unable to delete " + path.string()));
                             m_error = true;
                         }
                         // deal with ugly npapi dir if it exists
@@ -177,12 +175,12 @@ Uninstaller::run(bool fromRunonce)
 
     // Remove NPAPI plugin for those folks who have firefox2 (we used to
     // support it).  
-    bpf::Path ffx2Dir = ffx2PluginDir();
+    bfs::path ffx2Dir = ffx2PluginDir();
     if (bpf::isDirectory(ffx2Dir)) {
-        bpf::tDirIter end;
-        for (bpf::tDirIter it(ffx2Dir); it != end; ++it) {
-            bpf::Path plugin(it->path());
-            if (plugin.utf8().find("npybrowserplus_") == 0) {
+        bfs::directory_iterator end;
+        for (bfs::directory_iterator it(ffx2Dir); it != end; ++it) {
+            bfs::path plugin(it->path());
+            if (plugin.string().find("npybrowserplus_") == 0) {
                 BPLOG_DEBUG_STRM("remove " << plugin);
                 if (!remove(plugin)) {
                     BPLOG_WARN_STRM("unable to delete " << plugin);
@@ -210,10 +208,10 @@ Uninstaller::run(bool fromRunonce)
     }
 
     // remove non-localized start menu stuff
-    bpf::Path path = getFolderPath(CSIDL_PROGRAMS) / "Yahoo! BrowserPlus";
+    bfs::path path = getFolderPath(CSIDL_PROGRAMS) / "Yahoo! BrowserPlus";
     BPLOG_DEBUG_STRM("remove " << path);
-    if (!bpf::remove(path)) {
-        BPLOG_WARN(lastErrorString("unable to delete " + path.externalUtf8()));
+    if (!bpf::safeRemove(path)) {
+        BPLOG_WARN(lastErrorString("unable to delete " + path.string()));
         m_error = true;
     }
 
@@ -222,8 +220,8 @@ Uninstaller::run(bool fromRunonce)
         path = getFolderPath(CSIDL_LOCAL_APPDATA);
         path = path.parent_path() / "LocalLow" / "Yahoo!" / "BrowserPlus";
         BPLOG_DEBUG_STRM("remove " << path);
-        if (!bpf::remove(path)) {
-            BPLOG_WARN(lastErrorString("unable to delete " + path.externalUtf8()));
+        if (!bpf::safeRemove(path)) {
+            BPLOG_WARN(lastErrorString("unable to delete " + path.string()));
             m_error = true;
         }
         removeDirIfEmpty(path.parent_path());
@@ -238,15 +236,15 @@ Uninstaller::run(bool fromRunonce)
     }
 
     // remove temp dir
-    bpf::Path tempDir = bpf::getTempDirectory();
-    if (tempDir.filename() == bpf::Path("BrowserPlus")) {
-        (void) bpf::remove(tempDir);
+    bfs::path tempDir = bpf::getTempDirectory();
+    if (tempDir.filename().string() == "BrowserPlus") {
+        (void) bpf::safeRemove(tempDir);
     }
 
     // Remove platform, must be last.
     BPLOG_DEBUG_STRM("remove " << topDir);
-    if (!bpf::remove(topDir)) {
-        BPLOG_WARN(lastErrorString("unable to delete " + topDir.externalUtf8()));
+    if (!bpf::safeRemove(topDir)) {
+        BPLOG_WARN(lastErrorString("unable to delete " + topDir.string()));
         m_error = true;
     }
     removeDirIfEmpty(topDir.parent_path());
@@ -272,16 +270,16 @@ Uninstaller::run(bool fromRunonce)
 
 
 void
-Uninstaller::removeDirIfEmpty(const bpf::Path& dir)
+Uninstaller::removeDirIfEmpty(const bfs::path& dir)
 {
-    if (dir.utf8().compare("C:") == 0) {
+    if (dir.string().compare("C:") == 0) {
         // be paranoid
         return;
     }
     if (bpf::isDirectory(dir) && bfs::is_empty(dir)) {
         BPLOG_DEBUG_STRM("remove " << dir);
-        if (!bpf::remove(dir)) {
-            BPLOG_WARN(lastErrorString("unable to delete " + dir.externalUtf8()));
+        if (!bpf::safeRemove(dir)) {
+            BPLOG_WARN(lastErrorString("unable to delete " + dir.string()));
             m_error = true;
         }
     }
@@ -294,13 +292,13 @@ Uninstaller::scheduleRunonce()
 #ifdef NOTDEF
     // Schedule a runonce to try uninstall again.
     // XXX: have installer remove this entry!!
-    bpf::Path exePath = getUninstallerPath();
-    bpf::Path runoncePath = getTempDirectory() / exePath.filename();
-    (void) bpf::remove(runoncePath);
-    if (bpf::copy(exePath, runoncePath)) {
+    bfs::path exePath = getUninstallerPath();
+    bfs::path runoncePath = getTempDirectory() / exePath.filename();
+    (void) bpf::safeRemove(runoncePath);
+    if (bpf::safeCopy(exePath, runoncePath)) {
         writeString("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce",
                     "BrowserPlusUninstall", 
-                    runoncePath.externalUtf8() + " -headless -fromRunonce");
+                    runoncePath + " -headless -fromRunonce");
     } else {
         BPLOG_WARN_STRM("unable to copy " << exePath
                         << " -> " << runoncePath);

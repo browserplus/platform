@@ -29,9 +29,9 @@ namespace bp {
 namespace install {
 namespace utils {
     
-    bp::file::Path getFolderPath(int selector);
+    boost::filesystem::path getFolderPath(int selector);
 
-    void readPlatformInfo(const bp::file::Path& path);
+    void readPlatformInfo(const boost::filesystem::path& path);
 
     std::vector<std::string> mimeTypes();
     std::vector<bp::SemanticVersion> installedVersions();
@@ -62,16 +62,16 @@ namespace utils {
     // "dir".  Ugly as sin, but allows us to work with Firefox 
     // and non-ascii usernames.
     //
-    bp::file::Path npapiPluginDir(const bp::file::Path& dir);
-    extern bp::file::Path kUglyNpapiDir;  // C:/BrowserPlusPlugins
+    boost::filesystem::path npapiPluginDir(const boost::filesystem::path& dir);
+    extern boost::filesystem::path kUglyNpapiDir;  // C:/BrowserPlusPlugins
 
     // Return directory for Firefox 2 plugins.  Firefox 2
     // doesn't grok the "MozillaPlugins" registry stuff.
     // We no longer support Firefox 2, so this is just
     // here to allow deal with removing/replacing legacy installs.
-    bp::file::Path ffx2PluginDir();
+    boost::filesystem::path ffx2PluginDir();
 
-    bool getControlInfo(const bp::file::Path& path,
+    bool getControlInfo(const boost::filesystem::path& path,
                         std::string& version,
                         std::string& typeLibGuid,
                         std::string& activeXGuid,
@@ -80,7 +80,7 @@ namespace utils {
     // Returns 0 on success, non-zero otherwise.
     int registerControl(const std::vector<std::string>& vsMimetypes,
                         const std::string& sModuleUuid,
-                        const bp::file::Path& sModulePath,
+                        const boost::filesystem::path& sModulePath,
                         const std::string& sCoClassUuid,
                         const std::string& sCoClassName,
                         const std::string& sViProgid,
@@ -89,7 +89,7 @@ namespace utils {
     // Returns 0 on success, non-zero otherwise.
     int unRegisterControl(const std::vector<std::string>& vsMimetypes,
                           const std::string& sModuleUuid,
-                          const bp::file::Path& sModulePath,
+                          const boost::filesystem::path& sModulePath,
                           const std::string& sCoClassUuid,
                           const std::string& sViProgid,
                           const std::string& sProgid);

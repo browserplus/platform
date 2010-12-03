@@ -106,7 +106,7 @@ private:
 
     bool createOverlay(const std::string& name);
 
-    std::vector<bp::file::Path> getDragItems(IDataObject* pDataObj);
+    std::vector<boost::filesystem::path> getDragItems(IDataObject* pDataObj);
 
     // take global coordinates and convert them to window relative coords.
     void localizeCoords(LONG &x, LONG &y);
@@ -407,7 +407,7 @@ WindowsDropManager::DragEnter(IDataObject* pDataObj,
                               DWORD* pdwEffect)
 {
     BPLOG_INFO_STRM("DragEnter: " << pt.x << "," << pt.y);
-    std::vector<bp::file::Path> dragItems = getDragItems(pDataObj);
+    std::vector<boost::filesystem::path> dragItems = getDragItems(pDataObj);
     handleMouseEnter(dragItems);
     return S_OK;
 }
@@ -510,10 +510,10 @@ WindowsDropManager::dropWindowCallback(HWND hwnd,
 }
 
 
-std::vector<bp::file::Path>
+std::vector<boost::filesystem::path>
 WindowsDropManager::getDragItems(IDataObject* pDataObject)
 {
-    std::vector<bp::file::Path> results;
+    std::vector<boost::filesystem::path> results;
 
     // construct a FORMATETC object
     FORMATETC fmtetc = { CF_HDROP, 0, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
@@ -531,7 +531,7 @@ WindowsDropManager::getDragItems(IDataObject* pDataObject)
                 wchar_t* fileName = new wchar_t[nameLen];
                 DragQueryFileW(drop, i, fileName, nameLen);
                 std::wstring wName(fileName);
-                bp::file::Path path(wName);
+                boost::filesystem::path path(wName);
                 results.push_back(path);
                 delete[] fileName;
             }

@@ -54,7 +54,7 @@ class FileDeleteTest : public CPPUNIT_NS::TestCase
     void deleteFileInReadOnlyDir();
 
   private:
-    bp::file::Path m_testDir;
+	boost::filesystem::path m_testDir;
 };
 
 #endif

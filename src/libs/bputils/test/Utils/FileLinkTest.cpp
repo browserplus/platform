@@ -37,15 +37,15 @@ void
 FileLinkTest::createLink()
 {
 	// create target file 
-	Path target = m_dir / "target.txt";
+	bfs::path target = m_dir / "target.txt";
     CPPUNIT_ASSERT(bp::strutil::storeToFile(target, "this is a target file\n"));
 
 	// create link to target
-	Path src = m_dir / "link_to_target.lnk";
+	bfs::path src = m_dir / "link_to_target.lnk";
     CPPUNIT_ASSERT(bp::file::createLink(src, target));
 
     // ensure that link resolves to target 
-    Path resolved;
+    bfs::path resolved;
     CPPUNIT_ASSERT(bp::file::resolveLink(src, resolved));
     CPPUNIT_ASSERT(boost::filesystem::equivalent(resolved, target));
 }
@@ -54,12 +54,12 @@ FileLinkTest::createLink()
 void
 FileLinkTest::brokenLink()
 {
-    Path target = m_dir / "non_existent";
-    Path src = m_dir / "broken_link.lnk";
+    bfs::path target = m_dir / "non_existent";
+    bfs::path src = m_dir / "broken_link.lnk";
     bp::file::createLink(src, target);
-    Path resolved;
-    bool exists = resolveLink(src, resolved);
-    CPPUNIT_ASSERT_MESSAGE(resolved.utf8().c_str(), !exists && resolved.empty());
+    bfs::path resolved;
+    bool pathExists = resolveLink(src, resolved);
+    CPPUNIT_ASSERT_MESSAGE(resolved.string().c_str(), !pathExists && resolved.empty());
 }
 
 
@@ -67,24 +67,24 @@ void
 FileLinkTest::circularLink()
 {
     // make dir1 containing file1
-    Path dir1 = m_dir / "dir1";
+    bfs::path dir1 = m_dir / "dir1";
     bfs::create_directory(dir1);
-    Path file1 = dir1 / "file1";
+    bfs::path file1 = dir1 / "file1";
     CPPUNIT_ASSERT(bp::strutil::storeToFile(file1, "I am file 1"));
-    CPPUNIT_ASSERT(exists(file1));
+    CPPUNIT_ASSERT(bp::file::pathExists(file1));
     
     // make dir2 containing dir2
-    Path dir2 = m_dir / "dir2";
+    bfs::path dir2 = m_dir / "dir2";
     bfs::create_directory(dir2);
-    Path file2 =dir2 / "file2";
+    bfs::path file2 =dir2 / "file2";
     CPPUNIT_ASSERT(bp::strutil::storeToFile(file2, "I am file 2"));
-    CPPUNIT_ASSERT(exists(file2));
+    CPPUNIT_ASSERT(bp::file::pathExists(file2));
     
     // now make links from dir1 to dir2 and dir2 to dir1
-    Path link1 = dir1 / "link1.lnk";
+    bfs::path link1 = dir1 / "link1.lnk";
     bp::file::createLink(link1, dir2);
     CPPUNIT_ASSERT(isLink(link1));
-    Path link2 = dir2 / "link2.lnk";
+    bfs::path link2 = dir2 / "link2.lnk";
     bp::file::createLink(link2, dir1);
     CPPUNIT_ASSERT(isLink(link2));
     
@@ -94,8 +94,8 @@ FileLinkTest::circularLink()
     public:
         MyVisitor(size_t limit) : m_numChecked(0), m_limit(limit) {}
         virtual ~MyVisitor() {}
-        virtual tResult visitNode(const Path& p,
-                                  const Path& /*relativePath*/) {
+        virtual tResult visitNode(const bfs::path& p,
+                                  const bfs::path& /*relativePath*/) {
             if (m_numChecked >= m_limit) {
                 return eStop;
             }
@@ -115,7 +115,7 @@ void
 FileLinkTest::setUp()
 {
 	m_dir = getTempPath(getTempDirectory(), "FileLinkTest");
-    CPPUNIT_ASSERT(remove(m_dir));
+    CPPUNIT_ASSERT(safeRemove(m_dir));
 	CPPUNIT_ASSERT(bfs::create_directories(m_dir));
 }
 
@@ -123,6 +123,6 @@ FileLinkTest::setUp()
 void 
 FileLinkTest::tearDown()
 {
-    CPPUNIT_ASSERT(remove(m_dir));
+    CPPUNIT_ASSERT(safeRemove(m_dir));
 }
 

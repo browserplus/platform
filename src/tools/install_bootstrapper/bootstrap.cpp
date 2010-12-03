@@ -41,7 +41,7 @@
 #define BS_INFO_OUTPUT( x ) BPLOG_INFO_STRM(x)
 #define BS_ERROR_OUTPUT( x ) BPLOG_ERROR_STRM(x)
 
-bp::file::Path g_exePath;
+boost::filesystem::path g_exePath;
 const static std::string endOfPayloadMarker(
     "Yahoo!BrowserPlusEndOfInstallerPayloadMarker");
 
@@ -66,7 +66,7 @@ int APIENTRY WinMain( HINSTANCE, HINSTANCE, LPSTR, int )
     // different logfile can be specified via command line.
     // debug logging on be default
     std::vector<std::string> args;
-    bp::file::Path logFile = bp::file::getTempDirectory().parent_path() /"BrowserPlusInstaller.log";
+    boost::filesystem::path logFile = bp::file::getTempDirectory().parent_path() /"BrowserPlusInstaller.log";
 
     for (int i = 1; i < __argc; i++) {
         std::vector<std::string> arg = bp::strutil::split(__argv[i], "=");
@@ -96,7 +96,7 @@ int APIENTRY WinMain( HINSTANCE, HINSTANCE, LPSTR, int )
     }
 
     std::string logArg("-logfile=");
-    logArg.append(logFile.utf8());
+    logArg.append(logFile.string());
     args.push_back(logArg);
 
     wchar_t szPath[_MAX_PATH];
@@ -171,11 +171,11 @@ int APIENTRY WinMain( HINSTANCE, HINSTANCE, LPSTR, int )
 
     // out now contains a tarball that we'll want to decompress to a
     // temporary directory
-    bp::file::Path extractTo = bp::file::getTempPath(bp::file::getTempDirectory(), "BPINST");
+    boost::filesystem::path extractTo = bp::file::getTempPath(bp::file::getTempDirectory(), "BPINST");
 
     try {
         boost::filesystem::create_directories(extractTo);
-    } catch(const bp::file::tFileSystemError&) {
+    } catch(const boost::filesystem::filesystem_error&) {
         BS_ERROR_OUTPUT( "Couldn't create temporary directory: " << extractTo );
         return 1;
     }
@@ -201,7 +201,7 @@ int APIENTRY WinMain( HINSTANCE, HINSTANCE, LPSTR, int )
 
     // now spawn the installer
     {
-        bp::file::Path instExe = extractTo / "BrowserPlusInstaller.exe";
+        boost::filesystem::path instExe = extractTo / "BrowserPlusInstaller.exe";
 
         bp::process::spawnStatus status;
 
@@ -232,7 +232,7 @@ int APIENTRY WinMain( HINSTANCE, HINSTANCE, LPSTR, int )
     }
 
     // now let's clean up.
-    if (!bp::file::remove(extractTo))
+    if (!bp::file::safeRemove(extractTo))
     {
         BS_ERROR_OUTPUT( "Couldn't clean up temporary directory " << extractTo );
         return 1;

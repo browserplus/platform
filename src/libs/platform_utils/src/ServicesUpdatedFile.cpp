@@ -45,7 +45,7 @@
 void
 ServicesUpdated::indicateServicesChanged()
 {
-    bp::file::Path path = bp::paths::getServiceDirectory();
+    boost::filesystem::path path = bp::paths::getServiceDirectory();
     path /= SERVICES_UPDATED_FILENAME;
     bp::file::touch(path);
 }
@@ -53,10 +53,10 @@ ServicesUpdated::indicateServicesChanged()
 bool
 ServicesUpdated::servicesChanged()
 {
-    bp::file::Path path = bp::paths::getServiceDirectory();
+    boost::filesystem::path path = bp::paths::getServiceDirectory();
     path /= SERVICES_UPDATED_FILENAME;
-    if (bp::file::exists(path)) {
-        (void) bp::file::remove(path);
+    if (bp::file::pathExists(path)) {
+        (void) bp::file::safeRemove(path);
         return true;
     }
     

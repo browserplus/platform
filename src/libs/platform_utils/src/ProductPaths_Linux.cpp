@@ -43,19 +43,19 @@ using namespace std;
 using namespace bp::file;
 namespace bfs = boost::filesystem;
 
-Path
+bfs::path
 bp::paths::getProductTopDirectory()
 {
-    Path prodDir = getenv("HOME");
+    bfs::path prodDir = getenv("HOME");
     if (prodDir.empty()) {
         BP_THROW_FATAL("unable to get $HOME");
     }
-    prodDir /= Path("." + getCompanyName()) / getProductName();
+    prodDir /= bfs::path("." + getCompanyName()) / getProductName();
     return prodDir;
 }
 
 
-Path
+bfs::path
 bp::paths::getPluginWritableDirectory(int major,
                                       int minor,
                                       int micro)
@@ -68,16 +68,16 @@ bp::paths::getPluginWritableDirectory(int major,
 string 
 bp::paths::getIPCName()
 {
-    Path p =  getProductDirectory() / "bp.pipe";
-    return p.utf8();
+    bfs::path p =  getProductDirectory() / "bp.pipe";
+    return p.string();
 }
 
 
 string 
 bp::paths::getEphemeralIPCName()
 {
-    Path p = getTempPath(getTempDirectory(), "BPIPC");
-    return p.utf8();
+    bfs::path p = getTempPath(getTempDirectory(), "BPIPC");
+    return p.string();
 }
 
 
@@ -86,16 +86,16 @@ bp::paths::getIPCLockName(int major,
                           int minor,
                           int micro)
 {
-    return getDaemonPath(major, minor, micro).utf8();
+    return utf8(getDaemonPath(major, minor, micro));
 }
 
 
-vector<Path> 
+vector<bfs::path> 
 bp::paths::getPluginPaths(int major,
                           int minor,
                           int micro)
 {
-    vector<Path> rval;
+    vector<bfs::path> rval;
     // TODO: implement
     return rval;
 }

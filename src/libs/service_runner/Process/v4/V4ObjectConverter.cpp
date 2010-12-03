@@ -162,7 +162,8 @@ sapi_v4::v5ElementToV4(const ::BPElement * elemPtr)
             rv = (struct sapi_v4::BPElement_t *) calloc(1, sizeof(struct sapi_v4::BPElement_t));
             rv->type = sapi_v4::BPTPath;
             if (elemPtr->value.pathVal) {
-                rv->value.pathVal = strdup(bp::file::Path(elemPtr->value.pathVal).url().c_str());
+                rv->value.pathVal = strdup(bp::file::urlFromPath(
+                        boost::filesystem::path(elemPtr->value.pathVal)).c_str());
             }
             break;
         case ::BPTAny:

@@ -35,16 +35,17 @@
 
 using namespace std;
 namespace bpf = bp::file;
+namespace bfs = boost::filesystem;
 
-map<bpf::Path, BPHandle> s_pathMap;
-map<BPHandle, bpf::Path> s_handleMap;
-map<bpf::Path, BPHandle> s_writablePathMap;
-map<BPHandle, bpf::Path> s_writableHandleMap;
+map<bfs::path, BPHandle> s_pathMap;
+map<BPHandle, bfs::path> s_handleMap;
+map<bfs::path, BPHandle> s_writablePathMap;
+map<BPHandle, bfs::path> s_writableHandleMap;
 
 static BPHandle 
-pathToHandleImpl(const bpf::Path& path, bool writable)
+pathToHandleImpl(const bfs::path& path, bool writable)
 {
-    string safeName = bpf::utf8FromNative(path.filename());
+    string safeName = path.filename().string();
     vector<string> mimeTypes = bpf::mimeTypes(path);
     BPHandle h((writable ? "writablePath" : "path"),
                bp::random::generate(), safeName, bpf::size(path), mimeTypes, writable);
@@ -63,9 +64,9 @@ pathToHandleImpl(const bpf::Path& path, bool writable)
 // that a writable handle can be created, that's in traversing
 // service return values
 BPHandle 
-BPHandleMapper::pathToWritableHandle(const bpf::Path& path)
+BPHandleMapper::pathToWritableHandle(const bfs::path& path)
 {
-    map<bpf::Path, BPHandle>::iterator it = s_writablePathMap.find(path);
+    map<bfs::path, BPHandle>::iterator it = s_writablePathMap.find(path);
     if (it != s_writablePathMap.end()) {
         // allegedly found handle, update size and return.
         it->second.m_size = bpf::size(path);
@@ -77,9 +78,9 @@ BPHandleMapper::pathToWritableHandle(const bpf::Path& path)
 
 
 BPHandle 
-BPHandleMapper::pathToHandle(const bpf::Path& path)
+BPHandleMapper::pathToHandle(const bfs::path& path)
 {
-    map<bpf::Path, BPHandle>::iterator it = s_pathMap.find(path);
+    map<bfs::path, BPHandle>::iterator it = s_pathMap.find(path);
     if (it != s_pathMap.end()) {
         // allegedly found handle, update size and return.
         it->second.m_size = bpf::size(path);
@@ -90,11 +91,11 @@ BPHandleMapper::pathToHandle(const bpf::Path& path)
 }
 
 
-bpf::Path
+bfs::path
 BPHandleMapper::handleValue(const BPHandle& handle)
 {
-    bpf::Path rval;
-    map<BPHandle, bpf::Path>::iterator it = s_handleMap.find(handle);
+    bfs::path rval;
+    map<BPHandle, bfs::path>::iterator it = s_handleMap.find(handle);
     if (it != s_handleMap.end()) {
         if (it->first.type().compare(handle.type()) == 0
             && it->first.name().compare(handle.name()) == 0) {
@@ -104,11 +105,11 @@ BPHandleMapper::handleValue(const BPHandle& handle)
     return rval;
 }
 
-bpf::Path
+bfs::path
 BPHandleMapper::writableHandleValue(const BPHandle& handle)
 {
-    bpf::Path rval;
-    map<BPHandle, bpf::Path>::iterator it = s_writableHandleMap.find(handle);
+    bfs::path rval;
+    map<BPHandle, bfs::path>::iterator it = s_writableHandleMap.find(handle);
     if (it != s_writableHandleMap.end()) {
         if (it->first.type().compare(handle.type()) == 0
             && it->first.name().compare(handle.name()) == 0) {
@@ -149,7 +150,7 @@ BPHandleMapper::insertHandles(const bp::Object* bpObj)
         {
             // Path must become a map containing id/name keys
             const Path* pObj = dynamic_cast<const Path*>(bpObj);
-            bpf::Path path = *pObj;
+            bfs::path path = *pObj;
             BPHandle handle = (bpObj->type() == BPTNativePath ?
                                pathToHandle(path) :
                                pathToWritableHandle(path));
@@ -257,10 +258,10 @@ BPHandleMapper::expandHandles(const bp::Object* bpObj)
                            nameObj->value(), (long) sizeObj->value(),
                            mt, writable);
                 if (writable) {
-                    bpf::Path val = writableHandleValue(h);
+                    bfs::path val = writableHandleValue(h);
                     if (!val.empty()) rval = new WritablePath(val);
                 } else {
-                    bpf::Path val = handleValue(h);                    
+                    bfs::path val = handleValue(h);
                     if (!val.empty()) rval = new Path(val);                        
                 }
             } else {

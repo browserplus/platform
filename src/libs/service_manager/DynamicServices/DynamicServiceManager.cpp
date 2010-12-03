@@ -45,7 +45,7 @@ using namespace std::tr1;
  * a dynamic service manager
  */
 DynamicServiceManager::DynamicServiceManager(const std::string & loglevel,
-                                             const bp::file::Path & logfile)
+                                             const boost::filesystem::path & logfile)
     : m_logLevel(loglevel), m_logFile(logfile), m_instantiateId(10000)
 {
 }
@@ -55,7 +55,7 @@ DynamicServiceManager::~DynamicServiceManager()
 }
 
 void
-DynamicServiceManager::setPluginDirectory(const bp::file::Path & path)
+DynamicServiceManager::setPluginDirectory(const boost::filesystem::path & path)
 {
     // no support for multiple plugin directories?
     m_pluginDirectory = path;
@@ -178,7 +178,7 @@ DynamicServiceManager::purgeService(const std::string & name,
     m_state.stopService(summary);
 
     // remove the service by invoking service uninstaller
-    bp::file::Path serviceInstaller = bp::paths::getServiceInstallerPath();
+    boost::filesystem::path serviceInstaller = bp::paths::getServiceInstallerPath();
     vector<string> args;
     args.push_back("-u");
     args.push_back("-v");
@@ -186,7 +186,7 @@ DynamicServiceManager::purgeService(const std::string & name,
     args.push_back("-log");
     args.push_back("debug");
     args.push_back("-logfile");
-    args.push_back(bp::paths::getDaemonLogPath().externalUtf8());
+    args.push_back(bp::paths::getDaemonLogPath().string());
     args.push_back(summary.name());
     args.push_back(summary.version());
     stringstream ss;
@@ -248,7 +248,7 @@ DynamicServiceManager::internalFind(const std::string & name,
 // given a dependant summary and a set of provider summaries, attain
 // the path to the best match.  returns empty string if there is
 // no viable match
-static bp::file::Path
+static boost::filesystem::path
 getBestProvider(const bp::service::Summary & dep,
                 const std::map<bp::service::Summary, bp::service::Description>
                      & installed)
@@ -274,7 +274,7 @@ getBestProvider(const bp::service::Summary & dep,
 
     if (!winner.name().empty()) return winner.path();
     
-    return bp::file::Path();
+    return boost::filesystem::path();
 }
 
 unsigned int
@@ -317,7 +317,7 @@ DynamicServiceManager::instantiate(
             controller->setListener(this);
 
             // get a provider for dependent services
-            bp::file::Path providerPath;
+            boost::filesystem::path providerPath;
             if (summary.type() == bp::service::Summary::Dependent)
             {
                 providerPath = getBestProvider(summary, m_services);
@@ -418,7 +418,7 @@ DynamicServiceManager::startAllocation(
     }
 
     // generate a temporary directory
-    bp::file::Path tmpdir =
+    boost::filesystem::path tmpdir =
         bp::file::getTempPath(bp::file::getTempDirectory(), "ServiceData");
 
     unsigned int aid = controller->allocate(
@@ -464,7 +464,7 @@ DynamicServiceManager::onEnded(ServiceRunner::Controller * c)
         // non-standard locations, but internalFind has checks that
         // should protect that case.
         // In the very worst case, we'll merely do an unnecesary purge.
-        string path = c->path().utf8();
+        string path = c->path().generic_string();
         vector<string> nodes = bp::strutil::splitAndTrim( path, "/" );
         if (nodes.size() >= 2) {
             servName    = nodes[nodes.size()-2];
@@ -624,7 +624,7 @@ void
 DynamicServiceManager::onPrompt(ServiceRunner::Controller * c,
                                 unsigned int instance, 
                                 unsigned int promptId,
-                                const bp::file::Path & pathToDialog,
+                                const boost::filesystem::path & pathToDialog,
                                 const bp::Object * arguments)
 {
     shared_ptr<DynamicServiceInstance> dsi =

@@ -64,14 +64,14 @@ class DropTargetBase
     virtual bool isEnabled();
     virtual State state();
     
-    virtual void enter(const std::vector<bp::file::Path>& dragItems);
+    virtual void enter(const std::vector<boost::filesystem::path>& dragItems);
     virtual void leave(bool freeDragItems);
     
     virtual bool canAcceptDrop();
     virtual bp::Object* dropItems(); // caller assumes ownership of return value
 
   protected:
-    virtual bool directoryContainsMimeType(const bp::file::Path& path);
+    virtual bool directoryContainsMimeType(const boost::filesystem::path& path);
 
     typedef enum {
         Unknown,
@@ -81,8 +81,8 @@ class DropTargetBase
     std::string m_name;
     std::set<std::string> m_mimetypes;
     bool m_includeGestureInfo;
-    std::vector<bp::file::Path> m_dragItems;
-    std::vector<bp::file::Path> m_previousDragItems;
+    std::vector<boost::filesystem::path> m_dragItems;
+    std::vector<boost::filesystem::path> m_previousDragItems;
     State m_state;
     DropState m_dropState;
     bool m_enabled;

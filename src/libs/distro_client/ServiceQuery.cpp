@@ -46,6 +46,7 @@
 using namespace std;
 using namespace std::tr1;
 namespace bpf = bp::file;
+namespace bfs = boost::filesystem;
 
 IServiceQueryListener::~IServiceQueryListener()
 {
@@ -412,7 +413,7 @@ ServiceQuery::getNextLocalization()
             // If any version already exists on disk, this is an update.
             // This happens when minversion in a require forces us
             // to download a newer version before we cache the update.
-            bpf::Path servicePath = bp::paths::getServiceDirectory() / name;
+            bfs::path servicePath = bp::paths::getServiceDirectory() / name;
             synopsis.m_isUpdate = bpf::isDirectory(servicePath);
             
             m_locDescs.push_back(synopsis);
@@ -443,7 +444,7 @@ ServiceQuery::parseLocalization(const unsigned char* buf,
     // up, appending the information contained within to 
     // m_locDescs.back().
     std::string tmpStr((const char*) buf, len);
-    bpf::Path pkg = bpf::getTempPath(bpf::getTempDirectory(), "synopsisPkg");
+    bfs::path pkg = bpf::getTempPath(bpf::getTempDirectory(), "synopsisPkg");
     if (!bp::strutil::storeToFile(pkg, tmpStr)) {
         std::stringstream ss;
         ss << "couldn't save synopsis to temp file: " << pkg;
@@ -458,17 +459,17 @@ ServiceQuery::parseLocalization(const unsigned char* buf,
         std::stringstream ss;
         ss << "couldn't unpack synopsis: " << errMsg;
         BPLOG_ERROR_STRM(this << ": " << ss.str());
-        (void) bpf::remove(pkg);
+        (void) bpf::safeRemove(pkg);
         transactionFailed(ss.str());
         return;
     }
-    (void) bpf::remove(pkg);
+    (void) bpf::safeRemove(pkg);
     
     // now we've got json.  let's parse it.
     bp::Object * o = bp::Object::fromPlainJsonString(synopsisStr);
     if (o == NULL) {
         BPLOG_ERROR_STRM(this << ": couldn't parse synopsis JSON");
-        (void) bpf::remove(pkg);
+        (void) bpf::safeRemove(pkg);
         transactionFailed("couldn't parse synopsis JSON");
         return;
     }

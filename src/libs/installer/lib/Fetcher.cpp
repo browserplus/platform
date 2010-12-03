@@ -28,16 +28,16 @@
 
 using namespace std;
 using namespace std::tr1;
-namespace bpf = bp::file;
+namespace bfs = boost::filesystem;
 
 namespace bp {
     namespace install {
 
         //------------------------------------------
 
-        Fetcher::Fetcher(const bpf::Path& keyPath,
+        Fetcher::Fetcher(const bfs::path& keyPath,
                          const list<string>& distroServers,
-                         const bpf::Path& destDir)
+                         const bfs::path& destDir)
             : m_keyPath(keyPath), m_distroServers(distroServers), m_destDir(destDir),
               m_platformVersion(), m_platformSize(0), m_state(eIdle),
               m_totalServices(0), m_completedServices(0)
@@ -138,7 +138,7 @@ namespace bp {
             if (m_state == eFetchingService) {
                 try {
                     pair<string, string> p = m_neededServices.front();
-                    bpf::Path destDir = m_destDir / "services" / p.first / p.second;
+                    bfs::path destDir = m_destDir / "services" / p.first / p.second;
                     string errMsg;
                     ServiceUnpacker unpacker(buf, m_keyPath);
                     BPLOG_DEBUG_STRM("unpack service to " << destDir);
@@ -167,11 +167,11 @@ namespace bp {
             // is removed, the directory and dll will still exist,
             // but the manifest file won't (since windows can't remove
             // open files or their containing dirs).
-            bpf::Path serviceDir = bp::paths::getServiceDirectory();
+            bfs::path serviceDir = bp::paths::getServiceDirectory();
             ServiceList::const_iterator it;
             for (it = clist.begin(); it != clist.end(); ++it) {
-                bpf::Path path = serviceDir / it->first / it->second / "manifest.json";
-                if (!bpf::exists(path)) {
+                bfs::path path = serviceDir / it->first / it->second / "manifest.json";
+                if (!bp::file::pathExists(path)) {
                     m_neededServices.push_back(*it);
                 }
             }

@@ -33,7 +33,7 @@
  * \param baseurl - the base url to the webservice
  *                  (e.g. http://somehost.yahoo.com/api)
  */
-bool pushFile(bp::file::Path file, std::string baseurl,
+bool pushFile(boost::filesystem::path file, std::string baseurl,
               std::string serviceName, std::string serviceVersion,
               std::string platform);
 

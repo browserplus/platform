@@ -53,7 +53,7 @@ namespace ServiceRunner
 
         virtual void onPrompt(unsigned int instance,
                               unsigned int promptId,
-                              const bp::file::Path & pathToDialog,
+                              const boost::filesystem::path & pathToDialog,
                               const bp::Object * arguments) = 0;
 
         virtual ~IServiceLibraryListener() { }
@@ -74,7 +74,7 @@ namespace ServiceRunner
         // when service type is dependent, providerPath must be supplied,
         // and must be a valid path to a service that satisfies the
         // dependent's requirements.
-        bool load(const bp::file::Path & providerPath,
+        bool load(const boost::filesystem::path & providerPath,
                   std::string & oError);
 
         unsigned int apiVersion();
@@ -85,8 +85,8 @@ namespace ServiceRunner
 
         /** returns zero on failure (client allocate() function failed), or non-zero id
          *  upon success */
-        unsigned int allocate(std::string uri, bp::file::Path dataDir,
-                              bp::file::Path tempDir, std::string locale,
+        unsigned int allocate(std::string uri, boost::filesystem::path dataDir,
+                              boost::filesystem::path tempDir, std::string locale,
                               std::string userAgent, unsigned int clientPid);
 
         void destroy(unsigned int id);
@@ -96,11 +96,11 @@ namespace ServiceRunner
                     const bp::Object * arguments,
                     std::string & err);
 
-        int installHook(const bp::file::Path& serviceDir,
-						const bp::file::Path& tempDir);
+        int installHook(const boost::filesystem::path& serviceDir,
+						const boost::filesystem::path& tempDir);
 
-        int uninstallHook(const bp::file::Path& serviceDir,
-						  const bp::file::Path& tempDir);
+        int uninstallHook(const boost::filesystem::path& serviceDir,
+						  const boost::filesystem::path& tempDir);
 		
         void promptResponse(unsigned int promptId,
                             const bp::Object * arguments);
@@ -115,7 +115,7 @@ namespace ServiceRunner
          * open a shared library returning an opaque handle or NULL
          *  on failure
          */
-        static void * dlopenNP(const bp::file::Path & path);
+        static void * dlopenNP(const boost::filesystem::path & path);
         /**
          * close and free a handle to a dynamic library
          */

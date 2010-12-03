@@ -321,8 +321,8 @@ bp::localization::getLocalizedString(const string& key,
                                      unsigned int micro,
                                      bool useUpdateCache)
 {
-    bp::file::Path path = bp::paths::getLocalizedStringsPath(major, minor, micro, 
-                                                             useUpdateCache);
+    boost::filesystem::path path = bp::paths::getLocalizedStringsPath(major, minor, micro, 
+                                                                      useUpdateCache);
     return getLocalizedString(key, locale, outVal, path);
 }
 
@@ -331,7 +331,7 @@ bool
 bp::localization::getLocalizedString(const string& key,
                                      const string& locale,
                                      string& outVal,
-                                     const bp::file::Path& stringsPath)
+                                     const boost::filesystem::path& stringsPath)
 {
     bool found = false;
     bp::config::ConfigReader reader;
@@ -353,7 +353,7 @@ bp::localization::getLocalizations(const std::string& key)
 {
     std::map<std::string, std::string> rMap;
 
-    bp::file::Path path = bp::paths::getLocalizedStringsPath();
+    boost::filesystem::path path = bp::paths::getLocalizedStringsPath();
     bp::config::ConfigReader reader;
     const bp::Map * m;
     if (reader.load(path) && reader.getJsonMap(key, m))
@@ -417,19 +417,19 @@ bp::localization::getLocaleCandidates(const string& locale)
 }
 
 
-bp::file::Path
-bp::localization::getLocalizedUIPath(const bp::file::Path & uiDir,
+boost::filesystem::path
+bp::localization::getLocalizedUIPath(const boost::filesystem::path & uiDir,
                                      const std::string & locale)
 {
     // get a list of subdirs, get a list of locale candidates, and run
     // through the locale candidates returning the first subdir that
     // exists
     std::vector<std::string> candidates = getLocaleCandidates(locale);
-    bp::file::Path path;
+    boost::filesystem::path path;
 
     for (unsigned int i = 0; i < candidates.size(); i++)
     {
-        bp::file::Path p = uiDir / candidates[i];
+        boost::filesystem::path p = uiDir / candidates[i];
         if (bp::file::isDirectory(p)) {
             path = p;
             break;

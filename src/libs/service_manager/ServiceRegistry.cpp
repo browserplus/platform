@@ -36,7 +36,7 @@ using namespace std::tr1;
 
 
 ServiceRegistry::ServiceRegistry(const std::string & loglevel,
-                                 const bp::file::Path & logfile)
+                                 const boost::filesystem::path & logfile)
 {
     m_dynamicManager.reset(new DynamicServiceManager(loglevel, logfile));
 }
@@ -306,7 +306,7 @@ ServiceRegistry::getReg(const std::string & name,
 }
 
 void
-ServiceRegistry::setPluginDirectory(const bp::file::Path & path)
+ServiceRegistry::setPluginDirectory(const boost::filesystem::path & path)
 {
     m_dynamicManager->setPluginDirectory(path);
 }

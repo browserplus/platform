@@ -36,10 +36,12 @@
 
 using namespace std;
 using namespace std::tr1;
+namespace bpf = bp::file;
+namespace bfs = boost::filesystem;
 
 
 static bp::runloop::RunLoop s_rl;
-static bp::file::Path s_harnessProgram;
+static bfs::path s_harnessProgram;
 static bp::time::Stopwatch s_sw;
 static bool s_log = false;
 
@@ -146,14 +148,14 @@ private:
         }
         m_apiVersion = apiVersion;
 
-        bp::file::Path serviceDir = bp::paths::getServiceDirectory() / service / version;
+        bfs::path serviceDir = bp::paths::getServiceDirectory() / service / version;
         bp::SemanticVersion v;
         if (!v.parse(version)) {
             BPOUT("Bad version " << version);
             stop(-1);
         }
-        bp::file::Path dataDir = bp::paths::getServiceDataDirectory(service,
-                                                                    v.majorVer());
+        bfs::path dataDir = bp::paths::getServiceDataDirectory(service,
+                                                               v.majorVer());
         switch (m_action) {
         case eGetDescription:
             c->describe();
@@ -215,7 +217,7 @@ private:
     void onPrompt(ServiceRunner::Controller*,
                   unsigned int,
                   unsigned int,
-                  const bp::file::Path&,
+                  const bfs::path&,
                   const bp::Object*) 
     {
     }
@@ -262,7 +264,7 @@ setupLogging(shared_ptr<APTArgParse> argParser)
     bp::log::removeAllAppenders();
 
     string level = argParser->argument("log");
-    bp::file::Path path(argParser->argument("logfile"));
+    bfs::path path(argParser->argument("logfile"));
 
     if (level.empty() && path.empty()) return;
 
@@ -280,7 +282,7 @@ setupLogging(shared_ptr<APTArgParse> argParser)
 static int
 runService(shared_ptr<APTArgParse> argParser,
            shared_ptr<ServiceManager> serviceMan,
-           const bp::file::Path& absPath,
+           const bfs::path& absPath,
            const bp::service::Summary& summary)
 {
     string error, processTitle, ignore;
@@ -292,7 +294,7 @@ runService(shared_ptr<APTArgParse> argParser,
         processTitle = (string("BrowserPlus: ") + processTitle);
     }
     // now let's find a valid provider if this is a dependent
-    bp::file::Path providerPath;
+    bfs::path providerPath;
     if (summary.type() == bp::service::Summary::Dependent) {
         providerPath = ServiceRunner::determineProviderPath(summary, error);
         if (!error.empty()) {
@@ -311,7 +313,7 @@ runService(shared_ptr<APTArgParse> argParser,
     controller->setListener(serviceMan.get());
     if (!controller->run(s_harnessProgram, providerPath,
                          processTitle, argParser->argument("log"),
-                         bp::file::Path(argParser->argument("logfile")),
+                         bfs::path(argParser->argument("logfile")),
                          error)) {
         cerr << "Couldn't run service: " << error;
         return(1);
@@ -326,7 +328,7 @@ runService(shared_ptr<APTArgParse> argParser,
 
 static int 
 doUninstall(shared_ptr<APTArgParse> argParser,
-            const bp::file::Path& absPath,
+            const bfs::path& absPath,
             const bp::service::Summary& summary,
             int apiVersion)
 {
@@ -357,7 +359,7 @@ doUninstall(shared_ptr<APTArgParse> argParser,
         BPOUT(timeStamp() << "start remove " << absPath);
     }
     if (!dryRun) {
-        bool rv = bp::file::remove(absPath);
+        bool rv = bpf::safeRemove(absPath);
         if (argParser->argumentPresent("t")) {
             BPOUT(timeStamp() << "remove " << absPath << " returns " << rv);
         }
@@ -378,7 +380,7 @@ doUninstall(shared_ptr<APTArgParse> argParser,
 
 static int 
 doInstall(shared_ptr<APTArgParse> argParser,
-          const bp::file::Path& source,
+          const bfs::path& source,
           const string& serviceName,
           const string& serviceVersion,
           const bp::service::Summary& summary,
@@ -391,11 +393,11 @@ doInstall(shared_ptr<APTArgParse> argParser,
 
     // Now do the install.  We copy to the
     // local service directory and call install hook
-    bp::file::Path destination = bp::paths::getServiceDirectory()
+    bfs::path destination = bp::paths::getServiceDirectory()
                                  / serviceName / serviceVersion;
 
     // must we uninstall existing?
-    if (isDirectory(destination)) {
+    if (bpf::isDirectory(destination)) {
         if (argParser->argumentPresent("f")) {
             if (!dryRun) {
                 int rv = doUninstall(argParser, destination, summary, apiVersion);
@@ -414,8 +416,8 @@ doInstall(shared_ptr<APTArgParse> argParser,
             BPOUT(timeStamp() << "preparing installation directory...");
         }
         try {
-            boost::filesystem::create_directories(destination);
-        } catch(const bp::file::tFileSystemError&) {
+            bfs::create_directories(destination);
+        } catch(const bfs::filesystem_error&) {
             BPOUT("cannot create directory: '" << destination << "'");
             return -1;
         }
@@ -427,14 +429,13 @@ doInstall(shared_ptr<APTArgParse> argParser,
     }
     if (bp::file::isDirectory(source)) {
         try {
-            bp::file::tDirIter end;
-            for (bp::file::tDirIter it(source); it != end; ++it) {
-                bp::file::Path p(it->path());
-                bp::file::Path relPath = p.relativeTo(source);
-                bp::file::Path fromPath = it->path();
-                bp::file::Path toPath = destination / relPath;
+            bfs::directory_iterator end;
+            for (bfs::directory_iterator it(source); it != end; ++it) {
+                bfs::path fromPath = it->path();
+                bfs::path relPath = bpf::relativeTo(fromPath, source);
+                bfs::path toPath = destination / relPath;
                 if (!dryRun) {
-                    if (!bp::file::copy(fromPath, toPath)) {
+                    if (!bpf::safeCopy(fromPath, toPath)) {
                         BPOUT("error copying " << fromPath);
                         return(1);
                     } 
@@ -442,7 +443,7 @@ doInstall(shared_ptr<APTArgParse> argParser,
                     BPOUT("would copy " << fromPath << " -> " << toPath);
                 }
             }
-        } catch (const bp::file::tFileSystemError& e) {
+        } catch (const bfs::filesystem_error& e) {
             BPOUT("unable to iterate thru " << source << ": " << e.what());
             return -1;
         }
@@ -459,7 +460,7 @@ doInstall(shared_ptr<APTArgParse> argParser,
             int rv = runService(argParser, serviceMan, destination, summary);
             if (rv != 0) {
                 BPOUT("Install hook failed, code = " << rv);
-                (void) bp::file::remove(destination);
+                (void) bpf::safeRemove(destination);
                 return rv;
             }
         } else {
@@ -471,7 +472,7 @@ doInstall(shared_ptr<APTArgParse> argParser,
     // BrowserPlus to update this service.  This is only necessary
     // if we overwrote the on-disk service
     if (overwrote) {
-        bp::file::Path manifestPath = destination / "manifest.json";
+        bfs::path manifestPath = destination / "manifest.json";
         bp::file::touch(manifestPath);
     }
     
@@ -535,7 +536,7 @@ main(int argc,
     }
 
     // pathToHarness is ourself
-    s_harnessProgram = bp::file::canonicalProgramPath(bp::file::Path(argv[0]));
+    s_harnessProgram = bpf::canonicalProgramPath(bfs::path(argv[0]));
 
     bool dryRun = argParser->argumentPresent("n");
     bool uninstall = argParser->argumentPresent("u");
@@ -562,14 +563,14 @@ main(int argc,
 
     setupLogging(argParser);
 
-    bp::file::Path absPath;
+    bfs::path absPath;
     string serviceName, serviceVersion;
     if (uninstall) {
         serviceName = argv[x];
         serviceVersion = argv[x+1];
         absPath = bp::paths::getServiceDirectory() / serviceName / serviceVersion;
     } else {
-        absPath = bp::file::canonicalPath(bp::file::Path(argv[x]));
+        absPath = bp::file::canonicalPath(bfs::path(argv[x]));
     }
 
     // get service summary
@@ -582,7 +583,7 @@ main(int argc,
         BPOUT("Invalid service: " << endl << "  " << error);
         if (uninstall) {
             BPOUT("removing anyway");
-            (void) bp::file::remove(absPath);
+            (void) bpf::safeRemove(absPath);
         }
         exit(-7);
     }

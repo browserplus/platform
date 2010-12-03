@@ -37,7 +37,7 @@ class InstallerSkinGUI : public InstallerSkin
   public:
     // instantiate a GUI skin, passing the path to the ui files.
     // GUIs will look for an index.html inside said directory.
-    InstallerSkinGUI(const bp::file::Path & uiDirectory);
+    InstallerSkinGUI(const boost::filesystem::path & uiDirectory);
     virtual ~InstallerSkinGUI();
 
     // the InstallManager invokes this call on the installer output
@@ -68,7 +68,7 @@ class InstallerSkinGUI : public InstallerSkin
     void ended();
 
   private:
-    bp::file::Path m_uiDirectory;
+    boost::filesystem::path m_uiDirectory;
 
     ScriptableInstallerObject m_sio;
 };

@@ -57,9 +57,9 @@ class Fetcher : virtual public IDistQueryListener
         virtual ~MyServiceFilter() {}
     };
 
-    Fetcher(const bp::file::Path& keyPath,
+    Fetcher(const boost::filesystem::path& keyPath,
 		    const std::list<std::string>& distroServers,
-            const bp::file::Path& destDir);
+            const boost::filesystem::path& destDir);
 
     virtual ~Fetcher();
     
@@ -104,9 +104,9 @@ class Fetcher : virtual public IDistQueryListener
  protected:
     unsigned int fetchNextService();
     
-    bp::file::Path m_keyPath;
+    boost::filesystem::path m_keyPath;
     std::list<std::string> m_distroServers;
-    bp::file::Path m_destDir;
+    boost::filesystem::path m_destDir;
     std::string m_platformVersion;
     size_t m_platformSize;
     std::list<ServiceRequireStatement> m_requires;

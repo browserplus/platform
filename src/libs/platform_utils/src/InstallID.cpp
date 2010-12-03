@@ -32,7 +32,7 @@ namespace plat {
 
 std::string getInstallID()
 {
-    bp::file::Path path = bp::paths::getInstallIDPath();
+    boost::filesystem::path path = bp::paths::getInstallIDPath();
 
     // see if InstallID exists in phash.  If so, migrate it
     // to new InstallID file

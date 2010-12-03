@@ -181,14 +181,14 @@ getPSN()
 }
 
 
-static vector<bp::file::Path>
+static vector<boost::filesystem::path>
 runPanel(NSSavePanel* panel,
          NSString* file,       // non-nil implies save panel
          const string& userAgent)
 {
     MyOpenPanel* openPanel = file ? nil : (MyOpenPanel*)panel;
     MySavePanel* savePanel = file ? (MySavePanel*)panel : nil;
-    std::vector<bp::file::Path> selection;
+    std::vector<boost::filesystem::path> selection;
     if (isSafari5OnSnowLeopard(userAgent)) {
         BPLOG_DEBUG("Using 10.6+ Safari 5+ modality workaround for file browse");
         
@@ -306,7 +306,7 @@ FileBrowsePluglet::v1Browse(unsigned int tid,
     [panel setTitle: [NSString stringWithUTF8String: title.c_str()]];
 
     // Run the panel and get the results
-    vector<bp::file::Path> selection = runPanel(panel, NULL, m_plugin->getUserAgent());
+    vector<boost::filesystem::path> selection = runPanel(panel, NULL, m_plugin->getUserAgent());
     [panel setDelegate:nil];
     [panel orderOut: nil];
     [panel release];
@@ -345,7 +345,7 @@ FileBrowsePluglet::browse(unsigned int tid,
     [panel setTitle: [NSString stringWithUTF8String: title.c_str()]];
 
     // Run the panel and get the results
-    vector<bp::file::Path> selection = runPanel(panel, NULL, m_plugin->getUserAgent());
+    vector<boost::filesystem::path> selection = runPanel(panel, NULL, m_plugin->getUserAgent());
     [panel orderOut: nil];
     [panel release];
 
@@ -358,9 +358,9 @@ FileBrowsePluglet::browse(unsigned int tid,
     // return results
     bp::Map* m = new bp::Map;
     bp::List* l = new bp::List;
-    vector<bp::file::Path>::const_iterator it;
+    vector<boost::filesystem::path>::const_iterator it;
     for (it = selection.begin(); it != selection.end(); ++it) {
-        bp::file::Path path(*it);
+        boost::filesystem::path path(*it);
         l->append(new bp::Path(path));
     }
     m->add("files", l);
@@ -392,7 +392,7 @@ FileBrowsePluglet::save(unsigned int tid,
     [panel setTitle: [NSString stringWithUTF8String: title.c_str()]];
 
     // Run the panel and get the results
-    vector<bp::file::Path> selection = runPanel(panel,
+    vector<boost::filesystem::path> selection = runPanel(panel,
                                                 [NSString stringWithUTF8String: fileName.c_str()],
                                                 m_plugin->getUserAgent());
     [panel orderOut: nil];

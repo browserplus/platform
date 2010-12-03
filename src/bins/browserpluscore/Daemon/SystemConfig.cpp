@@ -199,8 +199,8 @@ activeSitesFunc(const char *,
                 } else if (parser.scheme() == "file") {
                     type = "website";
                     site = "local file: ";
-                    bp::file::Path p(parser.path());
-                    site.append(bp::file::utf8FromNative(p.filename()));
+                    boost::filesystem::path p(parser.path());
+                    site.append(p.filename().string());
                 } else if (parser.scheme() == "bpclient") {
                     type = "program";
                     if (!parser.path().empty()) {

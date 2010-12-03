@@ -51,10 +51,10 @@ Installer::preflight()
     BPLOG_DEBUG_STRM("begin Installer::preflight()");
 
     // remove existing start menu items
-    bpf::Path dir = getFolderPath(CSIDL_PROGRAMS) / getString(kProductNameShort);
+    bfs::path dir = getFolderPath(CSIDL_PROGRAMS) / getString(kProductNameShort);
     if (bpf::isDirectory(dir)) {
         BPLOG_INFO_STRM("preflight: delete " << dir);
-        (void) remove(dir);
+        (void) bpf::safeRemove(dir);
     } else {
         BPLOG_INFO_STRM("preflight: " << dir << " doesn't exist");
     }
@@ -63,7 +63,7 @@ Installer::preflight()
     dir = getFolderPath(CSIDL_PROGRAMS) / "Yahoo! BrowserPlus";
     if (bpf::isDirectory(dir)) {
         BPLOG_INFO_STRM("preflight: delete " << dir);
-        (void) remove(dir);
+        (void) bpf::safeRemove(dir);
     } else {
         BPLOG_INFO_STRM("preflight: " << dir << " doesn't exist");
     }
@@ -95,35 +95,35 @@ Installer::installPlugins()
         BPLOG_WARN_STRM("unable to disable nattergrams: " << e.what());
     }
 
-    vector<bpf::Path> pluginPaths = getPluginPaths(m_version.majorVer(),
+    vector<bfs::path> pluginPaths = getPluginPaths(m_version.majorVer(),
                                                    m_version.minorVer(),
                                                    m_version.microVer());
-    bpf::Path pluginsDir = pluginPaths[0].parent_path();
+    bfs::path pluginsDir = pluginPaths[0].parent_path();
 
     // install IE plugin and register it
     BPLOG_DEBUG("installing IE plugin");
-    bpf::Path path = m_dir / "plugins" / "IE";
+    bfs::path path = m_dir / "plugins" / "IE";
     doCopy(path, pluginsDir);
     
-    bpf::Path iePath = pluginsDir / bpf::Path("YBPAddon_" + m_version.asString()
+    bfs::path iePath = pluginsDir / bfs::path("YBPAddon_" + m_version.asString()
                                               + ".dll");
     if (registerControl(mimeTypes(), typeLibGuid(), iePath, activeXGuid(),
                         axName(), axViProgid(), axProgid(m_version)) != 0) {
-        BP_THROW(lastErrorString("unable to register " + iePath.externalUtf8()));
+        BP_THROW(lastErrorString("unable to register " + iePath.string()));
     }
 
     // Install NPAPI plugin
     BPLOG_DEBUG("installing NPAPI plugin");
-    bpf::Path npapiDestDir = npapiPluginDir(pluginsDir);
-    bpf::Path npapiPath = npapiDestDir / bpf::Path("npybrowserplus_"
+    bfs::path npapiDestDir = npapiPluginDir(pluginsDir);
+    bfs::path npapiPath = npapiDestDir / bfs::path("npybrowserplus_"
                                                    + m_version.asString()
                                                    + ".dll");
 
-    bpf::Path npapiSrc = m_dir / "plugins" / "NPAPI";
+    bfs::path npapiSrc = m_dir / "plugins" / "NPAPI";
     doCopy(npapiSrc, npapiDestDir);
     key = "HKEY_CURRENT_USER\\SOFTWARE\\MozillaPlugins\\@yahoo.com/BrowserPlus,version="
           + m_version.asString();
-    writeString(key, "Path", npapiPath.externalUtf8());
+    writeString(key, "Path", npapiPath.string());
     writeString(key, "ProductName", "Yahoo! BrowserPlus");
     writeString(key, "Version", m_version.asString());
     writeString(key, "Vendor", "Yahoo! Inc.");
@@ -144,10 +144,10 @@ void
 Installer::installPrefPanel()
 {
     BPLOG_DEBUG_STRM("begin Installer::installPrefPanel()");
-    bpf::Path dest = getProductDirectory(m_version.majorVer(),
+    bfs::path dest = getProductDirectory(m_version.majorVer(),
                                          m_version.minorVer(),
                                          m_version.microVer());
-    bpf::Path src = m_dir / "prefPane";
+    bfs::path src = m_dir / "prefPane";
     doCopy(src, dest);
     BPLOG_DEBUG_STRM("complete Installer::installPrefPanel()");
 }
@@ -162,7 +162,7 @@ Installer::makeLinks()
     BPLOG_DEBUG_STRM("begin Installer::makeLinks()");
     string configName = getString(kConfigLink);
     std::string osVersion = bp::os::PlatformVersion();
-    bpf::Path configExe = getProductDirectory(m_version.majorVer(),
+    bfs::path configExe = getProductDirectory(m_version.majorVer(),
                                               m_version.minorVer(),
                                               m_version.microVer()) / "BrowserPlusPrefs.exe";
     try {
@@ -190,10 +190,10 @@ Installer::makeLinks()
         writeString(key, "System.ControlPanel.Category", category);
 
         createKey(key + "\\DefaultIcon");
-        writeString(key + "\\DefaultIcon", configExe.externalUtf8() + ",-128");
+        writeString(key + "\\DefaultIcon", configExe.string() + ",-128");
 
         createKey(key + "\\Shell\\Open\\Command");
-        writeString(key + "\\Shell\\Open\\Command", configExe.externalUtf8());
+        writeString(key + "\\Shell\\Open\\Command", configExe.string());
     } catch (const Exception& e) {
         // ugh, clean up
         BPLOG_WARN(e.what());
@@ -224,19 +224,19 @@ Installer::postflight()
     BPLOG_DEBUG_STRM("begin Installer::postflight()");
 
     // Add/remove programs entry.
-    bpf::Path prodDir = getProductDirectory(m_version.majorVer(),
+    bfs::path prodDir = getProductDirectory(m_version.majorVer(),
                                             m_version.minorVer(),
                                             m_version.microVer());
 
     // uninstaller
     string key = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Yahoo! BrowserPlus";
-    bpf::Path topDir = prodDir.parent_path();
-    bpf::Path uninstaller = topDir / "BrowserPlusUninstaller.exe";
-    bpf::Path icon = topDir / "ybang.ico";
+    bfs::path topDir = prodDir.parent_path();
+    bfs::path uninstaller = topDir / "BrowserPlusUninstaller.exe";
+    bfs::path icon = topDir / "ybang.ico";
     string displayName = "Yahoo! BrowserPlus " + m_version.asString();
     writeString(key, "DisplayName", displayName);
-    writeString(key, "DisplayIcon", icon.externalUtf8());
-    writeString(key, "UninstallString", uninstaller.externalUtf8());
+    writeString(key, "DisplayIcon", icon.string());
+    writeString(key, "UninstallString", uninstaller.string());
     writeString(key, "Publisher", "Yahoo! Inc.");
     writeInt(key, "NoModify", 1);
     writeInt(key, "NoRepair", 1);
@@ -262,7 +262,7 @@ Installer::postflight()
 
     // Try to delete our dir.  It will likely only partially succeed since
     // some files are open and ntfs can't handle that.
-    (void) remove(m_dir);
+    (void) bpf::safeRemove(m_dir);
 
     // Alas, due to previous bugs (#180 and #192), we may have left registry cruft
     // on previous updates.  We must now atone for our sins and clean it up.
@@ -270,12 +270,12 @@ Installer::postflight()
 
     // Re-register our activex control (it could have 
     // been unregistered by above code if guid hadn't changed)
-    bpf::Path thisIEPluginPath = prodDir / "Plugins" / bpf::Path("YBPAddon_"
+    bfs::path thisIEPluginPath = prodDir / "Plugins" / bfs::path("YBPAddon_"
                                                                  + m_version.asString()
                                                                  + ".dll");
     if (registerControl(mimeTypes(), typeLibGuid(), thisIEPluginPath, activeXGuid(),
                         axName(), axViProgid(), axProgid(m_version)) != 0) {
-        BP_THROW(lastErrorString("unable to register " + thisIEPluginPath.externalUtf8()));
+        BP_THROW(lastErrorString("unable to register " + thisIEPluginPath.string()));
     }
 
     // Prevent vista UAC on first daemon launch from IE.  Any old guid will do,
@@ -283,13 +283,13 @@ Installer::postflight()
     std::string osVersion = bp::os::PlatformVersion();
     if (osVersion.compare("6") >= 0) {
         try {
-            bpf::Path daemonPath(prodDir);
+            bfs::path daemonPath(prodDir);
             key = "HKCU\\Software\\Microsoft\\Internet Explorer\\Low Rights\\ElevationPolicy\\"
                   + activeXGuid();
             createKey(key);
             writeInt(key, "Policy", 3);
             writeString(key, "AppName", "BrowserPlusCore.exe");
-            writeString(key, "AppPath", daemonPath.externalUtf8());
+            writeString(key, "AppPath", daemonPath.string());
         } catch (const bp::error::Exception& e) {
             BPLOG_WARN_STRM("attempting to prevent UAC: " << e.what());
         }
@@ -320,10 +320,10 @@ Installer::disablePlugins(const bp::SemanticVersion& version)
     // Also note that the plugin path doesn't need to exist for the 
     // registry zapping to work.
     try {
-        bpf::Path path =  getProductDirectory(version.majorVer(),
+        bfs::path path =  getProductDirectory(version.majorVer(),
                                               version.minorVer(),
                                               version.microVer()) 
-                          / "Plugins" / bpf::Path("YBPAddon_" + versionStr + ".dll");
+                          / "Plugins" / bfs::path("YBPAddon_" + versionStr + ".dll");
         // unregister control
         string vers, typeLibGuid, activeXGuid;
         vector<string> mtypes;
@@ -350,11 +350,11 @@ Installer::disablePlugins(const bp::SemanticVersion& version)
     }
 
     // Remove legacy ffx2 NPAPI plugin.
-    bpf::Path ffx2Dir = utils::ffx2PluginDir();
+    bfs::path ffx2Dir = utils::ffx2PluginDir();
     if (!ffx2Dir.empty()) {
-        bpf::Path path = ffx2Dir / bpf::Path("npybrowserplus_" + versionStr + ".dll");
-        if (!bpf::remove(path)) {
-            BPLOG_DEBUG_STRM(lastErrorString("unable to delete " + path.externalUtf8()));
+        bfs::path path = ffx2Dir / bfs::path("npybrowserplus_" + versionStr + ".dll");
+        if (!bpf::safeRemove(path)) {
+            BPLOG_DEBUG_STRM(lastErrorString("unable to delete " + path.string()));
         }
     }
 }

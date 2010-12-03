@@ -36,7 +36,7 @@ SessionManager::SessionManager(shared_ptr<ServiceRegistry> registry)
     // Setup a config file reader.
     bp::config::ConfigReader configReader;
     {
-        bp::file::Path configFilePath = bp::paths::getConfigFilePath();
+        boost::filesystem::path configFilePath = bp::paths::getConfigFilePath();
         if (!configReader.load(configFilePath)) {
             BP_THROW_FATAL("couldn't read config file");
             return;

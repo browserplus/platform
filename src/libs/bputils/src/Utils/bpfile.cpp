@@ -54,7 +54,9 @@
 #define strncasecmp _strnicmp
 #endif
 
+#include <locale>
 #include "boost/filesystem/fstream.hpp"
+#include "boost/filesystem/detail/utf8_codecvt_facet.hpp"
 #include "boost/algorithm/string/split.hpp"
 #include "boost/algorithm/string/classification.hpp"
 
@@ -73,6 +75,18 @@
 using namespace std;
 namespace bfs = boost::filesystem;
 
+
+// we must make sure to always use utf8 for narrow strings
+class ImbueWithUtf8 {
+public:
+    ImbueWithUtf8() {
+        std::locale global_loc = std::locale();
+        std::locale loc(global_loc, new bfs::detail::utf8_codecvt_facet);
+        (void) bfs::path::imbue(loc);
+    }
+};
+static ImbueWithUtf8 s_imbue;
+
 namespace bp { namespace file {
 
 const string kFileUrlPrefix("file://");
@@ -80,7 +94,7 @@ const string kFolderMimeType("application/x-folder");
 const string kLinkMimeType("application/x-link");
 const string kBadLinkMimeType("application/x-badlink");
 
-static set<Path> s_delayDelete;
+static set<bfs::path> s_delayDelete;
 
 // Extension to mimetype mappings.  Note that
 // a single extentsion may have multiple entries.  We will
@@ -1025,7 +1039,7 @@ initializeMimeTypes()
 
 class DirEntry {
 public:
-    static DirEntry fromPath(const Path& p) {
+    static DirEntry fromPath(const bfs::path& p) {
         DirEntry rval;
         FileInfo fi;
         if (statFile(p, fi)) {
@@ -1038,7 +1052,7 @@ public:
     }
     DirEntry() : m_path(), m_deviceId(0), 
         m_fileIdHigh(0), m_fileIdLow(0) {}
-    Path m_path;
+    bfs::path m_path;
     boost::uint32_t m_deviceId;
     boost::uint32_t m_fileIdHigh;
     boost::uint32_t m_fileIdLow;
@@ -1048,27 +1062,26 @@ public:
 // bfs::remove_all will throw as soon as it hits an error.
 // This version catches, whines, and keeps removing.
 static bool
-doRemoveAll(const Path& path)
+doRemoveAll(const bfs::path& path)
 {
     bool rval = true;
     try {
         // don't recurse into symlinks
         if (!isSymlink(path) && isDirectory(path)) {
             try {
-                tDirIter end;
-                for (tDirIter iter(path); iter != end; ++iter) {
-                    Path dir(iter->path());
+                bfs::directory_iterator end;
+                for (bfs::directory_iterator iter(path); iter != end; ++iter) {
                     try {
-                        if (!doRemoveAll(dir)) {
+                        if (!doRemoveAll(iter->path())) {
                             rval = false;
                         }
-                    } catch (const tFileSystemError& e) {
+                    } catch (const bfs::filesystem_error& e) {
                         BPLOG_WARN_STRM("doRemoveAll failed to remove "
-                                        << dir << ": " << e.what());
+                                        << iter->path() << ": " << e.what());
                         rval = false;
                     }
                 }
-            } catch (const tFileSystemError& e) {
+            } catch (const bfs::filesystem_error& e) {
                 BPLOG_WARN_STRM("unable to iterate thru " << path
                                 << ": " << e.what());
             }
@@ -1077,7 +1090,7 @@ doRemoveAll(const Path& path)
         if (!bfs::remove(path)) {
             rval = false;
         }
-    } catch (const tFileSystemError& e) {
+    } catch (const bfs::filesystem_error& e) {
         BPLOG_WARN_STRM("doRemoveAll failed to remove "
                         << path << ": " << e.what());
         rval = false;
@@ -1091,7 +1104,7 @@ doRemoveAll(const Path& path)
 // we don't revisit.
 //
 static bool
-isCircular(const bp::file::Path& p,
+isCircular(const bfs::path& p,
            const vector<DirEntry>& stack)
 {
     FileInfo fi;
@@ -1114,7 +1127,7 @@ isCircular(const bp::file::Path& p,
                    << ", " << stack[j].m_fileIdHigh
                    << ", " << stack[j].m_fileIdLow << ")" << endl;
             }
-            BPLOG_WARN_STRM(ss.str());
+            BPLOG_WARN(ss.str());
             return true;
         }
     }
@@ -1127,16 +1140,16 @@ isCircular(const bp::file::Path& p,
 // relative pseudo-path for each visited node.
 //
 static bool
-doVisit(const bp::file::Path& p,
+doVisit(const bfs::path& p,
         bp::file::IVisitor& v,  
         vector<DirEntry>& pathStack,
-        const bp::file::Path& relativeDir,
+        const bfs::path& relativeDir,
         bool followLinks,
         bool recursive)
 {
     // Find real target if we're chasing links.
     bool islink = isLink(p);
-    Path target = p;
+    bfs::path target = p;
     if (followLinks && islink) {
         // broken links will visit link itself
         if (!resolveLink(p, target)) {
@@ -1151,7 +1164,7 @@ doVisit(const bp::file::Path& p,
 
     // visit this node, but don't visit top directory of a non-recursive
     if (recursive || !relativeDir.empty() || !isDirectory(target)) {
-        bp::file::Path rp = relativeDir;
+        bfs::path rp = relativeDir;
         if (!isDirectory(target)) {
             rp /= p.filename();
         }
@@ -1171,11 +1184,11 @@ doVisit(const bp::file::Path& p,
 
         // visit immediate children
         try {
-            tDirIter end;
-            for (tDirIter iter(target); iter != end; ++iter) {
+            bfs::directory_iterator end;
+            for (bfs::directory_iterator iter(target); iter != end; ++iter) {
                 // resolve link if chasing
-                Path node(iter->path());
-                Path nodeTarget = node;
+                bfs::path node(iter->path());
+                bfs::path nodeTarget = node;
                 if (followLinks && isLink(node)) {
                     if (!resolveLink(node, nodeTarget)) {
                         // broken links will visit link itself
@@ -1207,7 +1220,7 @@ doVisit(const bp::file::Path& p,
                     }
                 }
             }
-        } catch (const bp::file::tFileSystemError& e) {
+        } catch (const bfs::filesystem_error& e) {
             BPLOG_WARN_STRM("visiting children of " << target
                             << " failed, continuing: " << e.what());
         }
@@ -1215,6 +1228,15 @@ doVisit(const bp::file::Path& p,
         pathStack.pop_back();
     }
     return true;
+}
+
+
+static char 
+char2hex(char c)
+{
+  if (isdigit(c)) c -= '0';
+  else c = (c | 0x20) - 'a' + 10;
+  return c;
 }
 
 
@@ -1245,15 +1267,6 @@ urlEncode(const string& s)
 }
 
 
-static char 
-char2hex(char c)
-{
-  if (isdigit(c)) c -= '0';
-  else c = (c | 0x20) - 'a' + 10;
-  return c;
-}
-
-
 /* collapse %XX into the ascii char it represents IN PLACE */
 static string
 urlDecode(string s)
@@ -1277,38 +1290,15 @@ urlDecode(string s)
 }
 
 
-//-------------------------- Path 
-
-#ifdef WIN32
-Path::Path(const std::string& utf8) : tBase(bp::file::nativeFromUtf8(utf8)) 
-{
-}
-#endif
-
-
 string 
-Path::utf8() const
+urlFromPath(const bfs::path& p)
 {
-    return utf8FromNative(string());
-}
-
-
-string 
-Path::externalUtf8() const
-{
-    return utf8FromNative(external_file_string());
-}
-
-
-string 
-Path::url() const
-{
-    std::string s = utf8();
+    string s = p.generic_string();
     if (s.empty()) {
-        return std::string("");
+        return string("");
     };
 
-    std::string rval = kFileUrlPrefix;
+    string rval = kFileUrlPrefix;
 
     // Split out edges.  Must give special treatment
     // to first and last edges.  On doze, first edge
@@ -1322,9 +1312,9 @@ Path::url() const
 #endif
     bool firstEdgeAdded = false;
     bool lastEdgeNull = false;
-    vector<std::string> edges;
+    vector<string> edges;
     boost::algorithm::split(edges, s, boost::algorithm::is_any_of("/"));
-    for (vector<std::string>::const_iterator it = edges.begin();
+    for (vector<string>::const_iterator it = edges.begin();
          it != edges.end(); ++it) {
         if (it->empty()) {
             lastEdgeNull = true;
@@ -1334,7 +1324,7 @@ Path::url() const
         if (!firstEdgeAdded) {
 #ifdef WIN32
             size_t colon = it->rfind(":");
-            if (colon != std::string::npos && colon == it->length()-1) {
+            if (colon != string::npos && colon == it->length()-1) {
                 rval += "/" + *it;
             } else {
                 if (haveHost) {
@@ -1361,98 +1351,18 @@ Path::url() const
 }
 
 
-Path
-Path::canonical() const
-{
-    tString dot = nativeFromUtf8(".");
-    tString dotdot = nativeFromUtf8("..");
-    Path rval;
-    for (iterator iter(begin()); iter != end(); ++iter) {
-        if (iter->compare(dot) == 0) {
-            continue;
-        }
-        if (iter->compare(dotdot) == 0) {
-            rval = rval.parent_path();
-            continue;
-        }
-        rval = rval / *iter;
-    }
-
-    // make sure we preserve a trailing /
-    tString slash = nativeFromUtf8("/");
-    if (string().rfind(slash) == string().length()-1) {
-        tString s = rval.string();
-        s += slash;
-        rval = s;
-    }
-    return rval;
-}
-
-
-Path
-Path::relativeTo(const Path& base) const
-{
-    if (base == *this) {
-        return Path();
-    }
-
-    std::string baseStr = base.utf8();
-    std::string ourStr = utf8();
-    if (baseStr.rfind("/") != baseStr.length()-1) {
-        baseStr += "/";
-    }
-    if (ourStr.find(baseStr) != 0) {
-        boost::system::error_code ec;
-        throw tFileSystemError("path1 not relative to path2",
-                               *this, base, ec);
-    }
-    tString relStr = nativeFromUtf8(ourStr.substr(baseStr.length(),
-                                                  string::npos));
-    return Path(relStr);
-}
-
-//-------------------------- convenience functions
-
-
-bool
-visit(const Path& p,
-      IVisitor& v,
-      bool followLinks)
-{
-    vector<DirEntry> stack;
-    Path rp;
-    return doVisit(p, v, stack, rp, followLinks, false);
-}
-
-
-bool
-recursiveVisit(const Path& p,
-               IVisitor& v,
-               bool followLinks)
-{
-    bool isDir = isDirectory(p);
-    if (!isDir) {
-        BPLOG_WARN_STRM("recursiveVisit(" << p << "), not a directory"
-                        << ", doing a visit()");
-    }
-    vector<DirEntry> stack;
-    Path rp;
-    if (isDir ) {
-        rp = p.filename();
-    }
-    return doVisit(p, v, stack, rp, followLinks, isDir);
-}
-
-
-Path 
+bfs::path
 pathFromURL(const string& url)
 {
     // file url format is file://host/path
 
-    Path rval;
     if (url.substr(0, kFileUrlPrefix.length()) != kFileUrlPrefix) {
-        return rval;
+        return bfs::path();
     }
+
+    // We'll form up a utf8 string representing path
+    // in generic format, then make a path from it
+    string pathStr;
 
     // check for //host
     bool haveHost = (url.find("file://") == 0) && (url.find("file:///") != 0);
@@ -1477,12 +1387,12 @@ pathFromURL(const string& url)
             // Windows can have a drive specifier in first edge, 
             // either as file://C:/ or file:///C:/
             size_t colon = it->rfind(":");
-            haveDrive = (colon != std::string::npos) && (colon == it->length()-1);
+            haveDrive = (colon != string::npos) && (colon == it->length()-1);
 #endif
             if (haveHost) {
-                // Everyone groks localhost and 127.0.0.1, which collapses to /
+                // Everyone groks localhost and 127.0.0.1, which collapses to nothingness
                 if (!it->compare("localhost") || !it->compare("127.0.0.1")) {
-                     rval = Path("/");
+                    pathStr = "";
                 } else {
 #ifdef WIN32
                     // Windows also groks //host/path.  No uniform way
@@ -1490,42 +1400,121 @@ pathFromURL(const string& url)
                     // also be aware that Windows may also have a
                     // drive specifier here.
                     if (haveDrive) {
-                        rval = Path(*it + "/");
+//                        pathStr = *it + "/";
+                        pathStr = *it;
                     } else {
-                        rval = Path("//" + *it);
+                        pathStr = "//" + *it;
                     }
 #else
-                    return rval;
+                    return bfs::path();
 #endif
                 }
             } else {
                 if (haveDrive) {
-                    rval = Path(*it + "/");
+                    pathStr = *it;
                 } else {
-                    rval = Path("/" + urlDecode(*it));
+                    pathStr = "/" + urlDecode(*it);
                 }
             }
             firstEdgeHandled = true;
         } else {
-            rval /= urlDecode(*it);
+            pathStr = pathStr + "/" + urlDecode(*it);
         }
     }
 
     // add trailing / if needed
     if (lastEdgeNull) {
-        tString str = rval.string();
-        size_t slashIndex = str.rfind(nativeFromUtf8("/"));
-        if (slashIndex == string::npos || slashIndex != str.length()-1) {
-            rval /= Path("/");
+        size_t slashIndex = pathStr.rfind("/");
+        if (slashIndex == string::npos || slashIndex != pathStr.length()-1) {
+            pathStr += "/";
         }
     }
 
+    return bfs::path(pathStr);
+}
+
+
+bool
+visit(const bfs::path& p,
+      IVisitor& v,
+      bool followLinks)
+{
+    vector<DirEntry> stack;
+    bfs::path rp;
+    return doVisit(p, v, stack, rp, followLinks, false);
+}
+
+
+bool
+recursiveVisit(const bfs::path& p,
+               IVisitor& v,
+               bool followLinks)
+{
+    bool isDir = isDirectory(p);
+    if (!isDir) {
+        BPLOG_WARN_STRM("recursiveVisit(" << p << "), not a directory"
+                        << ", doing a visit()");
+    }
+    vector<DirEntry> stack;
+    bfs::path rp;
+    if (isDir) {
+        rp = p.filename();
+    }
+    return doVisit(p, v, stack, rp, followLinks, isDir);
+}
+
+
+bfs::path
+canonical(const bfs::path& p)
+{
+    bfs::path rval;
+    for (bfs::path::iterator iter(p.begin()); iter != p.end(); ++iter) {
+        if (iter->string().compare(".") == 0) {
+            continue;
+        }
+        if (iter->string().compare("..") == 0) {
+            rval = rval.parent_path();
+            continue;
+        }
+        rval = rval / *iter;
+    }
+
+    // make sure we preserve a trailing /
+    string oldStr = p.generic_string();
+    if (oldStr.rfind("/") == oldStr.length()-1) {
+        string s = rval.generic_string();
+        s += "/";
+        rval = s;
+    }
     return rval;
 }
 
 
+bfs::path
+relativeTo(const bfs::path& p,
+           const bfs::path& base)
+{
+    if (base == p) {
+        return bfs::path();
+    }
+
+    string ourStr = p.generic_string();
+    string baseStr = base.generic_string();
+    if (baseStr.rfind("/") != baseStr.length()-1) {
+        baseStr += "/";
+    }
+    if (ourStr.find(baseStr) != 0) {
+        boost::system::error_code ec;
+        throw bfs::filesystem_error("path1 not relative to path2",
+                                          p, base, ec);
+    }
+    string relStr = ourStr.substr(baseStr.length(), string::npos);
+    return bfs::path(relStr);
+}
+
+
 static bool
-unsetReadOnly(const Path& path)
+unsetReadOnly(const bfs::path& path)
 {
     bool rval = false;
     FileInfo fi;
@@ -1546,11 +1535,11 @@ unsetReadOnly(const Path& path)
 
     
 bool 
-remove(const Path& path)
+safeRemove(const bfs::path& path)
 {
 
     // easy, path doesn't exist
-    if (path.empty() || !exists(path)) {
+    if (path.empty() || !pathExists(path)) {
         return true; 
     }
 
@@ -1565,16 +1554,15 @@ remove(const Path& path)
                              << "and trying again");
             if (isDirectory(path)) {
                 try {
-                    tRecursiveDirIter end;
-                    for (tRecursiveDirIter it(path); it != end; ++it) {
-                        Path p(it->path());
-                        (void) unsetReadOnly(p);
+                    bfs::recursive_directory_iterator end;
+                    for (bfs::recursive_directory_iterator it(path); it != end; ++it) {
+                        (void) unsetReadOnly(it->path());
                     }
-                } catch (const tFileSystemError& e) {
+                } catch (const bfs::filesystem_error& e) {
                     BPLOG_WARN_STRM("unable to iterate thru " << path
                                     << ": " << e.what());
                 } catch (const length_error& e) {
-                    BPLOG_WARN_STRM("std::length_error exception trying "
+                    BPLOG_WARN_STRM("length_error exception trying "
                                     << "to iterate thru " << path
                                     << ": " << e.what());
                 }
@@ -1586,15 +1574,15 @@ remove(const Path& path)
             // p's parent.  Try to give parent write permission,
             // then restore old permission when done.
             FileInfo parentInfo;
-            Path parent = path.parent_path();
+            bfs::path parent = path.parent_path();
             bool setParentInfo = statFile(parent, parentInfo)
-                && unsetReadOnly(parent);
+                                 && unsetReadOnly(parent);
             rval = doRemoveAll(path);
             if (setParentInfo) {
                 setFileProperties(parent, parentInfo);
             }
         }
-    } catch(const tFileSystemError& e) {
+    } catch(const bfs::filesystem_error& e) {
         BPLOG_WARN_STRM("remove(" << path << ") failed: " << e.what());
         rval = false;
     }
@@ -1603,20 +1591,20 @@ remove(const Path& path)
 
 
 bool
-move(const Path& from,
-     const Path& to)
+safeMove(const bfs::path& from,
+         const bfs::path& to)
 {
     try {
         bfs::rename(from, to);
-    } catch(const tFileSystemError& e) {
+    } catch(const bfs::filesystem_error& e) {
         BPLOG_WARN_STRM("move(" << from
                         << ", " << to << ") failed: " << e.what()
                         << ", trying copy/delete");
-        if (!copy(from, to)) {
+        if (!safeCopy(from, to)) {
             BPLOG_WARN_STRM("copy failed");
             return false;
         }
-        if (!remove(from)) {
+        if (!safeRemove(from)) {
             BPLOG_WARN_STRM("delete after copy failed: " << from
                             << ", adding for delayed delete");
             s_delayDelete.insert(from);
@@ -1629,21 +1617,20 @@ move(const Path& from,
 void
 delayDelete()
 {
-    set<Path>::iterator it;
+    set<bfs::path>::iterator it;
     for (it = s_delayDelete.begin(); it != s_delayDelete.end(); ++it) {
-        Path p(*it);
-        BPLOG_DEBUG_STRM("attempt to delete " << p);
-        (void) remove(p);
+        BPLOG_DEBUG_STRM("attempt to delete " << *it);
+        (void) safeRemove(*it);
     }
 }
 
 
 bool
-exists(const Path& path)
+pathExists(const bfs::path& path)
 {
     try {
         return bfs::exists(path);
-    } catch(const tFileSystemError& e) {
+    } catch(const bfs::filesystem_error& e) {
         BPLOG_DEBUG_STRM("bfs::exists(" << path << ") failed.");
         BPLOG_INFO_STRM("bfs::exists failed: " << e.what() <<
                         ", returning false.");
@@ -1653,11 +1640,11 @@ exists(const Path& path)
 
 
 boost::uintmax_t
-size(const Path& path)
+size(const bfs::path& path)
 {
     try {
         return isRegularFile(path) ? bfs::file_size(path) : 0;
-    } catch(const tFileSystemError& e) {
+    } catch(const bfs::filesystem_error& e) {
         BPLOG_DEBUG_STRM("bfs::file_size(" << path << ") failed.");
         BPLOG_INFO_STRM("bfs::file_size failed: " << e.what() <<
                         ", returning 0.");
@@ -1667,11 +1654,11 @@ size(const Path& path)
 
 
 bool
-isDirectory(const Path& path)
+isDirectory(const bfs::path& path)
 {
     try {
         return bfs::is_directory(path);
-    } catch(const tFileSystemError& e) {
+    } catch(const bfs::filesystem_error& e) {
         BPLOG_DEBUG_STRM("bfs::is_directory(" << path << ") failed.");
         BPLOG_INFO_STRM("bfs::is_directory failed: " << e.what() <<
                         ", returning false.");
@@ -1681,11 +1668,11 @@ isDirectory(const Path& path)
 
 
 bool
-isRegularFile(const Path& path)
+isRegularFile(const bfs::path& path)
 {
     try {
         return bfs::is_regular_file(path);
-    } catch(const tFileSystemError& e) {
+    } catch(const bfs::filesystem_error& e) {
         BPLOG_DEBUG_STRM("bfs::is_regular_file(" << path << ") failed.");
         BPLOG_INFO_STRM("bfs::is_regular_file failed: " << e.what() <<
                         ", returning false.");
@@ -1695,11 +1682,11 @@ isRegularFile(const Path& path)
 
 
 bool
-isOther(const Path& path)
+isOther(const bfs::path& path)
 {
     try {
         return bfs::is_other(path);
-    } catch(const tFileSystemError& e) {
+    } catch(const bfs::filesystem_error& e) {
         BPLOG_DEBUG_STRM("bfs::is_other(" << path << ") failed.");
         BPLOG_INFO_STRM("bfs::is_other failed: " << e.what() <<
                         ", returning false.");
@@ -1709,14 +1696,13 @@ isOther(const Path& path)
 
 
 static void
-copyDir(const Path& from,
-        const Path& to)
+copyDir(const bfs::path& from,
+        const bfs::path& to)
 {
-    tString fromStr = from.string();
-    tRecursiveDirIter end;
-    for (tRecursiveDirIter it(from); it != end; ++it) {
-        Path relPath = Path(it->path()).relativeTo(from);
-        Path target = to / relPath;
+    bfs::recursive_directory_iterator end;
+    for (bfs::recursive_directory_iterator it(from); it != end; ++it) {
+        bfs::path relPath = relativeTo(it->path(), from);
+        bfs::path target = to / relPath;
         if (isDirectory(it->path())) {
             bfs::create_directories(target);
         } else {
@@ -1727,9 +1713,9 @@ copyDir(const Path& from,
 
 
 bool 
-copy(const Path& src,
-     const Path& dst,
-     bool followLinks)
+safeCopy(const bfs::path& src,
+         const bfs::path& dst,
+         bool followLinks)
 {
     try {
         // fail on bad args
@@ -1738,23 +1724,23 @@ copy(const Path& src,
         }
 
         // fail if source doesn't exist
-        if (!exists(src)) {
+        if (!pathExists(src)) {
             return false;
         }
     
         // fail if destination file exists (no implicit overwrite)
-        if (exists(dst) && !isDirectory(dst)) {
+        if (pathExists(dst) && !isDirectory(dst)) {
             return false;
         }
 
         // chase links if asked, broken links cause failure
-        Path from = src;
+        bfs::path from = src;
         if (followLinks && isLink(src)) {
             if (!resolveLink(src, from)) {
                 return false;
             } 
         }
-        Path to = dst;
+        bfs::path to = dst;
         if (followLinks && isLink(dst)) {
             if (!resolveLink(dst, to)) {
                 return false;
@@ -1762,7 +1748,7 @@ copy(const Path& src,
         }
 
         // trailing / on dirs ok, but not on files
-        string fromStr = from.utf8();
+        string fromStr = from.generic_string();
         if (fromStr.rfind("/") == fromStr.length()-1) {
             if (isDirectory(from)) {
                 from = fromStr.substr(0, fromStr.length()-1);
@@ -1770,9 +1756,9 @@ copy(const Path& src,
                 return false;
             }
         }
-        string toStr = to.utf8();
+        string toStr = to.generic_string();
         if (toStr.rfind("/") == toStr.length()-1) {
-            if (exists(to) && !isDirectory(to)) {
+            if (pathExists(to) && !isDirectory(to)) {
                 return false;
             }
             to = toStr.substr(0, toStr.length()-1);
@@ -1780,7 +1766,7 @@ copy(const Path& src,
 
         if (isDirectory(from)) {
             // source is a directory
-            Path target = to;
+            bfs::path target = to;
             if (isDirectory(to)) {
                 // copy into dest, creating new dir with
                 // basename of source
@@ -1796,11 +1782,11 @@ copy(const Path& src,
             copyDir(from, target);
         } else {
             // source is file
-            if (src.utf8().rfind("/") == src.utf8().length() - 1) {
+            if (src.generic_string().rfind("/") == src.generic_string().length() - 1) {
                 // no trailing / allowed in src
                 return false;
             }
-            Path target = to;
+            bfs::path target = to;
             if (isDirectory(to)) {
                 // dest is directory, copy preserving filename
                 target = to / from.filename();
@@ -1810,7 +1796,7 @@ copy(const Path& src,
             }
             bfs::copy_file(from, target);
         }
-    } catch(tFileSystemError& e) {
+    } catch(bfs::filesystem_error& e) {
         BPLOG_ERROR_STRM("copy(" << src << ", " << dst
                          << " failed: " << e.what());
         return false;
@@ -1821,18 +1807,17 @@ copy(const Path& src,
 
 bool
 openReadableStream(ifstream& fstream,
-                   const Path& path,
+                   const bfs::path& path,
                    int flags)
 {
     if (fstream.is_open()) {
         BPLOG_WARN_STRM("openReadableStream, stream already open");
         return false;
     }
-    tString native = path.external_file_string();
 #ifdef WIN32
-    fstream.open(native.c_str(), ios::in | flags);
+    fstream.open(path.c_str(), ios::in | flags);
 #else
-    fstream.open(native.c_str(), ios::in | (_Ios_Openmode) flags);
+    fstream.open(path.c_str(), ios::in | (_Ios_Openmode) flags);
 #endif
     if (!fstream.is_open()) {
         BPLOG_WARN_STRM("openReadableStream, stream open failed for " << path);
@@ -1843,29 +1828,28 @@ openReadableStream(ifstream& fstream,
 
 
 bool
-openWritableStream(std::ofstream& fstream,
-                   const Path& path,
+openWritableStream(ofstream& fstream,
+                   const bfs::path& path,
                    int flags)
 {
     if (fstream.is_open()) {
         BPLOG_WARN_STRM("openWritableStream, stream already open");
         return false;
     }
-    tString native = path.external_file_string();
 #ifdef WIN32
-    fstream.open(native.c_str(), std::ios::out | flags);
+    fstream.open(path.c_str(), ios::out | flags);
 #else
-    fstream.open(native.c_str(), std::ios::out | (_Ios_Openmode) flags);
+    fstream.open(path.c_str(), ios::out | (_Ios_Openmode) flags);
 #endif
 
 	// set user read/write permission if needed
     tStat sb;
-    if (::stat(native.c_str(), &sb) != 0) {
+    if (::stat(path.c_str(), &sb) != 0) {
         BPLOG_WARN_STRM("openWritableStream, unable to stat " << path);
         return false;
     }
     if ((sb.st_mode & (S_IRUSR|S_IWUSR)) != (S_IRUSR|S_IWUSR)) {
-        if (::chmod(native.c_str(), S_IRUSR | S_IWUSR) != 0) {
+        if (::chmod(path.c_str(), S_IRUSR | S_IWUSR) != 0) {
             BPLOG_WARN_STRM("openWritableStream, unable to chmod " << path);
             return false;
         }
@@ -1878,7 +1862,7 @@ openWritableStream(std::ofstream& fstream,
 }
 
 bool
-makeReadOnly(const Path& path)
+makeReadOnly(const bfs::path& path)
 {
     // toggle bits to make this thing read only
     FileInfo fi;
@@ -1898,13 +1882,13 @@ makeReadOnly(const Path& path)
 
 
 vector<string> 
-mimeTypes(const Path& p)
+mimeTypes(const bfs::path& p)
 {
     initializeMimeTypes();
-    vector<std::string> rval;
+    vector<string> rval;
 
     // deal with links
-    Path target(p);
+    bfs::path target(p);
     if (isLink(p)) {
         if (resolveLink(p, target)) {
             rval.push_back(kLinkMimeType);
@@ -1920,11 +1904,11 @@ mimeTypes(const Path& p)
     }
 
     // get extension, boost includes the .
-    set<std::string> theSet;
-    tString ext = target.extension();
+    set<string> theSet;
+    string ext = target.extension().string();
     if (!ext.empty()) {
         ext = ext.substr(1, string::npos);
-        TExtMap::const_iterator it = s_extensionMap.find(utf8FromNative(ext));
+        TExtMap::const_iterator it = s_extensionMap.find(ext);
         if (it != s_extensionMap.end()) {
             theSet = it->second;
         }
@@ -1934,9 +1918,9 @@ mimeTypes(const Path& p)
     } else {
         // add items from theSet to rval, making sure
         // that "official" mimetype (xxx/vnd.yyy) is first
-        set<std::string>::const_iterator it;
+        set<string>::const_iterator it;
         for (it = theSet.begin(); it != theSet.end(); ++it) {
-            if (it->find("/vnd.") != std::string::npos) {
+            if (it->find("/vnd.") != string::npos) {
                 rval.insert(rval.begin(), *it);
             } else {
                 rval.push_back(*it);
@@ -1949,14 +1933,14 @@ mimeTypes(const Path& p)
 
 
 bool 
-isMimeType(const Path& p,
-           const set<std::string>& filter)
+isMimeType(const bfs::path& p,
+           const set<string>& filter)
 {
     if (filter.empty()) {
         return true;
     }
-    vector<std::string> myTypes = mimeTypes(p);
-    vector<std::string>::const_iterator it;
+    vector<string> myTypes = mimeTypes(p);
+    vector<string>::const_iterator it;
     for (it = myTypes.begin(); it != myTypes.end(); ++it) {
         if (filter.count(*it) > 0) {
             return true;

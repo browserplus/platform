@@ -41,11 +41,11 @@ class BPHandleMapper
 {
 public:
     // get a handle for a path
-    static BPHandle pathToHandle(const bp::file::Path& path);
+    static BPHandle pathToHandle(const boost::filesystem::path& path);
         
     // get the path represented by a handle
-    static bp::file::Path handleValue(const BPHandle& handle);
-    static bp::file::Path writableHandleValue(const BPHandle& handle);
+    static boost::filesystem::path handleValue(const BPHandle& handle);
+    static boost::filesystem::path writableHandleValue(const BPHandle& handle);
     
     // Move between bp::Object with embedded BPTPaths, and those
     // without, inserting or expanding handles along the way.  
@@ -56,7 +56,7 @@ public:
     static bp::Object* expandHandles(const bp::Object* bpObj);
 
 private:
-    static BPHandle pathToWritableHandle(const bp::file::Path& path);
+    static BPHandle pathToWritableHandle(const boost::filesystem::path& path);
 
     BPHandleMapper() {};
     ~BPHandleMapper() {};

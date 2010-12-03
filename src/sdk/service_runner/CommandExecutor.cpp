@@ -66,10 +66,10 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::allocate)
         uri = tokens[0];
     }
 
-    bp::file::Path data_dir = 
+    boost::filesystem::path data_dir = 
         bp::paths::getServiceDataDirectory(m_desc.name(),
                                            m_desc.majorVersion());
-    bp::file::Path tmpdir = bp::file::getTempDirectory();
+    boost::filesystem::path tmpdir = bp::file::getTempDirectory();
     tmpdir = bp::file::getTempPath(tmpdir, m_desc.name());
     std::string locale = "en";
     std::string userAgent(BPCLIENT_APPNAME);
@@ -110,13 +110,13 @@ static bp::Object * cloneOrConvert(const bp::Object * o)
 		std::string val;
         if (str->value()) val.append(str->value());
         if (!val.compare(0, pathPrefix.size(), pathPrefix)) {
-            bp::file::Path path(val.substr(pathPrefix.size()));
+            boost::filesystem::path path(val.substr(pathPrefix.size()));
             rv = new bp::Path(path);
         } else if (!val.compare(0, writablePathPrefix.size(), writablePathPrefix)) {
-            bp::file::Path path(val.substr(writablePathPrefix.size()));
+            boost::filesystem::path path(val.substr(writablePathPrefix.size()));
             rv = new bp::WritablePath(path);
         } else if (!val.compare(0, uriPrefix.size(), uriPrefix)) {
-            bp::file::Path path(val.substr(uriPrefix.size()));
+            boost::filesystem::path path(val.substr(uriPrefix.size()));
             rv = new bp::Path(path);
         }
     }
@@ -207,7 +207,7 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::invoke)
             // get the string out of the argMap
             std::string str;
             if (argMap->getString(it->name().c_str(), str)) {
-                bp::file::Path path(str);
+                boost::filesystem::path path(str);
                 argMap->add(it->name(), new bp::Path(path));                
             }
         }
@@ -215,7 +215,7 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::invoke)
             // get the string out of the argMap
             std::string str;
             if (argMap->getString(it->name().c_str(), str)) {
-                bp::file::Path path(str);
+                boost::filesystem::path path(str);
                 argMap->add(it->name(), new bp::WritablePath(path));                
             }
         }

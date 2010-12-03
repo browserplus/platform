@@ -266,7 +266,7 @@ Html5DropManager::DropTargetContext::DropTargetContext(NPP npp,
 static bool
 extractPathArguments(NPP npp,
                      const NPVariant* args, uint32_t argCount,
-                     std::vector<bp::file::Path> & oArgs)
+                     std::vector<boost::filesystem::path> & oArgs)
 {
     // we expect javascript to call us with an array of arrays.
     // each sub-array has exactly 2 elements, the first is a File object
@@ -325,7 +325,7 @@ extractPathArguments(NPP npp,
         }
 
         // verify that url is a file:// url
-        bp::file::Path path = bp::file::pathFromURL(url);
+        boost::filesystem::path path = bp::file::pathFromURL(url);
         if (path.empty()) {
             BPLOG_INFO_STRM("ignore non-file url " << url);
             continue;
@@ -364,9 +364,9 @@ extractPathArguments(NPP npp,
         // Validate name/size/path all are in harmony.
         // Links must be chased first.  Dirs have zero size according to 
         // boost, so don't check them. 
-        CHECK_RETURN(name.compare(bp::file::utf8FromNative(path.filename())) == 0,
+        CHECK_RETURN(name.compare(path.filename().string()) == 0,
                      "name mismatch");
-        bp::file::Path resolvedPath = path;
+        boost::filesystem::path resolvedPath = path;
         if (bp::file::isLink(path)) {
             CHECK_RETURN(bp::file::resolveLink(path, resolvedPath),
                          "unable to resolve link");
@@ -394,7 +394,7 @@ Html5DropManager::DropTargetContext::invoke(
         leave(false);
         m_theMan->m_listener->onHover(m_name, false);
     } else if (!s_onDrop.compare(funcName)) {
-        std::vector<bp::file::Path> paths;
+        std::vector<boost::filesystem::path> paths;
         if (!extractPathArguments(m_npp, args, argCount, paths)) {
             BPLOG_ERROR("error extracting paths passed from trusted JavaScript on drag enter");
         } else {

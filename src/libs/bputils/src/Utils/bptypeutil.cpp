@@ -154,12 +154,12 @@ bp::Object::build(const BPElement * elem)
                 break;
             case BPTNativePath: 
             {
-                obj = new bp::Path(bp::file::Path(elem->value.pathVal));
+                obj = new bp::Path(boost::filesystem::path(elem->value.pathVal));
                 break;
             }
             case BPTWritableNativePath: 
             {
-                obj = new bp::WritablePath(bp::file::Path(elem->value.pathVal));
+                obj = new bp::WritablePath(boost::filesystem::path(elem->value.pathVal));
                 break;
             }
             case BPTMap:
@@ -219,7 +219,7 @@ bp::Object::operator std::string() const
     throw ConversionException("cannot convert to string");
 }
 
-bp::Object::operator bp::file::Path() const 
+bp::Object::operator boost::filesystem::path() const 
 {
     throw ConversionException("cannot convert to path");
 }
@@ -357,7 +357,7 @@ bp::String::operator std::string() const
     return std::string(value());
 }
 
-bp::WritablePath::WritablePath(const bp::file::Path & path)
+bp::WritablePath::WritablePath(const boost::filesystem::path & path)
     : bp::Path(path)
 {
     e.type = BPTWritableNativePath;
@@ -384,8 +384,8 @@ bp::WritablePath::clone() const
 }
 
 
-bp::Path::Path(const bp::file::Path & path)
-    : bp::Object(BPTNativePath), m_path(path.external_file_string())
+bp::Path::Path(const boost::filesystem::path & path)
+    : bp::Object(BPTNativePath), m_path(path.native())
 {
     e.value.pathVal = (BPPath) m_path.c_str();
 }
@@ -411,9 +411,9 @@ bp::Path::operator= (const Path & other)
     return *this;
 }
 
-bp::Path::operator bp::file::Path() const 
+bp::Path::operator boost::filesystem::path() const 
 {
-	return bp::file::Path(m_path);
+	return boost::filesystem::path(m_path);
 }
 
 bp::Path::~Path()

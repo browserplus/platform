@@ -26,6 +26,7 @@
 
 using namespace std;
 using namespace bp::file;
+namespace bfs = boost::filesystem;
 
 CPPUNIT_TEST_SUITE_REGISTRATION(UrlTest);
 
@@ -47,15 +48,16 @@ CPPUNIT_TEST_SUITE_REGISTRATION(UrlTest);
 ////////////////////
 // support methods
 //
-Path roundtripPath( const Path& path )
+bfs::path roundtripPath( const bfs::path& path )
 {
-    return pathFromURL( path.url() );
+    return pathFromURL( urlFromPath( path ) );
 }
 
 
 string roundtripUrl( const std::string& sUrl )
 {
-    return pathFromURL( sUrl ).url();
+
+    return urlFromPath( pathFromURL( sUrl ) );
 }
 
 
@@ -63,7 +65,7 @@ string roundtripUrl( const std::string& sUrl )
 // test data
 //
 // format is: path, url
-vector<pair<Path, string> >  g_data;
+vector<pair<bfs::path, string> >  g_data;
 
 ////////////////////
 // UrlTest methods
@@ -79,31 +81,31 @@ void UrlTest::setUp()
 
 #ifdef WIN32
         // posix format with host name
-        g_data.push_back( make_pair( Path(L"//a"), "file://a" ));
-        g_data.push_back( make_pair( Path(L"//a/"), "file://a/" ));
-        g_data.push_back( make_pair( Path(L"//a/b/"), "file://a/b/" ));
-        g_data.push_back( make_pair( Path(L"//a/b/c.jpg"), "file://a/b/c.jpg" ));
-        g_data.push_back( make_pair( Path(L"//.a/b.ext"),  "file://.a/b.ext" ));
+        g_data.push_back( make_pair( bfs::path("//a"), "file://a" ));
+        g_data.push_back( make_pair( bfs::path("//a/"), "file://a/" ));
+        g_data.push_back( make_pair( bfs::path("//a/b/"), "file://a/b/" ));
+        g_data.push_back( make_pair( bfs::path("//a/b/c.jpg"), "file://a/b/c.jpg" ));
+        g_data.push_back( make_pair( bfs::path("//.a/b.ext"),  "file://.a/b.ext" ));
 
         // and now for a drive letter
-        g_data.push_back( make_pair( Path(L"c:/"),  "file:///c:/" ));
-        g_data.push_back( make_pair( Path(L"c:/a"),  "file:///c:/a" ));
-        g_data.push_back( make_pair( Path(L"c:/a/"),  "file:///c:/a/" ));
-        g_data.push_back( make_pair( Path(L"c:/foo.txt"),  "file:///c:/foo.txt" ));
-        g_data.push_back( make_pair( Path(L"a:/100/c d/e f.jpg"),
+        g_data.push_back( make_pair( bfs::path("c:/"),  "file:///c:/" ));
+        g_data.push_back( make_pair( bfs::path("c:/a"),  "file:///c:/a" ));
+        g_data.push_back( make_pair( bfs::path("c:/a/"),  "file:///c:/a/" ));
+        g_data.push_back( make_pair( bfs::path("c:/foo.txt"),  "file:///c:/foo.txt" ));
+        g_data.push_back( make_pair( bfs::path("a:/100/c d/e f.jpg"),
                                      "file:///a:/100/c%20d/e%20f.jpg" ));
 #endif
         // posix format 
-        g_data.push_back( make_pair( Path("/"), "file:///" ));
-        g_data.push_back( make_pair( Path("/some/path"),
+        g_data.push_back( make_pair( bfs::path("/"), "file:///" ));
+        g_data.push_back( make_pair( bfs::path("/some/path"),
                                      "file:///some/path" ));
-        g_data.push_back( make_pair( Path("/some/dir/"),
+        g_data.push_back( make_pair( bfs::path("/some/dir/"),
                                      "file:///some/dir/" ));
-        g_data.push_back( make_pair( Path("/a/b/c.jpg"),
+        g_data.push_back( make_pair( bfs::path("/a/b/c.jpg"),
                                      "file:///a/b/c.jpg" ));
-        g_data.push_back( make_pair( Path("/.a/b.ext"),
+        g_data.push_back( make_pair( bfs::path("/.a/b.ext"),
                                      "file:///.a/b.ext" ));
-        g_data.push_back( make_pair( Path("/a b/c d/e f.jpg"),
+        g_data.push_back( make_pair( bfs::path("/a b/c d/e f.jpg"),
                                      "file:///a%20b/c%20d/e%20f.jpg" ));
     }
 }
@@ -122,36 +124,36 @@ void UrlTest::testPathFromUrl()
 {
     for (size_t i=0; i < g_data.size(); ++i)
     {
-        CPPUNIT_ASSERT_EQUAL( g_data[i].first,
-                              pathFromURL( g_data[i].second ));
+        CPPUNIT_ASSERT_EQUAL( g_data[i].first, 
+            pathFromURL( g_data[i].second ) );
     }
 
     // posix format path from url with localhost host name
-    Path p = pathFromURL("file://localhost/b/c.jpg");
-    CPPUNIT_ASSERT(p.utf8().compare("/b/c.jpg") == 0);
+    bfs::path p = pathFromURL("file://localhost/b/c.jpg");
+    CPPUNIT_ASSERT_EQUAL(p.generic_string(), string("/b/c.jpg"));
     p = pathFromURL("file://localhost/c%20d/e%20f.jpg");
-    CPPUNIT_ASSERT(p.utf8().compare("/c d/e f.jpg") == 0);
+    CPPUNIT_ASSERT_EQUAL(p.generic_string(), string("/c d/e f.jpg"));
 
     // ditto for 127.0.0.1
     p = pathFromURL("file://127.0.0.1/b/c.jpg");
-    CPPUNIT_ASSERT(p.utf8().compare("/b/c.jpg") == 0);
+    CPPUNIT_ASSERT_EQUAL(p.generic_string(), string("/b/c.jpg"));
     p = pathFromURL("file://127.0.0.1/c%20d/e%20f.jpg");
-    CPPUNIT_ASSERT(p.utf8().compare("/c d/e f.jpg") == 0);
+    CPPUNIT_ASSERT_EQUAL(p.generic_string(), string("/c d/e f.jpg"));
 #ifdef WIN32
     // windows should take file://C:/foo and file:///C:/foo
     p = pathFromURL("file://C:/foo");
-    CPPUNIT_ASSERT(p.utf8().compare("C:/foo") == 0);
+    CPPUNIT_ASSERT_EQUAL(p.generic_string(), string("C:/foo"));
     p = pathFromURL("file:///C:/foo");
-    CPPUNIT_ASSERT(p.utf8().compare("C:/foo") == 0);
+    CPPUNIT_ASSERT_EQUAL(p.generic_string(), string("C:/foo"));
 #endif
 #ifndef WIN32
     // posix format path from url with host name should fail
     p = pathFromURL("file://a/b/c.jpg");
-    CPPUNIT_ASSERT_MESSAGE(p.utf8().c_str(), p.empty());
+    CPPUNIT_ASSERT_MESSAGE(p.generic_string().c_str(), p.empty());
     p = pathFromURL("file://.a/b.ext");
-    CPPUNIT_ASSERT_MESSAGE(p.utf8().c_str(), p.empty());
+    CPPUNIT_ASSERT_MESSAGE(p.generic_string().c_str(), p.empty());
     p = pathFromURL("file://a:100/c d/e f.jpg");
-    CPPUNIT_ASSERT_MESSAGE(p.utf8().c_str(), p.empty());
+    CPPUNIT_ASSERT_MESSAGE(p.generic_string().c_str(), p.empty());
 #endif
 }
 
@@ -160,15 +162,16 @@ void UrlTest::testUrlFromPath()
 {
     for (size_t i=0; i < g_data.size(); ++i)
     {
-        CPPUNIT_ASSERT_EQUAL( g_data[i].second, g_data[i].first.url() );
+        CPPUNIT_ASSERT_EQUAL( g_data[i].second, 
+                              urlFromPath( g_data[i].first ) );
     }
 
 #ifndef WIN32
     // url from posix format should ignore windows-style host name
-    Path p("//a/b/c.jpg");
-    CPPUNIT_ASSERT(p.url().compare("file:///a/b/c.jpg") == 0);
+    bfs::path p("//a/b/c.jpg");
+    CPPUNIT_ASSERT_EQUAL(urlFromPath(p), string("file:///a/b/c.jpg"));
     p = "//.a/b.ext";
-    CPPUNIT_ASSERT(p.url().compare("file:///.a/b.ext") == 0);
+    CPPUNIT_ASSERT_EQUAL(urlFromPath(p), string("file:///.a/b.ext"));
 #endif
 }
 
@@ -177,7 +180,7 @@ void UrlTest::testPathRoundtrip()
 {
     for (size_t i=0; i < g_data.size(); ++i)
     {
-        Path p = g_data[i].first;
+        bfs::path p = g_data[i].first;
         CPPUNIT_ASSERT_EQUAL( p, roundtripPath( p ) );
     }
 }
@@ -193,20 +196,18 @@ void UrlTest::testUrlRoundtrip()
 }
 
 
-#ifdef WIN32
 void UrlTest::testNonAscii()
 {
     unsigned char nonAscii[] = {
         0xd0, 0x9f, 0xd0, 0xb5,
         0xd1, 0x88, 0xd0, 0xbe };
-    wstring s(L"C:/Users/");
+    string s("/Users/");
     for (size_t i = 0; i < sizeof(nonAscii); i++) {
         s.push_back(nonAscii[i]);
     }
-    Path p(s);
+    bfs::path p(s);
     CPPUNIT_ASSERT_EQUAL(p, roundtripPath(p));
 }
-#endif
 
 
 void UrlTest::testUrlAppendPath()

@@ -63,7 +63,7 @@ public:
      *  parse a directory to determine whether a valid service resides
      *  beneath.
      */
-    bool detectService(const bp::file::Path &path, std::string &error);
+    bool detectService(const boost::filesystem::path &path, std::string &error);
     
     typedef enum {
         None,
@@ -80,7 +80,7 @@ public:
     std::string typeAsString() const;
 
     /** Path to the service directory */
-    const bp::file::Path& path() const;
+    const boost::filesystem::path& path() const;
 
     /** last modification of the service */
     BPTime modDate() const;
@@ -107,7 +107,7 @@ public:
 
     /** for a provider or standalone service, get the path to the
      *  dynamic library that implements the service */
-    bp::file::Path serviceLibraryPath() const;
+    boost::filesystem::path serviceLibraryPath() const;
 
     /** for a dependent service, who does the service depend on? */
     std::string usesService() const;
@@ -136,14 +136,14 @@ public:
 
     std::string m_name;
     std::string m_version;
-    bp::file::Path m_path;
+    boost::filesystem::path m_path;
     std::map<std::string, std::pair<std::string, std::string> >
         m_localizations;
     BPTime m_modDate;
     int m_shutdownDelaySecs;
 
     // specific to standalone or provider services
-    bp::file::Path m_serviceLibraryPath;    
+    boost::filesystem::path m_serviceLibraryPath;    
 
     // specific to dependent services
     std::string m_usesService;

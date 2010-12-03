@@ -75,7 +75,7 @@ namespace ServiceRunner
                         const bp::Object * o);
         void onPrompt(unsigned int instance,
                       unsigned int promptId,
-                      const bp::file::Path & pathToDialog,
+                      const boost::filesystem::path & pathToDialog,
                       const bp::Object * arguments);
 
         std::string m_ipcName;

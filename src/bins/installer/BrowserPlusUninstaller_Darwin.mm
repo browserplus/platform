@@ -34,13 +34,14 @@
 using namespace std;
 using namespace bp::file;
 using namespace bp::localization;
+namespace bfs = boost::filesystem;
 
 int
 main(int argc, const char** argv)
 {
     try {
         // debug logging on be default
-        Path logFile = getTempDirectory().parent_path() / "BrowserPlusUninstaller.log";
+        bfs::path logFile = getTempDirectory().parent_path() / "BrowserPlusUninstaller.log";
         string logLevel = "debug";
 
         bool quiet = false;

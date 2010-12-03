@@ -151,20 +151,20 @@ BPObjectTest::pathTest()
 
     bp::Object * bp = bp::Object::fromJsonString(json);
 
-    bp::file::Path orig = *((bp::Path *) bp);
-	CPPUNIT_ASSERT( bp::file::Path(somePathNative) == orig );
+    boost::filesystem::path orig = *((bp::Path *) bp);
+	CPPUNIT_ASSERT( boost::filesystem::path(somePathNative) == orig );
     CPPUNIT_ASSERT( bp->type() == BPTNativePath);
 
     bp::Object * clone = bp->clone();
-	bp::file::Path rhs(somePathNative);
-	bp::file::Path lhs = *((bp::Path *)clone);
+	boost::filesystem::path rhs(somePathNative);
+	boost::filesystem::path lhs = *((bp::Path *)clone);
     CPPUNIT_ASSERT( clone->type() == BPTNativePath );    
 	CPPUNIT_ASSERT( rhs.string() == lhs.string() );
     delete clone;
 
-    bp::file::Path p(somePathNative);
+    boost::filesystem::path p(somePathNative);
     bp::Path asp(p);
-    bp::file::Path after = asp;
+    boost::filesystem::path after = asp;
 	CPPUNIT_ASSERT( p == after );
 
     delete bp;

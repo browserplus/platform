@@ -120,7 +120,7 @@
 
 @end
 
-InstallerSkinGUI::InstallerSkinGUI(const bp::file::Path & uiDirectory)
+InstallerSkinGUI::InstallerSkinGUI(const boost::filesystem::path & uiDirectory)
 		: m_uiDirectory(uiDirectory), m_sio()
 {
 }
@@ -161,10 +161,10 @@ InstallerSkinGUI::startUp(unsigned int width, unsigned int height,
                          groupName: nil];
 
     // load up index.html from the ui directory
-    bp::file::Path pathToIndex = m_uiDirectory / "index.html";
+    boost::filesystem::path pathToIndex = m_uiDirectory / "index.html";
     // now create an NSString
     NSString * nsPath =
-        [[NSString alloc] initWithUTF8String: pathToIndex.external_file_string().c_str()];
+        [[NSString alloc] initWithUTF8String: pathToIndex.string().c_str()];
     NSURL * url = [[NSURL alloc] initFileURLWithPath: nsPath];
     [[webView mainFrame] loadRequest: [NSURLRequest requestWithURL: url]];
 

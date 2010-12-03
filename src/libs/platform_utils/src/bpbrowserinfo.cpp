@@ -153,8 +153,9 @@ void
 BrowserInfo::loadBrowserSupportInfo()
 {
     // not necessarily an error if file not present (e.g. unit tests)
-    bp::file::Path path = bp::paths::getPermissionsPath();
-    if (!bp::file::exists(path)) {
+    boost::filesystem::path path = bp::paths::getPermissionsPath();
+    boost::system::error_code ec;
+    if (!exists(path, ec)) {
         BPLOG_INFO_STRM(path << " does not exist");
         return;
     }
@@ -162,19 +163,19 @@ BrowserInfo::loadBrowserSupportInfo()
     try {
         string json;
         if (!bp::strutil::loadFromFile(path, json)) {
-            BP_THROW("unable to load from " + path.externalUtf8());
+            BP_THROW("unable to load from " + path.string());
         }
         string err;
         bp::Map* topMapPtr = 
             dynamic_cast<bp::Map*>(bp::Object::fromPlainJsonString(json, &err));
         if (!topMapPtr) {
-            BP_THROW("error parsing " + path.externalUtf8() + ": " + err);
+            BP_THROW("error parsing " + path.string() + ": " + err);
         }
 
         // get "browserSupport" value
         const bp::Object* objPtr = topMapPtr->value("browserSupport");
         if (!objPtr){
-            BP_THROW("no browserSupport key in " + path.externalUtf8());
+            BP_THROW("no browserSupport key in " + path.string());
         }
 
         // objPtr now has browser support info, sample json:

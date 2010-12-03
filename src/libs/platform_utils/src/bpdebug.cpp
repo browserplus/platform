@@ -77,7 +77,7 @@ void breakpoint( const std::string& sName )
 #ifndef NDEBUG
     // Load the bp config file.
     bp::config::ConfigReader config;
-    bp::file::Path configPath = bp::paths::getConfigFilePath();
+    boost::filesystem::path configPath = bp::paths::getConfigFilePath();
     if (config.load( configPath ))  {
         // Get "Breakpoints" member array.
         list<string> lsNames;

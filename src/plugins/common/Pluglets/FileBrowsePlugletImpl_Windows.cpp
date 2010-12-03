@@ -47,6 +47,7 @@
 
 using namespace std;
 namespace bpf = bp::file;
+namespace bfs = boost::filesystem;
 namespace bpl = bp::localization;
 namespace bps = bp::strutil;
 
@@ -59,7 +60,7 @@ static bool isXP()
 
 
 static bool runOsSpecificFileOpenDialog(const FileOpenDialogParms& parms,
-                                        vector<bpf::Path>& vPaths)
+                                        vector<bfs::path>& vPaths)
 {
     return isXP() ? runFileOpenDialogXP(parms, vPaths)
                   : runFileOpenDialog(parms, vPaths);
@@ -154,7 +155,7 @@ void FileBrowsePluglet::v1Browse(unsigned int tid,
     bool chaseLinks = true;
     FileOpenDialogParms parms = { (HWND)m_plugin->getWindow(), m_locale, title,
                                   filterName, filterPattern, chaseLinks };
-    vector<bpf::Path> vPaths;
+    vector<bfs::path> vPaths;
     if (!runOsSpecificFileOpenDialog(parms, vPaths))
     {
         failureCB(callbackArgument, tid,
@@ -191,7 +192,7 @@ void FileBrowsePluglet::browse(unsigned int tid,
     bool chaseLinks = false;
     FileOpenDialogParms parms = { (HWND)m_plugin->getWindow(), m_locale, title,
                                   L"", L"", chaseLinks };
-    vector<bpf::Path> vPaths;
+    vector<bfs::path> vPaths;
     if (!runOsSpecificFileOpenDialog(parms, vPaths))
     {
         failureCB(callbackArgument, tid,
@@ -208,10 +209,9 @@ void FileBrowsePluglet::browse(unsigned int tid,
     // version 2 and above just return what was selected
     bp::Map* m = new bp::Map;
     bp::List* l = new bp::List;
-    vector<bpf::Path>::const_iterator it;
+    vector<bfs::path>::const_iterator it;
     for (it = vPaths.begin(); it != vPaths.end(); ++it) {
-        bpf::Path path(*it);
-        l->append(new bp::Path(path));
+        l->append(new bp::Path(*it));
     }
     m->add("files", l);
     bp::Object* pObj = m;
@@ -237,7 +237,7 @@ void FileBrowsePluglet::save(unsigned int tid,
     
     FileSaveDialogParms parms = { (HWND)m_plugin->getWindow(), m_locale, title,
                                    wsInitialName };
-    bp::file::Path path;
+    boost::filesystem::path path;
 
     if (!runFileSaveDialog(parms, path)) {
         failureCB(callbackArgument, tid,

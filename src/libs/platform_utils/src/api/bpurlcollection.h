@@ -55,7 +55,7 @@ namespace bp {
          * \returns false if file could not be created or couldn't be
          *          parsed.
          */ 
-        bool init(const bp::file::Path & path, bool useDomainForHTTP = true);
+        bool init(const boost::filesystem::path & path, bool useDomainForHTTP = true);
 
         /**
          * Check if a url exists in the collection
@@ -74,7 +74,7 @@ namespace bp {
         bool add(const std::string & url);        
 
       private:
-        bp::file::Path m_path;
+        boost::filesystem::path m_path;
         bool m_useDomainForHTTP;
         bp::Map * m_data;
         bp::List * m_list;

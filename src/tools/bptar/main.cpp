@@ -25,6 +25,9 @@
 #include "ArchiveLib/ArchiveLib.h"
 #include "BPUtils/bpfile.h"
 
+namespace bpf = bp::file;
+namespace bfs = boost::filesystem;
+
 
 int
 main(int argc, char ** argv)
@@ -41,7 +44,7 @@ main(int argc, char ** argv)
                   << "[(create) files to include]" << std::endl;
         return 1;
     }
-    bp::file::Path fname(argv[2]);
+    bfs::path fname(argv[2]);
     
     if (*argv[1] == 'x') {
         // extract mode
@@ -51,7 +54,7 @@ main(int argc, char ** argv)
             exit(1);
         }
 
-        if (!ex.extract(bp::file::Path("."))) {
+        if (!ex.extract(bfs::path("."))) {
             std::cerr << "couldn't extract file: " << fname << std::endl;
             exit(1);
         }
@@ -74,14 +77,14 @@ main(int argc, char ** argv)
 
         // now add files and directories specified on command line
         for (int i = 3; i < argc; i++) {
-            bp::file::Path path(argv[i]);
-            std::vector<bp::file::Path> subPaths;
-            if (!bp::file::exists(path)) {
+            bfs::path path(argv[i]);
+            std::vector<bfs::path> subPaths;
+            if (!bpf::pathExists(path)) {
                 std::cerr << "no such file (skipping): " << path << std::endl;
                 continue;
             }
             
-            if (bp::file::isDirectory(path)) {
+            if (bpf::isDirectory(path)) {
                 // add the directory entry
                 if (!tar.addFile(path, path)) {
                     std::cerr << "couldn't add directory: "
@@ -90,12 +93,12 @@ main(int argc, char ** argv)
                 }
                 
                 try {
-                    bp::file::tRecursiveDirIter end;
-                    for (bp::file::tRecursiveDirIter it(path); it != end; ++it) {
-                        subPaths.push_back(bp::file::Path(it->path()));
+                    bfs::recursive_directory_iterator end;
+                    for (bfs::recursive_directory_iterator it(path); it != end; ++it) {
+                        subPaths.push_back(it->path());
                     }
-                } catch (const bp::file::tFileSystemError& e) {
-                    std::cerr << "unable to iterate thru " << path.externalUtf8()
+                } catch (const bfs::filesystem_error& e) {
+                    std::cerr << "unable to iterate thru " << path
                               << ": " << e.what();
                     exit(1);
                 }

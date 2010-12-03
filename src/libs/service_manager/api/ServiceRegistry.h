@@ -59,7 +59,7 @@ public:
      * which will be relayed to spawned services.
      */
     ServiceRegistry(const std::string & loglevel,
-                    const bp::file::Path & logfile);
+                    const boost::filesystem::path & logfile);
 
     /**
      * Destory a service registry
@@ -68,7 +68,7 @@ public:
     /**
      * Set the directory where dynamic services are installed
      */
-    void setPluginDirectory(const bp::file::Path & path);
+    void setPluginDirectory(const boost::filesystem::path & path);
 
    /**
      * By default the ServiceManager library is conservative with

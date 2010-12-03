@@ -60,7 +60,7 @@ HTMLRenderTest::JavascriptRunner::~JavascriptRunner()
 }
 
 void 
-HTMLRenderTest::JavascriptRunner::run(const bp::file::Path & path,
+HTMLRenderTest::JavascriptRunner::run(const boost::filesystem::path & path,
                                       bp::html::ScriptableObject & so,
                                       const std::string & soName)
 {
@@ -77,7 +77,7 @@ HTMLRenderTest::JavascriptRunner::run(const bp::file::Path & path,
     // figure out when the load is complete
     [webView setFrameLoadDelegate: watcher];
 
-    NSString * nsPath = [[NSString alloc] initWithUTF8String: path.utf8().c_str()];
+    NSString * nsPath = [[NSString alloc] initWithUTF8String: path.c_str()];
     NSURL * url = [[NSURL alloc] initFileURLWithPath: nsPath];
     [[webView mainFrame] loadRequest: [NSURLRequest requestWithURL: url]];
 }

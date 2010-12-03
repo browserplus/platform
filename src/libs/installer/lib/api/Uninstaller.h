@@ -31,18 +31,18 @@ namespace install {
 class Uninstaller 
 {
  public:
-    Uninstaller(const bp::file::Path& logFile,
+    Uninstaller(const boost::filesystem::path& logFile,
 				bp::log::Level logLevel);
     virtual ~Uninstaller();
 
     void run(bool fromRunonce = false);
 
  protected:
-     bp::file::Path m_dir;
-	 bp::file::Path m_logFile;
+     boost::filesystem::path m_dir;
+	 boost::filesystem::path m_logFile;
 	 bp::log::Level m_logLevel;
      bool m_error;
-     void removeDirIfEmpty(const bp::file::Path& dir);
+     void removeDirIfEmpty(const boost::filesystem::path& dir);
      void removeServices();
 #ifdef WIN32
      void scheduleRunonce();

@@ -54,13 +54,13 @@ class BPKGTest : public CPPUNIT_NS::TestCase
     void testStringRoundTrip();
     
   private:
-    bp::file::Path m_baseDirPath;
-    bp::file::Path m_testDirPath;
-    bp::file::Path m_testFilePath;
-    bp::file::Path m_keyFile;
-    bp::file::Path m_certFile;
-    bp::file::Path m_bpkgPath;
-    bp::file::Path m_unpackPath;
+    boost::filesystem::path m_baseDirPath;
+    boost::filesystem::path m_testDirPath;
+    boost::filesystem::path m_testFilePath;
+    boost::filesystem::path m_keyFile;
+    boost::filesystem::path m_certFile;
+    boost::filesystem::path m_bpkgPath;
+    boost::filesystem::path m_unpackPath;
 };
 
 #endif

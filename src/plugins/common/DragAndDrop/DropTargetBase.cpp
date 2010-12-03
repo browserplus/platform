@@ -36,7 +36,8 @@
 #include "PluginCommonLib/bppluginutil.h"
 
 using namespace std;
-using namespace bp::file;
+namespace bpf = bp::file;
+namespace bfs = boost::filesystem;
 
 DropTargetBase::DropTargetBase()
     : m_name(), m_mimetypes(),
@@ -127,7 +128,7 @@ DropTargetBase::state()
     
 
 void 
-DropTargetBase::enter(const vector<Path>& dragItems)
+DropTargetBase::enter(const vector<bfs::path>& dragItems)
 {
     BPLOG_INFO_STRM("enter target " << m_name 
                     << ", dropState = " << m_dropState);
@@ -173,19 +174,19 @@ DropTargetBase::canAcceptDrop()
         } else {
             m_dropState = CannotAccept;
             for (unsigned int i = 0; i < m_dragItems.size(); ++i) {
-                Path path = m_dragItems[i];
-                if (isDirectory(path)) {
+                bfs::path path = m_dragItems[i];
+                if (bpf::isDirectory(path)) {
                     if (directoryContainsMimeType(path)) {
                         m_dropState = CanAccept;
                         break;
                     }
                 } else {
-                    if (isLink(path)) {
-                        if (!resolveLink(path, path)) {
+                    if (bpf::isLink(path)) {
+                        if (!bpf::resolveLink(path, path)) {
                             continue;
                         }
                     }
-                    if (isMimeType(path, m_mimetypes)) {
+                    if (bpf::isMimeType(path, m_mimetypes)) {
                         m_dropState = CanAccept;
                         break;
                     }
@@ -208,11 +209,11 @@ DropTargetBase::dropItems()
     if (m_version.find("1.") == 0) {
         // version 1 api resolves links here, applies 
         // mimetype and limits, etc
-        vector<Path>::iterator it = m_dragItems.begin();
+        vector<bfs::path>::iterator it = m_dragItems.begin();
         while (it != m_dragItems.end()) {
-            Path path(*it);
-            if (isLink(path)) {
-                if (!resolveLink(path, path)) {
+            bfs::path path(*it);
+            if (bpf::isLink(path)) {
+                if (!bpf::resolveLink(path, path)) {
                     it = m_dragItems.erase(it);
                     continue;
                 } else {
@@ -228,10 +229,9 @@ DropTargetBase::dropItems()
     } else {
         // version 2 and above api just gives you what was dropped
         bp::List* l = new bp::List;
-        vector<Path>::const_iterator it;
+        vector<bfs::path>::const_iterator it;
         for (it = m_dragItems.begin(); it != m_dragItems.end(); ++it) {
-            Path path(*it);
-            l->append(new bp::Path(path));
+            l->append(new bp::Path(*it));
         }
         rval = l;
     }
@@ -247,7 +247,7 @@ DropTargetBase::name()
 
 
 bool 
-DropTargetBase::directoryContainsMimeType(const Path& path)
+DropTargetBase::directoryContainsMimeType(const bfs::path& path)
 {    
     class MyVisitor : public bp::file::IVisitor {
     public:
@@ -257,25 +257,25 @@ DropTargetBase::directoryContainsMimeType(const Path& path)
               m_numChecked(0), m_found(false) {
         }
         virtual ~MyVisitor() {}
-        virtual tResult visitNode(const bp::file::Path& p,
-                                  const bp::file::Path&) {
+        virtual tResult visitNode(const bfs::path& p,
+                                  const bfs::path&) {
             if (m_numChecked >= m_limit) {
                 return eStop;
             }
             m_numChecked++;
-            Path resolved = p;
-            if (isLink(p)) {
-                if (!resolveLink(p, resolved)) {
+            bfs::path resolved = p;
+            if (bpf::isLink(p)) {
+                if (!bpf::resolveLink(p, resolved)) {
                     return eOk;
                 }
             }
-            if (isDirectory(resolved)) {
-                if (m_mimeTypes.count(kFolderMimeType)) {
+            if (bpf::isDirectory(resolved)) {
+                if (m_mimeTypes.count(bpf::kFolderMimeType)) {
                     m_found = true;
                     return eStop;
                 }
-            } else if (isRegularFile(resolved)) {
-                if (isMimeType(resolved, m_mimeTypes)) {
+            } else if (bpf::isRegularFile(resolved)) {
+                if (bpf::isMimeType(resolved, m_mimeTypes)) {
                     m_found = true;
                     return eStop;
                 }

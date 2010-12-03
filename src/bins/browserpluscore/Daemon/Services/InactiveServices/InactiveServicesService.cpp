@@ -46,7 +46,7 @@ InactiveServicesService::InactiveServicesService(
     // Setup a config file reader.
     bp::config::ConfigReader configReader;
     {
-        bp::file::Path configFilePath = bp::paths::getConfigFilePath();
+        boost::filesystem::path configFilePath = bp::paths::getConfigFilePath();
         if (!configReader.load(configFilePath)) {
             BPLOG_ERROR_STRM("couldn't read config file at " << configFilePath);
             return;

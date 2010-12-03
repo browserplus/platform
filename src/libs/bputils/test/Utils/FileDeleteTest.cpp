@@ -35,7 +35,7 @@ namespace bfs = boost::filesystem;
 void 
 FileDeleteTest::deleteDir()
 {
-    CPPUNIT_ASSERT(remove(m_testDir));
+    CPPUNIT_ASSERT(bp::file::safeRemove(m_testDir));
 }
 
 
@@ -43,8 +43,8 @@ void
 FileDeleteTest::deleteReadOnlyDir()
 {
     // set readonly on foo.txt and subdir, then try to delete
-    Path path = m_testDir / "foo.txt";
-    Path dir = m_testDir / "subdir";
+    bfs::path path = m_testDir / "foo.txt";
+    bfs::path dir = m_testDir / "subdir";
 
     FileInfo fi;
     CPPUNIT_ASSERT(statFile(path, fi));
@@ -55,7 +55,7 @@ FileDeleteTest::deleteReadOnlyDir()
     fi.mode &= ~0200;
     CPPUNIT_ASSERT(setFileProperties(dir, fi));
 
-    CPPUNIT_ASSERT(remove(m_testDir));
+    CPPUNIT_ASSERT(bp::file::safeRemove(m_testDir));
 }
 
 
@@ -63,15 +63,15 @@ void
 FileDeleteTest::deleteFileInReadOnlyDir()
 {
     // set readonly on and subdir, then try to delete subdir/bar.txt
-    Path dir = m_testDir / "subdir";
+    bfs::path dir = m_testDir / "subdir";
 
     FileInfo fi;
     CPPUNIT_ASSERT(statFile(dir, fi));
     fi.mode &= ~0200;
     CPPUNIT_ASSERT(setFileProperties(dir, fi));
 
-    Path file = m_testDir / "subdir" / "bar.txt";
-    CPPUNIT_ASSERT(remove(file));
+    bfs::path file = m_testDir / "subdir" / "bar.txt";
+    CPPUNIT_ASSERT(bp::file::safeRemove(file));
 }
 
 
@@ -84,10 +84,10 @@ void
     // <m_testDir>/subdir
     // <m_testDir>/subdir/bar.txt
 
-    Path path = getTempPath(getTempDirectory(), "FileDeleteTest");
+    bfs::path path = getTempPath(getTempDirectory(), "FileDeleteTest");
 
     m_testDir = path;
-    CPPUNIT_ASSERT(remove(m_testDir));
+    CPPUNIT_ASSERT(bp::file::safeRemove(m_testDir));
     CPPUNIT_ASSERT(bfs::create_directories(m_testDir));
 
     // now let's build up the test directory structure
@@ -106,5 +106,5 @@ void
 void
 FileDeleteTest::tearDown()
 {
-    CPPUNIT_ASSERT(remove(m_testDir));
+    CPPUNIT_ASSERT(bp::file::safeRemove(m_testDir));
 }

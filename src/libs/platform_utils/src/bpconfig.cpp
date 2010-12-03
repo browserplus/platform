@@ -50,7 +50,7 @@ ConfigReader::ConfigReader()
 
 
 bool
-ConfigReader::load( const bp::file::Path& path )
+ConfigReader::load( const boost::filesystem::path& path )
 {
     // allow the same object to be re-used
     delete m_pConfigMap;

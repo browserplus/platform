@@ -203,7 +203,7 @@ private:
     // element, or m_vDropChennels.end() if elem not monitored.
     tDropChannelVecIt findDropChannel( const std::string& sElemId );
     
-    std::vector<bp::file::Path> getDragItems( IDataObject* pDataObject );
+    std::vector<boost::filesystem::path> getDragItems( IDataObject* pDataObject );
 
     // Get an appropriate source id for a drop event.
     // If the drop was on a monitored element or one of its children,
@@ -226,7 +226,7 @@ private:
     tDropChannelVec         m_vDropChannels;
     tListenerVec            m_vListeners;
 
-    std::vector<bp::file::Path> m_dragItems;
+    std::vector<boost::filesystem::path> m_dragItems;
 
     //////////////////////
     // Prevent copying

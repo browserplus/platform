@@ -44,6 +44,7 @@ using namespace std;
 using namespace bp::process;
 using namespace bp::file;
 using namespace bp::paths;
+namespace bfs = boost::filesystem;
 
 static const char* s_lastCheckTSKey = "PlatformUpdater::lastCheckTS"; 
 
@@ -236,15 +237,15 @@ PlatformUpdaterSingleton::spawnUpdate(const string& version)
     m_busy = true;
     m_updates.insert(version);
     string daemonLock = bp::paths::getIPCLockName();
-    Path cacheDir = getPlatformCacheDirectory() / version;
-    Path updater = cacheDir / "BrowserPlusUpdater";
+    bfs::path cacheDir = getPlatformCacheDirectory() / version;
+    bfs::path updater = cacheDir / "BrowserPlusUpdater";
     updater = canonicalProgramPath(updater);
-    if (!exists(updater)) {
+    if (!pathExists(updater)) {
         return false;
     }
     spawnStatus status;
     vector<string> args;
-    args.push_back(cacheDir.utf8());
+    args.push_back(cacheDir.string());
     args.push_back(daemonLock);
     bool rval = spawn(updater, args, &status);
     m_busy = false;
@@ -294,7 +295,7 @@ PlatformUpdaterSingleton::gotLatestPlatformVersion(unsigned int,
     bp::SemanticVersion current;
     (void) current.parse(bp::paths::versionString());
     if (latestVersion.compare(current) == 1) {
-        Path cacheDir = getPlatformCacheDirectory() / latestVersion.asString();
+        bfs::path cacheDir = getPlatformCacheDirectory() / latestVersion.asString();
         if (!isDirectory(cacheDir)) {
             // newer version available and we don't have it, initiate download
             m_tid = m_distQuery->downloadLatestPlatform(m_platform);

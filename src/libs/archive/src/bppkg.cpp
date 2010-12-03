@@ -48,20 +48,20 @@ namespace bfs = boost::filesystem;
 
 
 static void
-doPack(const bpf::Path& keyFile, 
-       const bpf::Path& certFile,
+doPack(const bfs::path& keyFile, 
+       const bfs::path& certFile,
        const string& password,
-       const bpf::Path& contentsFile,
-       const bpf::Path& outFile,
+       const bfs::path& contentsFile,
+       const bfs::path& outFile,
        bool isTar)
 {
-    bpf::Path sigFile;
-    bpf::Path pkgtar;
+    bfs::path sigFile;
+    bfs::path pkgtar;
     try {
         try {
             sigFile = bpf::getTempPath(bpf::getTempDirectory(), "bpkg_sig");
             pkgtar = bpf::getTempPath(bpf::getTempDirectory(), "bpkg_tar");
-        } catch (const bpf::tFileSystemError& e) {
+        } catch (const bfs::filesystem_error& e) {
             throw string("unable to get temp path names: " + string(e.what()));
         }
 
@@ -74,68 +74,66 @@ doPack(const bpf::Path& keyFile,
         string signature = signer->getSignature(keyFile, certFile, 
                                                 password, contentsFile);
         if (!bp::strutil::storeToFile(sigFile, signature)) {
-            throw string("unable to write signature file: " + sigFile.utf8());
+            throw string("unable to write signature file: " + sigFile.string());
         }
 
         // now add signature and contents to tarball
         //
         bp::tar::Create tar;
         if (!tar.open(pkgtar)) {
-            throw string("unable to open " + pkgtar.utf8());
+            throw string("unable to open " + pkgtar.string());
         }
-        bpf::Path fname = isTar ? bp::pkg::contentsPath() 
-            : bp::pkg::contentsDataPath();
+        bfs::path fname = isTar ? bp::pkg::contentsPath() 
+                                : bp::pkg::contentsDataPath();
         if (!tar.addFile(contentsFile, fname)) {
-            throw string("unable to add " + contentsFile.utf8());
+            throw string("unable to add " + contentsFile.string());
         }
         if (!tar.addFile(sigFile, bp::pkg::signaturePath())) {
-            throw string("unable to add " + sigFile.utf8());
+            throw string("unable to add " + sigFile.string());
         }
         if (!tar.close()) {
-            throw string("unable to close tar file: " + pkgtar.utf8());
+            throw string("unable to close tar file: " + pkgtar.string());
         }
 
         // Now compress that tarball
         //
         bp::lzma::Compress compress;
         ifstream ifs;
-        if (!bpf::openReadableStream(ifs, pkgtar, ifstream::binary))
-        {
-            throw string("unable to open stream for " + pkgtar.utf8());
+        if (!bpf::openReadableStream(ifs, pkgtar, ifstream::binary)) {
+            throw string("unable to open stream for " + pkgtar.string());
         }
         ofstream ofs;
-        if (!bpf::openWritableStream(ofs, outFile, ofstream::binary | ofstream::trunc))
-        {
-            throw string("unable to open stream for " + outFile.utf8());
+        if (!bpf::openWritableStream(ofs, outFile, ofstream::binary | ofstream::trunc))  {
+            throw string("unable to open stream for " + outFile.string());
         }
         compress.setInputStream(ifs);
         compress.setOutputStream(ofs);
         if (!compress.run()) {
-            throw string("unable to compress " + pkgtar.utf8() 
-                         + " to " + outFile.utf8());
+            throw string("unable to compress " + pkgtar.string()
+                         + " to " + outFile.string());
         }
         ifs.close();
         ofs.close();
     } catch (const string& msg) {
-        (void) remove(sigFile);
-        (void) remove(pkgtar);
+        (void) bpf::safeRemove(sigFile);
+        (void) bpf::safeRemove(pkgtar);
         throw msg;
     }
-    (void) remove(sigFile);
-    (void) remove(pkgtar);
+    (void) bpf::safeRemove(sigFile);
+    (void) bpf::safeRemove(pkgtar);
 }
 
 
 static void
-doUnpack(std::istream & is,
-         std::ostream & os,
-         const bpf::Path& certPath,
+doUnpack(istream & is,
+         ostream & os,
+         const bfs::path& certPath,
          bool isTar,
          BPTime& timestamp)
 {
     // uncompress bpkg
     bp::lzma::Decompress decompress;
-    std::stringstream ss;
+    stringstream ss;
 
     decompress.setInputStream(is);
     decompress.setOutputStream(ss);
@@ -147,7 +145,7 @@ doUnpack(std::istream & is,
 
     // TODO: fix this potentially large memory to memory copy.
 
-    std::stringstream contents, signature;
+    stringstream contents, signature;
     {
         bp::tar::Extract untar;
         if (!untar.load(ss.str() /*tarFile*/)) {
@@ -157,15 +155,15 @@ doUnpack(std::istream & is,
         ss.clear();
 
         // extract contents and signature
-        bpf::Path contentsPath(isTar ? bp::pkg::contentsPath() 
-                            : bp::pkg::contentsDataPath());
-        bpf::Path sigFilePath(bp::pkg::signaturePath());
+        bfs::path contentsPath(isTar ? bp::pkg::contentsPath() 
+                                     : bp::pkg::contentsDataPath());
+        bfs::path sigFilePath(bp::pkg::signaturePath());
 
         if (!untar.extractSingle(sigFilePath, signature)) {
-            throw string(sigFilePath.utf8() + " file missing");
+            throw string(sigFilePath.string() + " file missing");
         }
         if (!untar.extractSingle(contentsPath, contents)) {
-            throw string(contentsPath.utf8() + " file missing");
+            throw string(contentsPath.string() + " file missing");
         }
         if (!untar.close()) {
             throw string("unable to close untar session");
@@ -179,96 +177,95 @@ doUnpack(std::istream & is,
         throw string("unable to get signer object");
     }
 
-    if (!signer->verifyString(contents.str(), signature.str(), timestamp))
-    {
+    if (!signer->verifyString(contents.str(), signature.str(), timestamp)) {
         throw string("signature validation failed");
     }
 
     // write contents to final destination
-    contents.seekg(0, std::ios_base::beg);    
+    contents.seekg(0, ios_base::beg);    
     os << contents.str();
 }
 
-bpf::tString
+string
 bp::pkg::extension()
 {
-    return bpf::nativeFromUtf8(".bpkg");
+    return string(".bpkg");
 }
 
 
-bpf::Path 
+bfs::path 
 bp::pkg::contentsPath()
 {
-    return bpf::Path("contents.tar");
+    return bfs::path("contents.tar");
 }
 
 
-bpf::Path 
+bfs::path 
 bp::pkg::contentsDataPath()
 {
-    return bpf::Path("contents.data");
+    return bfs::path("contents.data");
 }
         
 
-bpf::Path 
+bfs::path 
 bp::pkg::signaturePath()
 {
-    return bpf::Path("signature.mime");
+    return bfs::path("signature.mime");
 }
 
 
 bool
-bp::pkg::packDirectory(const bpf::Path& keyFile, 
-                       const bpf::Path& certFile,
+bp::pkg::packDirectory(const bfs::path& keyFile, 
+                       const bfs::path& certFile,
                        const string& password,
-                       const bpf::Path& inDir,
-                       const bpf::Path& outFile)
+                       const bfs::path& inDir,
+                       const bfs::path& outFile)
 {
     class WriteVisitor : virtual public bpf::IVisitor
     {
     public:
         WriteVisitor(bp::tar::Create& tar,
-                     const bpf::Path& top) : m_tar(tar), m_top(top) {
+                     const bfs::path& top) : m_tar(tar), m_top(top) {
         }
         virtual ~WriteVisitor() {
         }
-        virtual bpf::IVisitor::tResult visitNode(const bpf::Path& p,
-                                                 const bpf::Path& relPath) {
+        virtual bpf::IVisitor::tResult visitNode(const bfs::path& p,
+                                                 const bfs::path& relPath) {
             // we strip away our top-level dir name
-            bpf::Path rel = relPath.relativeTo(m_top);
+            bfs::path rel = bpf::relativeTo(relPath, m_top);
             if (rel.empty()) {
                 return bpf::IVisitor::eOk;
             }
             if (!m_tar.addFile(p, rel)) {
-                throw string("couldn't add " + p.utf8()
-                             + " to tar as " + rel.utf8());
+                throw string("couldn't add " + p.string()
+                             + " to tar as " + rel.string());
             }
             return bpf::IVisitor::eOk;
         }
     protected:
         bp::tar::Create& m_tar;
-        bpf::Path m_top;
+        bfs::path m_top;
     };
 
 
     bool rval = true;
-    bpf::Path tarFile;
+    bfs::path tarFile;
     try {
         // First create tarball of inDir
         //
-        if (!bpf::exists(inDir)) {
-            throw string(inDir.utf8() + " does not exist");
+        if (!bpf::pathExists(inDir)) {
+            throw string(inDir.string() + " does not exist");
         }
 
         try {
             tarFile = bpf::getTempPath(bpf::getTempDirectory(), "bpkg_tarFile");
-        } catch (const bpf::tFileSystemError& e) {
+        } catch (const bfs::filesystem_error& e) {
             throw string("unable to create temp file: " + string(e.what()));
         }
 
         bp::tar::Create tar;
         if (!tar.open(tarFile)) {
-            throw string("unable to open " + tarFile.utf8());
+            throw string("unable to open " + tarFile.string());
         }
 
         // add children to tar
@@ -276,7 +273,7 @@ bp::pkg::packDirectory(const bpf::Path& keyFile,
         recursiveVisit(inDir, visitor, true);
 
         if (!tar.close()) {
-            throw string("unable to close tar file: " + tarFile.utf8());
+            throw string("unable to close tar file: " + tarFile.string());
         }
 
         // sign, tar, and compress
@@ -285,21 +282,21 @@ bp::pkg::packDirectory(const bpf::Path& keyFile,
         
     } catch (const string& msg) {
         BPLOG_ERROR(msg);
-        remove(outFile);
+        bpf::safeRemove(outFile);
         rval = false;
     }
 
-    remove(tarFile);
+    bpf::safeRemove(tarFile);
     return rval;
 }
 
 
 bool
-bp::pkg::unpackToDirectory(std::istream & bpkgStrm,
-                           const bpf::Path& destDir,
+bp::pkg::unpackToDirectory(istream & bpkgStrm,
+                           const bfs::path& destDir,
                            BPTime& timestamp,
-                           std::string& oError,
-                           const bpf::Path& certPath)
+                           string& oError,
+                           const bfs::path& certPath)
 {
     bp::time::Stopwatch sw;
     sw.start();
@@ -311,22 +308,22 @@ bp::pkg::unpackToDirectory(std::istream & bpkgStrm,
         stringstream contents;
 
         /* calculate the uncompressed size */
-        bpkgStrm.seekg(0, std::ios_base::end);
+        bpkgStrm.seekg(0, ios_base::end);
         long long unsigned int len = bpkgStrm.tellg();
-        bpkgStrm.seekg(0, std::ios_base::beg);    
+        bpkgStrm.seekg(0, ios_base::beg);    
 
         BPLOG_INFO_STRM("(" << sw.elapsedSec() << ") decompressing "
                         << len << " bytes");
         doUnpack(bpkgStrm, contents, certPath, true, timestamp);
 
         // untar contents to final destination
-        if (!remove(destDir)) {
-            throw string("unable to remove " + destDir.utf8());
+        if (!bpf::safeRemove(destDir)) {
+            throw string("unable to remove " + destDir.string());
         }
         try {
             bfs::create_directories(destDir);
-        } catch(const bpf::tFileSystemError&) {
-            throw string("unable to create " + destDir.utf8());
+        } catch(const bfs::filesystem_error&) {
+            throw string("unable to create " + destDir.string());
         }
         BPLOG_INFO_STRM("(" << sw.elapsedSec() << ") untarring "
                         << contents.str().length() << " bytes");
@@ -335,7 +332,7 @@ bp::pkg::unpackToDirectory(std::istream & bpkgStrm,
             throw string("unable to open tar data");
         }
         if (!untar.extract(destDir)) {
-            throw string("unable to extract tar file to " + destDir.utf8());
+            throw string("unable to extract tar file to " + destDir.string());
         }
         if (!untar.close()) {
             throw string("unable to close tar session");
@@ -357,29 +354,27 @@ bp::pkg::unpackToDirectory(std::istream & bpkgStrm,
 
 
 bool
-bp::pkg::unpackToDirectory(const bpf::Path& bpkgPath,
-                           const bpf::Path& destDir,
+bp::pkg::unpackToDirectory(const bfs::path& bpkgPath,
+                           const bfs::path& destDir,
                            BPTime& timestamp,
                            string& oError,
-                           const bpf::Path& certPath)
+                           const bfs::path& certPath)
 {
     ifstream ifs;
-    if (!bpf::openReadableStream(ifs, bpkgPath, ifstream::binary))
-    {
-        oError = std::string("unable to open stream for ") + bpkgPath.utf8();
+    if (!bpf::openReadableStream(ifs, bpkgPath, ifstream::binary)) {
+        oError = "unable to open stream for " + bpkgPath.string();
         return false;
     }
-
     return unpackToDirectory(ifs, destDir, timestamp, oError, certPath);
 }
 
 
 bool 
-bp::pkg::packFile(const bpf::Path& keyFile, 
-                  const bpf::Path& certFile,
+bp::pkg::packFile(const bfs::path& keyFile, 
+                  const bfs::path& certFile,
                   const string& password,
-                  const bpf::Path& inFile,
-                  const bpf::Path& outFile)
+                  const bfs::path& inFile,
+                  const bfs::path& outFile)
 {
     bool rval = true;
     try {
@@ -388,7 +383,7 @@ bp::pkg::packFile(const bpf::Path& keyFile,
         rval = true;
     } catch (const string& msg) {
         BPLOG_ERROR(msg);
-        remove(outFile);
+        bpf::safeRemove(outFile);
         rval = false;
     }
     return rval;
@@ -396,35 +391,33 @@ bp::pkg::packFile(const bpf::Path& keyFile,
 
 
 bool 
-bp::pkg::unpackToFile(const bpf::Path& bpkgPath,
-                      const bpf::Path& destFile,
+bp::pkg::unpackToFile(const bfs::path& bpkgPath,
+                      const bfs::path& destFile,
                       BPTime& timestamp,
                       string& oError,
-                      const bpf::Path& certPath) 
+                      const bfs::path& certPath) 
 {
     bool rval = true;
-    bpf::Path tmpDir;
+    bfs::path tmpDir;
     try {
         try {
             tmpDir = bpf::getTempPath(bpf::getTempDirectory(), "bpkg");
-        } catch(bpf::tFileSystemError& e) {
+        } catch(bfs::filesystem_error& e) {
             throw string("unable to get tmpDir path: " + string(e.what()));
         }
         try {
             bfs::create_directories(tmpDir);
-        } catch(bpf::tFileSystemError&) {
-            throw string("unable to create temp dir: " + tmpDir.utf8());
+        } catch(bfs::filesystem_error&) {
+            throw string("unable to create temp dir: " + tmpDir.string());
         }
         ifstream ifs;
-        if (!bpf::openReadableStream(ifs, bpkgPath, ifstream::binary))
-        {
-            throw string("unable to open stream for " + bpkgPath.utf8());
+        if (!bpf::openReadableStream(ifs, bpkgPath, ifstream::binary)) {
+            throw string("unable to open stream for " + bpkgPath.string());
         }
 
         ofstream ofs;
-        if (!bpf::openWritableStream(ofs, destFile, ifstream::binary))
-        {
-            throw string("unable to open stream for " + bpkgPath.utf8());
+        if (!bpf::openWritableStream(ofs, destFile, ifstream::binary)) {
+            throw string("unable to open stream for " + bpkgPath.string());
         }
 
         doUnpack(ifs, ofs, certPath, false, timestamp);
@@ -434,68 +427,67 @@ bp::pkg::unpackToFile(const bpf::Path& bpkgPath,
         oError = msg;
         rval = false;
     }
-    remove(tmpDir);
+    bpf::safeRemove(tmpDir);
     return rval;
 }
 
 
 bool 
-bp::pkg::packString(const bpf::Path& keyFile, 
-                    const bpf::Path& certFile,
+bp::pkg::packString(const bfs::path& keyFile, 
+                    const bfs::path& certFile,
                     const string& password,
                     const string& inStr,
-                    const bpf::Path& outFile)
+                    const bfs::path& outFile)
 {
     bool rval = true;
-    bpf::Path inFile;
+    bfs::path inFile;
     try {
         try {
             inFile = bpf::getTempPath(bpf::getTempDirectory(), "bpkg_string");
-        } catch (const bpf::tFileSystemError& e) {
+        } catch(bfs::filesystem_error& e) {
             throw string("unable to get temp path: " + string(e.what()));
         }
         if (!bp::strutil::storeToFile(inFile, inStr)) {
-            throw string("unable to save string to " + inFile.utf8());
+            throw string("unable to save string to " + inFile.string());
         }
         // sign, tar, and compress
         doPack(keyFile, certFile, password, inFile, outFile, false);
         rval = true;
     } catch (const string& msg) {
         BPLOG_ERROR(msg);
-        remove(outFile);
+        bpf::safeRemove(outFile);
         rval = false;
     }
-    remove(inFile);
+    bpf::safeRemove(inFile);
     return rval;
 }
 
 
 bool 
-bp::pkg::unpackToString(const bpf::Path& bpkgPath,
+bp::pkg::unpackToString(const bfs::path& bpkgPath,
                         string& resultStr,
                         BPTime& timestamp,
                         string& oError,
-                        const bpf::Path& certPath)
+                        const bfs::path& certPath)
 {
     bool rval = true;
-    bpf::Path tmpDir;
+    bfs::path tmpDir;
     try {
         try {
             tmpDir = bpf::getTempPath(bpf::getTempDirectory(), "bpkg");
-        } catch (const bpf::tFileSystemError& e) {
+        } catch(bfs::filesystem_error& e) {
             throw string("unable to get temp path: " + string(e.what()));
         }
         try {
             bfs::create_directories(tmpDir);
-        } catch(const bpf::tFileSystemError&) {
-            throw string("unable to create temp dir: " + tmpDir.utf8());
+        } catch(bfs::filesystem_error&) {
+            throw string("unable to create temp dir: " + tmpDir.string());
         }
-        bpf::Path destFile = tmpDir / "contents";
+        bfs::path destFile = tmpDir / "contents";
 
         ifstream ifs;
-        if (!bpf::openReadableStream(ifs, bpkgPath, ifstream::binary))
-        {
-            throw string("unable to open stream for " + bpkgPath.utf8());
+        if (!bpf::openReadableStream(ifs, bpkgPath, ifstream::binary)) {
+            throw string("unable to open stream for " + bpkgPath.string());
         }
         stringstream ostream;
         doUnpack(ifs, ostream, certPath, false, timestamp);
@@ -506,7 +498,7 @@ bp::pkg::unpackToString(const bpf::Path& bpkgPath,
         oError = msg;
         rval = false;
     }
-    remove(tmpDir);
+    bpf::safeRemove(tmpDir);
     return rval;
 }
 

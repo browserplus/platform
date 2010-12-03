@@ -50,7 +50,7 @@ class URLCollectionTest : public CPPUNIT_NS::TestCase
     void bogusPath();
     void malformedJSON();
     void fullTest();
-    bp::file::Path m_path;
+	boost::filesystem::path m_path;
 };
 
 #endif

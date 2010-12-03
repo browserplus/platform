@@ -158,7 +158,7 @@ namespace bp {
          */
         virtual operator bool() const; // throw(ConversionException)
         virtual operator std::string() const; // throw(ConversionException)
-		virtual operator bp::file::Path() const; // throw(ConversionException)
+		virtual operator boost::filesystem::path() const; // throw(ConversionException)
 		virtual operator long long() const; // throw(ConversionException)
         virtual operator double() const; // throw(ConversionException)
         virtual operator std::map<std::string, const Object *>() const;
@@ -220,23 +220,23 @@ namespace bp {
     class Path : public Object
     {
     public:
-        Path(const bp::file::Path & path);
+        Path(const boost::filesystem::path & path);
         Path(const Path & other);
         Path & operator= (const Path & other);
         // note: the returned pointer is to internal memory, and is
         // only valid for the lifetime of the object, or the invocation
         const BPPath value() const;
         virtual ~Path();
-        operator bp::file::Path() const; // throw(ConversionException)
+        operator boost::filesystem::path() const; // throw(ConversionException)
         virtual Object * clone() const;
     protected:
-        bp::file::tString m_path;
+        boost::filesystem::path::string_type m_path;
     };
 
     class WritablePath : public Path
     {
       public:
-        WritablePath(const bp::file::Path & path);
+        WritablePath(const boost::filesystem::path & path);
         WritablePath(const WritablePath & other);
         WritablePath & operator= (const WritablePath & other);
         virtual Object * clone() const;        

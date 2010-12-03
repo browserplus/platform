@@ -40,7 +40,7 @@ namespace bp {
 namespace plugin {
 
 
-bool setupLogging( const bp::file::Path& logfilePath )
+bool setupLogging( const boost::filesystem::path& logfilePath )
 {
     bp::log::Configurator cfg;
     cfg.loadConfigFile();

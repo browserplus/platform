@@ -73,7 +73,7 @@ class CarbonDropManager : public virtual InterceptDropManager
                           DragReference theDragRef,
                           short int& x,
                           short int& y);
-    vector<bp::file::Path> getDragItems(WindowRef theWindow,
+    vector<boost::filesystem::path> getDragItems(WindowRef theWindow,
                                         void* refcon,
                                         DragReference theDragRef);
 
@@ -189,7 +189,7 @@ CarbonDragDispatcher::bootStrapDragHandler(DragTrackingMessage message,
             for (it = disp->m_dropManagers.begin(); 
                  it != disp->m_dropManagers.end(); ++it) {
                 CarbonDropManager* dm = *it;
-                vector<bp::file::Path> dragItems = dm->getDragItems(theWindow,
+                vector<boost::filesystem::path> dragItems = dm->getDragItems(theWindow,
                                                                     refCon,
                                                                     theDragRef);
                 dm->handleMouseEnter(dragItems);
@@ -391,12 +391,12 @@ CarbonDropManager::receiveHandler(WindowRef theWindow,
 }
 
 
-vector<bp::file::Path>
+vector<boost::filesystem::path>
 CarbonDropManager::getDragItems(WindowRef theWindow,
                                 void* refcon,
                                 DragReference theDragRef)
 {
-    vector<bp::file::Path> results;
+    vector<boost::filesystem::path> results;
     OSErr err = noErr;
     // how many items
     UInt16 itemCount;
@@ -428,7 +428,7 @@ CarbonDropManager::getDragItems(WindowRef theWindow,
         if (err == noErr) {
             err = specToPath(&targetFile.fileSpec, path);
             if (err == noErr) {
-                bp::file::Path p((const char*)path);;
+                boost::filesystem::path p((const char*)path);;
                 results.push_back(p);
             }
         } else {
@@ -440,7 +440,7 @@ CarbonDropManager::getDragItems(WindowRef theWindow,
             if (err == noErr) {
                 err = specToPath(&targetFile.fileSpec, path);
                 if (err == noErr) {
-                    bp::file::Path p((const char*)path);
+                    boost::filesystem::path p((const char*)path);
                     results.push_back(p);
                 }
             }

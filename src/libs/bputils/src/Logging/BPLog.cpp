@@ -94,7 +94,7 @@ void setupLogToDebugger( const Level& level,
 }
 
 
-void setupLogToFile( const bp::file::Path& logFilePath,
+void setupLogToFile( const boost::filesystem::path& logFilePath,
                      const Level& level,
                      const FileMode& fileMode,
                      const TimeFormat& timeFormat,

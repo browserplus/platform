@@ -34,7 +34,7 @@
 using namespace std;
 using namespace std::tr1;
 using namespace ServiceRunner;
-namespace bpf = bp::file;
+namespace bfs = boost::filesystem;
 
 
 // BEGIN call-in points for dynamically loaded services
@@ -64,7 +64,7 @@ struct InstanceResponse
     long long int callbackId;
 
     // prompt
-	bp::file::Path dialogPath;
+	boost::filesystem::path dialogPath;
     BPUserResponseCallbackFuncPtr responseCallback;
     void * responseCookie;
     unsigned int promptId;
@@ -205,9 +205,8 @@ ServiceLibrary_v5::setupServiceLogging()
 
     bp::log::Destination dest = cfg.getDestination();
     if (dest == bp::log::kDestFile) {
-        string fileName = name().empty() ? "service" : name();
-        bpf::Path p(fileName);
-        p.replace_extension(bpf::nativeFromUtf8("log"));
+        bfs::path p(name().empty() ? "service" : name());
+        p.replace_extension("log");
         cfg.setPath(p);
     }
 	else if (dest == bp::log::kDestConsole) {
@@ -396,8 +395,8 @@ ServiceLibrary_v5::load(const bp::service::Summary &summary,
 
     // now let's determine the path to the shared library.  For
     // dependent services this will be extracted from the manifest
-    bpf::Path servicePath;
-    bpf::Path dependentPath;
+    bfs::path servicePath;
+    bfs::path dependentPath;
     const BPElement * dependentParams = NULL;    
     bp::Map dependentParamsStorage;
 
@@ -421,9 +420,9 @@ ServiceLibrary_v5::load(const bp::service::Summary &summary,
         servicePath = m_summary.path();
     }
 
-    servicePath = bpf::canonicalPath(servicePath);
+    servicePath = bp::file::canonicalPath(servicePath);
     if (!dependentPath.empty()) {
-        dependentPath = bpf::canonicalPath(dependentPath);
+        dependentPath = bp::file::canonicalPath(dependentPath);
     }
     
     funcTable = (const BPPFunctionTable *) m_funcTable;
@@ -445,8 +444,8 @@ ServiceLibrary_v5::load(const bp::service::Summary &summary,
 
         def = funcTable->initializeFunc(
             (const BPCFunctionTable *) getFunctionTable(),
-            (const BPPath) (servicePath.external_file_string().c_str()),
-            (const BPPath) (dependentPath.empty() ? NULL : dependentPath.external_file_string().c_str()),
+            (const BPPath) (servicePath.c_str()),
+            (const BPPath) (dependentPath.empty() ? NULL : dependentPath.c_str()),
             dependentParams);
 
         if (def == NULL)
@@ -495,8 +494,8 @@ ServiceLibrary_v5::shutdownService(bool callShutdown)
 }
 
 unsigned int
-ServiceLibrary_v5::allocate(std::string uri, bpf::Path dataDir,
-                            bpf::Path tempDir, std::string locale,
+ServiceLibrary_v5::allocate(std::string uri, bfs::path dataDir,
+                            bfs::path tempDir, std::string locale,
                             std::string userAgent, unsigned int clientPid)
 {
     unsigned int id = m_currentId++;
@@ -509,14 +508,14 @@ ServiceLibrary_v5::allocate(std::string uri, bpf::Path dataDir,
 
     if (funcTable->allocateFunc != NULL)
     {
-        bpf::Path serviceDir = m_summary.path();
+        bfs::path serviceDir = m_summary.path();
         
         int rv = funcTable->allocateFunc(
             &cookie,
             (const BPString) uri.c_str(),
-            (const BPPath) serviceDir.external_file_string().c_str(),
-            (const BPPath) dataDir.external_file_string().c_str(),
-            (const BPPath) tempDir.external_file_string().c_str(),
+            (const BPPath) serviceDir.c_str(),
+            (const BPPath) dataDir.c_str(),
+            (const BPPath) tempDir.c_str(),
             (const BPString) locale.c_str(),
             (const BPString) userAgent.c_str(),
             clientPid);
@@ -623,16 +622,16 @@ ServiceLibrary_v5::invoke(unsigned int id, unsigned int tid,
 
 
 int
-ServiceLibrary_v5::installHook(const bp::file::Path& serviceDir,
-                               const bp::file::Path& tempDir)
+ServiceLibrary_v5::installHook(const boost::filesystem::path& serviceDir,
+                               const boost::filesystem::path& tempDir)
 {
     int rval = 0;
     const BPPFunctionTable* funcTable = (const BPPFunctionTable*) m_funcTable;
     if (funcTable->installFunc != NULL) {
         BPLOG_INFO_STRM("calling installHook for " << name() << " / " << version());
         rval = funcTable->installFunc(
-                   (const BPPath) serviceDir.external_file_string().c_str(),
-                   (const BPPath) tempDir.external_file_string().c_str());
+                   (const BPPath) serviceDir.c_str(),
+                   (const BPPath) tempDir.c_str());
         BPLOG_INFO_STRM("installHook returned " << rval);
     }
     return rval;
@@ -640,16 +639,16 @@ ServiceLibrary_v5::installHook(const bp::file::Path& serviceDir,
 
 
 int
-ServiceLibrary_v5::uninstallHook(const bp::file::Path& serviceDir,
-                                 const bp::file::Path& tempDir)
+ServiceLibrary_v5::uninstallHook(const boost::filesystem::path& serviceDir,
+                                 const boost::filesystem::path& tempDir)
 {
     int rval = 0;
     const BPPFunctionTable* funcTable = (const BPPFunctionTable*) m_funcTable;
     if (funcTable->uninstallFunc != NULL) {
         BPLOG_INFO_STRM("calling uninstallHook for " << name() << " / " << version());
         rval = funcTable->uninstallFunc(
-                  (const BPPath) serviceDir.external_file_string().c_str(),
-                  (const BPPath) tempDir.external_file_string().c_str());
+                  (const BPPath) serviceDir.c_str(),
+                  (const BPPath) tempDir.c_str());
         BPLOG_INFO_STRM("uninstallHook returned " << rval);
     }
     return rval;
@@ -736,7 +735,7 @@ ServiceLibrary_v5::onHop(void * context)
                     beginPrompt(ir->promptId, ir->tid, ir->responseCallback,
                                 ir->responseCookie);
                     m_listener->onPrompt(instance, ir->promptId,
-                                         bpf::Path(ir->dialogPath), 
+                                         bfs::path(ir->dialogPath),
                                          ir->o);
                 }
                 break;

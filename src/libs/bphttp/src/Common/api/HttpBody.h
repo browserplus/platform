@@ -127,10 +127,10 @@ public:
 
     // Set the body from the specified file
     // Clears any 
-    void        fromPath( const bp::file::Path& path );
+    void        fromPath( const boost::filesystem::path& path );
     
     // Return path assigned to body
-    bp::file::Path path() const;
+    boost::filesystem::path path() const;
     
 // Accessors, only valid for byte buffer body
 public:
@@ -155,7 +155,7 @@ private:
     //                   Read once semantics vs. random access semantics
     tBuffer        m_vbBody;
     
-    bp::file::Path m_path;
+    boost::filesystem::path m_path;
 }; // Body
 
 

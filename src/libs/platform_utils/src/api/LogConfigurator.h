@@ -65,7 +65,7 @@ public:
     /**
      * Load appropriate values from specified config file.
      */
-    void loadConfigFile( const bp::file::Path& path =
+    void loadConfigFile( const boost::filesystem::path& path =
                          bp::paths::getConfigFilePath() );
 
     /**
@@ -83,8 +83,8 @@ public:
     const Destination& getDestination() const;
     void setDestination( const Destination& dest );
 
-    const bp::file::Path& getPath() const;
-    void setPath( const bp::file::Path& path );
+    const boost::filesystem::path& getPath() const;
+    void setPath( const boost::filesystem::path& path );
 
     const std::string& getLayout() const;
     void setLayout( const std::string& layout );
@@ -105,15 +105,15 @@ public:
     void setServiceLogMode( const ServiceLogMode& mode );
     
 private:
-    Level           m_level;
-    Destination     m_dest;
-    bp::file::Path  m_path;
-    std::string     m_layout;
-    TimeFormat      m_timeFormat;
-    FileMode        m_fileMode;
-    unsigned int    m_rolloverKB;
-    std::string     m_consoleTitle;
-    ServiceLogMode  m_serviceLogMode;
+    Level                    m_level;
+    Destination              m_dest;
+    boost::filesystem::path  m_path;
+    std::string              m_layout;
+    TimeFormat               m_timeFormat;
+    FileMode                 m_fileMode;
+    unsigned int             m_rolloverKB;
+    std::string              m_consoleTitle;
+    ServiceLogMode           m_serviceLogMode;
     
 private:
     Configurator( const Configurator& );

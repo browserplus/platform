@@ -48,24 +48,24 @@ Installer::installPlugins()
     BPLOG_DEBUG_STRM("begin Installer::installPlugins()");
     
     // Get path to plugins
-    Path pluginDir(getenv("HOME"));
+    bfs::path pluginDir(getenv("HOME"));
     pluginDir /= ".mozilla/plugins";
-    Path pluginPath = pluginDir / ("BrowserPlus_" + m_version.asString()  + ".so");
+    bfs::path pluginPath = pluginDir / ("BrowserPlus_" + m_version.asString()  + ".so");
 
     // remove existing version of our plugin
-    if (!remove(pluginPath)) {
-        BPLOG_INFO(lastErrorString("unable to delete " + pluginDir.externalUtf8()));
+    if (!safeRemove(pluginPath)) {
+        BPLOG_INFO(lastErrorString("unable to delete " + pluginDir));
     }
 
     // create plugin dir
     try {
         bfs::create_directories(pluginDir);
     } catch(const tFileSystemError&) {
-        BPLOG_INFO(lastErrorString("plugin dir already exists " + pluginDir.externalUtf8()));
+        BPLOG_INFO(lastErrorString("plugin dir already exists " + pluginDir));
     }
 
     // copy plugin into plugins dir
-    Path src = m_dir / "plugins" / pluginPath;
+    bfs::path src = m_dir / "plugins" / pluginPath;
     doCopy(src, pluginDir);
     BPLOG_DEBUG_STRM("complete Installer::installPlugins()");
 }
@@ -126,10 +126,10 @@ Installer::disablePlugins(const bp::SemanticVersion& version)
 {
     // Must physically remove OSX plugins to keep them from
     // being found by browser
-    vector<Path> plugins = getPluginPaths(version.majorVer(),
-                                          version.minorVer(),
-                                          version.microVer());
+    vector<bfs::path> plugins = getPluginPaths(version.majorVer(),
+                                               version.minorVer(),
+                                               version.microVer());
     for (size_t i = 0; i < plugins.size(); i++) {
-        (void) remove(plugins[i]);
+        (void) bp::file::(plugins[i]);
     }
 }

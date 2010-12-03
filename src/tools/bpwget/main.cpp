@@ -74,7 +74,7 @@ setupLogging(const APTArgParse& argParser)
     bp::log::removeAllAppenders();
     
     string level = argParser.argument("log");
-    bp::file::Path path(argParser.argument("logfile"));
+    boost::filesystem::path path(argParser.argument("logfile"));
 
     if (level.empty() && path.empty())
         return;
@@ -216,7 +216,7 @@ private:
 int
 main(int argc, const char ** argv)
 {
-    bp::log::setupLogToFile(bp::file::Path("bpwget.log"), bp::log::LEVEL_DEBUG);
+    bp::log::setupLogToFile(boost::filesystem::path("bpwget.log"), bp::log::LEVEL_DEBUG);
 
     // process command line arguments
     APTArgParse ap(" <options> <url>\n  execute HTTP requests from the command line");
@@ -249,8 +249,8 @@ main(int argc, const char ** argv)
 
     // check for post body
     if (ap.argumentPresent("post")) {
-        bp::file::Path path(ap.argument("post"));
-        if (!bp::file::exists(path)) {
+        boost::filesystem::path path(ap.argument("post"));
+        if (!bp::file::pathExists(path)) {
             cerr << "no such file: " << path << endl;
             return 1;
         }

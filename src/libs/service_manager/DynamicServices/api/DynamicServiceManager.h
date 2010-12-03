@@ -47,13 +47,13 @@ class DynamicServiceManager : public ServiceRunner::IControllerListener
     // Allocate a dynamic service manager passing in the loglevel
     // and logfile into which spawned services should log
     DynamicServiceManager(const std::string & loglevel,
-                          const bp::file::Path & logfile);
+                          const boost::filesystem::path & logfile);
     virtual ~DynamicServiceManager();   
 
     /**
      * Add a directory to "watch" for plugins
      */
-    void setPluginDirectory(const bp::file::Path & path);
+    void setPluginDirectory(const boost::filesystem::path & path);
 
     /**
      * Clear all plugin directories
@@ -141,13 +141,13 @@ class DynamicServiceManager : public ServiceRunner::IControllerListener
     
   private:
     // the configured plugin directory
-      bp::file::Path m_pluginDirectory;
+      boost::filesystem::path m_pluginDirectory;
 
     // detected installed services
     std::map<bp::service::Summary, bp::service::Description> m_services;
 
     std::string m_logLevel;
-    bp::file::Path m_logFile;
+    boost::filesystem::path m_logFile;
 
     // monotonically increasing ids returned by instance calls to allow
     // client to correlate
@@ -191,7 +191,7 @@ class DynamicServiceManager : public ServiceRunner::IControllerListener
                     long long int callback, const bp::Object * value);
     void onPrompt(ServiceRunner::Controller * c,
                   unsigned int instance, unsigned int promptId,
-                  const bp::file::Path & pathToDialog,
+                  const boost::filesystem::path & pathToDialog,
                   const bp::Object * arguments);
     void onInstallHook(ServiceRunner::Controller*,
                        int) {}

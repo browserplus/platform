@@ -44,13 +44,13 @@ bp::platformutil::removePlatform(const bp::SemanticVersion& version,
     
     if (!force) {
         // Don't try to clean up an installed platform
-        if (bp::file::exists(getBPInstalledPath(major, minor, micro))) {
+        if (pathExists(getBPInstalledPath(major, minor, micro))) {
             BPLOG_DEBUG_STRM(version.asString() << " installed, ignored");
             return;
         }
 
         // Don't try to clean up an installing platform
-        if (bp::file::exists(getBPInstallingPath(major, minor, micro))) {
+        if (pathExists(getBPInstallingPath(major, minor, micro))) {
             BPLOG_DEBUG_STRM(version.asString() << " installing, ignored");
             return;
         }
@@ -69,11 +69,11 @@ bp::platformutil::removePlatform(const bp::SemanticVersion& version,
 
     // nuke away
     BPLOG_DEBUG_STRM(version.asString() << " being nuked");
-    (void) remove(getProductDirectory(major, minor, micro));
-    (void) remove(getPluginWritableDirectory(major, minor, micro));
-    vector<Path> plugins = getPluginPaths(major, minor, micro);
+    (void) safeRemove(getProductDirectory(major, minor, micro));
+    (void) safeRemove(getPluginWritableDirectory(major, minor, micro));
+    vector<boost::filesystem::path> plugins = getPluginPaths(major, minor, micro);
     for (size_t i = 0; i < plugins.size(); i++) {
-        (void) remove(plugins[i]);
+        (void) safeRemove(plugins[i]);
     }
 
     if (lock) {

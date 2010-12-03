@@ -151,7 +151,7 @@ int main( int argc, const char ** argv )
         }
 
         if (ap.argumentPresent("logToFile")) {
-            bp::file::Path logPath("TestHarness.log");
+            boost::filesystem::path logPath("TestHarness.log");
             bp::log::Level level = bp::log::levelFromString(
                                     ap.argument("logToFile"));
             bp::log::setupLogToFile(logPath,level);

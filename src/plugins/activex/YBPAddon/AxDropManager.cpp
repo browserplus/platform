@@ -565,10 +565,10 @@ AxDropManager::findDropChannel( const std::string& sElemId )
 }
 
 
-std::vector<bp::file::Path> 
+std::vector<boost::filesystem::path> 
 AxDropManager::getDragItems( IDataObject* pDataObject )
 {
-    std::vector<bp::file::Path> rval;
+    std::vector<boost::filesystem::path> rval;
 
     FORMATETC fmt;
     fmt.ptd      = 0;
@@ -607,7 +607,7 @@ AxDropManager::getDragItems( IDataObject* pDataObject )
         wchar_t wsFilename[MAX_PATH];
         if (DragQueryFileW(hdrop, i, wsFilename, MAX_PATH) > 0)
         {
-            rval.push_back(bp::file::Path(wsFilename));
+            rval.push_back(boost::filesystem::path(wsFilename));
         }
     }
     

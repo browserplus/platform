@@ -54,9 +54,9 @@ class ServiceSummaryTest : public CPPUNIT_NS::TestCase
 
   private:
     // the directory into which a service is written
-    bp::file::Path m_testServiceDir;
+	boost::filesystem::path m_testServiceDir;
     void createService(const char * manifestJson,
-                       std::vector<bp::file::Path> filesToTouch);
+                       std::vector<boost::filesystem::path> filesToTouch);
 };
 
 #endif

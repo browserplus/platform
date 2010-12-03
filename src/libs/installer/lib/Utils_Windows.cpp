@@ -38,12 +38,13 @@ using namespace bp::error;
 using namespace bp::install;
 using namespace bp::registry;
 namespace bpf = bp::file;
+namespace bfs = boost::filesystem;
 
 
-bpf::Path bp::install::utils::kUglyNpapiDir("C:/BrowserPlusPlugins");
+bfs::path bp::install::utils::kUglyNpapiDir("C:/BrowserPlusPlugins");
 
 
-bpf::Path
+bfs::path
 bp::install::utils::getFolderPath(int selector)
 {
     wchar_t path[MAX_PATH] = {0};
@@ -52,7 +53,7 @@ bp::install::utils::getFolderPath(int selector)
     if (b != S_OK) {
         BP_THROW(lastErrorString("unable to get CSIDL " + selector));
     }
-    bpf::Path rval(path);
+    bfs::path rval(path);
     BPLOG_DEBUG_STRM("getFolderPath(" << selector << ") returns " << rval);
     return rval;
 }
@@ -88,12 +89,12 @@ bp::install::utils::axProgid(const bp::SemanticVersion& version)
 }
 
 
-bpf::Path
-bp::install::utils::npapiPluginDir(const bpf::Path& dir)
+bfs::path
+bp::install::utils::npapiPluginDir(const bfs::path& dir)
 {
-    bpf::Path rval = dir;
+    bfs::path rval = dir;
     bool useAsciiDir = false;
-    string utf8 = dir.utf8();
+    string utf8 = dir.string();
     for (size_t i = 0; i < utf8.length(); i++) {
         if ((unsigned int)utf8[i] > 128) {
             useAsciiDir = true;
@@ -108,10 +109,10 @@ bp::install::utils::npapiPluginDir(const bpf::Path& dir)
 }
 
 
-bpf::Path
+bfs::path
 bp::install::utils::ffx2PluginDir()
 {
-    bpf::Path rval;
+    bfs::path rval;
     string osVersion = bp::os::PlatformVersion();
     bool isVistaOrLater = (osVersion.compare("6") >= 0);
     if (!isVistaOrLater) {
@@ -122,7 +123,7 @@ bp::install::utils::ffx2PluginDir()
                 if (keys[i].path().find("Mozilla Firefox 2") != string::npos) {
                     string extKey = keys[i].fullPath() + "\\extensions";
                     try {
-                        rval = bpf::Path(readString(extKey, "Plugins"));
+                        rval = bfs::path(readString(extKey, "Plugins"));
                     } catch(const Exception&) {
                         BPLOG_WARN_STRM("unable to read Plugins from "
                                         << extKey);
@@ -136,7 +137,7 @@ bp::install::utils::ffx2PluginDir()
 
 
 bool
-bp::install::utils::getControlInfo(const bpf::Path& path,
+bp::install::utils::getControlInfo(const bfs::path& path,
                                    string& version,
                                    string& typeLibGuid,
                                    string& activeXGuid,
@@ -145,8 +146,8 @@ bp::install::utils::getControlInfo(const bpf::Path& path,
     bool rval = false;
     try {
         // dig version from path
-        string filename = bpf::utf8FromNative(path.filename());
-        string name = bpf::utf8FromNative(path.stem());
+        string filename = path.filename().string();
+        string name = path.stem().string();
         size_t start = name.find('_') + 1;
         version = name.substr(start);
 
@@ -201,7 +202,7 @@ bp::install::utils::getControlInfo(const bpf::Path& path,
 int
 bp::install::utils::registerControl(const vector<string>& vsMimetypes,
                                     const string& sModuleUuid,
-                                    const bpf::Path& modulePath,
+                                    const bfs::path& modulePath,
                                     const string& sCoClassUuid,
                                     const string& sCoClassName,
                                     const string& sViProgid,
@@ -212,11 +213,11 @@ bp::install::utils::registerControl(const vector<string>& vsMimetypes,
 
         //  "RegSetValue","HKCR\AppID\{<sModuleUuid>}\(Default)","Type: REG_SZ, Data: YBPAddon"
         string sKey = sRoot + "\\AppID\\" + sModuleUuid;
-        string sData = bpf::utf8FromNative(modulePath.stem());
+        string sData = modulePath.stem().string();
         writeString(sKey, sData);
         
         //  "RegSetValue","HKCR\AppID\YBPAddon.DLL\AppID","Type: REG_SZ, Data: {<sModuleUuid>}"
-        string sFilename = bpf::utf8FromNative(modulePath.filename());
+        string sFilename = modulePath.filename().string();
         sKey = sRoot + "\\AppID\\" + sFilename;
         writeString(sKey, "AppID", sModuleUuid);
         
@@ -265,7 +266,7 @@ bp::install::utils::registerControl(const vector<string>& vsMimetypes,
         //  "RegSetValue","HKCR\CLSID\{<sCoClassUuid>}\InprocServer32\ThreadingModel","Type: REG_SZ, Data: apartment"
         sKey = sRoot + "\\CLSID\\" + sCoClassUuid + "\\InprocServer32";
         createKey(sKey);
-        writeString(sKey, bpf::utf8FromNative(modulePath.external_file_string()));
+        writeString(sKey, modulePath.string());
         writeString(sKey, "ThreadingModel", "apartment");
 
         //  "RegCreateKey","HKCR\CLSID\{<sCoClassUuid>}\Control","Desired Access: Read/Write"
@@ -309,7 +310,7 @@ bp::install::utils::registerControl(const vector<string>& vsMimetypes,
 int
 bp::install::utils::unRegisterControl(const std::vector<std::string>& vsMimetypes,
                                       const string& sModuleUuid,
-                                      const bpf::Path& modulePath,
+                                      const bfs::path& modulePath,
                                       const string& sCoClassUuid,
                                       const string& sViProgid,
                                       const string& sProgid)
@@ -362,9 +363,9 @@ bp::install::utils::unRegisterControl(const std::vector<std::string>& vsMimetype
     }
 
     // "RegDeleteKey","HKCR\AppID\YBPAddon.dll"
-    string filename = bpf::utf8FromNative(modulePath.filename());
+    string filename = modulePath.filename().string();
     if (filename.empty()) {
-        BPLOG_WARN_STRM("bp::file::fileName(" << modulePath
+        BPLOG_WARN_STRM("fileName(" << modulePath
                         << ") is empty");
     } else {
         sKey = sRoot + "\\AppID\\" + filename;
@@ -419,11 +420,11 @@ bp::install::utils::unregisterCruftControls(bool force)
                 BPLOG_DEBUG_STRM(versionStr << " not a valid version, skipping");
                 continue;
             }
-            bpf::Path path =  getProductDirectory(version.majorVer(),
+            bfs::path path =  getProductDirectory(version.majorVer(),
                                                   version.minorVer(),
                                                   version.microVer())
                               / "Plugins" / edge;
-            if (!force && bpf::exists(path)) {
+            if (!force && bpf::pathExists(path)) {
                 continue;
             }
 
@@ -483,12 +484,12 @@ bp::install::utils::unregisterCruftControls(bool force)
             continue;
         }
 
-        bpf::Path pluginName = string("YBPAddon_") + versionStr + ".dll";
-        bpf::Path pluginPath =  getProductDirectory(version.majorVer(),
+        bfs::path pluginName = string("YBPAddon_") + versionStr + ".dll";
+        bfs::path pluginPath =  getProductDirectory(version.majorVer(),
                                                     version.minorVer(),
                                                     version.microVer())
                                 / "Plugins" / pluginName;
-        if (!force && bpf::exists(pluginPath)) {
+        if (!force && bpf::pathExists(pluginPath)) {
             continue;
         }
         try {

@@ -120,7 +120,7 @@ bp::pluginutil::toBrowserSafeRep( const bp::Object* input,
 
 
 bp::Object* 
-bp::pluginutil::applyFilters(const vector<bp::file::Path>& selection,
+bp::pluginutil::applyFilters(const vector<boost::filesystem::path>& selection,
                              const set<string>& mimetypes,
                              unsigned int flags,
                              unsigned int limit)
@@ -136,8 +136,8 @@ bp::pluginutil::applyFilters(const vector<bp::file::Path>& selection,
         }
         virtual ~MyVisitor() {
         }
-        bp::file::IVisitor::tResult visitNode(const bp::file::Path& p,
-                                              const bp::file::Path&) {
+        bp::file::IVisitor::tResult visitNode(const boost::filesystem::path& p,
+                                              const boost::filesystem::path&) {
             if (m_num >= m_limit) {
                 return eStop;
             }
@@ -177,7 +177,7 @@ bp::pluginutil::applyFilters(const vector<bp::file::Path>& selection,
     }
     
     for (unsigned int i = 0; (num < limit) && (i < selection.size()); ++i) {
-        bp::file::Path item = selection[i];
+        boost::filesystem::path item = selection[i];
         int parentID = 0;
         if (flags & kIncludeGestureInfo) {
             bp::Path* itemPath = new bp::Path(item);

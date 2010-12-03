@@ -90,27 +90,27 @@ service::Summary::version() const
     return m_version;
 }
     
-const bp::file::Path&
+const boost::filesystem::path&
 service::Summary::path() const
 {
     return m_path;
 }
 
 bool
-service::Summary::detectService(const bp::file::Path &dirName,
+service::Summary::detectService(const boost::filesystem::path &dirName,
                                 std::string &error)
 {    
     clear();
 
     // determine path to the manifest file
-    bp::file::Path manifestPath = dirName / s_manifestFileName;
+    boost::filesystem::path manifestPath = dirName / s_manifestFileName;
 
     std::string manifestContents;
 
     // read file
     if (!bp::strutil::loadFromFile(manifestPath, manifestContents)) {
         error.append("Couldn't read '");
-        error.append(manifestPath.externalUtf8());
+        error.append(manifestPath.string());
         error.append("'");
         return false;
     }
@@ -370,7 +370,7 @@ service::Summary::detectService(const bp::file::Path &dirName,
     // now set the modtime
     try {
         m_modDate.set(boost::filesystem::last_write_time(manifestPath));
-    } catch (const bp::file::tFileSystemError&) {
+    } catch (const boost::filesystem::filesystem_error&) {
         m_modDate.set(0);
     }
 
@@ -390,12 +390,12 @@ service::Summary::detectService(const bp::file::Path &dirName,
     // is a parseable version, if it isn't then we assume that this
     // service isn't in a <name>/<version> dir, and leave these two
     // members empty.
-    std::string versionCandidate = bp::file::utf8FromNative(dirName.filename());
+    std::string versionCandidate = dirName.filename().string();
     bp::SemanticVersion sv;
 
     if (!versionCandidate.empty() && sv.parse(versionCandidate)) {
         m_version = versionCandidate;     
-        m_name = bp::file::utf8FromNative(dirName.parent_path().filename());
+        m_name = dirName.parent_path().filename().string();
     } else {
         m_version.clear();
         m_name.clear();
@@ -413,11 +413,11 @@ service::Summary::modDate() const
 bool
 service::Summary::outOfDate() const
 {
-    bp::file::Path manifestPath = m_path / s_manifestFileName;
+    boost::filesystem::path manifestPath = m_path / s_manifestFileName;
     BPTime t((long)0);
     try {
         t.set(boost::filesystem::last_write_time(manifestPath));
-    } catch (const bp::file::tFileSystemError&) {
+    } catch (const boost::filesystem::filesystem_error&) {
         t.set(0);
     }
     return (0 != m_modDate.compare(t));
@@ -481,7 +481,7 @@ service::Summary::setLocalizations(std::map<std::string,
     m_localizations = l;
 }
 
-bp::file::Path
+boost::filesystem::path
 service::Summary::serviceLibraryPath() const
 {
     return m_serviceLibraryPath;
@@ -580,7 +580,7 @@ std::string
 bp::service::Summary::toHumanReadableString() const
 {
     std::stringstream ss;
-    ss << "Summary for service: " << path().utf8() << std::endl;
+    ss << "Summary for service: " << path() << std::endl;
     if (!m_name.empty()) {
         ss << "  " << m_name;
         if (!m_version.empty()) ss << "/" << m_version;

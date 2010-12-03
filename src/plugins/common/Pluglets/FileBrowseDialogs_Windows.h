@@ -44,12 +44,12 @@ struct FileOpenDialogParms
 // return false on error.
 // User cancel is not considered an error.
 bool runFileOpenDialog(const FileOpenDialogParms& parms,
-                       std::vector<bp::file::Path>& vPaths);
+                       std::vector<boost::filesystem::path>& vPaths);
 
 // return false on error.
 // User cancel is not considered an error.
 bool runFileOpenDialogXP(const FileOpenDialogParms& parms,
-                         std::vector<bp::file::Path>& vPaths);
+                         std::vector<boost::filesystem::path>& vPaths);
 
 
 struct FileSaveDialogParms
@@ -64,5 +64,5 @@ struct FileSaveDialogParms
 // return false on error.
 // User cancel is not considered an error.
 bool runFileSaveDialog(const FileSaveDialogParms& parms,
-                       bp::file::Path& path);
+                       boost::filesystem::path& path);
 

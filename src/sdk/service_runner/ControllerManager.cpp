@@ -98,7 +98,7 @@ void
 ControllerManager::onPrompt(ServiceRunner::Controller *,
                             unsigned int,
                             unsigned int promptId,
-                            const bp::file::Path & pathToDialog,
+                            const boost::filesystem::path & pathToDialog,
                             const bp::Object * arguments)
 {
     bp::Map m;

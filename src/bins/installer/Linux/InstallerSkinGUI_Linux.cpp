@@ -28,7 +28,7 @@
 #include <sstream>
 #include <iostream>
 
-InstallerSkinGUI::InstallerSkinGUI(const bp::file::Path & uiDirectory)
+InstallerSkinGUI::InstallerSkinGUI(const boost::filesystem::path & uiDirectory)
 		: m_uiDirectory(uiDirectory)
 {
 }

@@ -25,13 +25,14 @@
 #include "BPUtils/bpfile.h"
 #include "BPUtils/bpstrutil.h"
 
+namespace bfs = boost::filesystem;
 
 CPPUNIT_TEST_SUITE_REGISTRATION(MimeTypeTest);
 
 void
 MimeTypeTest::goodExt()
 {
-    bp::file::Path p("/Users/foo/bar.jpe");
+    bfs::path p("/Users/foo/bar.jpe");
     std::vector<std::string> t = bp::file::mimeTypes(p);
     CPPUNIT_ASSERT(count(t.begin(), t.end(), "image/jpeg") > 0);
     p = "/Users/foo/bar.jpeg";
@@ -49,7 +50,7 @@ MimeTypeTest::goodExt()
 void
 MimeTypeTest::badExt()
 {
-    bp::file::Path p("/Users/foo/bar.wtf");
+    bfs::path p("/Users/foo/bar.wtf");
     std::vector<std::string> t = bp::file::mimeTypes(p);
     CPPUNIT_ASSERT(count(t.begin(), t.end(), "application/unknown") > 0);
 }
@@ -58,7 +59,7 @@ MimeTypeTest::badExt()
 void
 MimeTypeTest::noExt()
 {
-    bp::file::Path p("/Users/foo/bar");
+    bfs::path p("/Users/foo/bar");
     std::vector<std::string> t = bp::file::mimeTypes(p);
     CPPUNIT_ASSERT(count(t.begin(), t.end(), "application/unknown") > 0);
 }
@@ -96,20 +97,20 @@ MimeTypeTest::noType()
 void 
 MimeTypeTest::chaseLink()
 {
-    bp::file::Path dir = bp::file::getTempPath(bp::file::getTempDirectory(), "MimeTypeTest");
-    CPPUNIT_ASSERT(bp::file::remove(dir));
+    bfs::path dir = bp::file::getTempPath(bp::file::getTempDirectory(), "MimeTypeTest");
+    CPPUNIT_ASSERT(bp::file::safeRemove(dir));
     CPPUNIT_ASSERT(boost::filesystem::create_directories(dir));
 
-    bp::file::Path linkPath = dir / "myLink.lnk";
+    bfs::path linkPath = dir / "myLink.lnk";
 
     // link to jpeg should be application/x-link,
     // chasing link should give image/jpeg
-    bp::file::Path path = dir / "foo.jpg";
+    bfs::path path = dir / "foo.jpg";
     CPPUNIT_ASSERT(bp::strutil::storeToFile(path, "hello world"));
     CPPUNIT_ASSERT(bp::file::createLink(linkPath, path));
     std::vector<std::string> t = bp::file::mimeTypes(linkPath);
     CPPUNIT_ASSERT(count(t.begin(), t.end(), bp::file::kLinkMimeType) > 0);
-    bp::file::Path resolved;
+    bfs::path resolved;
     CPPUNIT_ASSERT(bp::file::resolveLink(linkPath, resolved));
     CPPUNIT_ASSERT(boost::filesystem::equivalent(resolved, path));
     t = bp::file::mimeTypes(resolved);
@@ -117,9 +118,9 @@ MimeTypeTest::chaseLink()
     
     // link to folder should be application/x-link,
     // chasing link should give application/x-folder
-    bp::file::Path newDir = dir / "myDir";
+    bfs::path newDir = dir / "myDir";
     boost::filesystem::create_directories(newDir);
-    CPPUNIT_ASSERT(bp::file::remove(linkPath));
+    CPPUNIT_ASSERT(bp::file::safeRemove(linkPath));
     CPPUNIT_ASSERT(bp::file::createLink(linkPath, newDir));
     t = bp::file::mimeTypes(linkPath);
     CPPUNIT_ASSERT(count(t.begin(), t.end(), bp::file::kLinkMimeType) > 0);
@@ -129,19 +130,19 @@ MimeTypeTest::chaseLink()
     CPPUNIT_ASSERT(count(t.begin(), t.end(), bp::file::kFolderMimeType) > 0);
     
     // broken link should be application/x-badlink
-    bp::file::remove(linkPath);
+    bp::file::safeRemove(linkPath);
     CPPUNIT_ASSERT(bp::file::createLink(linkPath, dir/"i_do_not_exist"));
     t = bp::file::mimeTypes(linkPath);
     CPPUNIT_ASSERT(count(t.begin(), t.end(), bp::file::kBadLinkMimeType) > 0);
     
-    bp::file::remove(dir);
+    bp::file::safeRemove(dir);
 }
 
 
 void
 MimeTypeTest::registeredType()
 {
-    bp::file::Path p("/Users/foo/foo.xls");
+    bfs::path p("/Users/foo/foo.xls");
     std::vector<std::string> t = bp::file::mimeTypes(p);
     CPPUNIT_ASSERT(t[0] == "application/vnd.ms-excel");
     p = "/Users/foo/foo.ppt";

@@ -32,7 +32,7 @@
 class CommandExecutor : public CommandHandler
 {
   public:
-    CommandExecutor(const std::string & loglevel, const bp::file::Path& logfile);
+    CommandExecutor(const std::string & loglevel, const boost::filesystem::path& logfile);
 
     ~CommandExecutor();    
 

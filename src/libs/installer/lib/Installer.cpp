@@ -74,16 +74,16 @@ const char* Installer::kServicesDownloading = "kServicesDownloading";
 const char* Installer::kNewerVersionInstalled = "kNewerVersionInstalled";
 
 string Installer::s_locale;
-bpf::Path Installer::s_stringsPath;
+bfs::path Installer::s_stringsPath;
 
-Installer::Installer(const bpf::Path& dir,
-                     const bpf::Path& logFile,
+Installer::Installer(const bfs::path& dir,
+                     const bfs::path& logFile,
                      bp::log::Level logLevel,
                      bool deleteWhenDone)
     : m_dir(dir), m_logFile(logFile), m_logLevel(logLevel),
       m_deleteWhenDone(deleteWhenDone)
 {
-    string versionString = bpf::utf8FromNative(m_dir.filename());
+    string versionString = m_dir.filename().string();
     if (!m_version.parse(versionString)) {
         BP_THROW("Bad version: " + versionString);
     }
@@ -92,7 +92,7 @@ Installer::Installer(const bpf::Path& dir,
                                  m_version.minorVer(),
                                  m_version.microVer());
 
-    bpf::Path platInfo = m_dir / "platformInfo.json";
+    bfs::path platInfo = m_dir / "platformInfo.json";
     utils::readPlatformInfo(platInfo);
 }
 
@@ -100,7 +100,7 @@ Installer::Installer(const bpf::Path& dir,
 Installer::~Installer()
 {
     if (m_deleteWhenDone) {
-        remove(m_dir);
+        bpf::safeRemove(m_dir);
     }
 }
 
@@ -114,7 +114,7 @@ Installer::run()
 
     sendProgress(0);
     
-    bpf::Path installingPath;
+    bfs::path installingPath;
     try {
         // Make sure that a newer version (within same major rev)
         // isn't installed
@@ -136,7 +136,7 @@ Installer::run()
                                              m_version.microVer());
         BPTime now;
         if (!bp::strutil::storeToFile(installingPath, now.asString())) {
-            BP_THROW(lastErrorString("unable to write " + installingPath.externalUtf8()));
+            BP_THROW(lastErrorString("unable to write " + installingPath.string()));
         }
 
         sendProgress(5);
@@ -171,11 +171,11 @@ Installer::run()
     } catch (const bp::error::Exception& e) {
         BPLOG_ERROR_STRM("Installer.run() catches " << e.what());
         sendError(e.what());
-    } catch (const bpf::tFileSystemError& e) {
+    } catch (const bfs::filesystem_error& e) {
         BPLOG_ERROR_STRM("Installer.run() catches " << e.what());
         sendError(e.what());
     }
-    (void) remove(installingPath);
+    (void) bpf::safeRemove(installingPath);
     sendProgress(100);
     sendDone();
 }
@@ -187,7 +187,7 @@ Installer::installDaemon()
     BPLOG_DEBUG("begin Installer::installDaemon");
 
     // Now update platform
-    bpf::Path productDir = getProductDirectory(m_version.majorVer(),
+    bfs::path productDir = getProductDirectory(m_version.majorVer(),
                                                m_version.minorVer(),
                                                m_version.microVer());
 
@@ -195,26 +195,25 @@ Installer::installDaemon()
     // Then we use doCopy() to do the copy, which will "accept"
     // a failure as long as the src and dst files are identical.
     // This happens if windows has a file open (like the plugin).
-    bpf::Path daemonDir = m_dir / "daemon";
-    if (!remove(productDir)) {
+    bfs::path daemonDir = m_dir / "daemon";
+    if (!bpf::safeRemove(productDir)) {
         BPLOG_DEBUG_STRM("unable to delete " << productDir);
     }
     doCopy(daemonDir, productDir);  // throws on failure
 
     // Create copy of BrowserPlusCore as BrowserPlusService.
     // Can use hard link on unix
-    bpf::Path daemon = productDir / "BrowserPlusCore";
-    daemon = canonicalProgramPath(daemon);
-    bpf::Path svc = productDir / "BrowserPlusService";
-    svc = canonicalProgramPath(svc);
+    bfs::path daemon = productDir / "BrowserPlusCore";
+    daemon = bpf::canonicalProgramPath(daemon);
+    bfs::path svc = productDir / "BrowserPlusService";
+    svc = bpf::canonicalProgramPath(svc);
 #ifdef WIN32
     doCopy(daemon, svc);
 #else
     try {
         bfs::create_symlink(daemon, svc);
-    } catch(const bpf::tFileSystemError& e) {
-        BP_THROW("unable to create " + svc.externalUtf8()
-                 + ": " + e.what());
+    } catch(const bfs::filesystem_error& e) {
+        BP_THROW("unable to create " + svc.string() + ": " + e.what());
     }
 #endif
     BPLOG_DEBUG("complete Installer::installDaemon");
@@ -228,26 +227,26 @@ Installer::installPermissions()
 
     // Install new public keys if needed.  They are needed if
     // they are not found in the current keys.
-    bpf::Path newCertPath = m_dir / "permissions" / "BrowserPlus.crt";
-    if (bpf::exists(newCertPath)) {
+    bfs::path newCertPath = m_dir / "permissions" / "BrowserPlus.crt";
+    if (bpf::pathExists(newCertPath)) {
         bool needNewKeys = true;
         string newKeys;
         if (!bp::strutil::loadFromFile(newCertPath, newKeys)) {
-            BP_THROW(lastErrorString("unable to load keys from "
-                                     + newCertPath.externalUtf8()));
+            BP_THROW(lastErrorString("unable to load keys from " 
+                                     + newCertPath.string()));
         }
     
         string curKeys;
-        bpf::Path certPath = getCertFilePath();
-        if (bpf::exists(certPath)) {
+        bfs::path certPath = getCertFilePath();
+        if (bpf::pathExists(certPath)) {
             (void) bp::strutil::loadFromFile(certPath, curKeys);
             needNewKeys = (curKeys.find(newKeys) == string::npos);
         }
         if (needNewKeys) {
             curKeys.append(newKeys);
             if (!bp::strutil::storeToFile(certPath, curKeys)) {
-                BP_THROW(lastErrorString("unable to store keys to "
-                                         + certPath.externalUtf8()));
+                BP_THROW(lastErrorString("unable to store keys to " 
+                                         + certPath.string()));
             }
         }
     }
@@ -257,18 +256,18 @@ Installer::installPermissions()
                                                        m_version.microVer());
 
     // Now for domain permissions
-    vector<bpf::Path> files;
-    files.push_back(bpf::Path("updateDomainPermissions"));
-    files.push_back(bpf::Path("configDomainPermissions"));
+    vector<bfs::path> files;
+    files.push_back(bfs::path("updateDomainPermissions"));
+    files.push_back(bfs::path("configDomainPermissions"));
     for (unsigned int i = 0; i < files.size(); i++) {
-        bpf::Path path = m_dir / "permissions" / files[i];
+        bfs::path path = m_dir / "permissions" / files[i];
         string json;
-        if (!bpf::exists(path)) {
+        if (!bpf::pathExists(path)) {
             continue;
         }
         if (!bp::strutil::loadFromFile(path, json)) {
             BPLOG_WARN_STRM(lastErrorString("unable to load permissions from "
-                                            + path.externalUtf8()));
+                                            + path.string()));
             continue;
         }
         bp::Map* m = dynamic_cast<bp::Map*>(bp::Object::fromPlainJsonString(json));
@@ -304,12 +303,12 @@ Installer::installPermissions()
 
     try {
         // Now for auto-update permissions
-        bpf::Path path = m_dir / "permissions" / "configAutoUpdatePermissions";
-        if (bpf::exists(path)) {
+        bfs::path path = m_dir / "permissions" / "configAutoUpdatePermissions";
+        if (bpf::pathExists(path)) {
             string json;
             if (!bp::strutil::loadFromFile(path, json)) {
                 BP_THROW(lastErrorString("unable to load permissions from "
-                                         + path.externalUtf8()));
+                                         + path.string()));
             }
             bp::Map* m = dynamic_cast<bp::Map*>(bp::Object::fromPlainJsonString(json));
             if (!m) {
@@ -369,7 +368,7 @@ Installer::installPermissions()
 void
 Installer::installServices()
 {
-    bpf::Path servicesDir = m_dir / "services";
+    bfs::path servicesDir = m_dir / "services";
     BPLOG_DEBUG_STRM("begin Installer::installServices from "<< servicesDir);
 
     if (!bpf::isDirectory(servicesDir)) {
@@ -377,17 +376,16 @@ Installer::installServices()
         return;
     }
     try {
-        bpf::tDirIter sit_end;
-        for (bpf::tDirIter sit(servicesDir); sit != sit_end; ++sit) {
+        bfs::directory_iterator sit_end;
+        for (bfs::directory_iterator sit(servicesDir); sit != sit_end; ++sit) {
             try {
-                bpf::Path serviceInstaller = bpf::canonicalProgramPath(m_dir/"daemon"/"ServiceInstaller");
+                bfs::path serviceInstaller = bpf::canonicalProgramPath(m_dir/"daemon"/"ServiceInstaller");
                 if (serviceInstaller.empty()) {
                     throw "Unable to get service installer path";
                 }
-                bpf::tDirIter vit_end;
-                for (bpf::tDirIter vit(sit->path()); vit != vit_end; ++vit) {
+                bfs::directory_iterator vit_end;
+                for (bfs::directory_iterator vit(sit->path()); vit != vit_end; ++vit) {
                     // install by invoking service installer
-                    bpf::Path source(vit->path());
                     vector<string> args;
                     args.push_back("-f");
                     args.push_back("-v");
@@ -396,9 +394,9 @@ Installer::installServices()
                     args.push_back(bp::log::levelToString(m_logLevel));
                     if (!m_logFile.empty()) {
                         args.push_back("-logfile");
-                        args.push_back(m_logFile.externalUtf8());
+                        args.push_back(m_logFile.string());
                     }
-                    args.push_back(source.externalUtf8());
+                    args.push_back(vit->path().string());
                     stringstream ss;
                     ss << serviceInstaller;
                     for (size_t i = 0; i < args.size(); i++) {
@@ -419,16 +417,15 @@ Installer::installServices()
                     }
                 }
             } catch (const string& e) {
-                bpf::Path p(sit->path());
+                bfs::path p(sit->path());
                 BPLOG_WARN_STRM("unable to install " << p
                                 << ": " << e);
-            } catch (const bpf::tFileSystemError& e) {
-                bpf::Path p(sit->path());
-                BPLOG_WARN_STRM("unable to iterate thru " << p
+            } catch (const bfs::filesystem_error& e) {
+                BPLOG_WARN_STRM("unable to iterate thru " << sit->path()
                                 << ": " << e.what());
             }
         }
-    } catch (const bpf::tFileSystemError& e) {
+    } catch (const bfs::filesystem_error& e) {
         BPLOG_WARN_STRM("unable to iterate thru " << servicesDir   
                         << ": " << e.what());
     }
@@ -441,30 +438,30 @@ void
 Installer::installUninstaller()
 {
     BPLOG_DEBUG("begin Installer::installUninstaller");
-    bpf::Path dest = getUninstallerPath();
-    bpf::Path src = m_dir / dest.filename();
+    bfs::path dest = getUninstallerPath();
+    bfs::path src = m_dir / dest.filename();
     try {
         bfs::create_directories(dest.parent_path());
-    } catch(const bpf::tFileSystemError&) {
+    } catch (const bfs::filesystem_error&) {
         BP_THROW(lastErrorString("unable to create "
-            + bpf::Path(dest.parent_path()).externalUtf8()));
+                                 + dest.parent_path().string()));
     }
-    (void) remove(dest);
+    (void) bpf::safeRemove(dest);
     doCopy(src, dest);
 #ifdef WIN32
     // uninstall icon
     src = m_dir / "ybang.ico";
     dest = dest.parent_path() / "ybang.ico";
-    (void) remove(dest);
+    (void) bpf::safeRemove(dest);
     doCopy(src, dest);
 #endif
 #ifdef MAC
     // uninstaller has moved from ~/Applications, kill old one
-    bpf::Path ydir = bpf::Path(getenv("HOME")) / "Applications" / "Yahoo!";
-    bpf::Path s = ydir / "BrowserPlus";
-    (void) remove(s);
+    bfs::path ydir = bfs::path(getenv("HOME")) / "Applications" / "Yahoo!";
+    bfs::path s = ydir / "BrowserPlus";
+    (void) bpf::safeRemove(s);
     if (bpf::isDirectory(ydir) && bfs::is_empty(ydir)) {
-        (void) remove(ydir);
+        (void) bp::file::safeRemove(ydir);
     }
 #endif
     BPLOG_DEBUG("complete Installer::installUninstaller");
@@ -475,12 +472,12 @@ void
 Installer::allDone()
 {
     BPLOG_DEBUG("begin Installer::allDone");
-    bpf::Path installedPath = getBPInstalledPath(m_version.majorVer(),
+    bfs::path installedPath = getBPInstalledPath(m_version.majorVer(),
                                                  m_version.minorVer(),
                                                  m_version.microVer());
     BPTime now;
     if (!bp::strutil::storeToFile(installedPath, now.asString())) {
-        BP_THROW(lastErrorString("unable to write " + installedPath.externalUtf8()));
+        BP_THROW(lastErrorString("unable to write " + installedPath.string()));
     }
     BPLOG_DEBUG("complete Installer::allDone");
 }
@@ -541,34 +538,33 @@ Installer::getString(const char* key)
 
 
 void
-Installer::doCopy(const bpf::Path& src,
-                  const bpf::Path& dest)
+Installer::doCopy(const bfs::path& src,
+                  const bfs::path& dest)
 {
     BPLOG_DEBUG_STRM("doCopy: attempt to copy " << src
                      << " to " << dest);
-    if (!bpf::exists(src)) {
-        BP_THROW(lastErrorString(src.externalUtf8() + " does not exist"));
+    if (!bpf::pathExists(src)) {
+        BP_THROW(lastErrorString(src.string() + " does not exist"));
     }
     
     if (bpf::isDirectory(src)) {
         try {
             bfs::create_directories(dest);
-        } catch(const bpf::tFileSystemError&) {
-            BP_THROW(lastErrorString("unable to create " + dest.externalUtf8()));
+        } catch(const bfs::filesystem_error&) {
+            BP_THROW(lastErrorString("unable to create " + dest.string()));
         }
         try {
-            bpf::tRecursiveDirIter end;
-            for (bpf::tRecursiveDirIter it(src); it != end; ++it) {
-                bpf::Path srcPath = bpf::Path(it->path());
-                bpf::Path relPath = srcPath.relativeTo(src);
-                bpf::Path destPath = dest / relPath;
+            bfs::recursive_directory_iterator end;
+            for (bfs::recursive_directory_iterator it(src); it != end; ++it) {
+                bfs::path srcPath = it->path();
+                bfs::path relPath = bpf::relativeTo(srcPath, src);
+                bfs::path destPath = dest / relPath;
                 if (bpf::isRegularFile(srcPath)) {
                     doSingleFileCopy(srcPath, destPath);
                 }
             }
-        } catch (const bpf::tFileSystemError& e) {
-            BP_THROW("unable to iterate thru " + src.externalUtf8()
-                     + ": " + e.what());
+        } catch (const bfs::filesystem_error& e) {
+            BP_THROW("unable to iterate thru " + src.string() + ": " + e.what());
         }
     } else {
         doSingleFileCopy(src, dest);
@@ -579,39 +575,39 @@ Installer::doCopy(const bpf::Path& src,
 
 
 void
-Installer::doSingleFileCopy(const bpf::Path& src,
-                            const bpf::Path& dest)
+Installer::doSingleFileCopy(const bfs::path& src,
+                            const bfs::path& dest)
 {
     BPLOG_DEBUG_STRM("doSingleFileCopy(" << src << ", " << dest << ")");
 
-    if (!bpf::exists(src)) {
-        BP_THROW(lastErrorString(src.externalUtf8() + " does not exist"));
+    if (!bpf::pathExists(src)) {
+        BP_THROW(lastErrorString(src.string() + " does not exist"));
     }
-    bpf::Path destParent(dest.parent_path());
+    bfs::path destParent(dest.parent_path());
     try {
         bfs::create_directories(destParent);
-    } catch(const bpf::tFileSystemError&) {
-        BP_THROW(lastErrorString("unable to create " + destParent.externalUtf8()));
+    } catch(const bfs::filesystem_error&) {
+        BP_THROW(lastErrorString("unable to create " + destParent.string()));
     }
     
-    bpf::Path realDest = dest;
+    bfs::path realDest = dest;
     if (bpf::isDirectory(dest)) {
         realDest /= src.filename();
     }
 
     // first delete final dest.  copy() won't overwrite
-    if (remove(realDest)) {
+    if (bpf::safeRemove(realDest)) {
         // now copy source kid to dest
         BPLOG_DEBUG_STRM("copy " << src << " to " << realDest);
-        if (!copy(src, realDest)) {
-            BP_THROW(lastErrorString("unable to copy " + src.externalUtf8() 
-                                     + " to " + realDest.externalUtf8()));
+        if (!bpf::safeCopy(src, realDest)) {
+            BP_THROW(lastErrorString("unable to copy " + src.string()
+                                     + " to " + realDest.string()));
         }
     } else {
         // Hrm, can't delete destination.  That's ok if
         // it's identical to the source.
-        string msg = "unable to copy " + src.externalUtf8()
-            + " -> " + realDest.externalUtf8();
+        string msg = "unable to copy " + src.string()
+                     + " -> " + realDest.string();
         if (filesAreIdentical(src, realDest)) {
             BPLOG_DEBUG_STRM(msg + ", but files are identical");
         } else {
@@ -623,8 +619,8 @@ Installer::doSingleFileCopy(const bpf::Path& src,
 
 
 bool
-Installer::filesAreIdentical(const bpf::Path& f1,
-                             const bpf::Path& f2)
+Installer::filesAreIdentical(const bfs::path& f1,
+                             const bfs::path& f2)
 {
     bool rval = false;
 
@@ -638,8 +634,8 @@ Installer::filesAreIdentical(const bpf::Path& f1,
     // read files into buffers, compare the buffers
     //
     int fd1 = -1, fd2 = -1;
-    bpf::tString f1Ext = f1.external_file_string();
-    bpf::tString f2Ext = f2.external_file_string();
+    bfs::path::string_type f1Ext = f1.native();
+    bfs::path::string_type f2Ext = f2.native();
     unsigned char* buf1 = NULL;
     unsigned char* buf2 = NULL;
     try {
@@ -650,35 +646,35 @@ Installer::filesAreIdentical(const bpf::Path& f1,
 
         if (::_wsopen_s(&fd1, f1Ext.c_str(), _O_BINARY | _O_RDONLY,
                         _SH_DENYNO, _S_IREAD) != 0) {
-            BP_THROW("unable to open " + f1.externalUtf8());
+            BP_THROW("unable to open " + f1.string());
         }
         if (::_wsopen_s(&fd2, f2Ext.c_str(), _O_BINARY | _O_RDONLY,
                         _SH_DENYNO, _S_IREAD) != 0) {
-            BP_THROW("unable to open " + f2.externalUtf8());
+            BP_THROW("unable to open " + f2.string());
         }
 #else
         fd1 = ::open(f1Ext.c_str(), O_RDONLY);
         if (fd1 < 0) {
-            BP_THROW("unable to open " + f1.externalUtf8());
+            BP_THROW("unable to open " + f1.string());
         }
         fd2 = ::open(f2Ext.c_str(), O_RDONLY);
         if (fd2 < 0) {
-            BP_THROW("unable to open " + f2.externalUtf8());
+            BP_THROW("unable to open " + f2.string());
         }
 #endif
         buf1 = new unsigned char[f1Size];
         if (buf1 == NULL) {
-            BP_THROW("unable to allocate buffer for " + f1.externalUtf8());
+            BP_THROW("unable to allocate buffer for " + f1.string());
         }
         buf2 = new unsigned char[f2Size];
         if (buf2 == NULL) {
-            BP_THROW("unable to allocate buffer for " + f2.externalUtf8());
+            BP_THROW("unable to allocate buffer for " + f2.string());
         }
         if (::read(fd1, buf1, f1Size) != f1Size) {
-            BP_THROW("unable to read " + f1.externalUtf8());
+            BP_THROW("unable to read " + f1.string());
         }
         if (::read(fd2, buf2, f2Size) != f2Size) {
-            BP_THROW("unable to read " + f2.externalUtf8());
+            BP_THROW("unable to read " + f2.string());
         }
         rval = ::memcmp(buf1, buf2, f1Size) == 0;
     } catch (const bp::error::Exception& e) {
@@ -697,12 +693,12 @@ void
 Installer::removePlatform(const bp::SemanticVersion& version)
 {
     // "uninstall" platform
-    bpf::Path installedPath = getBPInstalledPath(version.majorVer(),
+    bfs::path installedPath = getBPInstalledPath(version.majorVer(),
                                                  version.minorVer(),
                                                  version.microVer());
     BPLOG_DEBUG_STRM("removePlatform " << version.asString()
                      << " tries to remove " << installedPath);
-    (void) bpf::remove(installedPath);
+    (void) bpf::safeRemove(installedPath);
 
     // Make sure that plugins aren't found by browsers
     disablePlugins(version);

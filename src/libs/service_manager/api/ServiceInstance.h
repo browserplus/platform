@@ -90,7 +90,7 @@ public:
                         const bp::Object & results);
     void sendUserPrompt(
         unsigned int cookie,
-        const bp::file::Path & pathToHTMLDialog,
+        const boost::filesystem::path & pathToHTMLDialog,
         const bp::Object * arguments);  
 
     void onHop(void * ctx);

@@ -142,7 +142,7 @@ namespace bp {
          * \param  sOut String to load
          * \return true iff successful.
          */
-        bool loadFromFile(const bp::file::Path& path,
+        bool loadFromFile(const boost::filesystem::path& path,
                           std::string& sOut);
 
         /**
@@ -152,7 +152,7 @@ namespace bp {
          * \param  sIn String to store
          * \return true iff successful.
          */
-        bool storeToFile(const bp::file::Path& path,
+        bool storeToFile(const boost::filesystem::path& path,
                          const std::string& sIn);
     };
 };

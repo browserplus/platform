@@ -32,7 +32,7 @@ HTMLRenderTest::JavascriptRunner::~JavascriptRunner()
 }
 
 void 
-HTMLRenderTest::JavascriptRunner::run(const bp::file::Path & path,
+HTMLRenderTest::JavascriptRunner::run(const boost::filesystem::path & path,
                                       bp::html::ScriptableObject & so,
                                       const std::string & soName)
 {

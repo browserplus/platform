@@ -37,23 +37,22 @@ PendingUpdateCache::cached()
 {
     std::list<bp::service::Summary> currentServices;
 
-    std::stack<bp::file::Path> dirStack;
+    std::stack<boost::filesystem::path> dirStack;
 
     dirStack.push(bp::paths::getServiceCacheDirectory());
     
     while (dirStack.size() > 0) {
-        bp::file::Path path(dirStack.top());
+        boost::filesystem::path path(dirStack.top());
         dirStack.pop();
 
         if (bp::file::isDirectory(path)) {
             try {
-                bp::file::tDirIter end;
-                for (bp::file::tDirIter it(path); it != end; ++it) {            
-                    bp::file::Path p(it->path());
+                boost::filesystem::directory_iterator end;
+                for (boost::filesystem::directory_iterator it(path); it != end; ++it) {            
+                    boost::filesystem::path p(it->path());
                     
                     // silently skip dot directories
-                    bp::file::tString dot = bp::file::nativeFromUtf8(".");
-                    if (p.filename().compare(0, 1, dot) == 0) continue;
+                    if (p.filename().string().compare(0, 1, ".") == 0) continue;
                     
                     if (!bp::file::isDirectory(p)) continue;
                     
@@ -72,7 +71,7 @@ PendingUpdateCache::cached()
                     BPLOG_DEBUG_STRM("yes, push summary: " << summary.toHumanReadableString());
                     currentServices.push_back(summary);
                 }
-            } catch (bp::file::tFileSystemError& e) {
+            } catch (boost::filesystem::filesystem_error& e) {
                 BPLOG_WARN_STRM("unable to iterate thru " << path
                                 << ": " << e.what());
             }
@@ -87,7 +86,7 @@ PendingUpdateCache::save(std::string name, std::string version,
                          const std::vector<unsigned char> & buf)
 {
     // unpack, aborting everything if this fails.
-    bp::file::Path dest = bp::paths::getServiceCacheDirectory() / name / version;
+    boost::filesystem::path dest = bp::paths::getServiceCacheDirectory() / name / version;
     ServiceUnpacker unpacker(buf);
     std::string errMsg;
     if (!unpacker.unpackTo(dest, errMsg)) {
@@ -102,14 +101,14 @@ PendingUpdateCache::save(std::string name, std::string version,
 bool
 PendingUpdateCache::purge()
 {
-    return bp::file::remove(
+    return bp::file::safeRemove(
         bp::paths::getServiceCacheDirectory());
 }
 
 bool
 PendingUpdateCache::install(std::string name, std::string version)
 {
-    bp::file::Path source = bp::paths::getServiceCacheDirectory() / name / version;
+    boost::filesystem::path source = bp::paths::getServiceCacheDirectory() / name / version;
     BPLOG_DEBUG_STRM("cached service install from " << source);
     if (!bp::file::isDirectory(source)) return false;
 
@@ -122,7 +121,7 @@ PendingUpdateCache::install(std::string name, std::string version)
         BPLOG_ERROR_STRM("cached service install " << name
                          << " / " << version << " failed : " << errMsg);
     }
-    (void) bp::file::remove(source);
+    (void) bp::file::safeRemove(source);
     return rval;
 }
 

@@ -55,8 +55,8 @@ namespace ServiceRunner
     // a non-empty path to the provider service will be provided on
     // success.  upon failure an empty string will be returned with
     // 'err' populated with a human readable error message
-    bp::file::Path determineProviderPath(const bp::service::Summary & summary,
-                                         std::string & err);
+    boost::filesystem::path determineProviderPath(const bp::service::Summary & summary,
+                                                  std::string & err);
 
     class IControllerListener  
     {
@@ -97,7 +97,7 @@ namespace ServiceRunner
         virtual void onPrompt(class Controller * c,
                               unsigned int instanceId,
                               unsigned int promptId,
-                              const bp::file::Path & pathToDialog,
+                              const boost::filesystem::path & pathToDialog,
                               const bp::Object * arguments) = 0;
         virtual void onInstallHook(class Controller * c,
                                    int code) = 0;
@@ -132,14 +132,14 @@ namespace ServiceRunner
          * Instantiate a Controller for a service.  Path is explicitly
          * provided.
          */
-        Controller(const bp::file::Path & pathToService);
+        Controller(const boost::filesystem::path & pathToService);
 
         ~Controller();
         
         // valid after constructor invoked with the full path to the
         // service.  Depending on the constructor invoked this is either
         // calculated or specified.
-        bp::file::Path path() { return m_path; }
+        boost::filesystem::path path() { return m_path; }
 
         // return the name of the service we manage.
         // This is currently only valid after IPC connection succeeds
@@ -169,11 +169,11 @@ namespace ServiceRunner
         //
         // serviceTitle will be set as the name of the child process as
         // visible through 'ps' and friends
-        bool run(const bp::file::Path & pathToHarness,
-                 const bp::file::Path & pathToProvider,
+        bool run(const boost::filesystem::path & pathToHarness,
+                 const boost::filesystem::path & pathToProvider,
                  const std::string & serviceTitle,
                  const std::string & logLevel,
-                 const bp::file::Path & logFile, 
+                 const boost::filesystem::path & logFile, 
                  std::string & err);
 
         // get a description of the service
@@ -184,8 +184,8 @@ namespace ServiceRunner
         // onAllocated call.
         // returns ((unsigned int) -1) on failure
         unsigned int allocate(const std::string & uri,
-                              const bp::file::Path & data_dir,
-                              const bp::file::Path & temp_dir,
+                              const boost::filesystem::path & data_dir,
+                              const boost::filesystem::path & temp_dir,
                               const std::string & locale,
                               const std::string & userAgent,
                               unsigned int clientPid);
@@ -201,12 +201,12 @@ namespace ServiceRunner
 
         // Invoke a service's installHook if present (v5 and later)
         // In all cases, listener's onUninstallHook will be called
-        void installHook(const bp::file::Path& serviceDir,
-                         const bp::file::Path& tempDir);
+        void installHook(const boost::filesystem::path& serviceDir,
+                         const boost::filesystem::path& tempDir);
 
         // invoke a service's uninstallHook if present (v5 and later)
-        void uninstallHook(const bp::file::Path& serviceDir,
-                           const bp::file::Path& tempDir);
+        void uninstallHook(const boost::filesystem::path& serviceDir,
+                           const boost::filesystem::path& tempDir);
 
         // send a user's response to an html prompt
         void sendResponse(unsigned int promptId,
@@ -230,7 +230,7 @@ namespace ServiceRunner
         std::string m_service;
         std::string m_version;
         unsigned int m_apiVersion;
-        bp::file::Path m_path;
+        boost::filesystem::path m_path;
         int m_pid;
         bp::process::spawnStatus m_spawnStatus;
         
@@ -288,7 +288,7 @@ namespace ServiceRunner
 
         // Temp dirs that were provided to instances.
         // We purge at end in case service does not.
-        std::vector<bp::file::Path> m_tempDirs;
+        std::vector<boost::filesystem::path> m_tempDirs;
 
         // Forced breakpoints (outside of bp.config).
         std::list<std::string> m_breakpoints;

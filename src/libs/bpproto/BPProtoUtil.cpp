@@ -34,7 +34,7 @@ bool startupDaemon(bp::process::spawnStatus& spawnStatus)
 {
     BPLOG_INFO("starting daemon --");
 
-    bp::file::Path binaryPath = bp::paths::getDaemonPath();
+    boost::filesystem::path binaryPath = bp::paths::getDaemonPath();
     BPLOG_INFO_STRM("path to binary: " << binaryPath);
 
     // execute the process

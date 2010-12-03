@@ -41,20 +41,20 @@ class Extract
     Extract();
     ~Extract();    
     // open a tarfile
-    bool open(const bp::file::Path& tarFile);
+    bool open(const boost::filesystem::path& tarFile);
     // load a tarfile that's already in memory
     bool load(const std::string& tarData);
     // list all contents of a tarfile (a vector of relative path strings
     // is returned)
-    std::vector<bp::file::Path> enumerateContents();
+    std::vector<boost::filesystem::path> enumerateContents();
     // extract a single element of a tarfile to a stream,
     // itemName is the name of the element in the tarfile
-    bool extractSingle(const bp::file::Path& itemName,
+    bool extractSingle(const boost::filesystem::path& itemName,
                        std::ostream & os);
     // close a tarfile
     bool close();    
     // extract all contents to a named destination directory
-    bool extract(const bp::file::Path& destDir);
+    bool extract(const boost::filesystem::path& destDir);
 
     
   private:
@@ -75,7 +75,7 @@ class Create
     Create();
     ~Create();    
     // create a new tarfile
-    bool open(const bp::file::Path& tarFile);
+    bool open(const boost::filesystem::path& tarFile);
     // close a tarfile
     bool close();    
     // add a file to the tarball.  fileToAdd should be an absolute path,
@@ -84,8 +84,8 @@ class Create
     // "fileToAdd".
     //
     // returns false on failure, true on success.
-    bool addFile(const bp::file::Path& fileToAdd,
-                 const bp::file::Path& fileNameInTar);
+    bool addFile(const boost::filesystem::path& fileToAdd,
+                 const boost::filesystem::path& fileNameInTar);
 
   private:
     static int writeCloseCallback(void *, bp::tar::Create * cobj);

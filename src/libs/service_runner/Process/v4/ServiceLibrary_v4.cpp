@@ -36,6 +36,7 @@ using namespace std;
 using namespace std::tr1;
 using namespace ServiceRunner;
 namespace bpf = bp::file;
+namespace bfs = boost::filesystem;
 
 // BEGIN call-in points for dynamically loaded services
 
@@ -202,9 +203,8 @@ ServiceLibrary_v4::setupServiceLogging()
 
     bp::log::Destination dest = cfg.getDestination();
     if (dest == bp::log::kDestFile) {
-        string fileName = name().empty() ? "service" : name();
-        bpf::Path p(fileName);
-        p.replace_extension(bpf::nativeFromUtf8("log"));
+        bfs::path p(name().empty() ? "service" : name());
+        p.replace_extension("log");
         cfg.setPath(p);
     }
 	else if (dest == bp::log::kDestConsole) {
@@ -504,8 +504,8 @@ ServiceLibrary_v4::load(const bp::service::Summary &summary,
 
     // now let's determine the path to the shared library.  For
     // dependent corelets this will be extracted from the manifest
-    bpf::Path path;
-    bpf::Path servicePath;
+    bfs::path path;
+    bfs::path servicePath;
     if (m_summary.type() == bp::service::Summary::Dependent) {
         servicePath = provider.path();
         path = provider.path() / provider.serviceLibraryPath();
@@ -515,12 +515,12 @@ ServiceLibrary_v4::load(const bp::service::Summary &summary,
     }
     path = bpf::canonicalPath(path);
     
-    BPLOG_INFO_STRM("loading v4 service library: " << bpf::utf8FromNative(path.filename()));
+    BPLOG_INFO_STRM("loading v4 service library: " << path.filename());
 
     {
         // set up the parameters to the initialize function
         bp::Map params;
-        params.add("CoreletDirectory", new bp::String(servicePath.utf8()));
+        params.add("CoreletDirectory", new bp::String(servicePath.generic_string()));
 
         if (funcTable == NULL || funcTable->initializeFunc == NULL)
         {
@@ -577,7 +577,7 @@ ServiceLibrary_v4::load(const bp::service::Summary &summary,
         // set up the parameters to the attach function
         bp::Map params;
         params.add("CoreletDirectory",
-                   new bp::String(m_summary.path().utf8()));
+                   new bp::String(m_summary.path().generic_string()));
 
         // add in arguments from dependent manifest
         std::map<std::string, std::string> summaryArgs =
@@ -592,7 +592,7 @@ ServiceLibrary_v4::load(const bp::service::Summary &summary,
         }
         params.add("Parameters", sargs);
 
-        bp::file::Path curdir;
+        boost::filesystem::path curdir;
 #ifdef WIN32
         wchar_t* cwd = _wgetcwd(NULL, 0);
 #else
@@ -646,8 +646,8 @@ ServiceLibrary_v4::shutdownService(bool callShutdown)
 }
 
 unsigned int
-ServiceLibrary_v4::allocate(std::string uri, bp::file::Path dataDir,
-                            bp::file::Path tempDir, std::string locale,
+ServiceLibrary_v4::allocate(std::string uri, boost::filesystem::path dataDir,
+                            boost::filesystem::path tempDir, std::string locale,
                             std::string userAgent, unsigned int clientPid)
 {
     unsigned int id = m_currentId++;
@@ -664,13 +664,13 @@ ServiceLibrary_v4::allocate(std::string uri, bp::file::Path dataDir,
 
     // set up (v4 sytle) arguments - they weren't AT ALL consistent :(
     is->context.add("uri", new bp::String(uri));
-    is->context.add("data_dir", new bp::String(dataDir.externalUtf8()));
-    is->context.add("temp_dir", new bp::String(tempDir.externalUtf8()));
+    is->context.add("data_dir", new bp::String(dataDir.string()));
+    is->context.add("temp_dir", new bp::String(tempDir.string()));
     is->context.add("locale", new bp::String(locale));
     is->context.add("userAgent", new bp::String(userAgent));
     is->context.add("clientPid", new bp::Integer(clientPid));
-    is->context.add("corelet_dir", new bp::String(m_summary.path().utf8()));
-    is->context.add("service_dir", new bp::String(m_summary.path().utf8()));
+    is->context.add("corelet_dir", new bp::String(m_summary.path().generic_string()));
+    is->context.add("service_dir", new bp::String(m_summary.path().generic_string()));
 
     is->cookie = NULL;
     is->attachID = m_attachId; 
@@ -772,16 +772,16 @@ ServiceLibrary_v4::invoke(unsigned int id, unsigned int tid,
 
 
 int
-ServiceLibrary_v4::installHook(const bp::file::Path&,
-                               const bp::file::Path&)
+ServiceLibrary_v4::installHook(const boost::filesystem::path&,
+                               const boost::filesystem::path&)
 {
     return 0;
 }
 
 
 int
-ServiceLibrary_v4::uninstallHook(const bp::file::Path&,
-                                 const bp::file::Path&)
+ServiceLibrary_v4::uninstallHook(const boost::filesystem::path&,
+                                 const boost::filesystem::path&)
 {
     return 0;
 }
@@ -878,7 +878,7 @@ ServiceLibrary_v4::onHop(void * context)
                     beginPrompt(ir->promptId, ir->tid, ir->responseCallback,
                                 ir->responseCookie);
                     m_listener->onPrompt(instance, ir->promptId,
-                                         bpf::Path(ir->dialogPath), 
+                                         bfs::path(ir->dialogPath),
                                          ir->o);
                 }
                 break;

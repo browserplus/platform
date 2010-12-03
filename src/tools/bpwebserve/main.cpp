@@ -42,6 +42,7 @@
 using namespace bp::http::server;
 using namespace bp::http;
 using namespace bp::file;
+namespace bfs = boost::filesystem;
 
 class DirHandler : public IHandler 
 {
@@ -53,7 +54,7 @@ public:
                         Response & response)
     {
         // translate request path into fs path
-        Path path(".");
+        bfs::path path(".");
         std::string urlPath = request.url.path();
         if (!urlPath.empty()) path /= urlPath;
 
@@ -66,17 +67,17 @@ public:
             }
         } else if (boost::filesystem::is_directory(path)) {
             response.body.append("<html><head><title>");
-            response.body.append("Contents of " + path.utf8());
+            response.body.append("Contents of " + path.generic_string());
             response.body.append("</title></head><body>");
-            response.body.append("<h2>Index of " + path.utf8() + "</h2>");        
+            response.body.append("<h2>Index of " + path.generic_string() + "</h2>");
             response.body.append("<hr><pre>\n"); 
             try {
-                tRecursiveDirIter end;
-                for (tRecursiveDirIter it(path); it != end; ++it) {
-                    Path pathToKid(it->path());
-                    Path relPath = pathToKid.relativeTo(path);
-                    std::string relStr = relPath.utf8();
-                    std::string urlToKid = request.url.path() + relPath.utf8();
+                bfs::recursive_directory_iterator end;
+                for (bfs::recursive_directory_iterator it(path); it != end; ++it) {
+                    bfs::path pathToKid = it->path();
+                    bfs::path relPath = relativeTo(pathToKid, path);
+                    std::string relStr = relPath.generic_string();
+                    std::string urlToKid = request.url.path() + relStr;
                     
                     unsigned int j;
                     
@@ -104,7 +105,7 @@ public:
                     BPTime t;
                     try {
                         t.set(boost::filesystem::last_write_time(pathToKid));
-                    } catch (const bp::file::tFileSystemError&) {
+                    } catch (const boost::filesystem::filesystem_error&) {
                         // empty
                     }
                     response.body.append(t.asString());
@@ -114,7 +115,7 @@ public:
                 }
                 
                 
-            } catch (const bp::file::tFileSystemError& ) {
+            } catch (const boost::filesystem::filesystem_error& ) {
                 // empty
             }
             
@@ -122,9 +123,9 @@ public:
         } else {
             response.status.setCode(Status::NOT_FOUND);
             response.body.append("<html><head><title>");
-            response.body.append("Not Found:" + path.utf8());
+            response.body.append("Not Found:" + path.generic_string());
             response.body.append("</title></head><body>");
-            response.body.append("Cannot find file: " + path.utf8());        
+            response.body.append("Cannot find file: " + path.generic_string());
             response.body.append("</body></html>");        
         }
         

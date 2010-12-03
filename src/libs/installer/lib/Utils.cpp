@@ -32,6 +32,7 @@ using namespace bp::strutil;
 using namespace bp::error;
 using namespace bp::install;
 namespace bpf = bp::file;
+namespace bfs = boost::filesystem;
 
 
 static vector<string> s_mimeTypes;
@@ -43,15 +44,15 @@ static string s_controlPanelGuid;
 #endif
 
 void 
-bp::install::utils::readPlatformInfo(const bpf::Path& path)
+bp::install::utils::readPlatformInfo(const bfs::path& path)
 {
     bp::config::ConfigReader reader;
     if (!reader.load(path)) {
-        BP_THROW("Unable to load " + path.externalUtf8());
+        BP_THROW("Unable to load " + path.string());
     }
     list<string> strList;
     if (!reader.getArrayOfStrings("mimeTypes", strList)) {
-        BP_THROW("Unable to read mimeTypes from " + path.externalUtf8());
+        BP_THROW("Unable to read mimeTypes from " + path.string());
     }
     list<string>::const_iterator it;
     for (it = strList.begin(); it != strList.end(); ++it) {
@@ -61,34 +62,33 @@ bp::install::utils::readPlatformInfo(const bpf::Path& path)
     }
 #ifdef WIN32
     if (!reader.getStringValue("activeXGuid", s_activeXGuid)) {
-        BP_THROW("Unable to read activeXGuid from " + path.externalUtf8());
+        BP_THROW("Unable to read activeXGuid from " + path.string());
     }
     if (!reader.getStringValue("typeLibGuid", s_typeLibGuid)) {
-        BP_THROW("Unable to read typeLibGuid from " + path.externalUtf8());
+        BP_THROW("Unable to read typeLibGuid from " + path.string());
     }
     if (!reader.getStringValue("controlPanelGuid", s_controlPanelGuid)) {
-        BP_THROW("Unable to read controlPanelGuid from " + path.externalUtf8());
+        BP_THROW("Unable to read controlPanelGuid from " + path.string());
     }
 #endif
 
     // determine what other versions of this major rev exist on disk
-    bpf::Path dir = getProductTopDirectory();
+    bfs::path dir = getProductTopDirectory();
     if (bpf::isDirectory(dir)) {
-        bpf::tDirIter end;
+        bfs::directory_iterator end;
         try {
-            for (bpf::tDirIter it(dir); it != end; ++it) {
-                string s = bpf::utf8FromNative(it->filename());
+            for (bfs::directory_iterator it(dir); it != end; ++it) {
                 bp::SemanticVersion version;
-                if (version.parse(s)) {
-                    bpf::Path installedPath = getBPInstalledPath(version.majorVer(),
+                if (version.parse(it->path().filename().string())) {
+                    bfs::path installedPath = getBPInstalledPath(version.majorVer(),
                                                                  version.minorVer(),
                                                                  version.microVer());
-                    if (bpf::exists(installedPath)) {
+                    if (bpf::pathExists(installedPath)) {
                         s_installedVersions.push_back(version);
                     }
                 }
             }
-        } catch (const bp::file::tFileSystemError& e) {
+        } catch (const bfs::filesystem_error& e) {
             BPLOG_WARN_STRM("unable to iterate thru " << dir
                             << ": " << e.what());
         }

@@ -148,7 +148,7 @@ static std::string s_singleFileContents("this is a test file.  It's"
 
 // create a directory and hierarchy under it with test data files
 static
-bool createDirectoryTestData(const bpf::Path & dirPath)
+bool createDirectoryTestData(const bfs::path & dirPath)
 {
     // create the directory
     if (!bfs::create_directories(dirPath)) {
@@ -156,13 +156,13 @@ bool createDirectoryTestData(const bpf::Path & dirPath)
     }
     
     // create a single file underneath
-    bpf::Path singleFilePath = dirPath / "singlefile";
+    bfs::path singleFilePath = dirPath / "singlefile";
     if (!bp::strutil::storeToFile(singleFilePath, s_singleFileContents)) {
         return false;
     }
 
     // create a read only file
-    bpf::Path readOnlyFilePath = dirPath / "readonly.foo";
+    bfs::path readOnlyFilePath = dirPath / "readonly.foo";
     if (!bp::strutil::storeToFile(readOnlyFilePath, std::string("foo"))) {
         return false;
     }
@@ -173,7 +173,7 @@ bool createDirectoryTestData(const bpf::Path & dirPath)
     }
 
     // create a nested file
-    bpf::Path nestedFilePath = dirPath/"levelone"/"leveltwo"/"levelthree"/"thefile.txt";
+    bfs::path nestedFilePath = dirPath/"levelone"/"leveltwo"/"levelthree"/"thefile.txt";
     if (!bfs::create_directories(nestedFilePath.parent_path())) {
         return false;
     }
@@ -187,13 +187,13 @@ bool createDirectoryTestData(const bpf::Path & dirPath)
 // validate that a directory hierarchy contains data properly generated
 // by createTestData
 static
-bool verifyDirectoryTestData(const bpf::Path & dirPath)
+bool verifyDirectoryTestData(const bfs::path & dirPath)
 {
     if (!bpf::isDirectory(dirPath)) return false;
 
     // verify existence and contents of top level file
     {
-        bpf::Path singleFilePath = dirPath / "singlefile";
+        bfs::path singleFilePath = dirPath / "singlefile";
         std::string fileContents;
         if (!bp::strutil::loadFromFile(singleFilePath, fileContents)) {
             return false;
@@ -205,7 +205,7 @@ bool verifyDirectoryTestData(const bpf::Path & dirPath)
 
     // verify existence and perms on  read only file
     {
-        bpf::Path readOnlyFilePath = dirPath / "readonly.foo";
+        bfs::path readOnlyFilePath = dirPath / "readonly.foo";
 
         bpf::FileInfo fi;
         if (!bpf::statFile(readOnlyFilePath, fi)) {
@@ -219,9 +219,9 @@ bool verifyDirectoryTestData(const bpf::Path & dirPath)
 
     // verify existence of nested file
     {
-        bpf::Path nestedFilePath = dirPath/"levelone"/"leveltwo"/"levelthree"/"thefile.txt";
+        bfs::path nestedFilePath = dirPath/"levelone"/"leveltwo"/"levelthree"/"thefile.txt";
 
-        if (!bpf::exists(nestedFilePath)) {
+        if (!bpf::pathExists(nestedFilePath)) {
             return false;
         }
     }
@@ -230,14 +230,14 @@ bool verifyDirectoryTestData(const bpf::Path & dirPath)
 }
 
 static
-bool createFileTestData(const bpf::Path & filePath)
+bool createFileTestData(const bfs::path & filePath)
 {
     return bp::strutil::storeToFile(filePath, s_testString);
 }
 
 
 static
-bool verifyFileTestData(const bpf::Path & filePath)
+bool verifyFileTestData(const bfs::path & filePath)
 {
     std::string str;
     if (!bp::strutil::loadFromFile(filePath, str)) {
@@ -339,12 +339,12 @@ BPKGTest::setUp()
 void
 BPKGTest::tearDown()
 {
-    (void) bpf::remove(m_testDirPath);
-    (void) bpf::remove(m_testFilePath);
-    (void) bpf::remove(m_keyFile);
-    (void) bpf::remove(m_certFile);
-    (void) bpf::remove(m_bpkgPath);
-    (void) bpf::remove(m_unpackPath);
-    (void) bpf::remove(m_baseDirPath.parent_path());
+    (void) bpf::safeRemove(m_testDirPath);
+    (void) bpf::safeRemove(m_testFilePath);
+    (void) bpf::safeRemove(m_keyFile);
+    (void) bpf::safeRemove(m_certFile);
+    (void) bpf::safeRemove(m_bpkgPath);
+    (void) bpf::safeRemove(m_unpackPath);
+    (void) bpf::safeRemove(m_baseDirPath.parent_path());
 }
 

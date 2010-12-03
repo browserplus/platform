@@ -42,14 +42,14 @@ class InstallProcessRunner : public bp::time::ITimerListener,
 
 {
   public:
-    InstallProcessRunner(const bp::file::Path& logPath,
+    InstallProcessRunner(const boost::filesystem::path& logPath,
                          const std::string& logLevel);
     virtual ~InstallProcessRunner();
 
     void setListener(std::tr1::weak_ptr<bp::install::IInstallerListener> listener);
                 
     // spawn BrowserPlusUpdater
-    void start(const bp::file::Path& dir,
+    void start(const boost::filesystem::path& dir,
                bool deleteWhenDone = false);
 
   private:
@@ -73,7 +73,7 @@ class InstallProcessRunner : public bp::time::ITimerListener,
     void onResponse(bp::ipc::Channel* c,
                     const bp::ipc::Response& response);
 
-    bp::file::Path m_logPath;
+    boost::filesystem::path m_logPath;
     std::string m_logLevel;
     std::tr1::weak_ptr<bp::install::IInstallerListener> m_listener;
     std::string m_ipcName;

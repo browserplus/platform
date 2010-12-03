@@ -311,7 +311,7 @@ InterceptDropManager::updateBounds()
 
 // handle mouse entering/exiting the browser window
 void
-InterceptDropManager::handleMouseEnter(const vector<bp::file::Path>& dragItems)
+InterceptDropManager::handleMouseEnter(const vector<boost::filesystem::path>& dragItems)
 {
     m_dragItems = dragItems;
     BPLOG_INFO_STRM(m_dragItems.size() << " drag items");

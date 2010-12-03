@@ -40,11 +40,11 @@ namespace DiskScanner {
     // along with their descriptions.  
     std::map<bp::service::Summary, bp::service::Description>
         scanDiskForServices(
-            const bp::file::Path & path,
+            const boost::filesystem::path & path,
             std::map<bp::service::Summary, bp::service::Description> lastScan,
             std::set<bp::service::Summary> running,
             const std::string & logLevel,
-            const bp::file::Path & logFile);
+            const boost::filesystem::path & logFile);
 };
 
 #endif 

@@ -61,12 +61,12 @@ namespace bfs = boost::filesystem;
 
 namespace bp { namespace file {
 
-static Path
-readLink(const Path& path)
+static bfs::path
+readLink(const bfs::path& path)
 {
-    Path rval;
+    bfs::path rval;
     char buf[PATH_MAX+1];
-    int r = ::readlink(path.external_file_string().c_str(), buf, sizeof(buf));
+    int r = ::readlink(path.c_str(), buf, sizeof(buf));
     if (r > 0) {
         int index = r < PATH_MAX ? r : PATH_MAX;
         buf[index] = '\0';
@@ -76,7 +76,7 @@ readLink(const Path& path)
     // aliases appear as regular files
     if (rval.empty()) {
         FSRef ref;
-        if (FSPathMakeRef((const UInt8*)path.external_file_string().c_str(),
+        if (FSPathMakeRef((const UInt8*)path.c_str(),
                           &ref, NULL) == noErr) {
             Boolean isFolder = false, wasAliased = false;
             (void) FSResolveAliasFile(&ref, true, &isFolder, &wasAliased);
@@ -116,10 +116,10 @@ stringRefToUTF8(CFStringRef cfStr)
 }
 
 
-Path
+bfs::path
 getTempDirectory()
 {
-    Path tempDir;
+    bfs::path tempDir;
     FSRef fref;
     OSErr err = FSFindFolder(kUserDomain, kTemporaryFolderType, 
                              kCreateFolder, &fref);
@@ -132,9 +132,7 @@ getTempDirectory()
             tempDir = stringRefToUTF8(ctmpDir);
             CFRelease(ctmpDir);
             CFRelease(tmpUrl);
-        }
-        else 
-        {
+        } else  {
             BP_THROW_FATAL("Can't get temp dir");
         }
     }
@@ -144,42 +142,28 @@ getTempDirectory()
     return tempDir;
 }
 #else
-Path
+bfs::path
 getTempDirectory()
 {
-    Path tempDir("/tmp/YahooBrowserPlus");
+    bfs::path tempDir("/tmp/YahooBrowserPlus");
     boost::filesystem::create_directories(tempDir);
     return tempDir;
 }
 #endif
 
 
-tString
-nativeFromUtf8(const string& s) 
+bfs::path
+getTempPath(const bfs::path& tempDir,
+            const string& prefix)
 {
-    return s;
-}
-
-
-string
-utf8FromNative(const tString& s) 
-{
-    return s;
-}
-
-
-Path
-getTempPath(const Path& tempDir,
-            const tString& prefix)
-{
-    Path rval;
-    Path p = tempDir / Path(prefix + "XXXXXX");
+    bfs::path rval;
+    bfs::path p = tempDir / bfs::path(prefix + "XXXXXX");
     char* tmpl = new char[p.string().size() + 1];
-    strcpy(tmpl, p.string().c_str());
+    strcpy(tmpl, p.c_str());
     char* s = ::mktemp(tmpl);
     if (!s) {
-        boost::system::error_code ec(errno, boost::system::system_category);
-        throw tFileSystemError("::mktemp fails", tempDir, Path(prefix), ec);
+        boost::system::error_code ec(errno, boost::system::system_category());
+        throw bfs::filesystem_error("::mktemp fails", tempDir, bfs::path(prefix), ec);
     }
     rval = s;
     delete[] s;
@@ -187,9 +171,9 @@ getTempPath(const Path& tempDir,
 }
 
 
-Path
-canonicalPath(const Path& path,
-              const Path& root)
+bfs::path
+canonicalPath(const bfs::path& path,
+              const bfs::path& root)
 {
     string rval;
     int cfd = -1;
@@ -199,13 +183,13 @@ canonicalPath(const Path& path,
             if (cfd < 0) {
                 throw string("unable to open .");
             }
-            if (::chdir(root.external_directory_string().c_str()) < 0) {
-                throw string("unable to chdir to " + root.externalUtf8());
+            if (::chdir(root.c_str()) < 0) {
+                throw string("unable to chdir to ") + root.c_str();
             }
         }
             
         char buf[PATH_MAX+1];
-        if (::realpath(path.external_file_string().c_str(), buf) == NULL) {
+        if (::realpath(path.c_str(), buf) == NULL) {
             throw string("realpath failed");
         }
         rval = buf;
@@ -220,9 +204,9 @@ canonicalPath(const Path& path,
 }
 
 
-Path
-canonicalProgramPath(const Path& path,
-                     const Path& root)
+bfs::path
+canonicalProgramPath(const bfs::path& path,
+                     const bfs::path& root)
 {
     // No action beyond canonicalName necessary on unix
     return canonicalPath(path, root);
@@ -230,11 +214,11 @@ canonicalProgramPath(const Path& path,
 
 
 bool 
-isSymlink(const Path& path)
+isSymlink(const bfs::path& path)
 {
     try {
         return bfs::is_symlink(path);
-    } catch(const tFileSystemError& e) {
+    } catch(const bfs::filesystem_error& e) {
         BPLOG_DEBUG_STRM("bfs::is_symlink(" << path << ") failed.");
         BPLOG_INFO_STRM("bfs::is_symlink failed: " << e.what() <<
                         ", returning false.");
@@ -244,7 +228,7 @@ isSymlink(const Path& path)
 
 
 bool 
-isLink(const Path& path)
+isLink(const bfs::path& path)
 {
     if (isSymlink(path)) {
         return true;
@@ -254,8 +238,7 @@ isLink(const Path& path)
     // aliases appear as regular files
     if (isRegularFile(path)) {
         FSRef ref;
-        if (FSPathMakeRef((const UInt8*)path.external_file_string().c_str(),
-                          &ref, NULL) == noErr) {
+        if (FSPathMakeRef((const UInt8*)path.c_str(), &ref, NULL) == noErr) {
             Boolean isAlias = false, isFolder = false;
             if (FSIsAliasFile(&ref, &isAlias, &isFolder) == noErr) {
                 return isAlias;
@@ -268,12 +251,12 @@ isLink(const Path& path)
 
 
 bool
-createLink(const Path& path,
-           const Path& target)
+createLink(const bfs::path& path,
+           const bfs::path& target)
 {
     try {
         bfs::create_symlink(target, path);
-    } catch(const bfs::basic_filesystem_error<bfs::path>& e) {
+    } catch(const bfs::filesystem_error& e) {
         BPLOG_WARN_STRM("createLink(" << path << ", "
                         << target << ") failed: "
                         << e.what());
@@ -284,14 +267,14 @@ createLink(const Path& path,
 
 
 bool
-resolveLink(const Path& path,
-            Path& target)
+resolveLink(const bfs::path& path,
+            bfs::path& target)
 {
     bool rval = false;
-    Path rstr = readLink(path);
+    bfs::path rstr = readLink(path);
     if (!rstr.empty()) {
         rstr = canonicalPath(rstr, path.parent_path());
-        rval = exists(rstr);
+        rval = pathExists(rstr);
     }
     if (rval) {
         target = rstr;
@@ -303,18 +286,17 @@ resolveLink(const Path& path,
 
 
 bool
-touch(const Path& path)
+touch(const bfs::path& path)
 {
-    if (exists(path)) {
-        return (utimes(path.external_file_string().c_str(), NULL) == 0);
+    if (pathExists(path)) {
+        return (utimes(path.c_str(), NULL) == 0);
     }
 
     if (!isDirectory(path.parent_path())) {
         return false;
     }
 
-    int fd = open(path.external_file_string().c_str(),
-                  O_EXCL | O_CREAT | O_WRONLY, 0644);
+    int fd = open(path.c_str(), O_EXCL | O_CREAT | O_WRONLY, 0644);
     if (fd < 0) return false;
     close(fd);
 
@@ -323,7 +305,7 @@ touch(const Path& path)
 
 
 bool
-statFile(const Path& p,
+statFile(const bfs::path& p,
          FileInfo& fi)
 {
     // init to zero
@@ -332,8 +314,7 @@ statFile(const Path& p,
 	if (p.empty()) return false;
 
     struct stat s;
-    tString nativePath = p.external_file_string();
-    if (::stat(nativePath.c_str(), &s) != 0) return false;
+    if (::stat(p.c_str(), &s) != 0) return false;
 
     // set times
 #ifdef MACOSX
@@ -361,28 +342,26 @@ statFile(const Path& p,
 
 
 bool
-setFileProperties(const Path& p,
+setFileProperties(const bfs::path& p,
                   const FileInfo& fi)
 {
 	if (p.empty()) return false;
 
-    tString nativePath = p.external_file_string();
-
-    chmod(nativePath.c_str(), fi.mode);
+    chmod(p.c_str(), fi.mode);
 
     // set file times
     try {
         bfs::last_write_time(p, fi.mtime);
-    } catch(const tFileSystemError&) {
+    } catch(const bfs::filesystem_error&) {
         // empty
     }
     return true;
 }
 
-Path
+bfs::path
 programPath()
 {
-    Path rv("");
+    bfs::path rv("");
 #ifdef MACOSX
     char pathbuf[PATH_MAX + 1];
     char real_executable[PATH_MAX + 1];
@@ -394,7 +373,7 @@ programPath()
 #else // MACOSX
     // NEEDSWORK.  No reliable implementation across Unices that I could find for now.
 #endif // MACOSX
-    return rv.canonical();
+    return canonical(rv);
 }
 
 
