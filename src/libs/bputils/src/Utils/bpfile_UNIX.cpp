@@ -50,6 +50,10 @@
 #include "api/BPLog.h"
 #include "api/bperrorutil.h"
 #else
+#define BPLOG_DEBUG(x)
+#define BPLOG_INFO(x)
+#define BPLOG_WARN(x)
+#define BPLOG_ERROR(x)
 #define BPLOG_DEBUG_STRM(x)
 #define BPLOG_INFO_STRM(x)
 #define BPLOG_WARN_STRM(x)
@@ -133,7 +137,9 @@ getTempDirectory()
             CFRelease(ctmpDir);
             CFRelease(tmpUrl);
         } else  {
-            BP_THROW_FATAL("Can't get temp dir");
+            boost::system::error_code ec(errno, boost::system::system_category());
+            throw bfs::filesystem_error("Can't get temp dir", bfs::path(),
+                                        bfs::path(), ec);
         }
     }
 

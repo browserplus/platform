@@ -41,6 +41,10 @@
 #include "api/BPLog.h"
 #include "api/bperrorutil.h"
 #else
+#define BPLOG_DEBUG(x)
+#define BPLOG_INFO(x)
+#define BPLOG_WARN(x)
+#define BPLOG_ERROR(x)
 #define BPLOG_DEBUG_STRM(x)
 #define BPLOG_INFO_STRM(x)
 #define BPLOG_WARN_STRM(x)
