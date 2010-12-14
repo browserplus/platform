@@ -394,9 +394,9 @@ Installer::installServices()
                     args.push_back(bp::log::levelToString(m_logLevel));
                     if (!m_logFile.empty()) {
                         args.push_back("-logfile");
-                        args.push_back(m_logFile.string());
+                        args.push_back(bpf::nativeUtf8String(m_logFile));
                     }
-                    args.push_back(vit->path().string());
+                    args.push_back(bpf::nativeUtf8String(vit->path()));
                     stringstream ss;
                     ss << serviceInstaller;
                     for (size_t i = 0; i < args.size(); i++) {
@@ -634,8 +634,8 @@ Installer::filesAreIdentical(const bfs::path& f1,
     // read files into buffers, compare the buffers
     //
     int fd1 = -1, fd2 = -1;
-    bfs::path::string_type f1Ext = f1.native();
-    bfs::path::string_type f2Ext = f2.native();
+    bfs::path::string_type f1Ext = bpf::nativeString(f1);
+    bfs::path::string_type f2Ext = bpf::nativeString(f2);
     unsigned char* buf1 = NULL;
     unsigned char* buf2 = NULL;
     try {

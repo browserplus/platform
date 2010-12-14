@@ -62,7 +62,7 @@ namespace bp {
                                 args.push_back(bp::log::levelToString(m_logLevel));
                                 if (!m_logFile.empty()) {
                                     args.push_back("-logfile");
-                                    args.push_back(m_logFile.string());
+                                    args.push_back(bpf::nativeUtf8String(m_logFile));
                                 }
                                 args.push_back(serviceName);
                                 args.push_back(serviceVersion);

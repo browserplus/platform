@@ -105,7 +105,7 @@ int APIENTRY WinMain( HINSTANCE hInst, HINSTANCE /*hinstPrev*/,
         string title;
         getLocalizedString( "configPanelTitle", sLocale, title );
         
-        bp::html::HtmlDialog dlg( title, path.string(), hIcon, &gateway );
+        bp::html::HtmlDialog dlg( title, bp::file::nativeUtf8String(path), hIcon, &gateway );
 
         dlg.DoModal();
 

@@ -41,7 +41,7 @@ ServiceLibrary::dlopenNP(const boost::filesystem::path & path)
     // LOAD_WITH_ALTERED_SEARCH_PATH argument
   
     // determine the target directory
-    void * libptr = (void *) LoadLibraryExW(path.c_str(),
+    void * libptr = (void *) LoadLibraryExW(bp::file::nativeString(path).c_str(),
                                             (HANDLE) NULL,
                                             LOAD_WITH_ALTERED_SEARCH_PATH);
     if (libptr == NULL) {

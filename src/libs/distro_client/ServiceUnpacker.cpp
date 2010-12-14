@@ -105,8 +105,8 @@ ServiceUnpacker::install(string& errMsg)
         args.push_back("-log");
         args.push_back("debug");
         args.push_back("-logfile");
-        args.push_back(bp::paths::getDaemonLogPath().string());
-        args.push_back(dir.string());
+        args.push_back(nativeUtf8String(bp::paths::getDaemonLogPath()));
+        args.push_back(nativeUtf8String(dir));
         stringstream ss;
         ss << serviceInstaller;
         for (size_t i = 0; i < args.size(); i++) {

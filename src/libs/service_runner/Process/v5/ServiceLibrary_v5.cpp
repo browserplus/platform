@@ -444,8 +444,8 @@ ServiceLibrary_v5::load(const bp::service::Summary &summary,
 
         def = funcTable->initializeFunc(
             (const BPCFunctionTable *) getFunctionTable(),
-            (const BPPath) (servicePath.c_str()),
-            (const BPPath) (dependentPath.empty() ? NULL : dependentPath.c_str()),
+            (const BPPath) (bp::file::nativeString(servicePath).c_str()),
+            (const BPPath) (dependentPath.empty() ? NULL : bp::file::nativeString(dependentPath).c_str()),
             dependentParams);
 
         if (def == NULL)
@@ -513,9 +513,9 @@ ServiceLibrary_v5::allocate(std::string uri, bfs::path dataDir,
         int rv = funcTable->allocateFunc(
             &cookie,
             (const BPString) uri.c_str(),
-            (const BPPath) serviceDir.c_str(),
-            (const BPPath) dataDir.c_str(),
-            (const BPPath) tempDir.c_str(),
+            (const BPPath) bp::file::nativeString(serviceDir).c_str(),
+            (const BPPath) bp::file::nativeString(dataDir).c_str(),
+            (const BPPath) bp::file::nativeString(tempDir).c_str(),
             (const BPString) locale.c_str(),
             (const BPString) userAgent.c_str(),
             clientPid);
@@ -630,8 +630,8 @@ ServiceLibrary_v5::installHook(const boost::filesystem::path& serviceDir,
     if (funcTable->installFunc != NULL) {
         BPLOG_INFO_STRM("calling installHook for " << name() << " / " << version());
         rval = funcTable->installFunc(
-                   (const BPPath) serviceDir.c_str(),
-                   (const BPPath) tempDir.c_str());
+                   (const BPPath) bp::file::nativeString(serviceDir).c_str(),
+                   (const BPPath) bp::file::nativeString(tempDir).c_str());
         BPLOG_INFO_STRM("installHook returned " << rval);
     }
     return rval;
@@ -647,8 +647,8 @@ ServiceLibrary_v5::uninstallHook(const boost::filesystem::path& serviceDir,
     if (funcTable->uninstallFunc != NULL) {
         BPLOG_INFO_STRM("calling uninstallHook for " << name() << " / " << version());
         rval = funcTable->uninstallFunc(
-                  (const BPPath) serviceDir.c_str(),
-                  (const BPPath) tempDir.c_str());
+                  (const BPPath) bp::file::nativeString(serviceDir).c_str(),
+                  (const BPPath) bp::file::nativeString(tempDir).c_str());
         BPLOG_INFO_STRM("uninstallHook returned " << rval);
     }
     return rval;

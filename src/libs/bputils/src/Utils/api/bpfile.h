@@ -67,6 +67,11 @@ namespace bp {
         extern const std::string kLinkMimeType;    // "application/x-link"
         extern const std::string kBadLinkMimeType; // "application/x-badlink"
 
+        // Get strings for a path with OS format ('/' vs. '\').  Need this
+		// since boost::filesystem's native() will leave / separators
+        boost::filesystem::path::string_type nativeString(const boost::filesystem::path& p);
+        std::string nativeUtf8String(const boost::filesystem::path& p);
+
         // Regular and a recursive path visitors.
         // The visit() method will visit each node of a directory,
         // calling the specified IVisitor's visit() method.

@@ -664,8 +664,8 @@ ServiceLibrary_v4::allocate(std::string uri, boost::filesystem::path dataDir,
 
     // set up (v4 sytle) arguments - they weren't AT ALL consistent :(
     is->context.add("uri", new bp::String(uri));
-    is->context.add("data_dir", new bp::String(dataDir.string()));
-    is->context.add("temp_dir", new bp::String(tempDir.string()));
+    is->context.add("data_dir", new bp::String(bpf::nativeUtf8String(dataDir)));
+    is->context.add("temp_dir", new bp::String(bpf::nativeUtf8String(tempDir)));
     is->context.add("locale", new bp::String(locale));
     is->context.add("userAgent", new bp::String(userAgent));
     is->context.add("clientPid", new bp::Integer(clientPid));

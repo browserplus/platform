@@ -87,7 +87,7 @@ readShortcut(const bfs::path& path)
 		if (FAILED(hr)) break;
 
 		// Load the shortcut. 
-		hr = ppf->Load((wchar_t*)path.c_str(), STGM_READ); 
+		hr = ppf->Load((wchar_t*) nativeString(path).c_str(), STGM_READ); 
 		if (FAILED(hr)) break;
 
         // Resolve the link (msdn lies, return value is S_FALSE on failure,
@@ -120,7 +120,7 @@ canonicalPath(const bfs::path& path,
 {
     bfs::path rval = root;
     if (root.empty() 
-        && PathIsRelativeW((wchar_t*) path.c_str())) {
+        && PathIsRelativeW((wchar_t*) nativeString(path).c_str())) {
         wchar_t* curDir = _wgetcwd(NULL, 0);
         if (!curDir) return path;
         rval = curDir;
@@ -168,7 +168,7 @@ isSymlink(const bfs::path& p)
 {
     bool rval = false;
     WIN32_FIND_DATAW findData;
-    HANDLE h = FindFirstFileW(p.c_str(), &findData);
+    HANDLE h = FindFirstFileW(nativeString(p).c_str(), &findData);
     if (h) {
         if ((findData.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)
             && (findData.dwReserved0 == IO_REPARSE_TAG_SYMLINK)) {
@@ -220,13 +220,13 @@ createLink(const bfs::path& path,
 		}
 
 		// set shortcut path
-		hr = psl->SetPath(target.c_str());
+		hr = psl->SetPath(nativeString(target).c_str());
 		if (FAILED(hr)) {
 			throw string("unable to set shortcut");
 		}
 
 		// persist it
-		hr = ppf->Save((LPCOLESTR) path.c_str(), TRUE);
+		hr = ppf->Save((LPCOLESTR) nativeString(path).c_str(), TRUE);
 		if (FAILED(hr)) {
 			throw string("unable to persist shortcut");
 		}
@@ -252,7 +252,7 @@ resolveLink(const bfs::path& path,
 {
     target.clear();
     if (isSymlink(path)) {
-        HANDLE h = CreateFileW(path.c_str(),
+        HANDLE h = CreateFileW(nativeString(path).c_str(),
                                0, FILE_SHARE_DELETE|FILE_SHARE_READ|FILE_SHARE_WRITE,
                                NULL, OPEN_EXISTING, 
                                FILE_FLAG_BACKUP_SEMANTICS, NULL);
@@ -289,8 +289,8 @@ getTempPath(const bfs::path& tempDir,
 {
     bfs::path prefixPath(prefix);
 	wchar_t outBuf[MAX_PATH];
-	UINT x = GetTempFileNameW(tempDir.c_str(),
-                              prefixPath.c_str(), 0, outBuf);
+	UINT x = GetTempFileNameW(nativeString(tempDir).c_str(),
+                              nativeString(prefixPath).c_str(), 0, outBuf);
     if (!x) {
         boost::system::error_code ec(GetLastError(),
                                      boost::system::system_category());
@@ -307,7 +307,7 @@ bool
 touch(const bfs::path& path)
 {
     HANDLE file = NULL;
-    file = CreateFileW(path.c_str(), GENERIC_WRITE,
+    file = CreateFileW(nativeString(path).c_str(), GENERIC_WRITE,
                        FILE_SHARE_DELETE | FILE_SHARE_READ |
                        FILE_SHARE_WRITE, NULL,
                        OPEN_ALWAYS, FILE_ATTRIBUTE_HIDDEN, NULL);
@@ -345,7 +345,7 @@ statFile(const bfs::path& p,
     HANDLE h = NULL;
     try {
         // strip off trailing slash
-        wstring nativePath = p.native();
+        wstring nativePath = nativeString(p);
         if (nativePath[nativePath.size() - 1] == '\\') {
             nativePath.erase(nativePath.size() - 1);
         }
@@ -404,7 +404,7 @@ setFileProperties(const bfs::path& p,
 {
     if (p.empty()) return false;
 
-    DWORD attr = GetFileAttributesW(p.c_str());
+    DWORD attr = GetFileAttributesW(nativeString(p).c_str());
     if (attr == INVALID_FILE_ATTRIBUTES) attr = 0;
     bool readOnly = ((fi.mode & 0200) == 0 && (fi.mode & 020) == 0 
                      && (fi.mode & 02) == 0);
@@ -413,7 +413,7 @@ setFileProperties(const bfs::path& p,
     } else {
         attr &= ~FILE_ATTRIBUTE_READONLY;
     }
-    if (!SetFileAttributesW(p.c_str(), attr)) {
+    if (!SetFileAttributesW(nativeString(p).c_str(), attr)) {
         BPLOG_WARN_STRM("SetFileAttribute(" << p
                         << ", " << attr << ") failed: "
                         << bp::error::lastErrorString());

@@ -123,7 +123,7 @@ Installer::installPlugins()
     doCopy(npapiSrc, npapiDestDir);
     key = "HKEY_CURRENT_USER\\SOFTWARE\\MozillaPlugins\\@yahoo.com/BrowserPlus,version="
           + m_version.asString();
-    writeString(key, "Path", npapiPath.string());
+    writeString(key, "Path", bpf::nativeUtf8String(npapiPath));
     writeString(key, "ProductName", "Yahoo! BrowserPlus");
     writeString(key, "Version", m_version.asString());
     writeString(key, "Vendor", "Yahoo! Inc.");
@@ -190,10 +190,10 @@ Installer::makeLinks()
         writeString(key, "System.ControlPanel.Category", category);
 
         createKey(key + "\\DefaultIcon");
-        writeString(key + "\\DefaultIcon", configExe.string() + ",-128");
+        writeString(key + "\\DefaultIcon", bpf::nativeUtf8String(configExe) + ",-128");
 
         createKey(key + "\\Shell\\Open\\Command");
-        writeString(key + "\\Shell\\Open\\Command", configExe.string());
+        writeString(key + "\\Shell\\Open\\Command", bpf::nativeUtf8String(configExe));
     } catch (const Exception& e) {
         // ugh, clean up
         BPLOG_WARN(e.what());
@@ -235,8 +235,8 @@ Installer::postflight()
     bfs::path icon = topDir / "ybang.ico";
     string displayName = "Yahoo! BrowserPlus " + m_version.asString();
     writeString(key, "DisplayName", displayName);
-    writeString(key, "DisplayIcon", icon.string());
-    writeString(key, "UninstallString", uninstaller.string());
+    writeString(key, "DisplayIcon", bpf::nativeUtf8String(icon));
+    writeString(key, "UninstallString", bpf::nativeUtf8String(uninstaller));
     writeString(key, "Publisher", "Yahoo! Inc.");
     writeInt(key, "NoModify", 1);
     writeInt(key, "NoRepair", 1);
@@ -289,7 +289,7 @@ Installer::postflight()
             createKey(key);
             writeInt(key, "Policy", 3);
             writeString(key, "AppName", "BrowserPlusCore.exe");
-            writeString(key, "AppPath", daemonPath.string());
+            writeString(key, "AppPath", bpf::nativeUtf8String(daemonPath));
         } catch (const bp::error::Exception& e) {
             BPLOG_WARN_STRM("attempting to prevent UAC: " << e.what());
         }

@@ -135,7 +135,7 @@ void forkChild( const string& sChildName, const vector<string>& vsParentArgs )
         childPath = tempDir / sChildName;
 
         // Setup the child's command line.
-        vsChildArgs.push_back( "\"" + childPath.string() + "\""); 
+        vsChildArgs.push_back( "\"" + nativeUtf8String(childPath) + "\""); 
         vsChildArgs.push_back("/child");
 
         // Add all the parent's args.
@@ -145,10 +145,10 @@ void forkChild( const string& sChildName, const vector<string>& vsParentArgs )
         }
 
         // Create a deleteOnClose copy of ourselves and launch it
-        CopyFileW( wszParentPath, childPath.c_str(), FALSE );
+        CopyFileW( wszParentPath, nativeString(childPath).c_str(), FALSE );
 
         // Open temp file with delete-on-close.
-        hChild = CreateFileW( childPath.c_str(),
+        hChild = CreateFileW( nativeString(childPath).c_str(),
                               GENERIC_READ,
                               FILE_SHARE_READ|FILE_SHARE_DELETE, 0,
                               OPEN_EXISTING, FILE_FLAG_DELETE_ON_CLOSE, 0 );

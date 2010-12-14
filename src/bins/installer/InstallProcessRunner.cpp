@@ -78,7 +78,7 @@ InstallProcessRunner::start(const boost::filesystem::path& dir,
     args.push_back("-ipcName=" + m_ipcName);
     args.push_back("-logPath=" + m_logPath.string());
     args.push_back("-logLevel=" + m_logLevel);
-    args.push_back(dir.string());
+    args.push_back(bp::file::nativeUtf8String(dir));
     if (bp::process::spawn(updaterExe, args, &m_procStatus,
                            dir, "BrowserPlusUpdater")) {
         // set a timer to catch non-responsive updater

@@ -1061,7 +1061,7 @@ Transaction::Impl::sendRequestWithBody()
     boost::filesystem::path path = m_pRequest->body.path();
     if (!path.empty()) {
         m_ePostSource = eFromFile;
-        m_hUploadFile = CreateFileW(path.c_str(),
+        m_hUploadFile = CreateFileW(bp::file::nativeString(path).c_str(),
                                     GENERIC_READ,
                                     FILE_SHARE_READ,
                                     NULL,

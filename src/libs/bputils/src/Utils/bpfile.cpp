@@ -1294,6 +1294,22 @@ urlDecode(string s)
 }
 
 
+bfs::path::string_type
+nativeString(const bfs::path& p)
+{
+    bfs::path t = p;
+    return t.make_preferred().c_str();
+}
+
+
+string
+nativeUtf8String(const bfs::path& p)
+{
+    bfs::path t = p;
+    return t.make_preferred().string();
+}
+
+
 string 
 urlFromPath(const bfs::path& p)
 {
@@ -1819,9 +1835,9 @@ openReadableStream(ifstream& fstream,
         return false;
     }
 #ifdef WIN32
-    fstream.open(path.c_str(), ios::in | flags);
+    fstream.open(nativeString(path).c_str(), ios::in | flags);
 #else
-    fstream.open(path.c_str(), ios::in | (_Ios_Openmode) flags);
+    fstream.open(nativeString(path).c_str(), ios::in | (_Ios_Openmode) flags);
 #endif
     if (!fstream.is_open()) {
         BPLOG_WARN_STRM("openReadableStream, stream open failed for " << path);
@@ -1841,19 +1857,19 @@ openWritableStream(ofstream& fstream,
         return false;
     }
 #ifdef WIN32
-    fstream.open(path.c_str(), ios::out | flags);
+    fstream.open(nativeString(path).c_str(), ios::out | flags);
 #else
-    fstream.open(path.c_str(), ios::out | (_Ios_Openmode) flags);
+    fstream.open(nativeString(path).c_str(), ios::out | (_Ios_Openmode) flags);
 #endif
 
 	// set user read/write permission if needed
     tStat sb;
-    if (::stat(path.c_str(), &sb) != 0) {
+    if (::stat(nativeString(path).c_str(), &sb) != 0) {
         BPLOG_WARN_STRM("openWritableStream, unable to stat " << path);
         return false;
     }
     if ((sb.st_mode & (S_IRUSR|S_IWUSR)) != (S_IRUSR|S_IWUSR)) {
-        if (::chmod(path.c_str(), S_IRUSR | S_IWUSR) != 0) {
+        if (::chmod(nativeString(path).c_str(), S_IRUSR | S_IWUSR) != 0) {
             BPLOG_WARN_STRM("openWritableStream, unable to chmod " << path);
             return false;
         }

@@ -95,7 +95,7 @@ bp::process::spawn(const boost::filesystem::path& path,
 {
 	// get args into writable C buf needed by CreateProcessW()
     std::wstring wsArgs;
-    wsArgs.append(L"\"" + path.native() + L"\" ");
+    wsArgs.append(L"\"" + bp::file::nativeString(path) + L"\" ");
     wsArgs.append(escapeArgs(vsArgs));
     wchar_t* wsBuf = _wcsdup(wsArgs.c_str());
     if (!wsBuf) {
@@ -105,7 +105,7 @@ bp::process::spawn(const boost::filesystem::path& path,
 
     // Setup CreateProcess.
     BOOL inheritHandles = inheritWin32StdHandles ? TRUE : FALSE;
-    std::wstring dir = workingDirectory.native();
+    std::wstring dir = bp::file::nativeString(workingDirectory);
     const wchar_t* pDir = dir.empty() ? NULL : dir.c_str();
     STARTUPINFO sinfo;
     ZeroMemory(&sinfo, sizeof(sinfo));
@@ -121,7 +121,7 @@ bp::process::spawn(const boost::filesystem::path& path,
     PROCESS_INFORMATION pinfo;
     ZeroMemory(&pinfo, sizeof(pinfo));
     
-    BOOL bRet = ::CreateProcessW(path.native().c_str(),
+    BOOL bRet = ::CreateProcessW(bp::file::nativeString(path).c_str(),
                                  wsBuf,
                                  NULL,              // process attributes
                                  NULL,              // thread attributes

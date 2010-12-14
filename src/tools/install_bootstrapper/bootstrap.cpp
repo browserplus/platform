@@ -96,7 +96,7 @@ int APIENTRY WinMain( HINSTANCE, HINSTANCE, LPSTR, int )
     }
 
     std::string logArg("-logfile=");
-    logArg.append(logFile.string());
+    logArg.append(bp::file::nativeUtf8String(logFile));
     args.push_back(logArg);
 
     wchar_t szPath[_MAX_PATH];

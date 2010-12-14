@@ -245,7 +245,7 @@ PlatformUpdaterSingleton::spawnUpdate(const string& version)
     }
     spawnStatus status;
     vector<string> args;
-    args.push_back(cacheDir.string());
+    args.push_back(nativeUtf8String(cacheDir));
     args.push_back(daemonLock);
     bool rval = spawn(updater, args, &status);
     m_busy = false;

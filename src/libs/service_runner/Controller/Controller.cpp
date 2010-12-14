@@ -164,7 +164,7 @@ Controller::run(const bfs::path & pathToHarness,
     if (!providerPath.empty())
     {
         args.push_back("-providerPath");    
-        args.push_back(bpf::canonicalPath(providerPath).string());
+        args.push_back(bpf::nativeUtf8String(bpf::canonicalPath(providerPath)));
     }
 
     if (!logLevel.empty())
@@ -176,7 +176,7 @@ Controller::run(const bfs::path & pathToHarness,
     if (!logFile.empty())
     {
         args.push_back("-logfile");    
-        args.push_back(bpf::canonicalPath(logFile).string());
+        args.push_back(bpf::nativeUtf8String(bpf::canonicalPath(logFile)));
     }
     
     m_sw.reset();
@@ -261,8 +261,8 @@ Controller::allocate(const std::string & uri,
             context.add("dataDir", new bp::Path(data_dir));
             context.add("tempDir", new bp::Path(temp_dir));
         } else {
-            context.add("dataDir", new bp::String(data_dir.string()));
-            context.add("tempDir", new bp::String(temp_dir.string()));
+            context.add("dataDir", new bp::String(bpf::nativeUtf8String(data_dir)));
+            context.add("tempDir", new bp::String(bpf::nativeUtf8String(temp_dir)));
         }
         context.add("locale", new bp::String(locale));
         context.add("userAgent", new bp::String(userAgent));

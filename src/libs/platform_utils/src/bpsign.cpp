@@ -56,12 +56,12 @@ openReadBIOFromPath(const bfs::path & path)
     BIO * b = NULL;
 #ifdef WIN32
 	FILE * f = NULL;
-	(void) ::_wfopen_s(&f, path.c_str(), L"rb");
+	(void) ::_wfopen_s(&f, nativeString(path).c_str(), L"rb");
     if (f != NULL) {
         b = BIO_new_fp(f, BIO_CLOSE);
     }
 #else
-    b = BIO_new_file(path.c_str(), "rb");
+    b = BIO_new_file(nativeString(path).c_str(), "rb");
 #endif
     return b;
 }

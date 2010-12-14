@@ -266,7 +266,7 @@ bp::install::utils::registerControl(const vector<string>& vsMimetypes,
         //  "RegSetValue","HKCR\CLSID\{<sCoClassUuid>}\InprocServer32\ThreadingModel","Type: REG_SZ, Data: apartment"
         sKey = sRoot + "\\CLSID\\" + sCoClassUuid + "\\InprocServer32";
         createKey(sKey);
-        writeString(sKey, modulePath.string());
+        writeString(sKey, bpf::nativeUtf8String(modulePath));
         writeString(sKey, "ThreadingModel", "apartment");
 
         //  "RegCreateKey","HKCR\CLSID\{<sCoClassUuid>}\Control","Desired Access: Read/Write"

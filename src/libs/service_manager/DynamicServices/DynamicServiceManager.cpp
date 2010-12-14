@@ -186,7 +186,7 @@ DynamicServiceManager::purgeService(const std::string & name,
     args.push_back("-log");
     args.push_back("debug");
     args.push_back("-logfile");
-    args.push_back(bp::paths::getDaemonLogPath().string());
+    args.push_back(bp::file::nativeUtf8String(bp::paths::getDaemonLogPath()));
     args.push_back(summary.name());
     args.push_back(summary.version());
     stringstream ss;
