@@ -385,7 +385,7 @@ bp::WritablePath::clone() const
 
 
 bp::Path::Path(const boost::filesystem::path & path)
-    : bp::Object(BPTNativePath), m_path(path.native())
+    : bp::Object(BPTNativePath), m_path(bp::file::nativeString(path))
 {
     e.value.pathVal = (BPPath) m_path.c_str();
 }
