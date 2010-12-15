@@ -159,7 +159,8 @@ BPObjectTest::pathTest()
 	boost::filesystem::path rhs(somePathNative);
 	boost::filesystem::path lhs = *((bp::Path *)clone);
     CPPUNIT_ASSERT( clone->type() == BPTNativePath );    
-	CPPUNIT_ASSERT( rhs.string() == lhs.string() );
+    CPPUNIT_ASSERT( bp::file::nativeUtf8String(rhs)
+                    == bp::file::nativeUtf8String(lhs) );
     delete clone;
 
     boost::filesystem::path p(somePathNative);
