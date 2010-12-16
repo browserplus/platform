@@ -435,8 +435,10 @@ doInstall(shared_ptr<APTArgParse> argParser,
                 bfs::path relPath = bpf::relativeTo(fromPath, source);
                 bfs::path toPath = destination / relPath;
                 if (!dryRun) {
+                    (void) bpf::safeRemove(toPath);
                     if (!bpf::safeCopy(fromPath, toPath)) {
-                        BPOUT("error copying " << fromPath);
+                        BPOUT("error copying " << fromPath << " -> " << toPath
+                              << ": " << bp::error::lastErrorString());
                         return(1);
                     } 
                 } else {
