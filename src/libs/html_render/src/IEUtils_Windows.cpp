@@ -531,8 +531,11 @@ bool invokeGlobalJsFunction( IWebBrowser2* pBrowser,
         return false;
     }
 
+    // Must Invoke via an IDispatchEx.  In IE9 beta, IDispatch::Invoke fails
+    CComQIPtr<IDispatchEx> dexObj = dispScripts;
+
     CComBSTR bstrFunc( sFuncName.c_str() );
-    HRESULT hr = dispScripts.Invoke1( bstrFunc, &vtArg, &vtRet );
+    HRESULT hr = dexObj.Invoke1( bstrFunc, &vtArg, &vtRet );
     if (FAILED( hr ))
     {
         BPLOG_COM_ERROR( "dispScript->Invoke1() failed!", hr );
