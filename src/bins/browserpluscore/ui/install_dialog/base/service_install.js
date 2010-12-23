@@ -142,7 +142,7 @@ try {
     YE.addListener("sd1", "click", service_detail_handler);
     YE.addListener("sd2", "click", service_detail_handler);
     
-    BPDialog.show(607, 355);
+    BPDialog.show(607, 370);
 
 } catch (ex) {
     msg = "service_install.js, exception:\n";
