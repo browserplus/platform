@@ -711,6 +711,16 @@ CBPCtl::getBrowserInfo()
 {
     if (m_browserInfo.platform().empty()) {
         m_browserInfo = bp::BrowserInfo(getUserAgent());
+
+        // XXX disable dnd in ie9 doc mode due to ie9 bugs
+        if (m_browserInfo.version().majorVer() == 9) {
+            float docMode = bp::ie::getDocumentMode(m_spLocalBrowser);
+            if (docMode >= 9.0) {
+                BPLOG_INFO("Disabling DnD for IE9 in IE9 document mode");
+                m_browserInfo.setCapability(bp::BrowserInfo::kDnDCapability,
+                                            bp::BrowserInfo::kUnsupported);
+            }
+        }
     }
     return m_browserInfo;
 }

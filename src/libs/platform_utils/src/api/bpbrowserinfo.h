@@ -72,6 +72,9 @@ namespace bp {
             return m_platform + "/" + m_browser + "/" + m_version.asString();
         }
 
+        void setCapability(const std::string& capability,
+                           const std::string& value);
+
     private:
         std::string m_platform;
         std::string m_browser;

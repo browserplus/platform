@@ -112,6 +112,7 @@ BrowserInfo::BrowserInfo(const std::string& userAgent) : m_supported(false)
 
         // now find out what's supported
         loadBrowserSupportInfo();
+
     } catch (const bp::error::Exception& e) {
         BPLOG_ERROR_STRM("caught " << e.what() << ", clearing BrowserInfo");
         m_supported = false;
@@ -303,6 +304,14 @@ BrowserInfo::versionFromUA(const string& userAgent,
     }
     rval = userAgent.substr(start, len);
     return rval;
+}
+
+
+void
+BrowserInfo::setCapability(const string& capability,
+                           const string& value)
+{
+    m_capabilities[capability] = value;
 }
 
 

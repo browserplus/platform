@@ -125,6 +125,9 @@ bool makeJsFuncIsFunction( IWebBrowser2* pBrowser,
                            CComPtr<IDispatch>& jsfnIsFunction );
 
 
+// Get document mode
+float getDocumentMode(IWebBrowser2* pBrowser);
+
 } // bp
 } // ie
 

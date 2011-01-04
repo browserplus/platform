@@ -679,6 +679,36 @@ bool makeJsFuncIsFunction( IWebBrowser2* pBrowser,
 }
 
 
+float
+getDocumentMode(IWebBrowser2* pBrowser)
+{
+    // Get IDispatch interface to the document.
+    CComPtr<IDispatch> dispDoc;
+    HRESULT hr = pBrowser->get_Document(&dispDoc);
+    if (FAILED(hr)){
+        BPLOG_COM_ERROR("pBrowser->get_Document() failed!", hr);
+        return 0;
+    }
+
+    // Get IHTMLDocument6 interface to the document.
+    CComQIPtr<IHTMLDocument6> qiDoc6 = dispDoc;
+    if (!qiDoc6) {
+        BPLOG_ERROR("QI for IHTMLDocument6 failed!");
+        return 0;
+    }
+
+    CComPtr<IHTMLDocument6> doc6 = qiDoc6;
+    VARIANT v;
+    v.vt = VT_R4;
+    v.fltVal = 0.0;
+    hr = doc6->get_documentMode(&v);
+    if (FAILED(hr)) {
+        BPLOG_COM_ERROR("doc6->get_documentMode() failed!", hr);
+        return 0;
+    }
+    return v.fltVal;
+}
+
 
 } // bp
 } // ie

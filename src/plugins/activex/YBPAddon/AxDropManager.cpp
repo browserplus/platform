@@ -247,7 +247,7 @@ AxDropManager::OnHtmlElementDragEnter( IHTMLEventObj* pEvtObj )
     // Disable the default action, which allows OnDrop to be called.
     // see the ondrop remarks at:
     // http://msdn.microsoft.com/library/default.asp?url=/workshop/author/dhtml/reference/events/ondrop.asp?frame=true
-    CComVariant vFalse = VARIANT_FALSE;
+    CComVariant vFalse(false);
     pEvtObj->put_returnValue(vFalse);
     return VARIANT_TRUE;
 }
@@ -292,7 +292,7 @@ AxDropManager::OnHtmlElementDragLeave( IHTMLEventObj* pEvtObj )
     // Disable the default action, which allows OnDrop to be called.
     // see the ondrop remarks at:
     // http://msdn.microsoft.com/library/default.asp?url=/workshop/author/dhtml/reference/events/ondrop.asp?frame=true
-    CComVariant vFalse = VARIANT_FALSE;
+    CComVariant vFalse(false);
     pEvtObj->put_returnValue(vFalse);
     return VARIANT_TRUE;
 }
@@ -304,7 +304,7 @@ AxDropManager::OnHtmlElementDragOver( IHTMLEventObj* pEvtObj )
     // Disable the default action, which allows OnDrop to be called.
     // See the ondrop remarks at:
     // http://msdn.microsoft.com/library/default.asp?url=/workshop/author/dhtml/reference/events/ondrop.asp?frame=true
-    CComVariant vFalse = VARIANT_FALSE;
+    CComVariant vFalse(false);
     pEvtObj->put_returnValue(vFalse);
     return VARIANT_TRUE;
 }
