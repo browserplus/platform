@@ -20,39 +20,18 @@
  * ***** END LICENSE BLOCK *****
  */
 
-/*
- *  bpdebug.h
- *  Debugging support.
- *
- *  Created by David Grigsby on 5/3/09.
- *
- */
 
-#ifndef _BPDEBUG_H_
-#define _BPDEBUG_H_
+#include "bpdebug.h"
+#import <Cocoa/Cocoa.h>
 
-
-#include <string>
-#include <list>
-
-namespace bp {
-namespace debug {
-        
-
-/**
- * invoke os-specific call to offer developer opportunity to attach a debugger.
- */
-void attachDebugger();
-
-void breakpoint( const std::string& sName );
-        
-void setForcedBreakpoints( const std::list<std::string>& breakpoints );
-
-#ifdef MACOSX
-void showAlert(const std::string& s);
-#endif
-        
-} // debug
-} // bp
-
-#endif
+void
+bp::debug::showAlert(const std::string& s) 
+{
+    NSAlert* alert = [[NSAlert alloc] init];
+    [alert setAlertStyle: NSCriticalAlertStyle];
+    [alert setMessageText: [NSString stringWithUTF8String: s.c_str()]];
+    [alert addButtonWithTitle: @"OK"];
+    [[alert window] setFloatingPanel: YES];
+    [alert runModal];
+    [alert release];
+}
