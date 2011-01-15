@@ -73,7 +73,9 @@ NPAPIPlugin::getWindow() const
 #elif defined(MACOSX)
     // this is a WindowRef (may be null)
     NP_CGContext* ctx = (NP_CGContext*)m_npWindow->window;
-    rval = ctx->window;
+    if (ctx) {
+        rval = ctx->window;
+    }
 #else 
 #warning "Linux NPAPI graphics stuff needsta be implemented!"
 #endif

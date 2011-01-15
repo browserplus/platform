@@ -29,7 +29,8 @@
 
 #include <npapi/npapi.h>
 #include <npapi/npruntime.h>
-#include <npapi/npupp.h>
+#include <npapi/npfunctions.h>
+#include <npapi/nptypes.h>
 
 #include "PluginCommonLib/BPPlugin.h"
 #include "PluginCommonLib/BPSession.h"

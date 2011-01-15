@@ -35,7 +35,6 @@
 
 #include <npapi/npapi.h>
 #include <npapi/npruntime.h>
-#include <npapi/npupp.h>
 
 #include "nputils.h"
 
@@ -90,8 +89,8 @@ class NPAPIVariant : public plugin::Variant
         sVal.clear();
         if (!isString()) return false;
         NPString tmpStr = NPVARIANT_TO_STRING(m_var);
-        sVal.append(static_cast<const char*>(tmpStr.utf8characters),
-                    tmpStr.utf8length);
+        sVal.append(static_cast<const char*>(tmpStr.UTF8Characters),
+                    tmpStr.UTF8Length);
         return true;
     }
 

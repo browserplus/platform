@@ -116,19 +116,19 @@ NPNetscapeFuncs gBrowserFuncs;
 
 // forward declarations
 NPClass* getPluginClass(void);
-NPError NPP_New(NPMIMEType pluginType, NPP instance, uint16 mode,
-                int16 argc, char* argn[], char* argv[], NPSavedData* saved);
+NPError NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode,
+                int16_t argc, char* argn[], char* argv[], NPSavedData* saved);
 NPError NPP_Destroy(NPP instance, NPSavedData** save);
 NPError NPP_SetWindow(NPP instance, NPWindow* window);
 NPError NPP_NewStream(NPP instance, NPMIMEType type, NPStream* stream,
-                      NPBool seekable, uint16* stype);
+                      NPBool seekable, uint16_t* stype);
 NPError NPP_DestroyStream(NPP instance, NPStream* stream, NPReason reason);
-int32 NPP_WriteReady(NPP instance, NPStream* stream);
-int32 NPP_Write(NPP instance, NPStream* stream, int32 offset, 
-                int32 len, void* buffer);
+int32_t NPP_WriteReady(NPP instance, NPStream* stream);
+int32_t NPP_Write(NPP instance, NPStream* stream, int32_t offset, 
+                int32_t len, void* buffer);
 void NPP_StreamAsFile(NPP instance, NPStream* stream, const char* fname);
 void NPP_Print(NPP instance, NPPrint* platformPrint);
-int16 NPP_HandleEvent(NPP instance, void* event);
+int16_t NPP_HandleEvent(NPP instance, void* event);
 void NPP_URLNotify(NPP instance, const char* URL, 
                    NPReason reason, void* notifyData);
 NPError NPP_GetValue(NPP instance, NPPVariable variable, void* value);
@@ -214,8 +214,8 @@ NPP_Shutdown()
 NPError 
 NPP_New(NPMIMEType pluginType, 
         NPP instance, 
-        uint16 mode, 
-        int16 argc, 
+        uint16_t mode, 
+        int16_t argc, 
         char* argn[], 
         char* argv[], 
         NPSavedData* saved)
@@ -248,13 +248,33 @@ NPP_New(NPMIMEType pluginType,
         BPLOG_WARN_STRM("set browser drawing model failed, err = " << err);
         return NPERR_INCOMPATIBLE_VERSION_ERROR;
     }
+
+    // See if browser supports cocoa event model.  If so, we use it.
+    // This is required for firefox 4 on osx.  When firefox 4 is running 64-bit,
+    // it will only load 32-bit plugins that use the cocoa model.  Nice.
+    BPLOG_INFO("ask browser for event model");
+    NPBool supportsCocoaEvents = FALSE;
+    err = gBrowserFuncs.getvalue(instance,
+                                 NPNVsupportsCocoaBool,
+                                 &supportsCocoaEvents);
+    if (err == NPERR_NO_ERROR && supportsCocoaEvents) {
+        BPLOG_DEBUG("supportsCocoaEvents");
+        // Set the event model
+        err = gBrowserFuncs.setvalue(instance,
+                                     NPPVpluginEventModel,
+                                     (void*)NPEventModelCocoa);
+        if (err != NPERR_NO_ERROR) {
+            BPLOG_WARN_STRM("set browser event model failed, err = " << err);
+            return NPERR_INCOMPATIBLE_VERSION_ERROR;
+        }
+    }
 #endif
     
     NPAPIPlugin * bp = new NPAPIPlugin(instance);
     if (bp == NULL) {
         return NPERR_OUT_OF_MEMORY_ERROR;
     }
-    
+
     instance->pdata = (void*)bp;
     
     // get things allocated... 
@@ -344,7 +364,7 @@ NPP_NewStream(NPP instance,
               NPMIMEType type, 
               NPStream* stream,
               NPBool seekable, 
-              uint16* stype)
+              uint16_t* stype)
 {
     return NPERR_GENERIC_ERROR;
 }
@@ -359,7 +379,7 @@ NPP_DestroyStream(NPP instance,
 }
 
 
-int32 
+int32_t
 NPP_WriteReady(NPP instance,
                NPStream* stream)
 {
@@ -367,11 +387,11 @@ NPP_WriteReady(NPP instance,
 }
 
 
-int32 
+int32_t
 NPP_Write(NPP instance,
           NPStream* stream,
-          int32 offset, 
-          int32 len,
+          int32_t offset, 
+          int32_t len,
           void* buffer)
 {
     return 0;
@@ -393,11 +413,11 @@ NPP_Print(NPP instance,
 }
 
 
-int16 
+int16_t
 NPP_HandleEvent(NPP instance,
                 void* event)
 {
-        return 0;
+    return 0;
 }
 
 

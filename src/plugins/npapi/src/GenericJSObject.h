@@ -38,7 +38,6 @@
 
 #include <npapi/npapi.h>
 #include <npapi/npruntime.h>
-#include <npapi/npupp.h>
 
 #include "BPUtils/bptypeutil.h"
 #include "common.h"

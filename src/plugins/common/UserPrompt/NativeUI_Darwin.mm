@@ -320,6 +320,8 @@ bp::ui::HTMLPrompt(void * parentWindow,
                    const bp::Object * arguments,
                    bp::Object ** oResponse)
 {
+    BPLOG_DEBUG_STRM("userAgent = '" << userAgent 
+                     << "', parentWindow = " << parentWindow);
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 
     // allocate our listener class
@@ -332,11 +334,9 @@ bp::ui::HTMLPrompt(void * parentWindow,
     mso->wv = nil;
     mso->session = nil;
     mso->response = NULL;
-    // Don't use sheets on Safari or Chrome, we don't have a useful
-    // window in the out-of-proc case
+    // Don't use sheets in out-of-proc browsers, we don't have a useful window
     unsigned int style = 0;
-    bp::BrowserInfo info(userAgent);
-    if (info.browser() == "Safari" || info.browser() == "Chrome")
+    if (parentWindow == NULL) 
     {
         mso->parentWindow = nil;
         style = NSTitledWindowMask;
@@ -346,8 +346,7 @@ bp::ui::HTMLPrompt(void * parentWindow,
         mso->parentWindow = [[NSWindow alloc] initWithWindowRef: parentWindow];
         style = NSBorderlessWindowMask;
     }
-    BPLOG_DEBUG_STRM("userAgent = '" << userAgent 
-                     << "', parentWindow = " << mso->parentWindow);
+
     
     NSRect frame = { {0,0}, {300, 600} };
     mso->cocoaWRef = [[NSWindow alloc] 

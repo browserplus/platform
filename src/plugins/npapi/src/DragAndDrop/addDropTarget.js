@@ -53,6 +53,14 @@ function(platformArg, browserArg, id, cbObj) {
       for (var i = 0; i < dt.mozItemCount; i++) {
         uris[i] = dt.mozGetDataAt('text/x-moz-url', i);
       }
+//    } else if (platform == 'OSX' && browser == 'Firefox') {
+      // XXX need this for firefox 4, would have to have js be
+      // signed to avoid alert
+//      netscape.security.PrivilegeManager.enablePrivilege('UniversalFileRead');
+//      for (var i = 0; i < files.length; i++) {
+//        var path = files[i].mozFullPath;
+//        uris[i] = 'file://' + path;
+//      }
     } else if (platform == 'OSX' && browser == 'Safari') {
       var uriText = dt.getData('text/uri-list');
       if (uriText) uris = uriText.split('\n');

@@ -266,8 +266,8 @@ InterceptDropManager::updateBounds()
             if (NPVARIANT_IS_STRING(result)) {
                 NPString s = NPVARIANT_TO_STRING(result);
                 string boundsStr;
-                boundsStr.append(static_cast<const char*>(s.utf8characters),
-                                 s.utf8length);
+                boundsStr.append(static_cast<const char*>(s.UTF8Characters),
+                                 s.UTF8Length);
                 
                 int r = sscanf(boundsStr.c_str(), "%hd %hd %hd %hd",
                                &(it->second.m_top),

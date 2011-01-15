@@ -33,7 +33,7 @@
 #define __COMMON_H__
 
 #include "npapi/npapi.h"
-#include "npapi/npupp.h"
+#include "npapi/npfunctions.h"
 #include "npapi/npruntime.h"
 
 // Define PLUGIN_TRACE to 1 to have the wrapper functions emit

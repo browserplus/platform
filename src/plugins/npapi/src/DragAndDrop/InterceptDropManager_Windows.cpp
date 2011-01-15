@@ -40,7 +40,6 @@
 
 #include <npapi/npapi.h>
 #include <npapi/npruntime.h>
-#include <npapi/npupp.h>
 
 #include <windows.h>
 #include <ShellAPI.h>

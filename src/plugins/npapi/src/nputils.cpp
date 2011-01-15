@@ -30,6 +30,7 @@
 #include "NPAPIObject.h"
 #include "nputils.h"
 #include "PluginCommonLib/BPHandleMapper.h"
+#include "BPUtils/BPLog.h"
 
 #include <iostream>
 #include <sstream>
@@ -62,8 +63,8 @@ npu::getStringValue(const NPVariant& var, std::string &outStr)
 {
     if(NPVARIANT_IS_STRING(var))
     {
-        outStr.append(var.value.stringValue.utf8characters,
-                      var.value.stringValue.utf8length);
+        outStr.append(var.value.stringValue.UTF8Characters,
+                      var.value.stringValue.UTF8Length);
         return true;
     }
 
@@ -222,11 +223,14 @@ npu::evaluateScript(NPP npp, const std::string &script,
                                          &windowObject);
     if (err == NPERR_NO_ERROR) {
         NPString eval;
-        eval.utf8characters = script.c_str();
-        eval.utf8length = script.length();
+        eval.UTF8Characters = script.c_str();
+        eval.UTF8Length = script.length();
         rval = gBrowserFuncs.evaluate(npp, windowObject, &eval, result);
         gBrowserFuncs.releaseobject(windowObject);
+    } else {
+        BPLOG_WARN_STRM("unable to get NPNVWindowNPObject, err = " << err);
     }
+
     return rval;
 }
 
@@ -235,6 +239,7 @@ npu::evaluateJSON(NPP npp, const bp::Object &obj,
                   NPVariant * result)
 {
     std::string json = obj.toPlainJsonString();
+    BPLOG_DEBUG_STRM("evaluate JSON: " << json);
     // For firefox on mac, evaluating an object yields null.  specifically:
     // "{foo: 'bar'}" -> null
     // "[{foo: 'bar'}][0]" -> object
@@ -247,12 +252,16 @@ npu::evaluateJSON(NPP npp, const bp::Object &obj,
                                          NPNVWindowNPObject,
                                          &windowObject);
     if (err == NPERR_NO_ERROR) {
+        BPLOG_DEBUG_STRM("evaluate JSON got window, calling gBrowserFuncs.evaluate");
         NPString eval;
-        eval.utf8characters = json.c_str();
-        eval.utf8length = json.length();
+        eval.UTF8Characters = json.c_str();
+        eval.UTF8Length = json.length();
         rval = gBrowserFuncs.evaluate(npp, windowObject, &eval, result);
         gBrowserFuncs.releaseobject(windowObject);
+    } else {
+        BPLOG_WARN_STRM("unable to get NPNVWindowNPObject, err = " << err);
     }
+    BPLOG_DEBUG_STRM("evaluate JSON returns " << rval);
     return rval;
 }
 

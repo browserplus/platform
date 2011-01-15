@@ -256,7 +256,7 @@ CarbonDropManager::CarbonDropManager(NPP instance,
       m_numDropWindows(0), m_dropWindows(NULL)
 {
     const NP_CGContext* ctx = (NP_CGContext*)window->window;
-    m_windowRef = ctx->window;
+    m_windowRef = (WindowRef) ctx->window;
 
     CarbonDragDispatcher* disp = CarbonDragDispatcher::get(m_windowRef);
     BPASSERT(disp != NULL);

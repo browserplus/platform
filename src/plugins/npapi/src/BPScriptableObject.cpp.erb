@@ -243,16 +243,16 @@ BPScriptableObject::invoke(NPIdentifier name,
         NPString tmpStr;
 
         tmpStr = NPVARIANT_TO_STRING(args[0]);
-        service.append(static_cast<const char*>(tmpStr.utf8characters),
-                       tmpStr.utf8length);
+        service.append(static_cast<const char*>(tmpStr.UTF8Characters),
+                       tmpStr.UTF8Length);
 
         tmpStr = NPVARIANT_TO_STRING(args[1]);
-        version.append(static_cast<const char*>(tmpStr.utf8characters),
-                       tmpStr.utf8length);
+        version.append(static_cast<const char*>(tmpStr.UTF8Characters),
+                       tmpStr.UTF8Length);
         
         tmpStr = NPVARIANT_TO_STRING(args[2]);
-        method.append(static_cast<const char*>(tmpStr.utf8characters),
-                      tmpStr.utf8length);
+        method.append(static_cast<const char*>(tmpStr.UTF8Characters),
+                      tmpStr.UTF8Length);
         
         // argument map may not be null
         arguments = &(args[3]);
