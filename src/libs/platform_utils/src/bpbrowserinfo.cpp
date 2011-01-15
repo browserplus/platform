@@ -67,6 +67,7 @@ BrowserInfo::BrowserInfo(const std::string& userAgent) : m_supported(false)
         //    'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; en-US) AppleWebKit/533.4 (KHTML, like Gecko) Chrome/5.0.375.38 Safari/533.4'
 
         // first grab platform
+        BPLOG_DEBUG_STRM("userAgent = " << userAgent);
         if (userAgent.find("Windows") != string::npos) {
             m_platform = "Windows";
         } else if (userAgent.find("Mac OS X") != string::npos) {
@@ -104,8 +105,15 @@ BrowserInfo::BrowserInfo(const std::string& userAgent) : m_supported(false)
             prefix = "Chrome/";
             separator = " ";
         }
+
         string vstr = versionFromUA(userAgent, prefix, separator);
-        if (!m_version.parse(vstr)) {
+        bool gotVersion = m_version.parse(vstr);
+        if (!gotVersion && m_browser == "Firefox") {
+            // Could be a beta firefox
+            vstr = versionFromUA(userAgent, prefix, "b");
+            gotVersion = m_version.parse(vstr);
+        }
+        if (!gotVersion) {
             BP_THROW("unable to parse version'" + vstr
                      + "', userAgent = '" + userAgent + "'");
         }
