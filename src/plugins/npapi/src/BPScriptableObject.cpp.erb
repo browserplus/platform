@@ -163,8 +163,9 @@ BPScriptableObject::invoke(NPIdentifier name,
 
     // a debug message
     char* func = gBrowserFuncs.utf8fromidentifier(name);
-    BPLOG_DEBUG_STRM("invoke " << (func ? func : "NULL") << " with " <<
-                    argCount << " args");
+    BPLOG_DEBUG_STRM("BPScriptableObject(" << this << "), invoke "
+                     << (func ? func : "NULL") << " with " <<
+                     argCount << " args");
     gBrowserFuncs.memfree(func);
         
     bool rval = false;
