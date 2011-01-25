@@ -55,8 +55,9 @@ function(platformArg, browserArg, id, cbObj) {
         uris[i] = dt.mozGetDataAt('text/x-moz-url', i);
       }
 //    } else if (platform == 'OSX' && browser == 'Firefox') {
-      // XXX need this for firefox 4, would have to have js be
-      // signed to avoid alert
+      // XXX need this for firefox 4, but will get an alert
+      // XXX requesting that file:// be granted permissions.
+      // XXX Pretty unacceptable
 //      netscape.security.PrivilegeManager.enablePrivilege('UniversalFileRead');
 //      for (var i = 0; i < files.length; i++) {
 //        var path = files[i].mozFullPath;
