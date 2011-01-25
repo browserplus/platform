@@ -33,9 +33,10 @@ function(platformArg, browserArg, id, cbObj) {
     }
     if (typeof(f) !== 'object' ||
         !f.toString || f.toString.constructor !==  Function ||
-        f.toString() !== '[object File]' ||
+        (f.toString() !== '[object File]'
+         && f.toString().indexOf('[object File @') != 0) ||
         f.constructor != File ||
-        f.protype != undefined ||
+        f.prototype != undefined ||
         !hasFileName ||
         !hasFileSize ||
         mutableMembers) {
