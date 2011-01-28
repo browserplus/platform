@@ -85,47 +85,37 @@ Building on win32:
     1. install msysgit from http://code.google.com/p/msysgit/downloads/list
     2. install Visual Studio 2008 Pro or equiv
     3. install Visual Studio 2008 SP1
-    4. install "Microsoft Windows SDK for Windows 7 and 
-       .NET Framework 3.5 Service Pack 1" from:
-       http://www.microsoft.com/downloads/details.aspx?displaylang=en&FamilyID=c17ba869-9671-4330-a63e-1fd44e0e2505
-    5. run the sdk configuration tool at:
-       c:\Program Files\Microsoft SDKs\Windows\v7.0\Setup\WindowsSdkVer 
-       and set v7.0 as the current sdk
-    6. (optional) Add a new user environment variable: 
-          Name: WindowsSdkDir
-          Value: C:\Program Files\Microsoft SDKs\Windows\v7.0\
-       This will ensure that in cases where VS launches cmake to regenerate 
-       .vcproj files, this environment variable, which is used in some of
-       our cmake scripts, will be expanded properly.  
-       Without this, invalid .vcproj files can be generated when cmake is 
-       launched by VS.
-    7. (optional) Add %WindowsSdkDir%Bin to your path.
-       This will allow you to easily invoke tools such as mt.exe from your
-       command line.
-    8. install cmake version 2.8.0 or greater from:
+    4. install "Microsoft Windows SDK for Windows 7 and .NET Framework 4" from:
+http://www.microsoft.com/downloads/en/details.aspx?FamilyID=6b6c21d2-2006-4afa-9702-529fa782d63b
+    5. register the 7.1 sdk as the current sdk:
+         start menu
+            Microsoft Windows SDK v7.1
+               Visual Studio Registration
+                  Windows SDK Configuration Tool
+    6. install cmake version 2.8.0 or greater from:
        http://www.cmake.org/cmake/resources/software.html
        during install, select "add cmake to PATH for this user (or all users)"
-    9. install ruby from: http://www.ruby-lang.org 
+    7. install ruby from: http://www.ruby-lang.org 
        and add C:\ruby\bin to your PATH
-   10. (optional) Install the latest version of doxygen if you would
+    8. (optional) Install the latest version of doxygen if you would
        like to have documentation generated for various projects which
        do this (like ServiceAPI).  (http://www.stack.nl/~dimitiri/doxygen/)
-   11. (if you want ability to do prod builds) 
+    9. (if you want ability to do prod builds) 
        install the latest JRE from:
        http://java.sun.com/javase/downloads/index.jsp
        ensure that JAVA_HOME is set correctly (e.g. C:\Program Files\Java\jdk1.6.0_14)
-   12. (if you want ability to do prod builds) 
+   10. (if you want ability to do prod builds) 
        install the latest ANT from http://ant.apache.org
        ensure that ANT_HOME is set correctly. 
        ensure that ant binary directory is in your path (e.g. %ANT_HOME%\bin)
-   13. install the latest ActivePerl from:
+   11. install the latest ActivePerl from:
        https://www.activestate.com/activeperl/downloads/ 
        ensure that perl is in your path from a vs command shell 
        (you'll need this at least for building openssl in external/)
-   13. install patch.exe from: 
+   11. install patch.exe from: 
        http://gnuwin32.sourceforge.net/packages/patch.htm
        rename patch.exe to ptch.exe and put it in your path
-   14. install 7z.exe from: http://www.7-zip.org
+   13. install 7z.exe from: http://www.7-zip.org
        and add it to your path
 
   Building the tree
