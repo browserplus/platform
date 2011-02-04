@@ -601,6 +601,11 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
             }
         ];
 
+	// The platform/browser combos we support at the most
+	// gross level.  Further refinements are made by the
+	// plugin, often based on version numbers.  We keep this
+	// level non-specific since updating the platform/plugin
+	// is easier than updating this file.
         var supportMatrix = {
             Mac: {
                 Firefox: "supported",
@@ -608,12 +613,7 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
                 Chrome: "supported"
             },
             Windows: {
-                Explorer: {
-                    "9": "experimental",
-                    "8": "supported",
-                    "7": "supported",
-                    "6": "supported"
-                },
+                Explorer: "supported",
                 Safari: "supported",
                 Firefox: "supported",
                 Chrome: "supported"
@@ -651,8 +651,6 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
                 var e = supportMatrix[_OS][_browser];
                 if (typeof e === 'string') {
                     return e;
-                } else if (e[_version]) {
-                    return e[_version];
                 } else {
                     return "unsupported";
                 }
