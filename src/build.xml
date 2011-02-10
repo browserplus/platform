@@ -17,13 +17,31 @@
     <target name="clean_make_release" unless="is.windows">
         <delete dir="../build_release" />
     </target>
+    <target name="clean_vc05_codecoverage" if="is.windows">
+        <delete dir="../build" />
+    </target>
     <target name="clean_vc08_codecoverage" if="is.windows">
+        <delete dir="../build" />
+    </target>
+    <target name="clean_vc10_codecoverage" if="is.windows">
+        <delete dir="../build" />
+    </target>
+    <target name="clean_vc05_debug" if="is.windows">
         <delete dir="../build" />
     </target>
     <target name="clean_vc08_debug" if="is.windows">
         <delete dir="../build" />
     </target>
+    <target name="clean_vc10_debug" if="is.windows">
+        <delete dir="../build" />
+    </target>
+    <target name="clean_vc05_release" if="is.windows">
+        <delete dir="../build" />
+    </target>
     <target name="clean_vc08_release" if="is.windows">
+        <delete dir="../build" />
+    </target>
+    <target name="clean_vc10_release" if="is.windows">
         <delete dir="../build" />
     </target>
     <target name="build_make_codecoverage" unless="is.windows">
@@ -53,11 +71,41 @@
             <arg line="-j3" />
         </exec>
     </target>
+    <target name="build_vc05_codecoverage" if="is.windows">
+        <mkdir dir="../build" />
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+set VSDIR=C:\Program Files\Microsoft Visual Studio 8\vc\bin
+if not "%VS80COMNTOOLS%"*==* set VSDIR=%VS80COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+cmake -G "Visual Studio 8 2005" ..\src
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+set VSDIR=C:\Program Files\Microsoft Visual Studio 8\vc\bin
+if not "%VS80COMNTOOLS%"*==* set VSDIR=%VS80COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+devenv BrowserPlus.sln /Build Debug /Project ALL_BUILD
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+    </target>
     <target name="build_vc08_codecoverage" if="is.windows">
         <mkdir dir="../build" />
         <delete file="../build/x1.bat" />
         <echo file="../build/x1.bat">@echo off
-call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+set VSDIR=C:\Program Files\Microsoft Visual Studio 9.0\vc\bin
+if not "%VS90COMNTOOLS%"*==* set VSDIR=%VS90COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
 if not %WINTEMP%*==* set TEMP=%WINTEMP%
 if not %WINTMP%*==* set TMP=%WINTMP%
 cmake -G "Visual Studio 9 2008" ..\src
@@ -67,7 +115,65 @@ cmake -G "Visual Studio 9 2008" ..\src
         </exec>
         <delete file="../build/x1.bat" />
         <echo file="../build/x1.bat">@echo off
-call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+set VSDIR=C:\Program Files\Microsoft Visual Studio 9.0\vc\bin
+if not "%VS90COMNTOOLS%"*==* set VSDIR=%VS90COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+devenv BrowserPlus.sln /Build Debug /Project ALL_BUILD
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+    </target>
+    <target name="build_vc10_codecoverage" if="is.windows">
+        <mkdir dir="../build" />
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+set VSDIR=C:\Program Files\Microsoft Visual Studio 10.0\vc\bin
+if not "%VS100COMNTOOLS%"*==* set VSDIR=%VS100COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+cmake -G "Visual Studio 10" ..\src
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+set VSDIR=C:\Program Files\Microsoft Visual Studio 10.0\vc\bin
+if not "%VS100COMNTOOLS%"*==* set VSDIR=%VS100COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+devenv BrowserPlus.sln /Build Debug /Project ALL_BUILD
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+    </target>
+    <target name="build_vc05_debug" if="is.windows">
+        <mkdir dir="../build" />
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+set VSDIR=C:\Program Files\Microsoft Visual Studio 8\vc\bin
+if not "%VS80COMNTOOLS%"*==* set VSDIR=%VS80COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+cmake -G "Visual Studio 8 2005" ..\src
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+set VSDIR=C:\Program Files\Microsoft Visual Studio 8\vc\bin
+if not "%VS80COMNTOOLS%"*==* set VSDIR=%VS80COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
 if not %WINTEMP%*==* set TEMP=%WINTEMP%
 if not %WINTMP%*==* set TMP=%WINTMP%
 devenv BrowserPlus.sln /Build Debug /Project ALL_BUILD
@@ -81,7 +187,9 @@ devenv BrowserPlus.sln /Build Debug /Project ALL_BUILD
         <mkdir dir="../build" />
         <delete file="../build/x1.bat" />
         <echo file="../build/x1.bat">@echo off
-call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+set VSDIR=C:\Program Files\Microsoft Visual Studio 9.0\vc\bin
+if not "%VS90COMNTOOLS%"*==* set VSDIR=%VS90COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
 if not %WINTEMP%*==* set TEMP=%WINTEMP%
 if not %WINTMP%*==* set TMP=%WINTMP%
 cmake -G "Visual Studio 9 2008" ..\src
@@ -91,10 +199,68 @@ cmake -G "Visual Studio 9 2008" ..\src
         </exec>
         <delete file="../build/x1.bat" />
         <echo file="../build/x1.bat">@echo off
-call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+set VSDIR=C:\Program Files\Microsoft Visual Studio 9.0\vc\bin
+if not "%VS90COMNTOOLS%"*==* set VSDIR=%VS90COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
 if not %WINTEMP%*==* set TEMP=%WINTEMP%
 if not %WINTMP%*==* set TMP=%WINTMP%
 devenv BrowserPlus.sln /Build Debug /Project ALL_BUILD
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+    </target>
+    <target name="build_vc10_debug" if="is.windows">
+        <mkdir dir="../build" />
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+set VSDIR=C:\Program Files\Microsoft Visual Studio 10.0\vc\bin
+if not "%VS100COMNTOOLS%"*==* set VSDIR=%VS100COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+cmake -G "Visual Studio 10" ..\src
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+set VSDIR=C:\Program Files\Microsoft Visual Studio 10.0\vc\bin
+if not "%VS100COMNTOOLS%"*==* set VSDIR=%VS100COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+devenv BrowserPlus.sln /Build Debug /Project ALL_BUILD
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+    </target>
+    <target name="build_vc05_release" if="is.windows">
+        <mkdir dir="../build" />
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+set VSDIR=C:\Program Files\Microsoft Visual Studio 8\vc\bin
+if not "%VS80COMNTOOLS%"*==* set VSDIR=%VS80COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+cmake -G "Visual Studio 8 2005" ..\src
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+set VSDIR=C:\Program Files\Microsoft Visual Studio 8\vc\bin
+if not "%VS80COMNTOOLS%"*==* set VSDIR=%VS80COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+devenv BrowserPlus.sln /Build Release /Project ALL_BUILD
         </echo>
         <exec executable="cmd" dir="../build" failonerror="true">
             <arg line="/C x1.bat" />
@@ -105,7 +271,9 @@ devenv BrowserPlus.sln /Build Debug /Project ALL_BUILD
         <mkdir dir="../build" />
         <delete file="../build/x1.bat" />
         <echo file="../build/x1.bat">@echo off
-call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+set VSDIR=C:\Program Files\Microsoft Visual Studio 9.0\vc\bin
+if not "%VS90COMNTOOLS%"*==* set VSDIR=%VS90COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
 if not %WINTEMP%*==* set TEMP=%WINTEMP%
 if not %WINTMP%*==* set TMP=%WINTMP%
 cmake -G "Visual Studio 9 2008" ..\src
@@ -115,7 +283,37 @@ cmake -G "Visual Studio 9 2008" ..\src
         </exec>
         <delete file="../build/x1.bat" />
         <echo file="../build/x1.bat">@echo off
-call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+set VSDIR=C:\Program Files\Microsoft Visual Studio 9.0\vc\bin
+if not "%VS90COMNTOOLS%"*==* set VSDIR=%VS90COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+devenv BrowserPlus.sln /Build Release /Project ALL_BUILD
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+    </target>
+    <target name="build_vc10_release" if="is.windows">
+        <mkdir dir="../build" />
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+set VSDIR=C:\Program Files\Microsoft Visual Studio 10.0\vc\bin
+if not "%VS100COMNTOOLS%"*==* set VSDIR=%VS100COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+cmake -G "Visual Studio 10" ..\src
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+set VSDIR=C:\Program Files\Microsoft Visual Studio 10.0\vc\bin
+if not "%VS100COMNTOOLS%"*==* set VSDIR=%VS100COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
 if not %WINTEMP%*==* set TEMP=%WINTEMP%
 if not %WINTMP%*==* set TMP=%WINTMP%
 devenv BrowserPlus.sln /Build Release /Project ALL_BUILD
@@ -140,10 +338,57 @@ devenv BrowserPlus.sln /Build Release /Project ALL_BUILD
             <arg line="test" />
         </exec>
     </target>
+    <target name="unittest_vc05_codecoverage" if="is.windows">
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+set VSDIR=C:\Program Files\Microsoft Visual Studio 8\vc\bin
+if not "%VS80COMNTOOLS%"*==* set VSDIR=%VS80COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+devenv BrowserPlus.sln /Build Debug /Project test
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+    </target>
     <target name="unittest_vc08_codecoverage" if="is.windows">
         <delete file="../build/x1.bat" />
         <echo file="../build/x1.bat">@echo off
-call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+set VSDIR=C:\Program Files\Microsoft Visual Studio 9.0\vc\bin
+if not "%VS90COMNTOOLS%"*==* set VSDIR=%VS90COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+devenv BrowserPlus.sln /Build Debug /Project test
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+    </target>
+    <target name="unittest_vc10_codecoverage" if="is.windows">
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+set VSDIR=C:\Program Files\Microsoft Visual Studio 10.0\vc\bin
+if not "%VS100COMNTOOLS%"*==* set VSDIR=%VS100COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+devenv BrowserPlus.sln /Build Debug /Project test
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+    </target>
+    <target name="unittest_vc05_debug" if="is.windows">
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+set VSDIR=C:\Program Files\Microsoft Visual Studio 8\vc\bin
+if not "%VS80COMNTOOLS%"*==* set VSDIR=%VS80COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
 if not %WINTEMP%*==* set TEMP=%WINTEMP%
 if not %WINTMP%*==* set TMP=%WINTMP%
 devenv BrowserPlus.sln /Build Debug /Project test
@@ -156,7 +401,9 @@ devenv BrowserPlus.sln /Build Debug /Project test
     <target name="unittest_vc08_debug" if="is.windows">
         <delete file="../build/x1.bat" />
         <echo file="../build/x1.bat">@echo off
-call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+set VSDIR=C:\Program Files\Microsoft Visual Studio 9.0\vc\bin
+if not "%VS90COMNTOOLS%"*==* set VSDIR=%VS90COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
 if not %WINTEMP%*==* set TEMP=%WINTEMP%
 if not %WINTMP%*==* set TMP=%WINTMP%
 devenv BrowserPlus.sln /Build Debug /Project test
@@ -166,10 +413,57 @@ devenv BrowserPlus.sln /Build Debug /Project test
         </exec>
         <delete file="../build/x1.bat" />
     </target>
+    <target name="unittest_vc10_debug" if="is.windows">
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+set VSDIR=C:\Program Files\Microsoft Visual Studio 10.0\vc\bin
+if not "%VS100COMNTOOLS%"*==* set VSDIR=%VS100COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+devenv BrowserPlus.sln /Build Debug /Project test
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+    </target>
+    <target name="unittest_vc05_release" if="is.windows">
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+set VSDIR=C:\Program Files\Microsoft Visual Studio 8\vc\bin
+if not "%VS80COMNTOOLS%"*==* set VSDIR=%VS80COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+devenv BrowserPlus.sln /Build Release /Project test
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+    </target>
     <target name="unittest_vc08_release" if="is.windows">
         <delete file="../build/x1.bat" />
         <echo file="../build/x1.bat">@echo off
-call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+set VSDIR=C:\Program Files\Microsoft Visual Studio 9.0\vc\bin
+if not "%VS90COMNTOOLS%"*==* set VSDIR=%VS90COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+devenv BrowserPlus.sln /Build Release /Project test
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+    </target>
+    <target name="unittest_vc10_release" if="is.windows">
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+set VSDIR=C:\Program Files\Microsoft Visual Studio 10.0\vc\bin
+if not "%VS100COMNTOOLS%"*==* set VSDIR=%VS100COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
 if not %WINTEMP%*==* set TEMP=%WINTEMP%
 if not %WINTMP%*==* set TMP=%WINTMP%
 devenv BrowserPlus.sln /Build Release /Project test
@@ -194,10 +488,57 @@ devenv BrowserPlus.sln /Build Release /Project test
             <arg line="CompressSDK" />
         </exec>
     </target>
+    <target name="compress_vc05_codecoverage" if="is.windows">
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+set VSDIR=C:\Program Files\Microsoft Visual Studio 8\vc\bin
+if not "%VS80COMNTOOLS%"*==* set VSDIR=%VS80COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+devenv BrowserPlus.sln /Build Debug /Project CompressSDK
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+    </target>
     <target name="compress_vc08_codecoverage" if="is.windows">
         <delete file="../build/x1.bat" />
         <echo file="../build/x1.bat">@echo off
-call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+set VSDIR=C:\Program Files\Microsoft Visual Studio 9.0\vc\bin
+if not "%VS90COMNTOOLS%"*==* set VSDIR=%VS90COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+devenv BrowserPlus.sln /Build Debug /Project CompressSDK
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+    </target>
+    <target name="compress_vc10_codecoverage" if="is.windows">
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+set VSDIR=C:\Program Files\Microsoft Visual Studio 10.0\vc\bin
+if not "%VS100COMNTOOLS%"*==* set VSDIR=%VS100COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+devenv BrowserPlus.sln /Build Debug /Project CompressSDK
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+    </target>
+    <target name="compress_vc05_debug" if="is.windows">
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+set VSDIR=C:\Program Files\Microsoft Visual Studio 8\vc\bin
+if not "%VS80COMNTOOLS%"*==* set VSDIR=%VS80COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
 if not %WINTEMP%*==* set TEMP=%WINTEMP%
 if not %WINTMP%*==* set TMP=%WINTMP%
 devenv BrowserPlus.sln /Build Debug /Project CompressSDK
@@ -210,7 +551,9 @@ devenv BrowserPlus.sln /Build Debug /Project CompressSDK
     <target name="compress_vc08_debug" if="is.windows">
         <delete file="../build/x1.bat" />
         <echo file="../build/x1.bat">@echo off
-call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+set VSDIR=C:\Program Files\Microsoft Visual Studio 9.0\vc\bin
+if not "%VS90COMNTOOLS%"*==* set VSDIR=%VS90COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
 if not %WINTEMP%*==* set TEMP=%WINTEMP%
 if not %WINTMP%*==* set TMP=%WINTMP%
 devenv BrowserPlus.sln /Build Debug /Project CompressSDK
@@ -220,10 +563,57 @@ devenv BrowserPlus.sln /Build Debug /Project CompressSDK
         </exec>
         <delete file="../build/x1.bat" />
     </target>
+    <target name="compress_vc10_debug" if="is.windows">
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+set VSDIR=C:\Program Files\Microsoft Visual Studio 10.0\vc\bin
+if not "%VS100COMNTOOLS%"*==* set VSDIR=%VS100COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+devenv BrowserPlus.sln /Build Debug /Project CompressSDK
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+    </target>
+    <target name="compress_vc05_release" if="is.windows">
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+set VSDIR=C:\Program Files\Microsoft Visual Studio 8\vc\bin
+if not "%VS80COMNTOOLS%"*==* set VSDIR=%VS80COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+devenv BrowserPlus.sln /Build Release /Project CompressSDK
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+    </target>
     <target name="compress_vc08_release" if="is.windows">
         <delete file="../build/x1.bat" />
         <echo file="../build/x1.bat">@echo off
-call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
+set VSDIR=C:\Program Files\Microsoft Visual Studio 9.0\vc\bin
+if not "%VS90COMNTOOLS%"*==* set VSDIR=%VS90COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
+if not %WINTEMP%*==* set TEMP=%WINTEMP%
+if not %WINTMP%*==* set TMP=%WINTMP%
+devenv BrowserPlus.sln /Build Release /Project CompressSDK
+        </echo>
+        <exec executable="cmd" dir="../build" failonerror="true">
+            <arg line="/C x1.bat" />
+        </exec>
+        <delete file="../build/x1.bat" />
+    </target>
+    <target name="compress_vc10_release" if="is.windows">
+        <delete file="../build/x1.bat" />
+        <echo file="../build/x1.bat">@echo off
+set VSDIR=C:\Program Files\Microsoft Visual Studio 10.0\vc\bin
+if not "%VS100COMNTOOLS%"*==* set VSDIR=%VS100COMNTOOLS%\..\..\vc\bin
+call "%VSDIR%\vcvars32.bat"
 if not %WINTEMP%*==* set TEMP=%WINTEMP%
 if not %WINTMP%*==* set TMP=%WINTMP%
 devenv BrowserPlus.sln /Build Release /Project CompressSDK
