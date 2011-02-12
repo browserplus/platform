@@ -65,6 +65,8 @@ BrowserInfo::BrowserInfo(const std::string& userAgent) : m_supported(false)
         //    'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6; en-us) AppleWebKit/531.9 (KHTML, like Gecko) Version/4.0.3 Safari/531.9'
         // A sample OSX Chrome userAgent string
         //    'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; en-US) AppleWebKit/533.4 (KHTML, like Gecko) Chrome/5.0.375.38 Safari/533.4'
+        // A sample OSX Titanium userAgent string
+        //    'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; en-US) AppleWebKit/533.4 (KHTML, like Gecko) Chrome/5.0.375.38 Safari/533.4 Titanium/1.0.0'
 
         // first grab platform
         BPLOG_DEBUG_STRM("userAgent = " << userAgent);
@@ -76,7 +78,9 @@ BrowserInfo::BrowserInfo(const std::string& userAgent) : m_supported(false)
             BP_THROW("unknown platform in '" + userAgent + "'");
         }
 
-        // now figure out the browser
+        // Now figure out the browser.  Make sure to check
+        // Safari last since Chrome and Titanium have
+        // "Safari" in their user agents.  Nice.
         string browser;
         if (userAgent.find("MSIE") != string::npos) {
             m_browser = "IE";
@@ -84,6 +88,8 @@ BrowserInfo::BrowserInfo(const std::string& userAgent) : m_supported(false)
             m_browser = "Firefox";
         } else if (userAgent.find("Chrome") != string::npos) {
             m_browser = "Chrome";
+        } else if (userAgent.find("Titanium") != string::npos) {
+            m_browser = "Titanium";
         } else if (userAgent.find("Safari") != string::npos) {
             m_browser = "Safari";
         } else {
