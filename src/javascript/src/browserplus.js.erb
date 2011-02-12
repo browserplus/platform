@@ -309,41 +309,6 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
                                 };
                             }
                             
-                            // Workaround a bug in Safari 5 on 10.6 (64bit) on platforms less than
-                            // 2.9.2.  An internal change in safari broke FileBrowse causing browser
-                            // lockup.  Rather than allowing the user to possibly experience this
-                            // error, we'll just report that browserplus isn't installed in this
-                            // environment.
-                            var isSafari5SnowLeopard = function() {
-                                try {
-                                    if (-1 != navigator.vendor.indexOf("Apple") &&
-                                        -1 != navigator.userAgent.indexOf("Intel Mac OS X 10_6") &&
-                                        -1 != navigator.userAgent.indexOf("Version/5"))
-                                    {
-                                        return true;
-                                    }
-                                } catch(e) { }
-                                return false;
-                            }
-                            if (isSafari5SnowLeopard() && !BrowserPlus.isAtLeastVersion("2.9.2")) {
-                                res = {
-                                    success: false,
-                                    error: 'bp.notInstalled',
-                                    verboseError: 'BrowserPlus cannot run on this browser reliably, you must upgrade'
-                                };
-                                
-                                // in this case, we still want platform update
-                                // logic to run to update this user so they can
-                                // use browserplus.  We'll make a single
-                                // require call which will cause BrowserPlus
-                                // to download or install an update if
-                                // available.  We require a built-in that's
-                                // always there and won't require prompting
-                                try {
-                                    BrowserPlus.require({services:[{service:"InactiveServices"}]}, function() {});
-                                } catch (e) {}
-                            }
-                            
                             _initState = res.success ? 'succeeded' : 'uninitialized';
                             // clear callbacks
                             var cbs = _initCallbacks;
@@ -558,6 +523,12 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
     function _detectBrowser() {
         var dataBrowser = [
             {
+                string: navigator.userAgent,
+                subString: "Titanium",
+                identity: "Titanium",
+                versionSearch: "Titanium"
+            },
+            {
                 string: navigator.vendor,
                 subString: "Apple",
                 identity: "Safari"
@@ -601,22 +572,24 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
             }
         ];
 
-	// The platform/browser combos we support at the most
-	// gross level.  Further refinements are made by the
-	// plugin, often based on version numbers.  We keep this
-	// level non-specific since updating the platform/plugin
-	// is easier than updating this file.
+	    // The platform/browser combos we support at the most
+	    // gross level.  Further refinements are made by the
+	    // plugin, often based on version numbers.  We keep this
+	    // level non-specific since updating the platform/plugin
+	    // is easier than updating this file.
         var supportMatrix = {
             Mac: {
                 Firefox: "supported",
                 Safari: "supported",
-                Chrome: "supported"
+                Chrome: "supported",
+                Titanium: "supported"
             },
             Windows: {
                 Explorer: "supported",
                 Safari: "supported",
                 Firefox: "supported",
-                Chrome: "supported"
+                Chrome: "supported",
+                Titanium: "supported"
             }
         };
 
