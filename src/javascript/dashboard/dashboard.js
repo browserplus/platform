@@ -7,15 +7,20 @@ services["TextToSpeech"] = {require: {service: "TextToSpeech"},
                             content: "sayContent", 
                             loadedCB: sayLoaded, 
                             cbCalled: false}
-services["DragAndDrop"] = {require: {service: "DragAndDrop", version: "1.0.1"}, 
+services["DragAndDrop"] = {require: {service: "DragAndDrop",
+                                     minversion: "2"}, 
                            content: "dropContent",
                            loadedCB: dropLoaded, 
                            cbCalled: false};
-services["Zipper"] = {require: {service: "Zipper",
-                                minversion: "1.0.0"},
-                      content: "dropContent",
-                      loadedCB: zipperLoaded, 
-                      cbCalled: false};
+services["Directory"] = {require: {service: "Directory",
+                                   minversion: "2"},
+                         content: "dropContent",
+                         loadedCB: directoryLoaded, 
+                         cbCalled: false};
+services["Archiver"] = {require: {service: "Archiver"},
+                        content: "dropContent",
+                        loadedCB: archiverLoaded, 
+                        cbCalled: false};
 
 for (k in services) {
     setAsLoading(services[k].content);
@@ -45,6 +50,7 @@ function initCB(result) {
     enumerateServices();
 } 
 
+
 function requireCB(result) {
     if (!result.success) {
         alert('unable to require services: ' + result.error + '/' + result.verboseError);
@@ -62,6 +68,7 @@ function requireCB(result) {
     }
 }
 
+
 // for now we just make the unloaded element invisible, it should be a
 // snazzy swirl or something
 function setAsLoading(divName) {
@@ -69,19 +76,20 @@ function setAsLoading(divName) {
     if (div) div.style.visibility = "hidden";
 }
 
+
 function setAsLoaded(divName) {
     var div = document.getElementById(divName);
     if (div) div.style.visibility = "visible";
 }
 
+
 function sayLoaded() {
-    enumerateServices();	
+    enumerateServices();    
     setAsLoaded("sayContent");
 
-    function say()
-    {
-	BrowserPlus.TextToSpeech.Say(
-	    {utterance: document.getElementById("sayit").value},
+    function say() {
+        BrowserPlus.TextToSpeech.Say(
+            {utterance: document.getElementById("sayit").value},
             function (res) {
                 if (!res.success) {
                     alert("Say failed:" + res.error + ": " + res.verboseError);
@@ -94,163 +102,6 @@ function sayLoaded() {
     document.sayform.onsubmit = say;
 }
 
-function quoteLoaded() {
-    setAsLoaded("quoteContent");
-    enumerateServices();	
-
-    function quote()
-    {
-	function quoteCallback(response)
-	{
-	    if (!response.success)
-	    {
-		alert("GetQuote failed:" + response.error
-		      + ": " + response.verboseError);
-		return false;
-	    }
-	    response = response.value;
-
-	    // now update the document
-	    var qtarget = document.getElementById("quotetarget");
-	    var worked = document.createTextNode(
-		response.name + " is at " + response.lastTrade);
-	    qtarget.replaceChild(worked, qtarget.childNodes[0]);
-
-	    // add an image for the fun of it
-	    var imgtarg = document.getElementById("quoteimagetarget");
-	    var imgelem = document.createElement("img");
-	    imgelem.setAttribute("src",
-				 "http://ichart.finance.yahoo.com/t?s=" + symbol);
-	    imgtarg.appendChild(imgelem);
-
-	    // Talk!
-	    var updown = response.change < 0.0 ? "down" : "up";
-	    var change =
-		response.change > 0.0 ? response.change : response.change * -1;
-	    var res = BrowserPlus.TextToSpeech.Say(
-		{utterance: response.name + " is " + updown + " " + change},
-                function (res) {
-                    if (!res.success) {
-                        alert("say failed: " + res.error + ": " + res.verboseError);
-                    }
-                });
-        }
-
-	// access symbol from DOM
-	var symbol = document.getElementById("symbol").value;
-
-	// fetch the quote using nbrowserplus
-	BrowserPlus.YahooFinance.GetQuote({ symbol: symbol }, quoteCallback);
-
-	// indicate that we're loading the quote
-	var imgtarget = document.getElementById("quoteimagetarget");
-	while (imgtarget.childNodes.length > 0) {
-	    imgtarget.removeChild(imgtarget.firstChild);
-	}
-
-	var loading = document.createTextNode("loading quote for "+
-					      symbol.toUpperCase() +"...");
-	var qtarget = document.getElementById("quotetarget");
-	qtarget.replaceChild(loading, qtarget.childNodes[0]);
-
-	return false;
-    }
-
-    document.quoteform.button.onclick = quote;
-    document.quoteform.onsubmit = quote;
-}
-
-function searchLoaded() { 
-    enumerateServices();	
-    setAsLoaded("searchContent");
-
-    function search()
-    {
-	function searchComplete(rez)
-	{
-	    if (!rez.success) {
-		alert("Search failed:" + rez.error + ": " + rez.verboseError);
-		return false;
-	    }
-	    rez = rez.value;
-
-	    BrowserPlus.TextToSpeech.Say(
-		{utterance: rez.returnedResults + " results for " + rez.query},
-		function(){});
-
-	    // now update the document
-	    var target = document.getElementById("searchtarget");
-	    var done = document.createTextNode("searched ");
-	    target.replaceChild(done, target.childNodes[0]);
-
-	    // now update the document
-	    var target = document.getElementById("searchtarget");
-
-	    // update the result count
-	    var countNode = target.childNodes[4];
-	    var newCountNode = document.createTextNode(rez.totalResults);
-	    target.replaceChild(newCountNode, countNode);
-	}
-
-	function searchResults(rez)
-	{
-	    var target = document.getElementById("searchtarget");
-
-	    // update the current result count
-	    var countNode = target.childNodes[2];
-	    var newCount = Number(countNode.data) + rez.length
-	    var newCountNode = document.createTextNode(newCount);
-	    target.replaceChild(newCountNode, countNode);
-
-	    // update the total result count
-	    countNode = target.childNodes[4];
-	    newCount = Number(countNode.data) + rez.length
-	    newCountNode = document.createTextNode(newCount);
-	    target.replaceChild(newCountNode, countNode);
-	    
-	    for (var i = 0; i < rez.length ; i++)
-	    {
-		response = rez[i];
-		var a = document.createElement("a");
-		a.appendChild(document.createTextNode(response.title));
-		target.appendChild(a);
-		var sz = document.createTextNode(" (" +
-						 (response.size / 1000) + "k)");
-		target.appendChild(sz);
-		target.appendChild(document.createElement("br"));
-	    }
-	}
-
-	// access symbol from DOM
-	var query = document.getElementById("query").value;
-
-	// start the search
-	BrowserPlus.DesktopSearch.Search({ query: query,
-					   type: "all",
-					   callback: searchResults
-					 },
-					 searchComplete);
-
-	// indicate that we're loading the quote
-	var target = document.getElementById("searchtarget");
-	while (target.childNodes.length > 0) {
-	    target.removeChild(target.firstChild);
-	}
-	
-	target.appendChild(document.createTextNode("searching "));
-	target.appendChild(
-	    document.createTextNode("\"" + query + "\".  displaying "));
-	target.appendChild(document.createTextNode("0"));
-	target.appendChild(document.createTextNode("/"));
-	target.appendChild(document.createTextNode("0"));
-	target.appendChild(document.createTextNode(" results"));
-	target.appendChild(document.createElement("p"));
-
-	return false;
-    }
-    document.searchform.button.onclick = search;
-    document.searchform.onsubmit = search;
-}
 
 function serviceDetails(service, version)
 {
@@ -278,12 +129,11 @@ function serviceDetails(service, version)
         });
 }
 
-function enumerateServices()
-{
+
+function enumerateServices() {
     BrowserPlus.listActiveServices(
-	function(services) {
-            if (!services.success)
-            {
+        function(services) {
+            if (!services.success) {
                 alert("InstalledServices failed:" + services.error
                       + ": " + services.verboseError);
                 return false;
@@ -292,8 +142,7 @@ function enumerateServices()
 
             list = document.createElement("ul");
 
-            for (i in services)
-            {
+            for (i in services) {
                 var elem = document.createElement("li");
 
                 service = services[i];
@@ -328,43 +177,44 @@ function enumerateServices()
 }
 
 
-function displayTiming(info)
-{
+function displayTiming(info) {
     var target = document.getElementById("timingDisplay");
     var txt = document.createTextNode(
         "BrowserPlus " + info.version + " (" + info.os + ")" + 
-	    " loaded in " + (new Date() - startTime) + "ms");
+            " loaded in " + (new Date() - startTime) + "ms");
     target.appendChild(txt);
 }
+
 
 // run client technology detection at load
 (function () {
     var target = document.getElementById("timingDisplay");
-    var systemInfo = YAHOO.bp.clientSystemInfo();				   
+    var systemInfo = YAHOO.bp.clientSystemInfo();                  
     txt = document.createTextNode(
         "You're running " + systemInfo.browser + " " +
-	    systemInfo.version + " - " + systemInfo.os +
-	    " [" + systemInfo.locale + "] ("+systemInfo.supportLevel+")");
+            systemInfo.version + " - " + systemInfo.os +
+            " [" + systemInfo.locale + "] ("+ systemInfo.supportLevel +")");
     target.appendChild(txt);    
     target.appendChild(document.createElement("br"));
 })();
 
-function displayGetBrowserPlus()
-{
+
+function displayGetBrowserPlus() {
     var target = document.getElementById("timingDisplay");
     target.appendChild(document.createTextNode("BrowserPlus is "));
     var bnode = document.createElement("b");
     bnode.appendChild(document.createTextNode("NOT installed!"));
     var pluglink = document.createElement("a");
     pluglink.setAttribute(
-      "href",
-      "http://browserplus.yahoo.com/install/");
+        "href",
+        "http://browserplus.yahoo.com/install/");
     pluglink.appendChild(document.createTextNode("get it now"));    
     target.appendChild(bnode);
     target.appendChild(document.createElement("br"));
     target.appendChild(pluglink);
 
 }
+
 
 // safari doesn't update page if all you do is twiddle a style,
 // this DOM change is a noop, but causes safari to render highlighting
@@ -374,12 +224,19 @@ function forceBrowserReflow(e) {
     e.removeChild(x);
 }
 
-function zipperLoaded() {
+
+function archiverLoaded() {
     enumerateServices();
 }
 
+
+function directoryLoaded() {
+    enumerateServices();
+}
+
+
 function dropLoaded() {
-    enumerateServices();	
+    enumerateServices();    
     setAsLoaded("dropContent");
 
     function photoHoverCallback(arg)
@@ -390,176 +247,119 @@ function dropLoaded() {
         } else {
             elem.style.borderColor = "gray";
         }
-	forceBrowserReflow(elem);
+        forceBrowserReflow(elem);
     }
 
     function photoDropCallback(arg) {
-	var utt = arg.length;
-	utt += " fantastic photo";
-        if (arg.length > 1) utt += "s";
-        BrowserPlus.TextToSpeech.Say({utterance: utt}, function(){});
-
-        logDrop(arg);
+        BrowserPlus.Directory.recursiveList(
+            {files: arg,
+             mimetypes: ["image/jpeg", "image/bmp", "image/gif", "image/tiff"],
+             limit: 500},
+            function(r) {
+                if (r.success) {
+                    var utt = r.value.files.length;
+                    utt += " fantastic photo";
+                    if (r.value.files.length != 1) utt += "s";
+                    BrowserPlus.TextToSpeech.Say({utterance: utt}, function(){});
+                } else {
+                    alert('BrowserPlus.Directory.recursiveList failed: '
+                          + result.error + '/' + result.verboseError);
+                }
+            });
     }
     
-    function musicHoverCallback(arg)
-    {
+    function musicHoverCallback(arg) {
         var elem = document.getElementById("musicDropTarget");
         if (arg == true) {
             elem.style.borderColor = "lime";
         } else {
             elem.style.borderColor = "gray";
         }
-	forceBrowserReflow(elem);
+        forceBrowserReflow(elem);
     }
 
     function musicDropCallback(arg) {
-        var utt = arg.actualSelection.length + " selection";
-        if (arg.actualSelection.length > 1) utt += "s";
-        utt += " resulted in " + arg.files.length + " tasty tune";
-        if (arg.files.length > 1) utt += "s";
-        BrowserPlus.TextToSpeech.Say({utterance: utt}, function(){});
-
-        logDrop(arg);
+        BrowserPlus.Directory.recursiveList(
+            {files: arg,
+             mimetypes: ["audio/basic", "audio/mpeg", "audio/x-aiff", "audio/x-wav", 
+                         "audio/x-ms-wma", "audio/mid", "audio/mp4", "audio/x-m4a"],
+             limit: 500},
+            function(r) {
+                if (r.success) {
+                    var utt = r.value.files.length;
+                    utt += " tasty tune";
+                    if (r.value.files.length != 1) utt += "s";
+                    BrowserPlus.TextToSpeech.Say({utterance: utt}, function(){});
+                } else {
+                    alert('BrowserPlus.Directory.recursiveList failed: '
+                          + result.error + '/' + result.verboseError);
+                }
+            });
     }
     
-    function allFilesHoverCallback(arg)
-    {
-        var elem = document.getElementById("allFilesDropTarget");
+    function zipperHoverCallback(arg) {
+        var elem = document.getElementById("zipperDropTarget");
         if (arg == true) {
             elem.style.borderColor = "navy";
         } else {
             elem.style.borderColor = "gray";
         }
-	forceBrowserReflow(elem);
+        forceBrowserReflow(elem);
     }
 
-    function allFilesDropCallback(arg) {
-	var files = [];
-	if (arg.actualSelection) {
-	    files = arg.actualSelection;
-	} else if (arg.length > 0) {
-	    files = arg;
-	}
-	BrowserPlus.Zipper.zip({files: files, followLinks:true},
-				     function (res) {
-					 var utt = "zip of " + files.length + " file";
-					 if (files.length > 1) utt += "s ";
-					 if (res.success) {
-					     utt += "succeeded";
-					 } else {
-					     utt += "failed";
-					     alert(res.error + ": " + res.verboseError);
-					 }
-					 BrowserPlus.TextToSpeech.Say({utterance: utt},
-								      function(){});
-					 alert("zip file "
-					       + res.value.zipFile.name
-					       + " will be removed when service unloads");
-				     });
-	logDrop(arg);
+    function zipperDropCallback(arg) {
+        BrowserPlus.Archiver.archive(
+            {files: arg,
+             format: "zip",
+             followLinks:true},
+            function (res) {
+                var _files = arg;
+                var utt = "zip of " + _files.length + " file";
+                if (_files.length > 1) utt += "s ";
+                if (res.success) {
+                    utt += "succeeded";
+                } else {
+                    utt += "failed";
+                    alert(res.error + ": " + res.verboseError);
+                }
+                BrowserPlus.TextToSpeech.Say({utterance: utt},
+                                             function(){});
+                alert("zip file "
+                      + res.value.archiveFile.name
+                      + " will be removed when service unloads");
+            });
     }
 
-    function logDrop(arg)
-    {
-        var msg = "";
-        if (arg.actualSelection) {
-            msg = msg + "actualSelection: ";
-            for (var i = 0; i < arg.actualSelection.length; i++) {
-                msg = msg + arg.actualSelection[i].BrowserPlusHandleID + " = " 
-                    + arg.actualSelection[i].BrowserPlusHandleName + ", ";
-            }
-            msg = msg + "\nfiles: ";
-            for (var i = 0; i < arg.files.length; i++) {
-                msg = msg + arg.files[i].handle.BrowserPlusHandleID
-                    + " = " + arg.files[i].handle.BrowserPlusHandleName
-                    + " (parent = " + arg.files[i].parent + ")\n";
-            }
-        } else {
-            for (var i = 0; i < arg.length; i++) {
-                msg = msg + arg[i].BrowserPlusHandleID + " = " 
-                    + arg[i].BrowserPlusHandleName + ", ";
-            }
-        }
-        //alert(msg);
-    }
-    
-    function setupDropZones()
-    {
-        addDropZone("photoDropTarget", ["image/jpeg", "image/bmp", "image/gif", "image/tiff"],
-                    false, photoHoverCallback, photoDropCallback, "eeeeee");
-        addDropZone("musicDropTarget",
-                    ["audio/basic", "audio/mpeg", "audio/x-aiff", "audio/x-wav", 
-                     "audio/x-ms-wma", "audio/mid", "audio/mp4"],
-                    true, musicHoverCallback, musicDropCallback, "dddddd");
-        addDropZone("allFilesDropTarget", [],
-                    true, allFilesHoverCallback, allFilesDropCallback, "cccccc");
+
+    function setupDropZones() {
+        addDropZone("photoDropTarget", photoHoverCallback, photoDropCallback, "eeeeee");
+        addDropZone("musicDropTarget", musicHoverCallback, musicDropCallback, "dddddd");
+        addDropZone("zipperDropTarget", zipperHoverCallback, zipperDropCallback, "cccccc");
     }
 
-    function addDropZone(targetId, mimeTypes, includeGestureInfo,
-                         hoverCallback, dropCallback, bgndColor)
-    {
+    function addDropZone(targetId, hoverCallback, dropCallback, bgndColor) {
         BrowserPlus.DragAndDrop.AddDropTarget(
-            {id: targetId, includeGestureInfo: includeGestureInfo, mimeTypes: mimeTypes},
+            {id: targetId},
             function(stat) {
                 if (!stat.success) {
                     alert("AddDropTarget(" + targetId + ") failed:" +
                           stat.error + "\n" +
                           stat.verboseError);
                 } else {
-		    BrowserPlus.DragAndDrop.AttachCallbacks(
-			{id: targetId, hover: hoverCallback, drop: dropCallback},
-			function() {} );
-		}
+                    BrowserPlus.DragAndDrop.AttachCallbacks(
+                        {id: targetId, hover: hoverCallback, drop: dropCallback},
+                        function() {} );
+                }
             });
         
         var elem = document.getElementById(targetId);
         elem.style.backgroundColor = bgndColor;
         hoverCallback(false);
     }
-    
-    function enableDropZone(targetId, enable, bgndColor)
-    {
-        BrowserPlus.DragAndDrop.EnableDropTarget(
-            {id: targetId, enable: enable}, 
-            function(stat) {
-                if (!stat.success) {
-                    alert("EnableDropTarget(" + targetId + ") failed:" +
-                          stat.error + "\n" +
-                          stat.verboseError);
-                } else {
-                    var elem = document.getElementById(targetId);
-                    if (enable) {
-                        elem.style.backgroundColor = bgndColor;
-                    } else {
-                        elem.style.backgroundColor = "ffffff";
-                    }
-                    forceBrowserReflow(elem);
-                }
-            });
-    }
-    
-    function onPhotosClick()
-    {
-        enableDropZone("photoDropTarget", document.dropform.button1.checked, "eeeeee");
-    }
-    
-    function onMusicClick()
-    {
-        enableDropZone("musicDropTarget", document.dropform.button2.checked, "dddddd");
-    }
-    
-    function onAllFilesClick()
-    {
-        enableDropZone("allFilesDropTarget", document.dropform.button3.checked, "cccccc");
-    }
 
     setupDropZones();
-
-    document.dropform.button1.onclick = onPhotosClick;
-    document.dropform.button2.onclick = onMusicClick;
-    document.dropform.button3.onclick = onAllFilesClick;
 }
+
 
 function evilLoaded(result) {
     msg = result.success ? "EvilService loaded in spite of blacklisting!"
