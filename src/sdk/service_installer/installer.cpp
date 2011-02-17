@@ -538,7 +538,7 @@ main(int argc,
     }
 
     // pathToHarness is ourself
-    s_harnessProgram = bpf::canonicalProgramPath(bfs::path(argv[0]));
+    s_harnessProgram = bpf::absoluteProgramPath(bfs::path(argv[0]));
 
     bool dryRun = argParser->argumentPresent("n");
     bool uninstall = argParser->argumentPresent("u");
@@ -572,7 +572,7 @@ main(int argc,
         serviceVersion = argv[x+1];
         absPath = bp::paths::getServiceDirectory() / serviceName / serviceVersion;
     } else {
-        absPath = bp::file::canonicalPath(bfs::path(argv[x]));
+        absPath = bp::file::absolutePath(bfs::path(argv[x]));
     }
 
     // get service summary

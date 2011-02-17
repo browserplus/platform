@@ -1511,6 +1511,22 @@ canonical(const bfs::path& p)
 
 
 bfs::path
+absolutePath(const bfs::path& path)
+{
+    bfs::path rval;
+    try {
+        rval = bfs::system_complete(path);
+    } catch(const bfs::filesystem_error& e) {
+        BPLOG_DEBUG_STRM("bfs::system_complete(" << path << ") failed.");
+        BPLOG_INFO_STRM("bfs::system_complete failed: " << e.what() <<
+                        ", returning false.");
+        rval.clear();
+    }
+    return rval;
+}
+
+
+bfs::path
 relativeTo(const bfs::path& p,
            const bfs::path& base)
 {

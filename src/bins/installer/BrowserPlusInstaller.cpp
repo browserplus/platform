@@ -804,7 +804,7 @@ main(int argc, const char** argv)
         conv.convert(argc, argv);
 
         bfs::path exe(argv[0]);
-        bfs::path exeDir = canonicalPath(exe).parent_path();
+        bfs::path exeDir = absolutePath(exe).parent_path();
     
         // debug logging on be default.  logfile cannot be in same dir
         // as executable since a mounted mac .dmg is read-only

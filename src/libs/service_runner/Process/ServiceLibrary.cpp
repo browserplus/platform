@@ -84,7 +84,7 @@ ServiceLibrary::parseManifest(std::string & err)
     //      to the location where the service api version *really* lives.
     //      (yeah, we could include a version in manifest too, but that would
     //       be a DRY violation)
-    return m_summary.detectService(bpf::canonicalPath(bfs::path(".")), err);
+    return m_summary.detectService(bpf::absolutePath(bfs::path(".")), err);
 }
 
 std::string
@@ -133,7 +133,7 @@ ServiceLibrary::load(const bfs::path & providerPath, std::string & err)
     {
         path = m_summary.path() / m_summary.serviceLibraryPath();
     }
-    path = bpf::canonicalPath(path);
+    path = bpf::absolutePath(path);
 
     // now path contains the path to the shared library, regardless of whether
     // this is a native or dependent service.

@@ -73,7 +73,7 @@ InstallProcessRunner::start(const boost::filesystem::path& dir,
                         << " will be lost");
     }
 
-    boost::filesystem::path updaterExe = bp::file::canonicalProgramPath(dir/"BrowserPlusUpdater");
+    boost::filesystem::path updaterExe = bp::file::absoluteProgramPath(dir/"BrowserPlusUpdater");
     std::vector<std::string> args;
     args.push_back("-ipcName=" + m_ipcName);
     args.push_back("-logPath=" + m_logPath.string());

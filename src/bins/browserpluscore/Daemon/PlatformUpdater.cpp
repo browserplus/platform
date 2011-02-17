@@ -239,7 +239,7 @@ PlatformUpdaterSingleton::spawnUpdate(const string& version)
     string daemonLock = bp::paths::getIPCLockName();
     bfs::path cacheDir = getPlatformCacheDirectory() / version;
     bfs::path updater = cacheDir / "BrowserPlusUpdater";
-    updater = canonicalProgramPath(updater);
+    updater = absoluteProgramPath(updater);
     if (!pathExists(updater)) {
         return false;
     }

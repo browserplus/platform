@@ -493,7 +493,7 @@ DiskScanner::scanDiskForServices(
                     }
                 }
                 if (!loadedServices && !subDirectories) {
-                    boost::filesystem::path fullPath(bp::file::canonicalPath(path));
+                    boost::filesystem::path fullPath(bp::file::absolutePath(path));
 
                     BPLOG_WARN_STRM("removing empty directory: " << fullPath);
                     bp::file::safeRemove(fullPath);

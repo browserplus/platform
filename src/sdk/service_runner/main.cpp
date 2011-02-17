@@ -519,7 +519,7 @@ main(int argc, const char ** argv)
         s_rl.init();
 
         // specify our own binary as the "harness program"
-        bfs::path harnessProgram = bpf::canonicalProgramPath(bfs::path(argv[0]));
+        bfs::path harnessProgram = bpf::absoluteProgramPath(bfs::path(argv[0]));
 
         // let's try to figure out a meaningful process title
         std::string processTitle, summary;

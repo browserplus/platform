@@ -258,7 +258,7 @@ int main(int argc, const char ** argv)
         setupLogging(argParser);
 
         string error;
-        boost::filesystem::path absPath = bp::file::canonicalPath(boost::filesystem::path(argv[x]));
+        boost::filesystem::path absPath = bp::file::absolutePath(boost::filesystem::path(argv[x]));
 
         bp::service::Summary summary;
     
@@ -307,7 +307,7 @@ int main(int argc, const char ** argv)
         controller->setListener(serviceMan.get());
     
         // pathToHarness is ourself
-        boost::filesystem::path harnessProgram = bp::file::canonicalProgramPath(boost::filesystem::path(argv[0]));
+        boost::filesystem::path harnessProgram = bp::file::absoluteProgramPath(boost::filesystem::path(argv[0]));
 
         // determine a reasonable title for the spawned service
         string processTitle, ignore;

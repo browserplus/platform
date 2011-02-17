@@ -513,7 +513,7 @@ ServiceLibrary_v4::load(const bp::service::Summary &summary,
         servicePath = m_summary.path();
         path = m_summary.path() / m_summary.serviceLibraryPath();
     }
-    path = bpf::canonicalPath(path);
+    path = bpf::absolutePath(path);
     
     BPLOG_INFO_STRM("loading v4 service library: " << path.filename());
 

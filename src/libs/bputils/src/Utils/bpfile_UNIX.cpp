@@ -178,44 +178,9 @@ getTempPath(const bfs::path& tempDir,
 
 
 bfs::path
-canonicalPath(const bfs::path& path,
-              const bfs::path& root)
+absoluteProgramPath(const bfs::path& path)
 {
-    string rval;
-    int cfd = -1;
-    try {
-        if (!root.empty()) {
-            cfd = ::open(".", O_RDONLY, 0);
-            if (cfd < 0) {
-                throw string("unable to open .");
-            }
-            if (::chdir(root.c_str()) < 0) {
-                throw string("unable to chdir to ") + root.c_str();
-            }
-        }
-            
-        char buf[PATH_MAX+1];
-        if (::realpath(path.c_str(), buf) == NULL) {
-            throw string("realpath failed");
-        }
-        rval = buf;
-    } catch(const string& s) {
-        rval.clear();
-    }
-    if (cfd >= 0) {
-        fchdir(cfd);
-        ::close(cfd);
-    }
-    return rval;
-}
-
-
-bfs::path
-canonicalProgramPath(const bfs::path& path,
-                     const bfs::path& root)
-{
-    // No action beyond canonicalName necessary on unix
-    return canonicalPath(path, root);
+    return absolutePath(path);
 }
 
 
@@ -277,15 +242,41 @@ resolveLink(const bfs::path& path,
             bfs::path& target)
 {
     bool rval = false;
-    bfs::path rstr = readLink(path);
-    if (!rstr.empty()) {
-        rstr = canonicalPath(rstr, path.parent_path());
-        rval = pathExists(rstr);
+    int cfd = -1;
+    bfs::path linkVal = readLink(path);
+    try {
+        if (!linkVal.empty()) {
+            bfs::path parent = path.parent_path();
+            if (!parent.empty()) {
+                cfd = ::open(".", O_RDONLY, 0);
+                if (cfd < 0) {
+                    throw string("unable to open .");
+                }
+                if (::chdir(parent.c_str()) < 0) {
+                    throw string("unable to chdir to ") + parent.c_str();
+                }
+            }
+            char buf[PATH_MAX+1];
+            if (::realpath(path.c_str(), buf) == NULL) {
+                throw string("realpath failed");
+            }
+            target = buf;
+            rval = pathExists(target);
+        }
+    } catch (const string&) {
+        rval = false;
+        target.clear();
     }
+
     if (rval) {
-        target = rstr;
+        target = linkVal;
     } else {
         target.clear();
+    }
+
+    if (cfd >= 0) {
+        ::fchdir(cfd);
+        ::close(cfd);
     }
     return rval;
 }

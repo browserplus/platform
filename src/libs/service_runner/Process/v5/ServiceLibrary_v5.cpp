@@ -420,9 +420,9 @@ ServiceLibrary_v5::load(const bp::service::Summary &summary,
         servicePath = m_summary.path();
     }
 
-    servicePath = bp::file::canonicalPath(servicePath);
+    servicePath = bp::file::absolutePath(servicePath);
     if (!dependentPath.empty()) {
-        dependentPath = bp::file::canonicalPath(dependentPath);
+        dependentPath = bp::file::absolutePath(dependentPath);
     }
     
     funcTable = (const BPPFunctionTable *) m_funcTable;

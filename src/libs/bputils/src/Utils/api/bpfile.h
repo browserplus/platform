@@ -23,12 +23,7 @@
 /*
  *  bpfile.h
  *
- *  Provide a boost::filesystem::path subclass with 
- *  a few convenience methods.
- *
- *  As with boost, boost::filesystem::path only does pathname manipulation
- *  stuff.  Any actual contact with the filesystem is done by 
- *  other functions in bp::file namespace.
+ *  Add a few convenience methods for dealing with boost::filesystem
 
  *  Copyright 2009 Yahoo! Inc. All rights reserved.
  *
@@ -159,25 +154,22 @@ namespace bp {
         boost::filesystem::path relativeTo(const boost::filesystem::path& p,
                                            const boost::filesystem::path& base); // throws bp::Exception
 
-        /** Return the canonical form of a path
+        /** Return the absolute form of a path.
+         *  Uses boost::filesystem::system_complete().
+         *  Returns empty if that method throws an exception. 
          *  \param path [IN] - path
-         *  \param root [IN] - root of relative path evaluation.
-         *                     Default (empty) means current dir.
          *  \returns canonical form of path, empty on failure
          */
-        boost::filesystem::path canonicalPath(const boost::filesystem::path& path,
-                                              const boost::filesystem::path& root = boost::filesystem::path());
+        boost::filesystem::path absolutePath(const boost::filesystem::path& path);
         
-        /** Return the canonical form of an executable program name
-         *  operations may include prepending root or current working
-         *  directory, appending ".exe" on win32, etc.
+        /** Return the absolute form of an executable program name, which
+         *  may include appending ".exe" on win32, etc.
+         *  Uses boost::filesystem::system_complete().
+         *  Returns empty if that method throws an exception. 
          *  \param path [IN] - path
-         *  \param root [IN] - root of relative path evaluation.
-         *                     Default (empty) means current dir.
          *  \returns canonical form of path, empty on failure
          */
-        boost::filesystem::path canonicalProgramPath(const boost::filesystem::path& path,
-                                                     const boost::filesystem::path& root = boost::filesystem::path());
+        boost::filesystem::path absoluteProgramPath(const boost::filesystem::path& path);
 
         /** Return the full path of the current executing program.
          *  \returns full path of the current executing program

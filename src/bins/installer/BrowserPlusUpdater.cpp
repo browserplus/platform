@@ -131,7 +131,7 @@ main(int argc, const char** argv)
         // set the appropriate locale for strings generated from the Installer
         string locale = bp::localization::getUsersLocale();
         bfs::path exe(argv[0]);
-        bfs::path stringsPath = canonicalPath(exe.parent_path() / "strings.json");
+        bfs::path stringsPath = absolutePath(exe.parent_path() / "strings.json");
         Installer::setLocalizedStringsPath(stringsPath, locale);
 
         // setup logging, may be overridden by -logPath=<path> and/or -logLevel=<level>

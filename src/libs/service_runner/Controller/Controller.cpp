@@ -164,7 +164,7 @@ Controller::run(const bfs::path & pathToHarness,
     if (!providerPath.empty())
     {
         args.push_back("-providerPath");    
-        args.push_back(bpf::nativeUtf8String(bpf::canonicalPath(providerPath)));
+        args.push_back(bpf::nativeUtf8String(bpf::absolutePath(providerPath)));
     }
 
     if (!logLevel.empty())
@@ -176,7 +176,7 @@ Controller::run(const bfs::path & pathToHarness,
     if (!logFile.empty())
     {
         args.push_back("-logfile");    
-        args.push_back(bpf::nativeUtf8String(bpf::canonicalPath(logFile)));
+        args.push_back(bpf::nativeUtf8String(bpf::absolutePath(logFile)));
     }
     
     m_sw.reset();

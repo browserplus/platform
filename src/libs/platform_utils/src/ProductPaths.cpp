@@ -135,7 +135,7 @@ bp::paths::getDaemonPath(int major,
                          int micro)
 {
     bfs::path p = getProductDirectory(major, minor, micro) / "BrowserPlusCore";
-    return bp::file::canonicalProgramPath(p);
+    return bp::file::absoluteProgramPath(p);
 }
 
 
@@ -155,7 +155,7 @@ bp::paths::getRunnerPath(int major,
                          int micro)
 {
     bfs::path p = getProductDirectory(major, minor, micro) / "BrowserPlusService";
-    return bp::file::canonicalProgramPath(p);
+    return bp::file::absoluteProgramPath(p);
 }
 
 
@@ -165,7 +165,7 @@ bp::paths::getServiceInstallerPath(int major,
                                    int micro)
 {
     bfs::path p = getProductDirectory(major, minor, micro) / "ServiceInstaller";
-    return bp::file::canonicalProgramPath(p);
+    return bp::file::absoluteProgramPath(p);
 }
 
 
@@ -173,7 +173,7 @@ bfs::path
 bp::paths::getUninstallerPath()
 {
     bfs::path p = getProductTopDirectory() / "BrowserPlusUninstaller";
-    return bp::file::canonicalProgramPath(p);
+    return bp::file::absoluteProgramPath(p);
 }
 
 
