@@ -38,22 +38,22 @@
 
 BPArgumentDefinition s_addArguments[] = {
     {
-        "id",
-        "The 'id' of the registered DOM element to operate on",
+        (BPString) "id",
+        (BPString) "The 'id' of the registered DOM element to operate on",
         BPTString,
         true
     },
     {
-        "mimeTypes",
-        "A list of mimetypes to filter against.  Only items which "
+        (BPString) "mimeTypes",
+        (BPString) "A list of mimetypes to filter against.  Only items which "
         "match one of these mimetypes will be accepted.  Default "
         "is empty (all dropped items will be accepted).",
         BPTList,
         false
     },
     {
-        "includeGestureInfo",
-        "Should selection gesture information be included in the argument "
+        (BPString) "includeGestureInfo",
+        (BPString) "Should selection gesture information be included in the argument "
         "to the 'drop' callback?  Default is false.  If false, the argument "
         "is an array of opaque file handles.  If true, the argument is a map "
         "containing keys 'actualSelection' and 'files'.  The 'actualSelection' "
@@ -66,8 +66,8 @@ BPArgumentDefinition s_addArguments[] = {
         false
     },
     {
-        "limit",
-        "Maximum number of items which will be included in a drop. "
+        (BPString) "limit",
+        (BPString) "Maximum number of items which will be included in a drop. "
 		"Default is " MAKESTRING(DEFAULT_DROP_LIMIT),
         BPTInteger,
         false
@@ -76,8 +76,8 @@ BPArgumentDefinition s_addArguments[] = {
 
 BPArgumentDefinition s_idArgument[] = {
     {
-        "id",
-        "The 'id' of the DOM element to operate on",
+        (BPString) "id",
+        (BPString) "The 'id' of the DOM element to operate on",
         BPTString,
         true
     }
@@ -85,14 +85,14 @@ BPArgumentDefinition s_idArgument[] = {
 
 BPArgumentDefinition s_attachArguments[] = {
     {
-        "id",
-        "The 'id' of the registered DOM element to which you wish to attach ",
+        (BPString) "id",
+        (BPString) "The 'id' of the registered DOM element to which you wish to attach ",
         BPTString,
         true
     },
     {
-        "hover",
-        "A function that will be invoked when the user hovers over "
+        (BPString) "hover",
+        (BPString) "A function that will be invoked when the user hovers over "
         "the drop target.  Argument is a boolean which when true means "
         "the user has entered the region, and when false means they have "
         "exited.",
@@ -100,8 +100,8 @@ BPArgumentDefinition s_attachArguments[] = {
         false
     },
     {
-        "drop",
-        "A function that will be invoked when the user drops files on "
+        (BPString) "drop",
+        (BPString) "A function that will be invoked when the user drops files on "
         "your drop target.  Arguments to the callback vary depending on "
         "whether 'includeGestureInfo' was set true for the target. "
         "See the documentation for the 'includeGestureInfo' argument "
@@ -113,15 +113,15 @@ BPArgumentDefinition s_attachArguments[] = {
 
 BPArgumentDefinition s_enableArguments[] = {
     {
-        "id",
-        "The 'id' of the registered DOM element for which you wish to "
+        (BPString) "id",
+        (BPString) "The 'id' of the registered DOM element for which you wish to "
         "enable/disable drag/drop activity.",
         BPTString,
         true
     },
     {
-        "enable",
-        "A boolean indicating whether activity should be enabled (true) "
+        (BPString) "enable",
+        (BPString) "A boolean indicating whether activity should be enabled (true) "
         "or disabled (false).",
         BPTBoolean,
         true
@@ -130,35 +130,35 @@ BPArgumentDefinition s_enableArguments[] = {
 
 BPFunctionDefinition s_dndFunctions[] = {
     {
-        "AddDropTarget",
-        "Starts monitoring drag/drop activity for the specified element.",
+        (BPString) "AddDropTarget",
+        (BPString) "Starts monitoring drag/drop activity for the specified element.",
         sizeof(s_addArguments)/sizeof(s_addArguments[0]),
         s_addArguments
     },
     {
-        "AttachCallbacks",
-        "AttachCallbacks to a registered drop target.  This function "
+        (BPString) "AttachCallbacks",
+        (BPString) "AttachCallbacks to a registered drop target.  This function "
         "will not return until RemoveDropTarget is called, so it should "
         "not be invoked synchronously.",
         sizeof(s_attachArguments)/sizeof(s_attachArguments[0]),
         s_attachArguments
     },
     {
-        "RemoveDropTarget",
-        "Stop monitoring an element for drag/drop activity.",
+        (BPString) "RemoveDropTarget",
+        (BPString) "Stop monitoring an element for drag/drop activity.",
         sizeof(s_idArgument)/sizeof(s_idArgument[0]),
         s_idArgument
     },
     {
-        "EnableDropTarget",
-        "Enable/disable an element for drag/drop activity.  AddDropTarget "
+        (BPString) "EnableDropTarget",
+        (BPString) "Enable/disable an element for drag/drop activity.  AddDropTarget "
         "must have already been called for the element.",
         sizeof(s_enableArguments)/sizeof(s_enableArguments[0]),
         s_enableArguments
     },
     {
-        "ListTargets",
-        "Returns a list of the ids of the currently registered drop targets.",
+        (BPString) "ListTargets",
+        (BPString) "Returns a list of the ids of the currently registered drop targets.",
         0,
         NULL
     }
@@ -167,9 +167,9 @@ BPFunctionDefinition s_dndFunctions[] = {
 
 // a description of this pluglet.
 static BPServiceDefinition s_dndPlugletDef = {
-    "DragAndDrop",
+    (BPString) "DragAndDrop",
     1, 0, 1,
-    "Allow drag and drop of files from desktop to web browser.",
+    (BPString) "Allow drag and drop of files from desktop to web browser.",
     sizeof(s_dndFunctions)/sizeof(s_dndFunctions[0]),
     s_dndFunctions
 };
@@ -179,8 +179,8 @@ static BPServiceDefinition s_dndPlugletDef = {
 
 BPArgumentDefinition s_addArguments2[] = {
     {
-        "id",
-        "The 'id' of the registered DOM element to operate on",
+        (BPString) "id",
+        (BPString) "The 'id' of the registered DOM element to operate on",
         BPTString,
         true
     }
@@ -188,35 +188,35 @@ BPArgumentDefinition s_addArguments2[] = {
 
 BPFunctionDefinition s_dndFunctions2[] = {
     {
-        "AddDropTarget",
-        "Starts monitoring drag/drop activity for the specified element.",
+        (BPString) "AddDropTarget",
+        (BPString) "Starts monitoring drag/drop activity for the specified element.",
         sizeof(s_addArguments2)/sizeof(s_addArguments2[0]),
         s_addArguments2
     },
     {
-        "AttachCallbacks",
-        "AttachCallbacks to a registered drop target.  This function "
+        (BPString) "AttachCallbacks",
+        (BPString) "AttachCallbacks to a registered drop target.  This function "
         "will not return until RemoveDropTarget is called, so it should "
         "not be invoked synchronously.",
         sizeof(s_attachArguments)/sizeof(s_attachArguments[0]),
         s_attachArguments
     },
     {
-        "RemoveDropTarget",
-        "Stop monitoring an element for drag/drop activity.",
+        (BPString) "RemoveDropTarget",
+        (BPString) "Stop monitoring an element for drag/drop activity.",
         sizeof(s_idArgument)/sizeof(s_idArgument[0]),
         s_idArgument
     },
     {
-        "EnableDropTarget",
-        "Enable/disable an element for drag/drop activity.  AddDropTarget "
+        (BPString) "EnableDropTarget",
+        (BPString) "Enable/disable an element for drag/drop activity.  AddDropTarget "
         "must have already been called for the element.",
         sizeof(s_enableArguments)/sizeof(s_enableArguments[0]),
         s_enableArguments
     },
     {
-        "ListTargets",
-        "Returns a list of the ids of the currently registered drop targets.",
+        (BPString) "ListTargets",
+        (BPString) "Returns a list of the ids of the currently registered drop targets.",
         0,
         NULL
     }
@@ -224,9 +224,9 @@ BPFunctionDefinition s_dndFunctions2[] = {
 
 // a description of this pluglet.
 static BPServiceDefinition s_dndPlugletDef2 = {
-    "DragAndDrop",
+    (BPString) "DragAndDrop",
     2, 0, 0,
-    "Allow drag and drop of files from desktop to web browser.",
+    (BPString) "Allow drag and drop of files from desktop to web browser.",
     sizeof(s_dndFunctions2)/sizeof(s_dndFunctions2[0]),
     s_dndFunctions2
 };

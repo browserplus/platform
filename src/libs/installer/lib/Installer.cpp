@@ -202,10 +202,9 @@ Installer::installDaemon()
     doCopy(daemonDir, productDir);  // throws on failure
 
     // Create copy of BrowserPlusCore as BrowserPlusService.
-    // Can use hard link on unix
-    bfs::path daemon = productDir / "BrowserPlusCore";
-    daemon = bpf::absoluteProgramPath(daemon);
-    bfs::path svc = bpf::absoluteProgramPath(productDir) / "BrowserPlusService";
+    // Can use link on unix
+    bfs::path daemon = bpf::absoluteProgramPath(productDir / "BrowserPlusCore");
+    bfs::path svc = bpf::absoluteProgramPath(productDir / "BrowserPlusService");
 #ifdef WIN32
     doCopy(daemon, svc);
 #else

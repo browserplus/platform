@@ -27,24 +27,24 @@
 
 BPArgumentDefinition s_browseArguments[] = {
     {
-        "recurse",
-        "If true and a folder is selected, the folder's recursive "
+        (BPString) "recurse",
+        (BPString) "If true and a folder is selected, the folder's recursive "
         "contents will be returned.  If false, the folder itself "
         "will be returned.  Default is true.",
         BPTBoolean,
         false
     },
     {
-        "mimeTypes",
-        "A list of mimetypes to filter against.  Only items which "
+        (BPString) "mimeTypes",
+        (BPString) "A list of mimetypes to filter against.  Only items which "
         "match one of these mimetypes will be accepted.  Default is "
         "empty (all items will be accepted)",
         BPTList,
         false
     },
     {
-        "includeGestureInfo",
-        "Should selection gesture information be included in the argument "
+        (BPString) "includeGestureInfo",
+        (BPString) "Should selection gesture information be included in the argument "
         "to the callback?  Default is false.  If false, the argument "
         "is an array of opaque file handles.  If true, the argument is a map "
         "containing keys 'actualSelection' and 'files'.  The 'actualSelection' "
@@ -57,8 +57,8 @@ BPArgumentDefinition s_browseArguments[] = {
         false
     },
     {
-        "limit",
-        "Maximum number of items which will be included. "
+        (BPString) "limit",
+        (BPString) "Maximum number of items which will be included. "
         "Default is 1000",
         BPTInteger,
         false
@@ -67,8 +67,8 @@ BPArgumentDefinition s_browseArguments[] = {
 
 BPFunctionDefinition s_browseFunctions[] = {
     {
-        "OpenBrowseDialog",
-        "Present the user with a native browse dialog.  Return value is a "
+        (BPString) "OpenBrowseDialog",
+        (BPString) "Present the user with a native browse dialog.  Return value is a "
         "list of filehandles for the selected items.  On OSX and Windows XP, "
         "multiple files and folders may be selected.  On Windows Vista and "
         "Windows 7, multiple files or a single folder may be selected.",
@@ -79,9 +79,9 @@ BPFunctionDefinition s_browseFunctions[] = {
 
 // a description of this service.
 static BPServiceDefinition s_fileBrowsePlugletDef = {
-    "FileBrowse",
+    (BPString) "FileBrowse",
     1, 0, 1,
-    "Present the user with a file browse dialog.",
+    (BPString) "Present the user with a file browse dialog.",
     sizeof(s_browseFunctions)/sizeof(s_browseFunctions[0]),
     s_browseFunctions
 };
@@ -90,8 +90,8 @@ static BPServiceDefinition s_fileBrowsePlugletDef = {
 
 BPFunctionDefinition s_browseFunctions2[] = {
     {
-        "OpenBrowseDialog",
-        "Present the user with a native browse dialog.  On OSX and Windows XP, "
+        (BPString) "OpenBrowseDialog",
+        (BPString) "Present the user with a native browse dialog.  On OSX and Windows XP, "
 		"multiple files and folders may be selected.  On Windows Vista and "
         "Windows 7, multiple files or a single folder may be selected.  "
         "Return value has key \"files\" which contains a list of filehandles "
@@ -102,9 +102,9 @@ BPFunctionDefinition s_browseFunctions2[] = {
 
 // a description of this service.
 static BPServiceDefinition s_fileBrowsePlugletDef2 = {
-    "FileBrowse",
+    (BPString) "FileBrowse",
     2, 0, 0,
-    "Present the user with a file browse dialog.",
+    (BPString) "Present the user with a file browse dialog.",
     sizeof(s_browseFunctions2)/sizeof(s_browseFunctions2[0]),
     s_browseFunctions2
 };
@@ -114,8 +114,8 @@ static BPServiceDefinition s_fileBrowsePlugletDef2 = {
 BPArgumentDefinition s_saveArguments[] =
 {
     {
-        "name",
-        "The default filename.",
+        (BPString) "name",
+        (BPString) "The default filename.",
         BPTString,
         false
     }
@@ -123,8 +123,8 @@ BPArgumentDefinition s_saveArguments[] =
 
 BPFunctionDefinition s_browseFunctions3[] = {
     {
-        "selectFiles",
-        "Present the user with a native browse dialog.  On OSX and Windows XP, "
+        (BPString) "selectFiles",
+        (BPString) "Present the user with a native browse dialog.  On OSX and Windows XP, "
 		"multiple files and folders may be selected.  On Windows Vista and "
         "Windows 7, multiple files or a single folder may be selected.  "
         "Return value has key \"files\" which contains a list of filehandles "
@@ -132,8 +132,8 @@ BPFunctionDefinition s_browseFunctions3[] = {
         0, NULL
     },
     {
-        "saveAs",
-        "Present the user with a native save dialog.  Return value has "
+        (BPString) "saveAs",
+        (BPString) "Present the user with a native save dialog.  Return value has "
         "key \"file\" which contains a filehandle for the filename "
         "to save to.",
         sizeof(s_saveArguments)/sizeof(s_saveArguments[0]),
@@ -143,9 +143,9 @@ BPFunctionDefinition s_browseFunctions3[] = {
 
 // a description of this service.
 static BPServiceDefinition s_fileBrowsePlugletDef3 = {
-    "FileBrowse",
+    (BPString) "FileBrowse",
     3, 0, 0,
-    "Present the user with a file browse dialog.",
+    (BPString) "Present the user with a file browse dialog.",
     sizeof(s_browseFunctions3)/sizeof(s_browseFunctions3[0]),
     s_browseFunctions3
 };

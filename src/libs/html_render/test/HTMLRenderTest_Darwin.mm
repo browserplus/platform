@@ -23,6 +23,7 @@
 #include "HTMLRenderTest.h"
 #include "HTMLRender/HTMLRender.h"
 #include <iostream>
+#include <sstream>
 
 #include <Cocoa/Cocoa.h>
 #include <WebKit/WebKit.h>
@@ -32,8 +33,17 @@
     bp::html::ScriptableObject * so;
     NSString* soName;
 }
+- (void)                webView: (WebView*) sender
+didFailProvisionalLoadWithError: (NSError*) error
+                       forFrame: (WebFrame*) frame;
+
+- (void)                webView: (WebView*) sender
+               didFailWithError: (NSError*) error
+                       forFrame: (WebFrame*) frame;
+
 - (void)                webView: (WebView *) sender
-    windowScriptObjectAvailable: (WebScriptObject *)windowScriptObject;
+           didClearWindowObject: (WebScriptObject *)windowScriptObject
+                       forFrame: (WebFrame *)frame;
 @end;
 
 @implementation LoadWatcher
@@ -43,8 +53,40 @@
     [super dealloc];
 }
 
+- (void)                webView: (WebView*) sender
+didFailProvisionalLoadWithError: (NSError*) error
+                       forFrame: (WebFrame*) frame
+{
+    std::stringstream ss;
+    ss << "didFailProvisionalLoadWithError: code = " << [error code]
+       << ", domain = " << [error domain];
+    NSString* s = [error localizedDescription];
+    if (s) {
+        ss << " (" << [s UTF8String] << ")";
+    }
+    std::cerr << ss.str() << std::endl;
+    throw(ss.str());
+}
+
+- (void)                webView: (WebView*) sender
+               didFailWithError: (NSError*) error
+                       forFrame: (WebFrame*) frame
+{
+    std::stringstream ss;
+    ss << "didFailWithError: code = " << [error code]
+       << ", domain = " << [error domain];
+    NSString* s = [error localizedDescription];
+    if (s) {
+        ss << " (" << [s UTF8String] << ")";
+    }
+    std::cerr << ss.str() << std::endl;
+    throw(ss.str());
+}
+
+
 - (void)                webView: (WebView *) sender
-    windowScriptObjectAvailable: (WebScriptObject *)windowScriptObject
+           didClearWindowObject: (WebScriptObject *)windowScriptObject
+                       forFrame: (WebFrame *)frame
 {
     WebScriptObject * scriptable =
         (WebScriptObject *) so->scriptableObject((void *) windowScriptObject);

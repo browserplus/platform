@@ -188,7 +188,7 @@ NP_GetMIMEDescription(void)
     // I don't believe that Mac npapi actually uses this. 
     // It seems that the Localized.rsrc is what's used, but
     // let's keep this versioned for consistency
-    return "<%= $cmake["MimeType"] %>";
+    return (char*) "<%= $cmake["MimeType"] %>";
 }
 
 
@@ -335,10 +335,10 @@ NPP_GetValue(NPP instance,
     
     switch (variable) {
         case NPPVpluginNameString:
-            *((char**)value) = "Yahoo! Browser Plus";
+            *((char**)value) = (char*) "Yahoo! Browser Plus";
             break;
         case NPPVpluginDescriptionString:
-            *((char**)value) = "Yahoo! Browser Plus NPAPI Plugin";
+            *((char**)value) = (char*) "Yahoo! Browser Plus NPAPI Plugin";
             break;
         case NPPVpluginScriptableNPObject:
             *(NPObject**)value = plugin->scriptableObject();

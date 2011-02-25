@@ -26,14 +26,14 @@
 BPArgumentDefinition s_logArguments[] =
 {
     {
-        "location",
-        "The location (e.g. method name) from which the log event is emitted.",
+        (BPString) "location",
+        (BPString) "The location (e.g. method name) from which the log event is emitted.",
         BPTString,
         true
     },
     {
-        "message",
-        "The message to be logged.",
+        (BPString) "message",
+        (BPString) "The message to be logged.",
         BPTString,
         true
     }
@@ -43,32 +43,32 @@ BPArgumentDefinition s_logArguments[] =
 BPFunctionDefinition s_logFunctions[] =
 {
     {
-        "Fatal",
-        "Log a fatal error to the Browserplus plugin logging facility.",
+        (BPString) "Fatal",
+        (BPString) "Log a fatal error to the Browserplus plugin logging facility.",
         sizeof(s_logArguments)/sizeof(s_logArguments[0]),
         s_logArguments
     },
     {
-        "Error",
-        "Log an error to the Browserplus plugin logging facility.",
+        (BPString) "Error",
+        (BPString) "Log an error to the Browserplus plugin logging facility.",
         sizeof(s_logArguments)/sizeof(s_logArguments[0]),
         s_logArguments
     },
     {
-        "Warn",
-        "Log a warning to the Browserplus plugin logging facility.",
+        (BPString) "Warn",
+        (BPString) "Log a warning to the Browserplus plugin logging facility.",
         sizeof(s_logArguments)/sizeof(s_logArguments[0]),
         s_logArguments
     },
     {
-        "Info",
-        "Log an informational message to the Browserplus plugin logging facility.",
+        (BPString) "Info",
+        (BPString) "Log an informational message to the Browserplus plugin logging facility.",
         sizeof(s_logArguments)/sizeof(s_logArguments[0]),
         s_logArguments
     },
     {
-        "Debug",
-        "Log a debug message to the Browserplus plugin logging facility.",
+        (BPString) "Debug",
+        (BPString) "Log a debug message to the Browserplus plugin logging facility.",
         sizeof(s_logArguments)/sizeof(s_logArguments[0]),
         s_logArguments
     }
@@ -78,9 +78,9 @@ BPFunctionDefinition s_logFunctions[] =
 // a description of this pluglet.
 static BPServiceDefinition s_logPlugletDef =
 {
-    "Log",
+    (BPString) "Log",
     1, 0, 1,
-    "Log to BrowserPlus's logfile on disk.  The available levels in order of "
+    (BPString) "Log to BrowserPlus's logfile on disk.  The available levels in order of "
     "severity are Fatal, Error, Warn, Info, Debug.",
     sizeof(s_logFunctions)/sizeof(s_logFunctions[0]),
     s_logFunctions

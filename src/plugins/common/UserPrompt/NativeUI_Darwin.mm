@@ -55,8 +55,15 @@
 };
 
 - (void) webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame;
-- (void) webView:(WebView *)sender
-         windowScriptObjectAvailable: (WebScriptObject *)windowScriptObject;
+- (void) webView: (WebView*) sender
+         didFailProvisionalLoadWithError: (NSError*) error
+         forFrame: (WebFrame*) frame;
+- (void) webView: (WebView*) sender
+         didFailWithError: (NSError*) error
+         forFrame: (WebFrame*) frame;
+- (void) webView: (WebView *) sender
+         didClearWindowObject: (WebScriptObject *)windowScriptObject
+         forFrame: (WebFrame *)frame;
 - (void) webView: (WebView *)sender
          decidePolicyForNavigationAction:(NSDictionary *)actionInformation
          request:(NSURLRequest *)request
@@ -224,8 +231,39 @@ DialogScriptableObject::invoke(const std::string & functionName,
 }
 
 
-- (void)webView:(WebView *)sender
-        windowScriptObjectAvailable: (WebScriptObject *)wso
+- (void) webView: (WebView*) sender
+         didFailProvisionalLoadWithError: (NSError*) error
+         forFrame: (WebFrame*) frame
+{
+    std::stringstream ss;
+    ss << "didFailProvisionalLoadWithError: code = " << [error code]
+       << ", domain = " << [error domain];
+    NSString* s = [error localizedDescription];
+    if (s) {
+        ss << " (" << [s UTF8String] << ")";
+    }
+    throw(ss.str());
+}
+
+
+- (void) webView: (WebView*) sender
+         didFailWithError: (NSError*) error
+         forFrame: (WebFrame*) frame
+{
+    std::stringstream ss;
+    ss << "didFailWithError: code = " << [error code]
+       << ", domain = " << [error domain];
+    NSString* s = [error localizedDescription];
+    if (s) {
+        ss << " (" << [s UTF8String] << ")";
+    }
+    throw(ss.str());
+}
+
+
+- (void) webView: (WebView *) sender
+         didClearWindowObject: (WebScriptObject *)wso
+         forFrame: (WebFrame *)frame 
 {
     WebScriptObject * scriptable = (WebScriptObject *)
         scriptObj->getScriptableObject()->scriptableObject((void *) wso);

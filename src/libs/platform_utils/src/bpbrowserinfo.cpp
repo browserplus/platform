@@ -67,6 +67,8 @@ BrowserInfo::BrowserInfo(const std::string& userAgent) : m_supported(false)
         //    'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; en-US) AppleWebKit/533.4 (KHTML, like Gecko) Chrome/5.0.375.38 Safari/533.4'
         // A sample OSX Titanium userAgent string
         //    'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; en-US) AppleWebKit/533.4 (KHTML, like Gecko) Chrome/5.0.375.38 Safari/533.4 Titanium/1.0.0'
+        // A sample OSX Opera userAgent string
+        //    'Opera/9.80 (Macintosh; Intel Mac OS X 10.6.6; U; en) Presto/2.7.62 Version/11.01'
 
         // first grab platform
         BPLOG_DEBUG_STRM("userAgent = " << userAgent);
@@ -92,6 +94,8 @@ BrowserInfo::BrowserInfo(const std::string& userAgent) : m_supported(false)
             m_browser = "Titanium";
         } else if (userAgent.find("Safari") != string::npos) {
             m_browser = "Safari";
+        } else if (userAgent.find("Opera") != string::npos) {
+            m_browser = "Opera";
         } else {
             BP_THROW("unknown browser in '" + userAgent + "'");
         }
@@ -109,6 +113,9 @@ BrowserInfo::BrowserInfo(const std::string& userAgent) : m_supported(false)
             separator = " ";
         } else if (m_browser == "Chrome") {
             prefix = "Chrome/";
+            separator = " ";
+        } else if (m_browser == "Opera") {
+            prefix = "Version/";
             separator = " ";
         }
 

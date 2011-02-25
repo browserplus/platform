@@ -42,6 +42,7 @@ static
 boost::filesystem::path writeToTempFile(const std::string & content)
 {
     boost::filesystem::path path = bp::file::getTempPath(bp::file::getTempDirectory(), "foobar");
+    path.replace_extension(".html");
     CPPUNIT_ASSERT( bp::strutil::storeToFile(path, content) );
     return path;
 }

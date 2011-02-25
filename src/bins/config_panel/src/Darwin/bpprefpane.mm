@@ -32,9 +32,10 @@
 @implementation BPPrefPane
 
 - (void)                webView: (WebView *) sender
-    windowScriptObjectAvailable: (WebScriptObject *) wso
+           didClearWindowObject: (WebScriptObject *)wso
+                       forFrame: (WebFrame *)frame
 {
-    BPLOG_INFO_STRM("windowScriptObjectAvailable");
+    BPLOG_INFO_STRM("didClearWindowObject");
     m_so = new ScriptableConfigObject;
 
     WebScriptObject * scriptable = (WebScriptObject *)

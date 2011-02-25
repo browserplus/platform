@@ -1,0 +1,6 @@
+_NXArgc
+_NXArgv
+___progname
+_environ
+__mh_execute_header
+

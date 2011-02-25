@@ -39,17 +39,21 @@
     WebView * m_webView;
 }
 - (void)                webView: (WebView *) sender
-    windowScriptObjectAvailable: (WebScriptObject *)windowScriptObject;
+           didClearWindowObject: (WebScriptObject *)windowScriptObject
+                       forFrame: (WebFrame *)frame;
+
 - (void)  mainViewDidLoad;
 
-- (void) webView: (WebView *) sender
+- (void)                webView: (WebView *) sender
 didFailProvisionalLoadWithError: (NSError *) error
-        forFrame: (WebFrame *) frame;
+                       forFrame: (WebFrame *) frame;
 
 - (void)                    webView: (WebView *) sender
                didFailLoadWithError: (NSError *) error 
                            forFrame: (WebFrame *) frame;
+
 - (void)webView: (WebView *) sender didFinishLoadForFrame:(WebFrame *)frame;
+
 - (void)webView:(WebView *)sender setStatusText:(NSString *)text;
 
 // yuck!  undocumented:

@@ -52,15 +52,25 @@
 @public
     ScriptableInstallerObject * m_so;
 }
+- (void)                webView: (WebView*) sender
+didFailProvisionalLoadWithError: (NSError*) error
+                       forFrame: (WebFrame*) frame;
+
+- (void)                webView: (WebView*) sender
+               didFailWithError: (NSError*) error
+                       forFrame: (WebFrame*) frame;
+
 - (void)                webView: (WebView *) sender
-    windowScriptObjectAvailable: (WebScriptObject *)windowScriptObject;
+           didClearWindowObject: (WebScriptObject *)windowScriptObject
+                       forFrame: (WebFrame *)frame;
+
 - (void)  mainViewDidLoad;
 
-- (void) webView: (WebView *)sender
-         decidePolicyForNavigationAction:(NSDictionary *)actionInformation
-         request:(NSURLRequest *)request
-         frame:(WebFrame *)frame
-         decisionListener:(id < WebPolicyDecisionListener >) listener;
+- (void)                webView: (WebView *)sender
+decidePolicyForNavigationAction:(NSDictionary *)actionInformation
+                        request:(NSURLRequest *)request
+                          frame:(WebFrame *)frame
+               decisionListener:(id < WebPolicyDecisionListener >) listener;
 
 // yuck!  undocumented!  used to capture javascript errors.
 // http://lists.apple.com/archives/webkitsdk-dev/2006/Apr/msg00018.html
@@ -72,13 +82,45 @@
 @implementation MyWebViewListener
 
 - (void)                webView: (WebView *) sender
-    windowScriptObjectAvailable: (WebScriptObject *) wso
+           didClearWindowObject: (WebScriptObject *)wso
+                       forFrame: (WebFrame *)frame
 {
-    BPLOG_INFO("windowScriptObjectAvailable");
+    BPLOG_INFO("didClearWindowObject");
     WebScriptObject * scriptable = (WebScriptObject *)
         m_so->getScriptableObject()->scriptableObject((void *) wso);
     [wso setValue:scriptable forKey: @"BPInstaller"];
 }
+
+- (void)                webView: (WebView*) sender
+didFailProvisionalLoadWithError: (NSError*) error
+                       forFrame: (WebFrame*) frame
+{
+    std::string msg;
+    std::stringstream ss;
+    ss << "didFailProvisionalLoadWithError: code = " << [error code]
+       << ", domain = " << [error domain];
+    NSString* s = [error localizedDescription];
+    if (s) {
+        msg = [s UTF8String];
+    }
+    m_so->setError(msg, ss.str());
+}
+
+- (void)                webView: (WebView*) sender
+               didFailWithError: (NSError*) error
+                       forFrame: (WebFrame*) frame
+{
+    std::string msg;
+    std::stringstream ss;
+    ss << "didFailWithError: code = " << [error code]
+       << ", domain = " << [error domain];
+    NSString* s = [error localizedDescription];
+    if (s) {
+        msg = [s UTF8String];
+    }
+    m_so->setError(msg, ss.str());
+}
+
 
 - (void) mainViewDidLoad
 {

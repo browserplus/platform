@@ -342,9 +342,8 @@ function dropLoaded() {
             {id: targetId},
             function(stat) {
                 if (!stat.success) {
-                    alert("AddDropTarget(" + targetId + ") failed:" +
-                          stat.error + "\n" +
-                          stat.verboseError);
+                    var msg = "Require failed: " + stat.error + ", " + stat.verboseError;
+                    document.getElementById(targetId).innerHTML = msg;
                 } else {
                     BrowserPlus.DragAndDrop.AttachCallbacks(
                         {id: targetId, hover: hoverCallback, drop: dropCallback},

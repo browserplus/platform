@@ -138,8 +138,7 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
          * services to the corresponding BrowserPlus.SERVICE_NAME object.
          * the return value is the full description of the coreles.
          */           
-        require: function(args, callback)
-        {
+        require: function(args, callback) {
             if (callback == null || callback.constructor != Function) {
                 throw new Error("BrowserPlus.require() invoked without required " +
                                 "callback parameter");
@@ -240,11 +239,11 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
                 if (_setupPlugin() && _corePlugin() !== null) {
                     success = true; 
                 } else {
-                   // We've tried both mimetypes without luck,
-                   // which is probably because b+ isn't installed.
-                   // Reset _mimeType so that the init() after
-                   // an install will work.
-                   _mimeType = "application/x-browserplus_2";
+                    // We've tried both mimetypes without luck,
+                    // which is probably because b+ isn't installed.
+                    // Reset _mimeType so that the init() after
+                    // an install will work.
+                    _mimeType = "application/x-browserplus_2";
                 }
             }
 
@@ -273,8 +272,7 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
                             // of the new platform
                             if (!res.success &&
                                 res.error === 'bp.switchVersion' &&
-                                _detectBrowser().browser !== "Explorer")
-                            {
+                                _detectBrowser().browser !== "Explorer") {
                                 // construct a new mimetype
                                 var newMT = "application/x-browserplus_";
                                 newMT += res.verboseError;
@@ -287,8 +285,7 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
                                             navigator.plugins.refresh(false);
                                         } catch(ignoreErr) { }
                                         
-                                        if (_setupPlugin() && _corePlugin() !== null)
-                                        {
+                                        if (_setupPlugin() && _corePlugin() !== null) {
                                             setTimeout(function() { _corePlugin().Initialize(_args, proxyInitCallback); }, 10);
                                         } else {
                                             proxyInitCallback(res);
@@ -300,8 +297,7 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
 
                             // finally, bp.switchVersion should never make it up to client
                             // javascript.  we'll fold it into 'notInstalled'
-                            if (!res.success && res.error === 'bp.switchVersion')
-                            {
+                            if (!res.success && res.error === 'bp.switchVersion') {
                                 res = {
                                     success: false,
                                     error: 'bp.notInstalled',
@@ -382,8 +378,7 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
         // load synchronously.
 
         var mt = navigator.mimeTypes[_mimeType];
-        if (typeof(mt) !== "object" || typeof(mt.enabledPlugin) !== "object")
-        {
+        if (typeof(mt) !== "object" || typeof(mt.enabledPlugin) !== "object") {
             return false;
         }
 
@@ -430,8 +425,7 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
             document.getElementById( _bpPluginID ).Ping();        
             _pluginLoaded = true;
             return true;
-        }
-        catch(e) {
+        } catch(e) {
             // Protect the next operation - we have had issues with
             // this intermittently throwing InvalidParameter.
             try {
@@ -439,8 +433,7 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
                 // connected to the plugin.  Keeping this element
                 // around has interfered with some retry scenarios.
                 document.body.removeChild(elem);
-            }
-            catch(e2) {
+            } catch(e2) {
             }
         }
 
@@ -539,13 +532,14 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
                 identity: "Chrome"
             },
             {
-                prop: window.opera,
-                identity: "Opera"
-            },
-            {
                 string: navigator.userAgent,
                 subString: "Firefox",
                 identity: "Firefox"
+            },
+            {
+                string: navigator.userAgent,
+                subString: "Opera",
+                identity: "Opera"
             },
             {
                 string: navigator.userAgent,
@@ -572,24 +566,26 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
             }
         ];
 
-	    // The platform/browser combos we support at the most
-	    // gross level.  Further refinements are made by the
-	    // plugin, often based on version numbers.  We keep this
-	    // level non-specific since updating the platform/plugin
-	    // is easier than updating this file.
+        // The platform/browser combos we support at the most
+        // gross level.  Further refinements are made by the
+        // plugin, often based on version numbers.  We keep this
+        // level non-specific since updating the platform/plugin
+        // is easier than updating this file.
         var supportMatrix = {
             Mac: {
                 Firefox: "supported",
                 Safari: "supported",
                 Chrome: "supported",
-                Titanium: "supported"
+                Titanium: "supported",
+                Opera: "experimental"
             },
             Windows: {
                 Explorer: "supported",
                 Safari: "supported",
                 Firefox: "supported",
                 Chrome: "supported",
-                Titanium: "supported"
+                Titanium: "supported",
+                Opera: "experimental"
             }
         };
 
@@ -636,17 +632,14 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
             _browser = searchString(dataBrowser) || "An unknown browser";
             _version = searchVersion(navigator.userAgent) || searchVersion(navigator.appVersion) || "an unknown version";
             _OS = searchString(dataOS) || "an unknown OS";
-            // catch ppc/iphone/others     
+            // catch following unsupported stuff:
+            // - ppc/iphone/others     
+            // - Firefox 2
             if (_OS === "Mac" && navigator.userAgent.indexOf("Intel") == -1) {
                 _supportLevel = "unsupported";
-            }
-            // manually catch FFX 2 - not supported
-            else if (navigator.userAgent.indexOf("Firefox/2.0.0") != -1)
-            {
+            } else if (navigator.userAgent.indexOf("Firefox/2.0.0") != -1) {
                 _supportLevel = "unsupported";
-            }
-            else
-            {
+            } else {
                 _supportLevel = supportLevel();
             }
             _locale = navigator.language || navigator.browserLanguage || 
