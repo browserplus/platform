@@ -212,7 +212,7 @@ Installer::makeLinks()
             BPLOG_WARN(e.what());
         }
     }
-    BPLOG_DEBUG_STRM("begin Installer::makeLinks()");
+    BPLOG_DEBUG_STRM("complete Installer::makeLinks()");
 }
 
 
