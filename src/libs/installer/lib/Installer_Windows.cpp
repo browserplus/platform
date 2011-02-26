@@ -193,7 +193,8 @@ Installer::makeLinks()
         writeString(key + "\\DefaultIcon", bpf::nativeUtf8String(configExe) + ",-128");
 
         createKey(key + "\\Shell\\Open\\Command");
-        writeString(key + "\\Shell\\Open\\Command", bpf::nativeUtf8String(configExe));
+	// must quote shell cmd
+        writeString(key + "\\Shell\\Open\\Command", "\"" + bpf::nativeUtf8String(configExe) + "\"");
     } catch (const Exception& e) {
         // ugh, clean up
         BPLOG_WARN(e.what());
