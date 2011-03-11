@@ -115,7 +115,8 @@ puts "Verifying configuration:"
   "outdir"
 ].each {|k|
   raise "missing required cmdline param: -#{k}" if (!eval("$#{k}"))
-  v = JSON.generate(eval("$#{k}"))
+  jsonArr = [ eval("$#{k}") ]
+  v = JSON.generate(jsonArr)
   puts "  $#{k}:\t#{v}"
 }
 
