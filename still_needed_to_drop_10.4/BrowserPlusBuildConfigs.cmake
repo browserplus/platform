@@ -91,7 +91,6 @@ IF(WIN32)
     SET(CMAKE_MODULE_LINKER_FLAGS_RELEASE "${linkFlagsRelease}"
         CACHE STRING "BrowserPlus module release linker flags" FORCE)
 ELSE ()
-    SET(isysrootFlag)
     IF (APPLE)
       # Must tell cmake that we really, really, really want gcc-4.2
       INCLUDE(CMakeForceCompiler)
@@ -109,30 +108,20 @@ ELSE ()
         SET(CMAKE_OSX_ARCHITECTURES i386)
         SET (CMAKE_OSX_DEPLOYMENT_TARGET "10.6"
           CACHE STRING "Compile for snow leopard deployment" FORCE)
-        SET(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.6.sdk"
-            CACHE STRING "Compile for snow leopard backwards compat" FORCE)
-        SET(isysrootFlag "-isysroot ${CMAKE_OSX_SYSROOT}")
         SET(minVersionFlag "-mmacosx-version-min=10.6")
-        SET(CMAKE_FRAMEWORK_PATH "${CMAKE_OSX_SYSROOT}/System/Library/Frameworks"
-            CACHE STRING "use 10.6 frameworks" FORCE)
       ELSE ()
         # and we 32bit i386 for osx 10.5
         SET(CMAKE_OSX_ARCHITECTURES i386)
         SET (CMAKE_OSX_DEPLOYMENT_TARGET "10.5"
           CACHE STRING "Compile for tiger deployment" FORCE)
-        SET(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.5.sdk"
-            CACHE STRING "Compile for tiger backwards compat" FORCE)
-        SET(isysrootFlag "-isysroot ${CMAKE_OSX_SYSROOT}")
         SET(minVersionFlag "-mmacosx-version-min=10.5")
-        SET(CMAKE_FRAMEWORK_PATH "${CMAKE_OSX_SYSROOT}/System/Library/Frameworks"
-            CACHE STRING "use 10.5 frameworks" FORCE)
       ENDIF ()
 
-      SET(CMAKE_MODULE_LINKER_FLAGS "${minVersionFlag} ${isysrootFlag}")
+      SET(CMAKE_MODULE_LINKER_FLAGS "${minVersionFlag}")
       SET(CMAKE_MODULE_LINKER_FLAGS_CODECOVERAGE "-lgcov")
-      SET(CMAKE_EXE_LINKER_FLAGS "-dead_strip -dead_strip_dylibs ${minVersionFlag} ${isysrootFlag}")
+      SET(CMAKE_EXE_LINKER_FLAGS "-dead_strip -dead_strip_dylibs ${minVersionFlag}")
       SET(CMAKE_EXE_LINKER_FLAGS_CODECOVERAGE "-lgcov")
-      SET(CMAKE_SHARED_LINKER_FLAGS "${minVersionFlag} ${isysrootFlag}  -Wl,-single_module")
+      SET(CMAKE_SHARED_LINKER_FLAGS "${minVersionFlag} -Wl,-single_module")
       SET(CMAKE_SHARED_LINKER_FLAGS_CODECOVERAGE "-lgcov")
       ADD_DEFINITIONS(-DMACOSX -D_MACOSX -DMAC -D_MAC -DXP_MACOSX)
       SET(CMAKE_C_COMPILER gcc-4.2)
@@ -142,7 +131,7 @@ ELSE ()
       set(FPICFlag "-fPIC")
     ENDIF()
 
-    SET(CMAKE_CXX_FLAGS "-Wall ${isysrootFlag} ${minVersionFlag} ${FPICFlag}")
+    SET(CMAKE_CXX_FLAGS "-Wall ${minVersionFlag} ${FPICFlag}")
     SET(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -g")
     SET(CMAKE_CXX_FLAGS_CODECOVERAGE "${CMAKE_CXX_FLAGS_DEBUG} -O0 -fprofile-arcs -ftest-coverage")
     SET(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -Os")
