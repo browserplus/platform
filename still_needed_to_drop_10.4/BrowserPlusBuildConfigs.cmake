@@ -92,15 +92,21 @@ IF(WIN32)
         CACHE STRING "BrowserPlus module release linker flags" FORCE)
 ELSE ()
     IF (APPLE)
-      # Must tell cmake that we really, really, really want gcc-4.2
+      # Must tell cmake that we really, really, really want llvm-gcc-4.2.
+      # Use full paths since 10.5 doesn't have llvm in /usr/bin.
+      # Even with all of this, 10.5 xcode generator doesn't honor this.
+      #
       INCLUDE(CMakeForceCompiler)
-      CMAKE_FORCE_C_COMPILER(gcc-4.2 GNU)
-      CMAKE_FORCE_CXX_COMPILER(gcc-4.2 GNU)
+#     SET(CMAKE_C_COMPILER gcc-4.2)
+#     SET(CMAKE_CXX_COMPILER g++-4.2)
+      SET(CMAKE_C_COMPILER /Developer/usr/bin/llvm-gcc-4.2)
+      SET(CMAKE_CXX_COMPILER /Developer/usr/bin/llvm-g++-4.2)
+      SET(ENV{CC} ${CMAKE_C_COMPILER})
+      SET(ENV{CXX} ${CMAKE_CXX_COMPILER})
+      CMAKE_FORCE_C_COMPILER(${CMAKE_C_COMPILER} GNU)
+      CMAKE_FORCE_CXX_COMPILER(${CMAKE_CXX_COMPILER} GNU)
 
-      # now tell cmake to tell xcode that we really, really, really,
-      # want gcc-4.2 and i386
-      SET( CMAKE_XCODE_ATTRIBUTE_GCC_VERSION "4.2"
-           CACHE STRING "BrowserPlus debug CXX flags" FORCE )
+      # now tell cmake to tell xcode that we really want i386
       SET(CMAKE_XCODE_ATTRIBUTE_ARCHS i386)
 
       IF ("${CMAKE_BUILD_TYPE}" STREQUAL "CodeCoverage")
@@ -124,8 +130,6 @@ ELSE ()
       SET(CMAKE_SHARED_LINKER_FLAGS "${minVersionFlag} -Wl,-single_module")
       SET(CMAKE_SHARED_LINKER_FLAGS_CODECOVERAGE "-lgcov")
       ADD_DEFINITIONS(-DMACOSX -D_MACOSX -DMAC -D_MAC -DXP_MACOSX)
-      SET(CMAKE_C_COMPILER gcc-4.2)
-      SET(CMAKE_CXX_COMPILER g++-4.2)
     ELSE()
       ADD_DEFINITIONS(-DLINUX -D_LINUX -DXP_LINUX)
       set(FPICFlag "-fPIC")

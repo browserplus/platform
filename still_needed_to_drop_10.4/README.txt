@@ -8,8 +8,9 @@ To complete dropping OSX 10.4 support:
         _supportLevel = "unsupported";
 
 - cp exported_symbols.txt to src/bins/browserpluscore
-
 - cp BrowserPlusBuildConfigs.cmake to src/support/build_scripts
+- cp BuildTemplates.cmake to src/support/BuildTemplates
+- cp PrivateMacros.cmake to src/support/BuildTemplates/lib
 
 
 
