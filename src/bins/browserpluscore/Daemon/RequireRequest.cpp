@@ -204,7 +204,7 @@ RequireRequest::doRun()
         return;
     }
     
-    // platform updates?
+    // platform updates
     checkPlatformUpdates();
     vector<bp::SemanticVersion>::iterator ui = m_platformUpdates.begin();
     while (ui != m_platformUpdates.end()) {
@@ -295,6 +295,19 @@ RequireRequest::doRun()
                             << (it->m_minversion));
             haveAllServices = false;
         }
+    }
+
+    // If platform is deprecated, we're done.  Either we have everything we
+    // need, or we fail.  We won't install new stuff.
+    if (bp::os::IsDeprecated()) {
+        if (haveAllServices) {
+            postSuccess();
+        } else {
+            BPLOG_INFO("no new services can be installed onto deprecated os");
+            postFailure("BP.requireError",
+                        "os is deprecated, no new services can be installed");
+        }
+        return;
     }
     
     // What's installed?
@@ -450,6 +463,13 @@ RequireRequest::postProgress(const std::string & nameArg,
 void
 RequireRequest::checkPlatformUpdates()
 {
+    // No updates for deprecated platforms.  Shouldn't be any since
+    // daemon didn't start platformupdater singleton, but let's be paranoid.
+    if (bp::os::IsDeprecated()) {
+        m_platformUpdates.clear();
+        return;
+    }
+    
     using namespace bp::file;
     namespace bfs = boost::filesystem;
     

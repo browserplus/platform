@@ -198,3 +198,17 @@ bool bp::os::Is64Bit()
 #endif
     return (bool) bIs64Bit;
 }
+
+
+bool bp::os::IsDeprecated()
+{
+    bool rval = false;
+#ifdef MACOSX
+    std::string v = PlatformVersion();
+    if (v.find("10.4.") == 0) 
+    {
+        rval = true;
+    }
+#endif
+    return rval;
+}

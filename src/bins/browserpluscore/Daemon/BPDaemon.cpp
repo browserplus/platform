@@ -33,6 +33,7 @@
 
 #include "AutoShutdown.h"
 #include "BPUtils/bpfile.h"
+#include "BPUtils/OS.h"
 #include "ServiceManager/ServiceManager.h"
 #include "Permissions/Permissions.h"
 #include "platform_utils/bpexitcodes.h"
@@ -95,8 +96,7 @@ winSigHandler(DWORD dwCtrlType)
     if (dwCtrlType == CTRL_C_EVENT ||
         dwCtrlType == CTRL_CLOSE_EVENT ||
         dwCtrlType == CTRL_BREAK_EVENT ||
-        dwCtrlType == CTRL_SHUTDOWN_EVENT)
-    {
+        dwCtrlType == CTRL_SHUTDOWN_EVENT) {
         shared_ptr<BPDaemon> daemon = BPDaemon::getSharedDaemon();
         daemon->stop();
         shutdownProcess();
@@ -162,8 +162,7 @@ processCommandLine(APTArgParse& argParser, int argc, const char ** argv)
     // parse command line arguments
     bool rval = true;
     int x = argParser.parse(sizeof(args)/sizeof(args[0]), args, argc, argv);
-    if (x < 0 || x != argc)
-    {
+    if (x < 0 || x != argc) {
         std::cerr << argParser.error() << std::endl;
         rval = false;
     }
@@ -263,8 +262,7 @@ BPDaemon::BPDaemon(int argc, const char** argv)
 BPDaemon::~BPDaemon()
 {
     s_singletonDaemon = NULL;
-    if (m_registry != NULL) 
-    {
+    if (m_registry != NULL) {
         // free resources for more effective leak checking.
         m_registry->unregisterAll();
     }
@@ -280,8 +278,7 @@ BPDaemon::run()
     
     // If another B+ process is running, shutdown immediately,
     // only indication is exit code.
-    if (NULL == (g_DaemonLockHandle = bp::acquireProcessLock(false)))
-    {
+    if (NULL == (g_DaemonLockHandle = bp::acquireProcessLock(false))) {
         // another BrowserPlusCore process is running
         ::exit(bp::exit::kDuplicateProcess);
     }
@@ -299,14 +296,12 @@ BPDaemon::run()
     setupErrorHandling();
 
     PermissionsManager* pmgr = PermissionsManager::get();
-    if (!pmgr) 
-    {
+    if (!pmgr) {
         ::exit(bp::exit::kNoPermissionsManager);
     }
         
     // do we have adequate permissions to try to run?
-    if (pmgr->upToDateCheck(this))
-    {
+    if (pmgr->upToDateCheck(this)) {
         startup();
     } else {
         // will get IPermissionsManageListenerr::upToDate() called
@@ -364,12 +359,10 @@ BPDaemon::setupServiceRegistry()
             new InactiveServicesServiceFactory()));
 
     // now set the service directorys
-    if (m_argParser.argumentPresent("cd"))
-    {
+    if (m_argParser.argumentPresent("cd")) {
         std::vector<std::string> serviceDirs = m_argParser.argumentValues("cd");
         std::vector<std::string>::iterator it;
-        for (it = serviceDirs.begin(); it != serviceDirs.end(); it++)
-        {
+        for (it = serviceDirs.begin(); it != serviceDirs.end(); it++) {
             m_registry->setPluginDirectory(boost::filesystem::path(*it));
         }
     }
@@ -395,8 +388,7 @@ BPDaemon::setupServer()
 
     std::string errBuf;
 
-    if (!m_server.start(ipcPath, &errBuf))
-    {
+    if (!m_server.start(ipcPath, &errBuf)) {
         BPLOG_ERROR_STRM("Failed to bind " << ipcPath
                          << ": " << errBuf);
         return false;
@@ -446,8 +438,7 @@ BPDaemon::setupServiceUpdater()
     if (!getDistroServerList()) return false;
 
     long long int cVal;
-    if (m_configReader.getIntegerValue("ServiceUpdatePollPeriod", cVal))
-    {
+    if (m_configReader.getIntegerValue("ServiceUpdatePollPeriod", cVal)) {
         s_updatePollPeriod = (unsigned int) cVal;
     }
 
@@ -488,14 +479,12 @@ BPDaemon::setupAutoShutdown()
 
     int nMaxIdleSecs = knDefaultMaxIdleSecs;
     long long int lnConfigVal;
-    if (m_configReader.getIntegerValue("MaxIdleSecs", lnConfigVal))
-    {
+    if (m_configReader.getIntegerValue("MaxIdleSecs", lnConfigVal)) {
         nMaxIdleSecs = static_cast<int>(lnConfigVal);
     }
 
     // If MaxIdleSecs is <=0, we interpret this as "no auto shutdown".
-    if (nMaxIdleSecs > 0)
-    {
+    if (nMaxIdleSecs > 0) {
         m_shutdownAgent.reset(new AutoShutdownAgent(nMaxIdleSecs,
                                                     m_sessionManager));
         m_shutdownAgent->start();
@@ -534,8 +523,7 @@ BPDaemon::startup()
     // NOTE: error return codes must all be < 0 (allows 
     // bp::process::wait() to distinguish between error exits
     // and signals). 
-    if (!checkKillSwitch())
-    {
+    if (!checkKillSwitch()) {
         // this exit code known to BPProtocol SessionCreator.cpp
         ::exit(bp::exit::kKillswitch);
     }        
@@ -554,21 +542,24 @@ BPDaemon::startup()
 
     setupServiceRegistry();
     
-    if (!setupServer())
-    {
+    bool deprecated = bp::os::IsDeprecated();
+    if (deprecated) {
+        BPLOG_INFO_STRM("Platform is deprecated, no platform/service updates will occur");
+    }
+    
+    if (!setupServer()) {
         ::exit(bp::exit::kCantSetupIpcServer);
     }
     
-    if (!setupServiceInstaller())
-    {
+    if (!setupServiceInstaller()) {
         ::exit(bp::exit::kCantSetupServiceInstaller);
     }
     
-    if (!setupServiceUpdater()) {
+    if (!deprecated && !setupServiceUpdater()) {
         ::exit(bp::exit::kCantSetupServiceUpdater);
     }
     
-    if (!setupPlatformUpdater()) {
+    if (!deprecated && !setupPlatformUpdater()) {
         ::exit(bp::exit::kCantSetupPlatformUpdater);
     }
 
@@ -577,8 +568,7 @@ BPDaemon::startup()
     }
     
     // don't do autoshutdown if running in foreground
-    if (!m_argParser.argumentPresent("fg"))
-    {
+    if (!m_argParser.argumentPresent("fg")) {
         setupAutoShutdown();
     }
 }
