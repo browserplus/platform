@@ -12,7 +12,7 @@
 
 # if you want to update to a newer version of the bakery, fiddle this
 # sha256 to point to the commit you want
-bakery_commit = "b4f92501652eef352ccd61232e4d5b4317c154ab"
+bakery_commit = "a19755b689755ebbd5c9e61d38e236b25e229cac"
 # END user serviceable parts
 
 require 'rbconfig'
