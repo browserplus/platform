@@ -28,6 +28,7 @@
 #include <Windows.h>
 #include "BPUtils/bpstrutil.h"
 #include "BPUtils/bpfile.h"
+#include "BPUtils/BPLog.h"
 
 using namespace ServiceRunner;
 

@@ -50,6 +50,7 @@ MACRO (_YBT_BUILD_TEST name)
   SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_INSTALL_PREFIX}/tests)
 
   _YBT_SETUP_PCH(${name} ${name})
+
   # Sets up XPConnect client stuff properly.
   IF (WIN32)
     ADD_DEFINITIONS(-DXP_WIN)

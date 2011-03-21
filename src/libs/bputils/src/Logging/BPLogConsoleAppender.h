@@ -31,6 +31,9 @@
 #define _BPLOGCONSOLEAPPENDER_H_
 
 #include "BPLogAppender.h"
+#ifdef WIN32
+#include <Windows.h>
+#endif
 
 namespace bp {
 namespace log {

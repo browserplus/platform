@@ -144,13 +144,13 @@ int APIENTRY WinMain( HINSTANCE, HINSTANCE, LPSTR, int )
 
     // now let's seek to the end and read the last four bytes
     f.seekg(-4, std::ios_base::cur);
-    int off = f.tellg();
+    int off = (int) f.tellg();
     int sz;
     f.read((char *) &sz, sizeof(sz));
     BS_INFO_OUTPUT( sz << " compressed bytes embedded in installer.");
 
     f.seekg(-sz-4, std::ios::cur);
-    off = f.tellg();
+    off =(int)  f.tellg();
     BS_INFO_OUTPUT( "Extracting LZMA compressed data at offset: " << off );
 
     // now we're ready to unlzma the thing!

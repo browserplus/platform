@@ -23,7 +23,13 @@
 
 #pragma once
 
+#ifdef WIN32
+// boost::algorithm causes vs to whine
+#pragma warning(disable:4996 4512 4101)
+
 #include <windows.h>
+#endif#
+
 
 #include <list>
 #include <vector>

@@ -26,6 +26,13 @@
  *  Copyright 2009 Yahoo! Inc. All rights reserved.
  */
 
+#ifdef WIN32
+// boost::algorithm causes vs to whine
+#pragma warning(disable:4996 4512 4101)
+#define strcasecmp _stricmp
+#define strncasecmp _strnicmp
+#endif
+
 #include <set>
 #include <vector>
 #include <map>
@@ -49,13 +56,6 @@
 #define BPLOG_INFO_STRM(x)
 #define BPLOG_WARN_STRM(x)
 #define BPLOG_ERROR_STRM(x)
-#endif
-
-#ifdef WIN32
-// boost::algorithm::is_any_of causes vs to whine
-#pragma warning(disable:4996 4512 4101)
-#define strcasecmp _stricmp
-#define strncasecmp _strnicmp
 #endif
 
 #include <locale>

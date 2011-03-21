@@ -32,6 +32,10 @@
 #include <time.h>
 #include <string.h>
 
+#ifdef WIN32
+#include <Windows.h>
+#endif
+
 BPTime::BPTime() : m_time(time(NULL))
 {
 }

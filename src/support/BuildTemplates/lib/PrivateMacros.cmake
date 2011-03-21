@@ -293,19 +293,19 @@ MACRO(_YBT_DETERMINE_SOURCE_FILES name)
   # using the templates..
   IF (DEFINED ${name}_PRIVATE_HEADERS)
     MESSAGE(FATAL_ERROR
-	  "!! ${name}_PRIVATE_HEADERS is only meaningful for a library")
+          "!! ${name}_PRIVATE_HEADERS is only meaningful for a library")
   ENDIF ()
   IF (DEFINED ${name}_PUBLIC_HEADERS)
     MESSAGE(FATAL_ERROR
-	  "!! ${name}_PUBLIC_HEADERS is only meaningful for a library")
+          "!! ${name}_PUBLIC_HEADERS is only meaningful for a library")
   ENDIF ()
   IF (DEFINED ${name}_HEADERS)
     MESSAGE(FATAL_ERROR
-	  "!! don't define ${name}_HEADERS.  define ${name}_SOURCES")
+          "!! don't define ${name}_HEADERS.  define ${name}_SOURCES")
   ENDIF ()
 
   IF (DEFINED ${name}_SOURCES)
-	# if x_SOURCES is set, we split out headers and implementation files
+        # if x_SOURCES is set, we split out headers and implementation files
     IF(DEFINED YBT_VERBOSE)
       MESSAGE("**   ${name}_SOURCES is set: explicit specification.")
     ENDIF ()
@@ -316,12 +316,12 @@ MACRO(_YBT_DETERMINE_SOURCE_FILES name)
     FOREACH (file ${${name}_SOURCES}) 
       IF (${header} MATCHES ".*\\.h$")
         SET(headers ${file} ${headers})
-	  ELSE ()
+          ELSE ()
         SET(sources ${file} ${sources})
-	  ENDIF ()
+          ENDIF ()
     ENDFOREACH ()
 
-	# should we really be doing the platform specific filtering here?
+        # should we really be doing the platform specific filtering here?
     # seems useful, but there may be use cases where it's not desired
     _YBT_FILTER_PLATFORM_SPECIFIC(sources ${sources})
     _YBT_ABSOLUTIFY_PATHS(sources ${sources})
@@ -337,8 +337,8 @@ MACRO(_YBT_DETERMINE_SOURCE_FILES name)
       MESSAGE("**   ${name}_SOURCES is not set: implicit specification.")
     ENDIF ()
 
-	# if x_SOURCES is not set, we find all headers and sources under the
-	# current source dir
+        # if x_SOURCES is not set, we find all headers and sources under the
+        # current source dir
 
     # find source files
     FILE (GLOB_RECURSE sources *.cpp *.mm *.c *.rc)
@@ -423,7 +423,7 @@ ENDMACRO ()
 #                 a file from a source location to a destination
 #                 location before or after building the specified target
 #   target   - CMake target to hang the operation off of
-#   when     - either PRE_BUILD or POST_BUILD 				  
+#   when     - either PRE_BUILD or POST_BUILD                             
 #   srcFile  - source file
 #   destFile - destination file name
 ############################################################
@@ -536,7 +536,7 @@ MACRO(_YBT_SYMLINK_FILES_DURING_TARGET_P target when installPath basePath)
     GET_FILENAME_COMPONENT(subdir ${file} PATH)
     FILE(RELATIVE_PATH subdir ${basePath} ${subdir})
     _YBT_SYMLINK_FILES_DURING_TARGET(${target} ${when}
-	                                 "${installPath}/${subdir}"
+                                         "${installPath}/${subdir}"
                                      ${file})
   ENDFOREACH ()
 ENDMACRO ()
@@ -652,7 +652,7 @@ ENDMACRO ()
 ############################################################
 MACRO (_YBT_SYMLINK_FILES relativePath)
   SET (instDir ${CMAKE_INSTALL_PREFIX}/${relativePath})
-  SET (preserve) 	
+  SET (preserve)        
   FOREACH (file ${ARGN})
     IF (${file} STREQUAL "PRESERVE")    
       SET (preserve "nonnil")
@@ -660,8 +660,8 @@ MACRO (_YBT_SYMLINK_FILES relativePath)
       SET (copyTo)
       # if preserve is set, preserve the path
       _YBT_ABSOLUTIFY_PATHS(file ${file})
-      IF (preserve)	      
-	FILE (RELATIVE_PATH to ${CMAKE_CURRENT_SOURCE_DIR} ${file})
+      IF (preserve)           
+        FILE (RELATIVE_PATH to ${CMAKE_CURRENT_SOURCE_DIR} ${file})
         SET (copyTo ${instDir}/${to})
       ELSE ()
         GET_FILENAME_COMPONENT(to ${file} NAME)
@@ -752,47 +752,45 @@ MACRO(_YBT_SETUP_PCH rootName name)
       ENDIF ()
     ENDFOREACH ()
   ENDIF ()
-  IF (DEFINED YBT_CXX_PCH AND WIN32)
-    # setup the plat-specific force-include switch
+  IF (DEFINED YBT_CXX_PCH)
     IF (WIN32)
-      SET (compilerInclude "/FI")
-    ELSE ()
-      SET (compilerInclude "-include")
-    ENDIF ()
-    # go through each file and make sure PCH is included
-    SET(firstFile TRUE)
-    FOREACH (file ${allSources})
-      IF (NOT "${file}" MATCHES "\\.c$" AND
-          NOT "${file}" MATCHES "\\.h$" AND
-          NOT "${file}" MATCHES "\\.js$" AND
-          NOT "${file}" MATCHES "\\.rc$" AND
-          NOT "${file}" MATCHES "\\.idl$" AND
-          NOT "${file}" MATCHES "\\.xpidl$")
-        # Ensure every source file includes the PCH.
-        SET(NEW_FLAGS "")
-        GET_SOURCE_FILE_PROPERTY(OLD_FLAGS ${file} COMPILE_FLAGS)
-        IF ("${OLD_FLAGS}" STREQUAL "NOTFOUND")
-          SET(OLD_FLAGS "")
-        ENDIF ()
-        IF (NOT "${OLD_FLAGS}" MATCHES "${compilerInclude} \"${YBT_CXX_PCH}\"")
-          SET(NEW_FLAGS "${NEW_FLAGS} ${compilerInclude} \"${YBT_CXX_PCH}\"")
-        ENDIF ()
-        IF (firstFile)
-	      IF (NOT "${OLD_FLAGS}" MATCHES "/Yc\"${YBT_CXX_PCH}\"")
-            SET(NEW_FLAGS "${NEW_FLAGS} /Yc\"${YBT_CXX_PCH}\"")
+      # go through each file and make sure PCH is included
+      SET(firstFile TRUE)
+      FOREACH (file ${allSources})
+        IF (NOT "${file}" MATCHES "\\.c$" AND
+            NOT "${file}" MATCHES "\\.h$" AND
+            NOT "${file}" MATCHES "\\.js$" AND
+            NOT "${file}" MATCHES "\\.rc$" AND
+            NOT "${file}" MATCHES "\\.idl$" AND
+            NOT "${file}" MATCHES "\\.xpidl$")
+          # Ensure every source file includes the PCH.
+          SET(NEW_FLAGS "")
+          GET_SOURCE_FILE_PROPERTY(OLD_FLAGS ${file} COMPILE_FLAGS)
+          IF ("${OLD_FLAGS}" STREQUAL "NOTFOUND")
+            SET(OLD_FLAGS "")
           ENDIF ()
-        ELSE ()
-	      IF (NOT "${OLD_FLAGS}" MATCHES "/Yu\"${YBT_CXX_PCH}\"")
-	        SET(NEW_FLAGS "${NEW_FLAGS} /Yu\"${YBT_CXX_PCH}\"")
-	      ENDIF ()
-	    ENDIF ()
-	    SET (firstFile FALSE) 
-        # Now set both flags.
-        SET_SOURCE_FILES_PROPERTIES(${file} PROPERTIES COMPILE_FLAGS
-                                    "${OLD_FLAGS} ${NEW_FLAGS}")
-      ENDIF ()
-    ENDFOREACH ()
-    IF (NOT WIN32)
+          # force-include the PCH
+          IF (NOT "${OLD_FLAGS}" MATCHES "/FI\"${YBT_CXX_PCH}\"")
+            SET(NEW_FLAGS "${NEW_FLAGS} /FI\"${YBT_CXX_PCH}\"")
+          ENDIF ()
+  
+          IF (firstFile)
+            IF (NOT "${OLD_FLAGS}" MATCHES "/Yc\"${YBT_CXX_PCH}\"")
+              SET(NEW_FLAGS "${NEW_FLAGS} /Yc\"${YBT_CXX_PCH}\"")
+            ENDIF ()
+          ELSE ()
+            IF (NOT "${OLD_FLAGS}" MATCHES "/Yu\"${YBT_CXX_PCH}\"")
+              SET(NEW_FLAGS "${NEW_FLAGS} /Yu\"${YBT_CXX_PCH}\"")
+            ENDIF ()
+          ENDIF ()
+          SET (firstFile FALSE) 
+  
+          # Now set both flags.
+          SET_SOURCE_FILES_PROPERTIES(${file} PROPERTIES COMPILE_FLAGS
+                                      "${OLD_FLAGS} ${NEW_FLAGS}")
+        ENDIF ()
+      ENDFOREACH ()
+    ELSE ()
       # Precompiled headers are supported in gcc 3.4 and higher
       IF (CMAKE_CXX_COMPILER_VERSION MATCHES ".*3\\.[4-9].*" OR
           CMAKE_CXX_COMPILER_VERSION MATCHES ".*4\\.[0-9].*")

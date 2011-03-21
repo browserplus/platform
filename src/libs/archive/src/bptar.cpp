@@ -265,7 +265,7 @@ long
 Create::writeCallback(void *,  bp::tar::Create * cobj,
                       const void * buf, size_t len)
 {
-    long before = cobj->m_file.tellp();
+    long before =(long) cobj->m_file.tellp();
     cobj->m_file.write((const char *) buf, len);
     long after = ((long) cobj->m_file.tellp() - before);
     return after;
@@ -378,9 +378,9 @@ Create::addFile(const bfs::path& fileToAdd,
         for (;;)
         {
             fstream.read((char *) buf, BP_TAR_BUF_SIZE);
-            size_t rd = fstream.gcount(); 
+            size_t rd = (size_t) fstream.gcount(); 
 			if (rd > 0) {
-                long wt = archive_write_data(a, (void *) buf, fstream.gcount());
+                long wt = archive_write_data(a, (void *) buf, (size_t) fstream.gcount());
                 if (wt != fstream.gcount()) {
                     return false;
                 }

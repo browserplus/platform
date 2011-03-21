@@ -33,6 +33,7 @@
 #include <sstream>
 
 #ifdef WINDOWS
+#pragma warning(disable: 4995)
 #include <windows.h>
 #include <strsafe.h>
 #else

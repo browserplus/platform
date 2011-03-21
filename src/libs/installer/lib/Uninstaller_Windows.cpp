@@ -135,7 +135,7 @@ Uninstaller::run(bool fromRunonce)
         if (keyExists(mozKey)) {
             vector<Key> keys = subKeys(mozKey);
             for (size_t i = 0; i < keys.size(); i++) {
-                if (keys[i].path().find("@yahoo.com/BrowserPlus,version=") != string.npos) {
+                if (keys[i].path().find("@yahoo.com/BrowserPlus,version=") != string::npos) {
                     try {
                         // find path to npapi and remove it.
                         // make sure that path is in top dir or ugly dir

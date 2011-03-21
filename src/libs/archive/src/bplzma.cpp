@@ -52,7 +52,7 @@ bp::lzma::IO::outputCallback(void *ctx, const void *buf, size_t size)
         return 0;
     }
 
-    unsigned int pos = os->tellp();
+    unsigned int pos = (unsigned int) os->tellp();
     if (pos == (unsigned int) -1) pos = 0;
 	os->write((const char *) buf, size);
     return ((unsigned int) os->tellp() - pos);
@@ -69,7 +69,7 @@ bp::lzma::IO::inputCallback(void *ctx, void *buf, size_t * size)
         *size = 0;
     } else {
         is->read((char *) buf, *size);
-        *size = is->gcount();
+        *size = (size_t) is->gcount();
     }
 
     return 0;

@@ -113,16 +113,13 @@ RequireLock::releaseLock(weak_ptr<ILockListener> listener)
 {
     // if the caller of release lock doesn't own the lock, then
     // ignore this call
-    if (s_lockQueue.empty() ||
-        (listener < s_lockQueue.front() || s_lockQueue.front() < listener))
-    {
+    if (s_lockQueue.empty() || (listener.lock() != s_lockQueue.front().lock())) {
         return;
     }
     BPLOG_DEBUG("Require lock released");
     s_lockQueue.pop_front();
 
-    if (s_lockQueue.size() > 0)
-    {
+    if (s_lockQueue.size() > 0) {
         postLockReadyEvent(s_lockQueue.front());
     }
 }
