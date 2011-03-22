@@ -29,6 +29,7 @@
 #              override 'permissions': -config=permissions=permissions.json
 #              permissions.json will be parsed, toplevel keys overwritten,
 #              and it will be written.
+#   -verbose   be verbose
 #   
 # Potentially Helpful Hints
 #
@@ -64,6 +65,8 @@ def addKeysToJsonFile(keys, file)
   keys.each { |k,v| contents[k] = v }
   File.open(file, "w+") { |f| f.write JSON.generate(contents) }
 end
+
+$beVerbose = defined?($verbose) ? $verbose : false
 
 ## step 0: determine and output configuration
 $version = "<%= $cmake["VersionString"] %>"
@@ -135,7 +138,7 @@ raise "cannot find file: #{$certStore}" if !File.exist? $certStore
 if platform=="Windows" && $buildType=="prod"
   raise "cannot find authenticode .pfx file" if !File.exist? $authKey
 end
-FileUtils.mkdir_p $outdir
+FileUtils.mkdir_p($outdir, :mode => 0755, :verbose => $beVerbose)
 
 $bpkg = File.join($topDir, "tools", "bpkg")
 if !File.executable? $bpkg
@@ -150,13 +153,13 @@ $primary = "http://" + $primary if $primary !~ /^http/
 ## step 1: copy into build directry
 if File.exist? $workDir
   puts "Removing previous build artifacts"
-  FileUtils.rm_rf($workDir)
+  FileUtils.rm_rf($workDir, :verbose => $beVerbose)
 end
 
 puts "Copying artifacts into work directory (#{$workDir})"
-FileUtils.mkdir_p($workDir)  
-FileUtils.cp_r(File.join($topDir, "install"), $workDir)
-FileUtils.cp_r(File.join($topDir, "update"), $workDir)
+FileUtils.mkdir_p($workDir, :mode => 0755, :verbose => $beVerbose)  
+FileUtils.cp_r(File.join($topDir, "install"), $workDir, :preserve => true, :verbose => $beVerbose)
+FileUtils.cp_r(File.join($topDir, "update"), $workDir, :preserve => true, :verbose => $beVerbose)
 
 # step 2: sub configuration files to provide distribution servers
 #         and drop in pubkey
@@ -192,7 +195,7 @@ subs = {
 ].each { |f|
   f = File.join($workDir, f)
   puts "copy certStore to #{f}"
-  FileUtils.cp($certStore, f)
+  FileUtils.cp($certStore, f, :preserve => true, :verbose => $beVerbose)
 }
 
 apass = ""
@@ -231,7 +234,7 @@ system("ruby -s \"#{buildInstallerScript}\" -fname=\"#{$prefix}_#{$version}#{exe
 # step 6: generate "offline" installer
 
 # first we'll copy in the bpkg
-FileUtils.cp(bpkgPath, File.join($workDir, "install"))
+FileUtils.cp(bpkgPath, File.join($workDir, "install"), :preserve => true, :verbose => $beVerbose)
 
 # now let's sub in the name of the bpkg
 $instCfgKeys['package'] = bpkgName

@@ -32,7 +32,7 @@ if ARGV[0] =~ /help/ || $intDir == nil
 end
 
 topDir = "<%= $cmake['CMAKE_CURRENT_SOURCE_DIR'] %>"
-beVerbose = defined?($verbose) ? $verbose : false
+$beVerbose = defined?($verbose) ? $verbose : false
 bpVersion = "<%= $cmake["VersionString"] %>"
 
 platform = nil
@@ -84,7 +84,7 @@ puts "Parameterizable artifacts bundle to be left in #{artifactsDir}"
 # setup paths into update dir
 updateDir = File.join(artifactsDir, "update")
 FileUtils.rm_rf(updateDir, :verbose => $beVerbose)
-FileUtils.mkdir_p(updateDir)
+FileUtils.mkdir_p(updateDir, :verbose => $beVerbose)
 updateDaemonDir = File.join(updateDir, "daemon")
 updatePluginsDir = File.join(updateDir, "plugins")
 updatePrefPaneDir = File.join(updateDir, "prefPane")
@@ -95,20 +95,20 @@ localizeUIScript = File.join(topDir, "support", "l10n", "localizeUI.rb")
 # platformInfo.json
 #
 FileUtils.install("#{$buildDir}/libs/installer/platformInfo.json",
-                  updateDir, :verbose => $beVerbose)
+                  updateDir, :mode => 0644, :verbose => $beVerbose)
 
 #
 # daemon
 #
 FileUtils.mkdir_p(updateDaemonDir, :mode => 0755, :verbose => $beVerbose)
 FileUtils.install("#{shippingBinsDir}/BrowserPlusCore#{exeSuffix}",
-                  updateDaemonDir, :verbose => $beVerbose)
+                  updateDaemonDir, :mode => 0755, :verbose => $beVerbose)
 FileUtils.install("#{topDir}/bins/browserpluscore/BrowserPlus.config",
-                  updateDaemonDir, :verbose => $beVerbose)
+                  updateDaemonDir, :mode => 0644, :verbose => $beVerbose)
 FileUtils.install("#{$buildDir}/bins/browserpluscore/strings.json",
-                  updateDaemonDir, :verbose => $beVerbose)
+                  updateDaemonDir, :mode => 0644, :verbose => $beVerbose)
 FileUtils.install("#{shippingBinsDir}/ServiceInstaller#{exeSuffix}",
-                  updateDaemonDir, :verbose => $beVerbose)
+                  updateDaemonDir, :mode => 0755, :verbose => $beVerbose)
 
 # install HTML user interface next to the daemon
 updateUIDir = File.join(updateDaemonDir, "ui")
@@ -139,18 +139,21 @@ FileUtils.mkdir_p(updatePluginsDir, :mode => 0755, :verbose => $beVerbose)
 if platform == "Darwin"
     FileUtils.cp_r("#{shippingBinsDir}/BrowserPlus.plugin",
                    "#{updatePluginsDir}/BrowserPlus_#{bpVersion}.plugin",
+                   :preserve => true,
                    :verbose => $beVerbose)
 else
     ieDir = File.join(updatePluginsDir, "IE") 
     FileUtils.mkdir_p(ieDir, :verbose => $beVerbose)
     FileUtils.install("#{shippingBinsDir}/YBPAddon.dll", 
                       "#{ieDir}/YBPAddon_#{bpVersion}.dll",
+                      :mode => 0644,
                       :verbose => $beVerbose)
     
     npapiDir = File.join(updatePluginsDir, "NPAPI")
     FileUtils.mkdir_p(npapiDir, :verbose => $beVerbose)
     FileUtils.install("#{shippingBinsDir}/npybrowserplus.dll", 
                       "#{npapiDir}/npybrowserplus_#{bpVersion}.dll",
+                      :mode => 0644,
                       :verbose => $beVerbose)
 end
 
@@ -161,16 +164,19 @@ FileUtils.mkdir_p(updatePrefPaneDir, :mode => 0755, :verbose => $beVerbose)
 if platform == "Darwin"
     FileUtils.cp_r("#{shippingBinsDir}/BrowserPlusPrefs.prefPane",
                    "#{updatePrefPaneDir}/BrowserPlusPrefs.prefPane",
+                   :preserve => true,
                    :verbose => $beVerbose)
 else
     FileUtils.cp("#{shippingBinsDir}/BrowserPlusPrefs.exe",
                  "#{updatePrefPaneDir}/BrowserPlusPrefs.exe",
+                 :preserve => true,
                  :verbose => $beVerbose)
 end
 
 FileUtils.mkdir_p(updatePermsDir, :mode => 0755, :verbose => $beVerbose)
 FileUtils.install("#{topDir}/support/signing/devel_certs/BrowserPlus.crt", 
                   updatePermsDir, 
+                  :mode => 0644,
                   :verbose => $beVerbose)
 
 # executables go into updateDir
@@ -267,7 +273,7 @@ FileUtils.install("#{$buildDir}/support/build_scripts/generate.rb",
                   :mode => 0755, :verbose => $verbose)
 
 # and generate.rb needs a tool or two to do its duty
-FileUtils.mkdir_p("#{artifactsDir}/tools")
+FileUtils.mkdir_p("#{artifactsDir}/tools", :verbose => $beVerbose)
 FileUtils.install("#{$buildDir}/dist/bin/#{$intDir}/bpkg#{exeSuffix}",
                   "#{artifactsDir}/tools",
                   :mode => 0755, :verbose => $verbose)
@@ -279,21 +285,22 @@ toolsDir = File.join(artifactsDir, "tools")
 flushTurds(toolsDir, $beVerbose)
 FileUtils.cp_r("#{topDir}/support/build_scripts/json", 
                "#{toolsDir}",
+               :preserve => true,
                :verbose => $beVerbose)
 
 # finally let's drop our friend browserplus.js in the PAB so that it
 # truly is a standalone package of all interesting parameterizable build
 # artifacts
 jsDir = File.join(artifactsDir, "js")
-FileUtils.mkdir_p(jsDir)
+FileUtils.mkdir_p(jsDir, :verbose => true)
 Dir.glob(File.join(shippingResDir, "*.js")).each { |f|
   FileUtils.install(f, jsDir, :mode => 0644, :verbose => $beVerbose)
 }
 
 # remove previous installers and update pkg
-FileUtils.rm_f(File.join($buildDir, "BrowserPlus_#{bpVersion}#{instSuffix}"))
-FileUtils.rm_f(File.join($buildDir, "BrowserPlus_#{bpVersion}_full#{instSuffix}"))
-FileUtils.rm_f(File.join($buildDir, "BrowserPlus_#{bpVersion}.bpkg"))
+FileUtils.rm_f(File.join($buildDir, "BrowserPlus_#{bpVersion}#{instSuffix}"), :verbose => $beVerbose)
+FileUtils.rm_f(File.join($buildDir, "BrowserPlus_#{bpVersion}_full#{instSuffix}"), :verbose => $beVerbose)
+FileUtils.rm_f(File.join($buildDir, "BrowserPlus_#{bpVersion}.bpkg"), :verbose => $beVerbose)
 
 # generate installers and update pkg
 
@@ -339,5 +346,8 @@ secondaries.each { |s|  generateCmd = generateCmd + " -secondary=#{s}" }
 generateCmd = generateCmd + " -buildType=ephemeral -logLevel=#{logLevel}"
 generateCmd = generateCmd + " -logSizeKB=#{logSizeKB}"
 generateCmd = generateCmd + " -logDest=#{logDest} -logTime=#{logTime}"
+
+puts "GENERATE from: #{Dir.getwd}"
+puts "GENERATE via: #{generateCmd}"
 system(generateCmd)
 

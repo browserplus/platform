@@ -68,7 +68,7 @@ def myCP_R(src, dest)
     puts "cp -RL #{src} #{dest}" if $beVerbose 
     system("cp -RL #{src} #{dest}")
   else
-    FileUtils.cp_r(src, dest, :verbose => $beVerbose)
+    FileUtils.cp_r(src, dest, :preserve => true, :verbose => $beVerbose)
   end
 end
 
@@ -116,7 +116,7 @@ myCP_R("#{utilsBuildDir}/include/BPUtils", "#{utilsDir}/include")
 
 FileUtils.mkdir_p("#{utilsDir}/lib")
 Dir["#{utilsBuildDir}/lib/#{$intDir}/*BPUtils*"].each do |lib|
-  FileUtils.install(lib, "#{utilsDir}/lib", :verbose => $beVerbose)
+  FileUtils.install(lib, "#{utilsDir}/lib", :preserve => true, :verbose => $beVerbose)
 end
 
 # BPUtils needs boost libs, preserve symlinks on unix
@@ -127,7 +127,7 @@ Dir["#{externalsDir}/lib/#{$intDir}/libboost*"].each do |lib|
     target = File.readlink(lib)
     FileUtils.symlink(target, "#{utilsDir}/lib/#{src}", :verbose => $beVerbose)
   else
-    FileUtils.install(lib, "#{utilsDir}/lib", :verbose => $beVerbose)
+    FileUtils.install(lib, "#{utilsDir}/lib", :preserve => true, :verbose => $beVerbose)
   end
 end
 
@@ -136,25 +136,25 @@ end
 protoBuildDir = "#{buildDir}/dist"
 FileUtils.mkdir_p("#{protocolDir}/include", :verbose => $beVerbose)
 myCP_R("#{protoBuildDir}/include/BPProtocol", "#{protocolDir}/include")
-FileUtils.mkdir_p("#{protocolDir}/lib")
+FileUtils.mkdir_p("#{protocolDir}/lib", :verbose => $beVerbose)
 Dir["#{protoBuildDir}/lib/#{$intDir}/*BPProtocol*"].each do |lib|
-  FileUtils.install(lib, "#{protocolDir}/lib", :verbose => $beVerbose)
+  FileUtils.install(lib, "#{protocolDir}/lib", :preserve => true, :verbose => $beVerbose)
 end
 
 # Copy bphttp to internal sdk.
 httpBuildDir = "#{buildDir}/dist"
 FileUtils.mkdir_p("#{httpDir}/include", :verbose => $beVerbose)
 myCP_R("#{httpBuildDir}/include/bphttp", "#{httpDir}/include")
-FileUtils.mkdir_p("#{httpDir}/lib")
+FileUtils.mkdir_p("#{httpDir}/lib", :verbose => $beVerbose)
 Dir["#{httpBuildDir}/lib/#{$intDir}/*bphttp*"].each do |lib|
-  FileUtils.install(lib, "#{httpDir}/lib", :verbose => $beVerbose)
+  FileUtils.install(lib, "#{httpDir}/lib", :preserve => true, :verbose => $beVerbose)
 end
 
 
 # copy appropriate files from ServiceAPI to SDK
 FileUtils.mkdir_p("#{sdkDir}/include/ServiceAPI", :verbose => $beVerbose)
 Dir["#{$topDir}/sdk/service_api/api/ServiceAPI/*.h"].each do |f|
-  FileUtils.install(f, "#{sdkDir}/include/ServiceAPI", :verbose => $beVerbose)
+  FileUtils.install(f, "#{sdkDir}/include/ServiceAPI", :preserve => true, :verbose => $beVerbose)
 end
 
 # command line client goes to sdk.  bp daemon goes to shipping binaries
@@ -195,7 +195,8 @@ FileUtils.install("#{$topDir}/support/signing/Combined.crt", "#{internalSdkDir}/
 FileUtils.mkdir_p("#{sdkDir}/bin", :verbose => $beVerbose)
 FileUtils.install(installerExe, "#{sdkDir}/bin", :mode => 0755, :verbose => $beVerbose)
 FileUtils.install(runnerExe, "#{sdkDir}/bin", :mode => 0755, :verbose => $beVerbose)
-FileUtils.install("#{$topDir}/support/signing/Combined.crt", "#{sdkDir}/bin/BrowserPlus.crt", :verbose => $beVerbose)
+FileUtils.install("#{$topDir}/support/signing/Combined.crt", "#{sdkDir}/bin/BrowserPlus.crt", 
+                  :mode => 0644, :verbose => $beVerbose)
 
 # Plugins go to shipping binaries dir where makeInstaller and installLocally
 # will find them
@@ -230,10 +231,13 @@ end
 #
 FileUtils.mkdir_p(signingDir, :verbose => $beVerbose)
 bpSignerExe = "#{buildDir}/dist/bin/#{$intDir}/bpsigner#{exeSuffix}"
-FileUtils.install(bpSignerExe, signingDir, :verbose => $beVerbose)
-FileUtils.install("#{$topDir}/support/signing/devel_certs/BrowserPlus.pvk", signingDir, :verbose => $beVerbose)
-FileUtils.install("#{$topDir}/support/signing/devel_certs/BrowserPlus.crt", signingDir, :verbose => $beVerbose)
-FileUtils.install("#{$topDir}/support/signing/devel_certs/README.txt", signingDir, :verbose => $beVerbose)
+FileUtils.install(bpSignerExe, signingDir, :mode => 0755, :verbose => $beVerbose)
+FileUtils.install("#{$topDir}/support/signing/devel_certs/BrowserPlus.pvk", signingDir,
+                  :mode => 0644, :verbose => $beVerbose)
+FileUtils.install("#{$topDir}/support/signing/devel_certs/BrowserPlus.crt", signingDir,
+                  :mode => 0644, :verbose => $beVerbose)
+FileUtils.install("#{$topDir}/support/signing/devel_certs/README.txt", signingDir, 
+                  :mode => 0644, :verbose => $beVerbose)
 
 # Generate some documentation
 #
@@ -254,7 +258,7 @@ if $platform == "Windows"
 else
   sampleServiceFiles = %w[README.txt service.cpp manifest.json Makefile SampleServiceTest.html]
 end
-FileUtils.mkdir_p("#{sdkDir}/samples/NativeService")
+FileUtils.mkdir_p("#{sdkDir}/samples/NativeService", :verbose => $beVerbose)
 sampleServiceFiles.each do |f|
   # magicially handle the fact that .erb files are substituted into the
   # build directory
@@ -267,22 +271,28 @@ sampleServiceFiles.each do |f|
     f = pf if File.exist?(pf)
   }
   FileUtils.install(f, "#{sdkDir}/samples/NativeService",
+                    :preserve => true,
                     :verbose => $beVerbose)
 end
 
 # Put ruby sample service in SDK
 sampleServiceFiles = %w[README.html hello.rb manifest.json]
-FileUtils.mkdir_p("#{sdkDir}/samples/RubyService")
+FileUtils.mkdir_p("#{sdkDir}/samples/RubyService", :verbose => $beVerbose)
 sampleServiceFiles.each do |f|
   FileUtils.install("#{$topDir}/sdk/sample_services/RubyService/#{f}",
-                    "#{sdkDir}/samples/RubyService", :verbose => $beVerbose)
+                    "#{sdkDir}/samples/RubyService",
+                    :preserve => true, :verbose => $beVerbose)
 end
 
 # README and ChangeLog
 #
-FileUtils.install("#{$topDir}/libs/installer/misc/README.txt", sdkDir, :verbose => $beVerbose)
-FileUtils.install("#{$topDir}/libs/installer/misc/README_INTERNAL.txt", File.join(internalSdkDir, "README.txt"), :verbose => $beVerbose)
-FileUtils.install("#{$topDir}/../docs/ChangeLog.txt", internalSdkDir, :verbose => $beVerbose)
+FileUtils.install("#{$topDir}/libs/installer/misc/README.txt", sdkDir,
+                  :mode => 0644, :verbose => $beVerbose)
+FileUtils.install("#{$topDir}/libs/installer/misc/README_INTERNAL.txt",
+                  File.join(internalSdkDir, "README.txt"),
+                  :mode => 0644, :verbose => $beVerbose)
+FileUtils.install("#{$topDir}/../docs/ChangeLog.txt", internalSdkDir,
+                  :mode => 0644, :verbose => $beVerbose)
 
 # clean out any source control turds from output dirs
 flushTurds(sdkDir)
