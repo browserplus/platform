@@ -806,7 +806,7 @@ MACRO(_YBT_SETUP_PCH rootName name)
         #SET_SOURCE_FILES_PROPERTIES(${YBT_CXX_PCH} PROPERTIES HEADER_FILE_ONLY FALSE)
         #This should work but doesn't
         #Either use these two lines or subsequent two lines
-        #ADD_CUSTOM_TARGET(${name}_GCH_FILE "$CMAKE_C_COMPILER} ${pchCompileFlags}" DEPENDS ${YBT_CXX_PCH})
+        #ADD_CUSTOM_TARGET(${name}_GCH_FILE "${CMAKE_C_COMPILER} ${pchCompileFlags}" DEPENDS ${YBT_CXX_PCH})
         #ADD_DEPENDENCIES(${name} ${name}_GCH_FILE)
         #This is modified from python src
         #Either use these two lines or preceding two lines
