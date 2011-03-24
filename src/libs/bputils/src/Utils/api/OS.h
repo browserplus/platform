@@ -54,8 +54,6 @@ namespace bp
         std::string CurrentUser();
 
         bool Is64Bit();
-        
-        bool IsDeprecated();
     };
 };
 

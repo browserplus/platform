@@ -38,6 +38,7 @@
 #include "ArchiveLib/ArchiveLib.h"
 #include "BPUtils/bpfile.h"
 #include "BPUtils/BPLog.h"
+#include "BPUtils/OS.h"
 #include "platform_utils/bpconfig.h"
 #include "platform_utils/bpdns.h"
 #include "platform_utils/bplocalization.h"
@@ -144,6 +145,28 @@ PermissionsManager::lastCheck(BPTime& t) const
         rval = true;
     }
     return rval;
+}
+
+
+bool 
+PermissionsManager::isOSPlatformDeprecated() const
+{
+    string os = bp::os::PlatformAsString();
+    string osVersion = bp::os::PlatformVersion();
+    map<string, set<string> >::const_iterator it;
+    it = m_deprecatedOSPlatforms.find(os);
+    if (it != m_deprecatedOSPlatforms.end()) {
+        for (set<string>::const_iterator vi = it->second.begin();
+             vi != it->second.end(); ++vi) {
+            if (osVersion.find(*vi) == 0) {
+                BPLOG_DEBUG_STRM(os << " / " << osVersion
+                                 << " deprecated by entry "
+                                 << it->first << " / " << *vi);
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 
@@ -679,6 +702,26 @@ PermissionsManager::load()
             }
         }
 
+        // deprecated OS platforms
+        objPtr = m["deprecatedOSPlatforms"];
+        if (objPtr) {
+            map<string, const bp::Object*> osMap = *objPtr;
+            map<string, const bp::Object*>::const_iterator it;
+            for (it = osMap.begin(); it != osMap.end(); ++it) {
+                string os = it->first;
+                BPLOG_INFO_STRM("OS " << os << " has deprecated versions:");
+                vector<const bp::Object*> versions = *(it->second);
+                set<string> versionSet;
+                for (size_t i = 0; i < versions.size(); ++i) {
+                    string s = *(versions[i]);
+                    versionSet.insert(s);
+                    BPLOG_INFO_STRM("\t" << s);
+                }
+                m_deprecatedOSPlatforms[it->first] = versionSet;
+                
+            }
+        }
+
         // publicKeys is a list of public keys to be added to certs
         objPtr = m["publicKeys"];
         if (objPtr) {
@@ -858,6 +901,7 @@ PermissionsManager::load()
         m_platformBlacklist.clear();
         m_permLocalizations.clear();
         m_permMigrations.clear();
+        m_deprecatedOSPlatforms.clear();
         m_badPermissionsOnDisk = true;
     }
     

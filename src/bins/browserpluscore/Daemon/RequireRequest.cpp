@@ -299,7 +299,7 @@ RequireRequest::doRun()
 
     // If platform is deprecated, we're done.  Either we have everything we
     // need, or we fail.  We won't install new stuff.
-    if (bp::os::IsDeprecated()) {
+    if (PermissionsManager::get()->isOSPlatformDeprecated()) {
         if (haveAllServices) {
             postSuccess();
         } else {
@@ -465,7 +465,7 @@ RequireRequest::checkPlatformUpdates()
 {
     // No updates for deprecated platforms.  Shouldn't be any since
     // daemon didn't start platformupdater singleton, but let's be paranoid.
-    if (bp::os::IsDeprecated()) {
+    if (PermissionsManager::get()->isOSPlatformDeprecated()) {
         m_platformUpdates.clear();
         return;
     }

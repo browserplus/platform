@@ -33,7 +33,6 @@
 
 #include "AutoShutdown.h"
 #include "BPUtils/bpfile.h"
-#include "BPUtils/OS.h"
 #include "ServiceManager/ServiceManager.h"
 #include "Permissions/Permissions.h"
 #include "platform_utils/bpexitcodes.h"
@@ -542,7 +541,7 @@ BPDaemon::startup()
 
     setupServiceRegistry();
     
-    bool deprecated = bp::os::IsDeprecated();
+    bool deprecated = PermissionsManager::get()->isOSPlatformDeprecated();
     if (deprecated) {
         BPLOG_INFO_STRM("Platform is deprecated, no platform/service updates will occur");
     }

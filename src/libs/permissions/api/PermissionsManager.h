@@ -157,6 +157,12 @@ public:
     bool error() const;
     
     /**
+     * Is OS platform deprecated?  If so, no platform/service update checks
+     * will occur, and no new services can be installed.
+     */
+    bool isOSPlatformDeprecated() const;
+    
+    /**
      * Do unapproved domains require user approval?
      */
     bool requireDomainApproval() const;
@@ -409,6 +415,10 @@ private:
     std::vector<MigrationEntry> m_permMigrations;
     std::set<std::string> m_appliedPermMigrations;
     
+    // deprecated OS platforms.  key is OS ("osx", "win32"), value
+    // is list of deprecated versions ("10.4")
+    std::map<std::string, std::set<std::string> > m_deprecatedOSPlatforms;
+
     virtual void onTransactionFailed(unsigned int tid,
                                      const std::string& msg);
     virtual void gotPermissions(unsigned int tid,

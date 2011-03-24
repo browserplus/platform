@@ -1,3 +1,12 @@
+//***********************************************************************************
+// DANGER WILL ROBINSON!
+//
+// This file is NOT intended for user-modification, it is updated automatically by
+// the platform.  If you try to modify entries, you are completely on your own.
+// The slightest error can result in crashes, dogs sleeping with cats, and other
+// bad things. You have been warned.
+//***********************************************************************************
+
 <%
 # a utility function to get all localazations for a specified key
 # and to returnit as a json key
@@ -33,6 +42,21 @@ end
         <%= $cmake["BP_PLATFORM_BLACKLIST"] %>
     ],
      
+    // Deprecated OS platforms.  A deprecated platform will 
+    // not check for platform/service updates, nor will it
+    // install new services.  
+    // Versions are:
+    //   osx10.4   10.4.
+    //   osx10.5   10.5.
+    //   osx10.6   10.6.
+    //   win xp    5.2.
+    //   win vista 6.0.
+    //   win w7    6.1.
+    // The trailing '.' is important!
+    "deprecatedOSPlatforms": {
+        "osx" : ["10.4."]
+    }, 
+
     // Supported browsers and their capabilities
     "browserSupport": {
         // browserplus version
