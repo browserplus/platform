@@ -49,7 +49,7 @@ IF (APPLE)
   SET_TARGET_PROPERTIES(BrowserPlusCore PROPERTIES
                         LINK_FLAGS_DEBUG "-exported_symbols_list ${CMAKE_CURRENT_SOURCE_DIR}/${EXPORTED_SYMBOLS} -flat_namespace")
   SET_TARGET_PROPERTIES(BrowserPlusCore PROPERTIES
-                        LINK_FLAGS_RELEASE "-exported_symbols_list ${CMAKE_CURRENT_SOURCE_DIR}/${EXPORTED_SYMBOLS}.txt -flat_namespace")
+                        LINK_FLAGS_RELEASE "-exported_symbols_list ${CMAKE_CURRENT_SOURCE_DIR}/${EXPORTED_SYMBOLS} -flat_namespace")
   SET_TARGET_PROPERTIES(BrowserPlusCore PROPERTIES
                         LINK_FLAGS_CODECOVERAGE "-exported_symbols_list ${CMAKE_CURRENT_SOURCE_DIR}/exported_symbols2.txt -flat_namespace")
 ENDIF ()
