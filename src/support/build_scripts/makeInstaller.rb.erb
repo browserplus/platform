@@ -238,7 +238,7 @@ if platform == "Darwin"
                       "#{installerDir}/",
                       :mode => 0644, :verbose => $verbose)
 
-    FileUtils.install("#{topDir}/libs/installer/miscScripts/mac/buildInstaller.rb",
+    FileUtils.install("#{$buildDir}/libs/installer/miscScripts/mac/buildInstaller.rb",
                       "#{installerDir}/",
                       :mode => 0644, :verbose => $verbose)
 
