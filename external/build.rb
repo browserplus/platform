@@ -12,7 +12,7 @@
 
 # if you want to update to a newer version of the bakery, fiddle this
 # sha256 to point to the commit you want
-bakery_commit = "9ae459e3fcbaaeccd3ebbf59a6e3c01b8b75a2d6"
+bakery_commit = "3ef9ce0b40cf1871f74c561b2ed1895f591e4695"
 
 # XXX when 10.4 support dropped, replace sha above and get rid of this logic
 if ARGV.length == 1 && ARGV[0] == "osx10.5"
