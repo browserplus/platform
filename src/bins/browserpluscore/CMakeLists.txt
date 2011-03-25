@@ -38,10 +38,18 @@ SET(BrowserPlusCore_LINK_STATIC
 YBT_BUILD(BINARY BrowserPlusCore)
 TARGET_LINK_LIBRARIES(BrowserPlusCore ${OS_LIBS})
 IF (APPLE)
+  # XXX when 10.4 dropped, "else" clause becomes the only one 
+  # XXX (provided that exported_symbols_10_5.txt is copied
+  # XXX over to exported_symbols.txt)
+  IF (OSX10.5_BUILD) 
+    SET(EXPORTED_SYMBOLS exported_symbols_10_5.txt)
+  ELSE ()
+    SET(EXPORTED_SYMBOLS exported_symbols.txt)
+  ENDIF ()
   SET_TARGET_PROPERTIES(BrowserPlusCore PROPERTIES
-                        LINK_FLAGS_DEBUG "-exported_symbols_list ${CMAKE_CURRENT_SOURCE_DIR}/exported_symbols.txt -flat_namespace")
+                        LINK_FLAGS_DEBUG "-exported_symbols_list ${CMAKE_CURRENT_SOURCE_DIR}/${EXPORTED_SYMBOLS} -flat_namespace")
   SET_TARGET_PROPERTIES(BrowserPlusCore PROPERTIES
-                        LINK_FLAGS_RELEASE "-exported_symbols_list ${CMAKE_CURRENT_SOURCE_DIR}/exported_symbols.txt -flat_namespace")
+                        LINK_FLAGS_RELEASE "-exported_symbols_list ${CMAKE_CURRENT_SOURCE_DIR}/${EXPORTED_SYMBOLS}.txt -flat_namespace")
   SET_TARGET_PROPERTIES(BrowserPlusCore PROPERTIES
                         LINK_FLAGS_CODECOVERAGE "-exported_symbols_list ${CMAKE_CURRENT_SOURCE_DIR}/exported_symbols2.txt -flat_namespace")
 ENDIF ()

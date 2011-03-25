@@ -42,6 +42,12 @@ IF (APPLE)
   MESSAGE("!! CMAKE_OSX_SYSROOT == ${CMAKE_OSX_SYSROOT}")
 ENDIF ()
 
+IF (OSX10.5_BUILD)
+  MESSAGE("\n**** DOING AN OSX10.5 BUILD ****\n")
+ELSE ()
+  MESSAGE("\n**** To do an osx10.5 build, do cmake -DOSX10.5_BUILD=true ... ****\n")
+ENDIF()
+
 # Now run .erb and .cmakeIn substitution.  This must occur
 # before the ADD_SUBDIRECTORY() commands below so that the
 # CMakeLists.txt files in those dirs will see the generated files.
@@ -73,10 +79,21 @@ ADD_SUBDIRECTORY(javascript)
 
 # a custom step to build latest externals
 SET (pathToExtBuildRb "${CMAKE_CURRENT_SOURCE_DIR}/../external/build.rb")
-ADD_CUSTOM_TARGET(
-    BuildExternals ALL
-    COMMAND ruby ${pathToExtBuildRb}
-    COMMENT "Build 3rd party dependencies")
+
+# XXX when 10.4 dropped, "else" clause becomes the only one
+# XXX (provided that bakery osx10.5 branch merged to master
+# XXX and 'osx10.5' logic removed from build.rb)
+IF (OSX10.5_BUILD)
+  ADD_CUSTOM_TARGET(
+      BuildExternals ALL
+      COMMAND ruby ${pathToExtBuildRb} osx10.5
+      COMMENT "Build 3rd party dependencies")
+ELSE ()
+  ADD_CUSTOM_TARGET(
+      BuildExternals ALL
+      COMMAND ruby ${pathToExtBuildRb}
+      COMMENT "Build 3rd party dependencies")
+ENDIF ()
 
 # PerformSubstitutions should run anytime we build anything else
 ADD_DEPENDENCIES( BPUtils_s PerformSubstitution )

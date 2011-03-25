@@ -140,7 +140,7 @@ SET (YBT_SECOND_RUN "1" CACHE INTERNAL "An anti-verbosity flag")
 IF(WIN32)
     ADD_DEFINITIONS(-DWIN32)
     SET(CXX_BUILD_FLAGS
-	    " /D _CRT_SECURE_NO_DEPRECATE /Zm1000 /EHa /wd4025 /wd4100 /wd4127 /wd4251 /wd4256 /wd4335 /wd4996 /Z7 /MT")
+        " /D _CRT_SECURE_NO_DEPRECATE /Zm1000 /EHa /wd4025 /wd4100 /wd4127 /wd4251 /wd4256 /wd4335 /wd4996 /Z7 /MT")
     SET(CXX_DEBUG_BUILD_FLAGS "/Od -DDEBUG -D_DEBUG")
     SET(CXX_RELEASE_BUILD_FLAGS "/O2")
     SET(LINK_FLAGS "/INCREMENTAL:NO /OPT:REF /OPT:ICF /DEBUG /PDB:NONE")
@@ -170,8 +170,15 @@ IF(WIN32)
     ELSE ()
       MESSAGE(FATAL_ERROR "Using unsupported Windows compiler")
     ENDIF ()
-#    MESSAGE("Using cl ${CMAKE_CXX_COMPILER_VERSION}")
+    MESSAGE("Using cl ${CMAKE_CXX_COMPILER_VERSION}")
 ELSE ()
+    EXEC_PROGRAM("${CMAKE_C_COMPILER} ARGS --version |head -1 |awk '{print $1}'"
+                 OUTPUT_VARIABLE CMAKE_C_COMPILER_VERSION)
+    EXEC_PROGRAM("${CMAKE_CXX_COMPILER} ARGS --version |head -1 |awk '{print $1}'"
+                 OUTPUT_VARIABLE CMAKE_CXX_COMPILER_VERSION)
+    MESSAGE("Using C compiler ${CMAKE_C_COMPILER}, version ${CMAKE_C_COMPILER_VERSION}")
+    MESSAGE("Using C++ compiler ${CMAKE_CXX_COMPILER}, version ${CMAKE_CXX_COMPILER_VERSION}")
+
     SET(CXX_BUILD_FLAGS "-Wall -fPIC")
     IF (APPLE)
         SET(CMAKE_EXE_LINKER_FLAGS "-bind_at_load")
@@ -183,7 +190,6 @@ ELSE ()
     ENDIF () 
 
     SET(CXX_DEBUG_BUILD_FLAGS "-DDEBUG -g")
-
 
     # GCC 3.3 will cause the following kinds of errors when compiled
     # with -O3 or higher on mac:
@@ -208,21 +214,20 @@ ELSE ()
     #          would be preferred
     #
     # On gcc versions less that 3.x we don't want to do this cause the
-    # compiler doesn't warn, and doesn't understand the flag.  We key
-    # off of the system name, however gcc version might be more general 
-    IF (NOT ${CMAKE_SYSTEM} MATCHES "FreeBSD-4.*")
+    # compiler doesn't warn, and doesn't understand the flag.
+    IF (CMAKE_CXX_COMPILER_VERSION MATCHES ".*-g\\+\\+3\\.[4-9].*")
         SET(CXX_BUILD_FLAGS "${CXX_BUILD_FLAGS} -Wno-unused-parameter")
         IF(DEFINED YBT_VERBOSE)
           MESSAGE("** NOTE: disabling \"unused parameter\" compiler warnings!")
     ENDIF ()
     ENDIF ()
-        
+
     # gcc versions less that 3.x will not tolerate a directory in the link
     # path with the name of "string" (or vector, or anything else).  For
     # that reason we insure the path to the include directory is first in our
     # include path
 
-    IF (${CMAKE_SYSTEM} MATCHES "FreeBSD-4.*")
+    IF (CMAKE_CXX_COMPILER_VERSION MATCHES ".*-g\\+\\+-3\\.[4-9].*")
         SET(CXX_BUILD_FLAGS "${CXX_BUILD_FLAGS} -ftemplate-depth-100")
         FIND_PATH(GXX_STRING_INCLUDE_PATH string /usr/include/g++)
         IF (NOT GXX_STRING_INCLUDE_PATH)
@@ -235,9 +240,6 @@ ELSE ()
     IF (APPLE)
         SET(CXX_BUILD_FLAGS "${CXX_BUILD_FLAGS} -Wno-long-double")
     ENDIF ()
-
-    EXEC_PROGRAM(gcc ARGS --version OUTPUT_VARIABLE CMAKE_CXX_COMPILER_VERSION)
-    #MESSAGE("Using gcc ${CMAKE_CXX_COMPILER_VERSION}")
 ENDIF ()
 
 IF (CXX_RELEASE_BUILD_FLAGS)

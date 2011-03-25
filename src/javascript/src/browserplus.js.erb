@@ -249,7 +249,12 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
 
             if (!success) {
                 _initState = 'uninitialized';
-                lCb({ success: false, error: "bp.notInstalled" });
+                // osx10.4 is deprecated.  we'll load it, but not install it.
+                if (navigator.userAgent.indexOf("Mac OS X 10_4_") != -1) {
+                    lCb({success: false, error: "bp.unsupportedClient"});
+                } else {
+                    lCb({ success: false, error: "bp.notInstalled" });
+                }
                 return;
             } else {
                 _initCallbacks.push(lCb);
@@ -639,6 +644,8 @@ BrowserPlus = (typeof BrowserPlus != "undefined" && BrowserPlus) ? BrowserPlus :
                 _supportLevel = "unsupported";
             } else if (navigator.userAgent.indexOf("Firefox/2.0.0") != -1) {
                 _supportLevel = "unsupported";
+            } else if (navigator.userAgent.indexOf("Mac OS X 10_4_") != -1) {
+                _supportLevel = "deprecated";
             } else {
                 _supportLevel = supportLevel();
             }

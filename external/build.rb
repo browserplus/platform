@@ -14,6 +14,12 @@
 # sha256 to point to the commit you want
 bakery_commit = "9ae459e3fcbaaeccd3ebbf59a6e3c01b8b75a2d6"
 
+# XXX when 10.4 support dropped, replace sha above and get rid of this logic
+if ARGV.length == 1 && ARGV[0] == "osx10.5"
+  puts '*** DOING OSX10.5 BUILD **'
+  bakery_commit = "e8ebe4362d25188e4cb20428f94129c87e1d48a6"
+end
+
 # END user serviceable parts
 
 require 'rbconfig'

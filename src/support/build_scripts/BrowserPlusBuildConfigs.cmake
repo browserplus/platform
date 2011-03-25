@@ -91,17 +91,37 @@ IF(WIN32)
     SET(CMAKE_MODULE_LINKER_FLAGS_RELEASE "${linkFlagsRelease}"
         CACHE STRING "BrowserPlus module release linker flags" FORCE)
 ELSE ()
-    SET(isysrootFlag)
-    IF (APPLE)
-      # Must tell cmake that we really, really, really want gcc-4.0
-      INCLUDE(CMakeForceCompiler)
-      CMAKE_FORCE_C_COMPILER(gcc-4.0 GNU)
-      CMAKE_FORCE_CXX_COMPILER(gcc-4.0 GNU)
 
-      # now tell cmake to tell xcode that we really, really, really,
-      # want gcc-4.0 and i386
-      SET( CMAKE_XCODE_ATTRIBUTE_GCC_VERSION "4.0"
-           CACHE STRING "BrowserPlus debug CXX flags" FORCE )
+    # Must tell cmake that we really, really, really want certain
+    # compiler/sdk
+    SET(isysrootFlag)
+    SET(minVersionFlag)
+    INCLUDE(CMakeForceCompiler)
+    IF (APPLE)
+      # XXX when 10.4 dropped, "if" clause becomes the only one 
+      IF (OSX10.5_BUILD) 
+        # Use full paths since 10.5 doesn't have llvm in /usr/bin.
+        # Even with all of this, 10.5 xcode generator doesn't honor this.
+        # SET(CMAKE_C_COMPILER gcc-4.2)
+        # SET(CMAKE_CXX_COMPILER g++-4.2)
+        SET(CMAKE_C_COMPILER /Developer/usr/bin/llvm-gcc-4.2)
+        SET(CMAKE_CXX_COMPILER /Developer/usr/bin/llvm-g++-4.2)
+        SET(ENV{CC} ${CMAKE_C_COMPILER})
+        SET(ENV{CXX} ${CMAKE_CXX_COMPILER})
+        CMAKE_FORCE_C_COMPILER(${CMAKE_C_COMPILER} GNU)
+        CMAKE_FORCE_CXX_COMPILER(${CMAKE_CXX_COMPILER} GNU)
+        SET(CMAKE_XCODE_ATTRIBUTE_GCC_VERSION "4.2"
+            CACHE STRING "BrowserPlus debug CXX flags" FORCE)
+      ELSE ()
+        CMAKE_FORCE_C_COMPILER(gcc-4.0 GNU)
+        CMAKE_FORCE_CXX_COMPILER(gcc-4.0 GNU)
+        SET(CMAKE_XCODE_ATTRIBUTE_GCC_VERSION "4.0"
+            CACHE STRING "BrowserPlus debug CXX flags" FORCE)
+        SET(CMAKE_C_COMPILER gcc-4.0)
+        SET(CMAKE_CXX_COMPILER g++-4.0)
+      ENDIF ()
+
+      # now tell cmake to tell xcode that we really, really, really want i386
       SET(CMAKE_XCODE_ATTRIBUTE_ARCHS i386)
 
       IF ("${CMAKE_BUILD_TYPE}" STREQUAL "CodeCoverage")
@@ -109,23 +129,27 @@ ELSE ()
         SET(CMAKE_OSX_ARCHITECTURES i386)
         SET (CMAKE_OSX_DEPLOYMENT_TARGET "10.6"
           CACHE STRING "Compile for snow leopard deployment" FORCE)
-        SET(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.6.sdk"
-            CACHE STRING "Compile for snow leopard backwards compat" FORCE)
-        SET(isysrootFlag "-isysroot ${CMAKE_OSX_SYSROOT}")
         SET(minVersionFlag "-mmacosx-version-min=10.6")
-        SET(CMAKE_FRAMEWORK_PATH "${CMAKE_OSX_SYSROOT}/System/Library/Frameworks"
-            CACHE STRING "use 10.6 frameworks" FORCE)
       ELSE ()
-        # and we 32bit i386 for osx 10.4
         SET(CMAKE_OSX_ARCHITECTURES i386)
-        SET (CMAKE_OSX_DEPLOYMENT_TARGET "10.4"
-          CACHE STRING "Compile for tiger deployment" FORCE)
-        SET(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.4u.sdk"
-            CACHE STRING "Compile for tiger backwards compat" FORCE)
-        SET(isysrootFlag "-isysroot ${CMAKE_OSX_SYSROOT}")
-        SET(minVersionFlag "-mmacosx-version-min=10.4")
-        SET(CMAKE_FRAMEWORK_PATH "${CMAKE_OSX_SYSROOT}/System/Library/Frameworks"
-            CACHE STRING "use 10.4 frameworks" FORCE)
+        # XXX when 10.4 dropped, "if" clause becomes the only one 
+        IF (OSX10.5_BUILD)
+          # and we 32bit i386 for osx 10.5
+          SET(CMAKE_OSX_ARCHITECTURES i386)
+          SET (CMAKE_OSX_DEPLOYMENT_TARGET "10.5"
+               CACHE STRING "Compile for tiger deployment" FORCE)
+          SET(minVersionFlag "-mmacosx-version-min=10.5") 
+        ELSE ()
+          # and we 32bit i386 for osx 10.4
+          SET (CMAKE_OSX_DEPLOYMENT_TARGET "10.4"
+               CACHE STRING "Compile for tiger deployment" FORCE)
+          SET(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.4u.sdk"
+              CACHE STRING "Compile for tiger backwards compat" FORCE)
+          SET(isysrootFlag "-isysroot ${CMAKE_OSX_SYSROOT}")
+          SET(minVersionFlag "-mmacosx-version-min=10.4")
+          SET(CMAKE_FRAMEWORK_PATH "${CMAKE_OSX_SYSROOT}/System/Library/Frameworks"
+              CACHE STRING "use 10.4 frameworks" FORCE)
+        ENDIF ()
       ENDIF ()
 
       SET(CMAKE_MODULE_LINKER_FLAGS "${minVersionFlag} ${isysrootFlag}")
@@ -135,8 +159,6 @@ ELSE ()
       SET(CMAKE_SHARED_LINKER_FLAGS "${minVersionFlag} ${isysrootFlag}  -Wl,-single_module")
       SET(CMAKE_SHARED_LINKER_FLAGS_CODECOVERAGE "-lgcov")
       ADD_DEFINITIONS(-DMACOSX -D_MACOSX -DMAC -D_MAC -DXP_MACOSX)
-      SET(CMAKE_C_COMPILER gcc-4.0)
-      SET(CMAKE_CXX_COMPILER g++-4.0)
     ELSE()
       ADD_DEFINITIONS(-DLINUX -D_LINUX -DXP_LINUX)
       set(FPICFlag "-fPIC")
