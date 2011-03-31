@@ -63,8 +63,13 @@ Building on OSX:
     1. install git (available in MacPorts)
     2. install the latest version of XCode (at time of writing 2.5 or 3.0 for tiger/leopard)
        At install, make sure to select the Mac OS X 10.4 SDK option.
-    3. install cmake version 2.8.1 or greater from http://www.cmake.org/cmake/resources/software.html
-    4. install ruby 1.8.7 from http://www.ruby-lang.org
+
+       NOTE: If you have upgraded to XCode4, you will need to make a symlink from 
+       /Developer/SDKs/MacOSX10.4u.sdk to /Developer-old/SDKs/MacOSX10.4u.sdk in
+       order to build.  This requirement will be dropped when 10.4 support is dropped.
+
+    3. install cmake version 2.8.4 or greater from http://www.cmake.org/cmake/resources/software.html
+    4. install ruby 1.9.2 from http://www.ruby-lang.org
  
   Building the tree:    
     1. cd <path to public_platform>/external
@@ -83,8 +88,7 @@ Building on OSX:
 Building on win32:
   Setting up your environment:
     1. install msysgit from http://code.google.com/p/msysgit/downloads/list
-    2. install Visual Studio 2008 Pro or equiv
-    3. install Visual Studio 2008 SP1
+    2. install Visual Studio 2010 Pro or equiv
     4. install "Microsoft Windows SDK for Windows 7 and .NET Framework 4" from:
 http://www.microsoft.com/downloads/en/details.aspx?FamilyID=6b6c21d2-2006-4afa-9702-529fa782d63b
     5. register the 7.1 sdk as the current sdk:
@@ -92,10 +96,10 @@ http://www.microsoft.com/downloads/en/details.aspx?FamilyID=6b6c21d2-2006-4afa-9
             Microsoft Windows SDK v7.1
                Visual Studio Registration
                   Windows SDK Configuration Tool
-    6. install cmake version 2.8.0 or greater from:
+    6. install cmake version 2.8.4 or greater from:
        http://www.cmake.org/cmake/resources/software.html
        during install, select "add cmake to PATH for this user (or all users)"
-    7. install ruby from: http://www.ruby-lang.org 
+    7. install ruby 1.9.2 from: http://www.ruby-lang.org 
        and add C:\ruby\bin to your PATH
     8. (optional) Install the latest version of doxygen if you would
        like to have documentation generated for various projects which
@@ -131,5 +135,5 @@ http://www.microsoft.com/downloads/en/details.aspx?FamilyID=6b6c21d2-2006-4afa-9
          or
        devenv BrowserPlus.sln /Build {Debug,Release}
          or
-       Launch VS08, open build\BrowserPlus.sln and build via the gui.
+       Launch VS10, open build\BrowserPlus.sln and build via the gui.
            
