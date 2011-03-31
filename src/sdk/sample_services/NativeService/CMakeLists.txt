@@ -32,13 +32,20 @@ SET(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS 1)
 SET (serviceName SampleService)
 
 # Name our project
-PROJECT(${serviceName}Service)
+PROJECT(${serviceName})
 
 IF (WIN32)
-  INCLUDE_EXTERNAL_MSPROJECT(
-    "${serviceName}"
-    "${CMAKE_CURRENT_SOURCE_DIR}/${serviceName}.vcproj"
-    PackageSDK)
+  IF (MSVC90)
+    INCLUDE_EXTERNAL_MSPROJECT(
+      "${serviceName}"
+      "${CMAKE_CURRENT_SOURCE_DIR}/${serviceName}_vs9.vcproj"
+      PackageSDK)
+  ELSE ()
+    INCLUDE_EXTERNAL_MSPROJECT(
+      "${serviceName}"
+      "${CMAKE_CURRENT_SOURCE_DIR}/${serviceName}.vcxproj"
+      PackageSDK)
+  ENDIF ()
 ELSE ()
   ADD_CUSTOM_TARGET(
       ${serviceName} ALL
