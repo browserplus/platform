@@ -10,39 +10,63 @@
     </condition>
     <target name="clean_make_codecoverage" unless="is.windows">
         <delete dir="Darwin" />
+        <delete dir="bakery" />
+        <delete file="bakery_version.txt" />
     </target>
     <target name="clean_make_debug" unless="is.windows">
         <delete dir="Darwin" />
+        <delete dir="bakery" />
+        <delete file="bakery_version.txt" />
     </target>
     <target name="clean_make_release" unless="is.windows">
         <delete dir="Darwin" />
+        <delete dir="bakery" />
+        <delete file="bakery_version.txt" />
     </target>
     <target name="clean_vc05_codecoverage" if="is.windows">
         <delete dir="Windows" />
+        <delete dir="bakery" />
+        <delete file="bakery_version.txt" />
     </target>
     <target name="clean_vc08_codecoverage" if="is.windows">
         <delete dir="Windows" />
+        <delete dir="bakery" />
+        <delete file="bakery_version.txt" />
     </target>
     <target name="clean_vc10_codecoverage" if="is.windows">
         <delete dir="Windows" />
+        <delete dir="bakery" />
+        <delete file="bakery_version.txt" />
     </target>
     <target name="clean_vc05_debug" if="is.windows">
         <delete dir="Windows" />
+        <delete dir="bakery" />
+        <delete file="bakery_version.txt" />
     </target>
     <target name="clean_vc08_debug" if="is.windows">
         <delete dir="Windows" />
+        <delete dir="bakery" />
+        <delete file="bakery_version.txt" />
     </target>
     <target name="clean_vc10_debug" if="is.windows">
         <delete dir="Windows" />
+        <delete dir="bakery" />
+        <delete file="bakery_version.txt" />
     </target>
     <target name="clean_vc05_release" if="is.windows">
         <delete dir="Windows" />
+        <delete dir="bakery" />
+        <delete file="bakery_version.txt" />
     </target>
     <target name="clean_vc08_release" if="is.windows">
         <delete dir="Windows" />
+        <delete dir="bakery" />
+        <delete file="bakery_version.txt" />
     </target>
     <target name="clean_vc10_release" if="is.windows">
         <delete dir="Windows" />
+        <delete dir="bakery" />
+        <delete file="bakery_version.txt" />
     </target>
     <target name="build_make_codecoverage" unless="is.windows">
         <exec executable="ruby" failonerror="true">
