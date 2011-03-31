@@ -12,15 +12,15 @@
 
 # if you want to update to a newer version of the bakery, fiddle this
 # sha256 to point to the commit you want
-bakery_commit = "57d738befca4b693036d4b9df01402ca61417c11"
+bakery_commit = "2b5c25652208939fbce58ffc3d9c92df4b20de32"
+
+# END user serviceable parts
 
 # XXX when 10.4 support dropped, replace sha above and get rid of this logic
 if ARGV.length == 1 && ARGV[0] == "osx10.5"
   puts '*** DOING OSX10.5 BUILD **'
-  bakery_commit = "e8ebe4362d25188e4cb20428f94129c87e1d48a6"
+  ENV['BP_OSX_TARGET'] = '10.5'
 end
-
-# END user serviceable parts
 
 require 'rbconfig'
 require 'fileutils'

@@ -81,8 +81,7 @@ ADD_SUBDIRECTORY(javascript)
 SET (pathToExtBuildRb "${CMAKE_CURRENT_SOURCE_DIR}/../external/build.rb")
 
 # XXX when 10.4 dropped, "else" clause becomes the only one
-# XXX (provided that bakery osx10.5 branch merged to master
-# XXX and 'osx10.5' logic removed from build.rb)
+# XXX (provided that 'osx10.5' logic removed from build.rb)
 IF (OSX10.5_BUILD)
   ADD_CUSTOM_TARGET(
       BuildExternals ALL
