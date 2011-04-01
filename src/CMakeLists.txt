@@ -42,10 +42,10 @@ IF (APPLE)
   MESSAGE("!! CMAKE_OSX_SYSROOT == ${CMAKE_OSX_SYSROOT}")
 ENDIF ()
 
-IF (OSX10.5_BUILD)
-  MESSAGE("\n**** DOING AN OSX10.5 BUILD ****\n")
+IF (OSX10.4_BUILD)
+  MESSAGE("\n**** DOING AN OSX10.4 BUILD ****\n")
 ELSE ()
-  MESSAGE("\n**** To do an osx10.5 build, do cmake -DOSX10.5_BUILD=true ... ****\n")
+  MESSAGE("\n**** To do an osx10.4 build, do cmake -DOSX10.4_BUILD=true ... ****\n")
 ENDIF()
 
 # Now run .erb and .cmakeIn substitution.  This must occur
@@ -81,11 +81,11 @@ ADD_SUBDIRECTORY(javascript)
 SET (pathToExtBuildRb "${CMAKE_CURRENT_SOURCE_DIR}/../external/build.rb")
 
 # XXX when 10.4 dropped, "else" clause becomes the only one
-# XXX (provided that 'osx10.5' logic removed from build.rb)
-IF (OSX10.5_BUILD)
+# XXX (provided that 'osx10.4' logic removed from build.rb)
+IF (OSX10.4_BUILD)
   ADD_CUSTOM_TARGET(
       BuildExternals ALL
-      COMMAND ruby ${pathToExtBuildRb} osx10.5
+      COMMAND ruby ${pathToExtBuildRb} osx10.4
       COMMENT "Build 3rd party dependencies")
 ELSE ()
   ADD_CUSTOM_TARGET(

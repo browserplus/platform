@@ -39,10 +39,8 @@ YBT_BUILD(BINARY BrowserPlusCore)
 TARGET_LINK_LIBRARIES(BrowserPlusCore ${OS_LIBS})
 IF (APPLE)
   # XXX when 10.4 dropped, "else" clause becomes the only one 
-  # XXX (provided that exported_symbols_10_5.txt is copied
-  # XXX over to exported_symbols.txt)
-  IF (OSX10.5_BUILD) 
-    SET(EXPORTED_SYMBOLS exported_symbols_10_5.txt)
+  IF (OSX10.4_BUILD) 
+    SET(EXPORTED_SYMBOLS exported_symbols_10_4.txt)
   ELSE ()
     SET(EXPORTED_SYMBOLS exported_symbols.txt)
   ENDIF ()

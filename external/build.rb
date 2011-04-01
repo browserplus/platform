@@ -12,14 +12,14 @@
 
 # if you want to update to a newer version of the bakery, fiddle this
 # sha256 to point to the commit you want
-bakery_commit = "f9de8201957683cb3ae16a7281bf47d1866b714a"
+bakery_commit = "e0c8191420f234748abb477e7e700327209fd38d"
 
 # END user serviceable parts
 
-# XXX when 10.4 support dropped, replace sha above and get rid of this logic
-if ARGV.length == 1 && ARGV[0] == "osx10.5"
-  puts '*** DOING OSX10.5 BUILD **'
-  ENV['BP_OSX_TARGET'] = '10.5'
+# XXX when 10.4 support dropped, get rid of this logic
+if ARGV.length == 1 && ARGV[0] == "osx10.4"
+  puts '*** DOING OSX10.4 BUILD **'
+  ENV['BP_OSX_TARGET'] = '10.4'
 else
   ENV['BP_OSX_TARGET'] = ''
 end

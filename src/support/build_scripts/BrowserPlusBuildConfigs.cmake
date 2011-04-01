@@ -98,8 +98,15 @@ ELSE ()
     SET(minVersionFlag)
     INCLUDE(CMakeForceCompiler)
     IF (APPLE)
-      # XXX when 10.4 dropped, "if" clause becomes the only one 
-      IF (OSX10.5_BUILD) 
+      # XXX when 10.4 dropped, "else" clause becomes the only one 
+      IF (OSX10.4_BUILD) 
+        CMAKE_FORCE_C_COMPILER(gcc-4.0 GNU)
+        CMAKE_FORCE_CXX_COMPILER(gcc-4.0 GNU)
+        SET(CMAKE_XCODE_ATTRIBUTE_GCC_VERSION "4.0"
+            CACHE STRING "BrowserPlus debug CXX flags" FORCE)
+        SET(CMAKE_C_COMPILER gcc-4.0)
+        SET(CMAKE_CXX_COMPILER g++-4.0)
+      ELSE ()
         # Use full paths since 10.5 doesn't have llvm in /usr/bin.
         # Even with all of this, 10.5 xcode generator doesn't honor this.
         # SET(CMAKE_C_COMPILER gcc-4.2)
@@ -112,13 +119,6 @@ ELSE ()
         CMAKE_FORCE_CXX_COMPILER(${CMAKE_CXX_COMPILER} GNU)
         SET(CMAKE_XCODE_ATTRIBUTE_GCC_VERSION "4.2"
             CACHE STRING "BrowserPlus debug CXX flags" FORCE)
-      ELSE ()
-        CMAKE_FORCE_C_COMPILER(gcc-4.0 GNU)
-        CMAKE_FORCE_CXX_COMPILER(gcc-4.0 GNU)
-        SET(CMAKE_XCODE_ATTRIBUTE_GCC_VERSION "4.0"
-            CACHE STRING "BrowserPlus debug CXX flags" FORCE)
-        SET(CMAKE_C_COMPILER gcc-4.0)
-        SET(CMAKE_CXX_COMPILER g++-4.0)
       ENDIF ()
 
       # now tell cmake to tell xcode that we really, really, really want i386
@@ -132,14 +132,8 @@ ELSE ()
         SET(minVersionFlag "-mmacosx-version-min=10.6")
       ELSE ()
         SET(CMAKE_OSX_ARCHITECTURES i386)
-        # XXX when 10.4 dropped, "if" clause becomes the only one 
-        IF (OSX10.5_BUILD)
-          # and we 32bit i386 for osx 10.5
-          SET(CMAKE_OSX_ARCHITECTURES i386)
-          SET (CMAKE_OSX_DEPLOYMENT_TARGET "10.5"
-               CACHE STRING "Compile for tiger deployment" FORCE)
-          SET(minVersionFlag "-mmacosx-version-min=10.5") 
-        ELSE ()
+        # XXX when 10.4 dropped, "else" clause becomes the only one 
+        IF (OSX10.4_BUILD)
           # and we 32bit i386 for osx 10.4
           SET (CMAKE_OSX_DEPLOYMENT_TARGET "10.4"
                CACHE STRING "Compile for tiger deployment" FORCE)
@@ -149,6 +143,12 @@ ELSE ()
           SET(minVersionFlag "-mmacosx-version-min=10.4")
           SET(CMAKE_FRAMEWORK_PATH "${CMAKE_OSX_SYSROOT}/System/Library/Frameworks"
               CACHE STRING "use 10.4 frameworks" FORCE)
+        ELSE ()
+          # and we 32bit i386 for osx 10.5
+          SET(CMAKE_OSX_ARCHITECTURES i386)
+          SET (CMAKE_OSX_DEPLOYMENT_TARGET "10.5"
+               CACHE STRING "Compile for tiger deployment" FORCE)
+          SET(minVersionFlag "-mmacosx-version-min=10.5") 
         ENDIF ()
       ENDIF ()
 
