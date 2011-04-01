@@ -116,13 +116,14 @@ FileUtils.install(File.join(instDir, "bplus_icon.icns"), resourcesDir,
 # TODO: do we want version number appended to filename here?
 sparseImagePath = File.join($outDir, "#{$fname}.sparseimage")
 templatePath = File.join($outDir, "#{$fname}.sparseimage")
-mountPoint = "/tmp/XXXBrowserPlusInstallerMountPoint"
+mountPoint = `mktemp -d /tmp/BrowserPlusInstallerMountXXXXX`.strip
 
 FileUtils.rm_f(sparseImagePath, :verbose => $verbose)
 system("hdiutil convert #{instDir}/BrowserPlusInstaller.template.dmg -format UDSP -o #{sparseImagePath}")
 system("hdiutil mount -private #{sparseImagePath} -mountpoint #{mountPoint}")
 system("cp -R #{appDir}/ \"#{mountPoint}/BrowserPlus Installer.app\"")
-system("hdiutil eject \"#{mountPoint}\"")
+system("hdiutil eject \"#{mountPoint}\" -force")
+system("rmdir #{mountPoint}")
 system("hdiutil convert #{sparseImagePath} -format UDBZ -o #{dmgFile}")
 # with a custom .app installer, this is no longer useful (YIB-2540072)
 # system("hdiutil internet-enable #{dmgFile}")
