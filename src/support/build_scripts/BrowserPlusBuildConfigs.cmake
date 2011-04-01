@@ -100,8 +100,6 @@ ELSE ()
     IF (APPLE)
       # XXX when 10.4 dropped, "else" clause becomes the only one 
       IF (OSX10.4_BUILD) 
-        CMAKE_FORCE_C_COMPILER(gcc-4.0 GNU)
-        CMAKE_FORCE_CXX_COMPILER(gcc-4.0 GNU)
         SET(CMAKE_XCODE_ATTRIBUTE_GCC_VERSION "4.0"
             CACHE STRING "BrowserPlus debug CXX flags" FORCE)
         SET(CMAKE_C_COMPILER gcc-4.0)
@@ -113,13 +111,14 @@ ELSE ()
         # SET(CMAKE_CXX_COMPILER g++-4.2)
         SET(CMAKE_C_COMPILER /Developer/usr/bin/llvm-gcc-4.2)
         SET(CMAKE_CXX_COMPILER /Developer/usr/bin/llvm-g++-4.2)
-        SET(ENV{CC} ${CMAKE_C_COMPILER})
-        SET(ENV{CXX} ${CMAKE_CXX_COMPILER})
-        CMAKE_FORCE_C_COMPILER(${CMAKE_C_COMPILER} GNU)
-        CMAKE_FORCE_CXX_COMPILER(${CMAKE_CXX_COMPILER} GNU)
         SET(CMAKE_XCODE_ATTRIBUTE_GCC_VERSION "4.2"
             CACHE STRING "BrowserPlus debug CXX flags" FORCE)
       ENDIF ()
+
+      SET(ENV{CC} ${CMAKE_C_COMPILER})
+      SET(ENV{CXX} ${CMAKE_CXX_COMPILER})
+      CMAKE_FORCE_C_COMPILER(${CMAKE_C_COMPILER} GNU)
+      CMAKE_FORCE_CXX_COMPILER(${CMAKE_CXX_COMPILER} GNU)
 
       # now tell cmake to tell xcode that we really, really, really want i386
       SET(CMAKE_XCODE_ATTRIBUTE_ARCHS i386)
