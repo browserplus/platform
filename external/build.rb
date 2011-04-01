@@ -20,6 +20,8 @@ bakery_commit = "2b5c25652208939fbce58ffc3d9c92df4b20de32"
 if ARGV.length == 1 && ARGV[0] == "osx10.5"
   puts '*** DOING OSX10.5 BUILD **'
   ENV['BP_OSX_TARGET'] = '10.5'
+else
+  ENV['BP_OSX_TARGET'] = ''
 end
 
 require 'rbconfig'
