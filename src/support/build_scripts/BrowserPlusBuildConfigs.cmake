@@ -115,10 +115,11 @@ ELSE ()
       ELSE ()
         # Use full paths since 10.5 doesn't have llvm in /usr/bin.
         # Even with all of this, 10.5 xcode generator doesn't honor this.
-        # SET(CMAKE_C_COMPILER gcc-4.2)
-        # SET(CMAKE_CXX_COMPILER g++-4.2)
-        SET(CMAKE_C_COMPILER /Developer/usr/bin/llvm-gcc-4.2)
-        SET(CMAKE_CXX_COMPILER /Developer/usr/bin/llvm-g++-4.2)
+        # XXX llvm doesn't support code coverage!
+        #SET(CMAKE_C_COMPILER /Developer/usr/bin/llvm-gcc-4.2)
+        #SET(CMAKE_CXX_COMPILER /Developer/usr/bin/llvm-g++-4.2)
+        SET(CMAKE_C_COMPILER gcc-4.2)
+        SET(CMAKE_CXX_COMPILER g++-4.2)
         IF ("${CMAKE_BUILD_TYPE}" STREQUAL "CodeCoverage") 
           SET (CMAKE_OSX_DEPLOYMENT_TARGET "10.6"
                CACHE STRING "Compile for snow leopard deployment" FORCE)
