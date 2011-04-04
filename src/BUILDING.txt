@@ -70,6 +70,7 @@ Building on OSX:
 
     3. install cmake version 2.8.4 or greater from http://www.cmake.org/cmake/resources/software.html
     4. install ruby 1.9.2 from http://www.ruby-lang.org
+    5. install test-unit version 1.2.3 ruby gem (gem update --system && gem install test-unit -v 1.2.3)
  
   Building the tree:    
     1. cd <path to public_platform>/external
@@ -99,27 +100,29 @@ http://www.microsoft.com/downloads/en/details.aspx?FamilyID=6b6c21d2-2006-4afa-9
     6. install cmake version 2.8.4 or greater from:
        http://www.cmake.org/cmake/resources/software.html
        during install, select "add cmake to PATH for this user (or all users)"
-    7. install ruby 1.9.2 from: http://www.ruby-lang.org 
+    7. install ruby 1.9.2 from: http://rubyinstaller.org/downloads/
        and add C:\ruby\bin to your PATH
-    8. (optional) Install the latest version of doxygen if you would
+    8. install ruby devkit from http://rubyinstaller.org/downloads/
+    9. run <location to ruby devkit>\devkitvars.bat and then install test-unit version 1.2.3 ruby gem (gem update --system && gem install test-unit -v 1.2.3)
+   10. (optional) Install the latest version of doxygen if you would
        like to have documentation generated for various projects which
        do this (like ServiceAPI).  (http://www.stack.nl/~dimitiri/doxygen/)
-    9. (if you want ability to do prod builds) 
+   11. (if you want ability to do prod builds) 
        install the latest JRE from:
        http://java.sun.com/javase/downloads/index.jsp
        ensure that JAVA_HOME is set correctly (e.g. C:\Program Files\Java\jdk1.6.0_14)
-   10. (if you want ability to do prod builds) 
+   12. (if you want ability to do prod builds) 
        install the latest ANT from http://ant.apache.org
        ensure that ANT_HOME is set correctly. 
        ensure that ant binary directory is in your path (e.g. %ANT_HOME%\bin)
-   11. install the latest ActivePerl from:
+   13. install the latest ActivePerl from:
        https://www.activestate.com/activeperl/downloads/ 
        ensure that perl is in your path from a vs command shell 
        (you'll need this at least for building openssl in external/)
-   11. install patch.exe from: 
+   14. install patch.exe from: 
        http://gnuwin32.sourceforge.net/packages/patch.htm
        rename patch.exe to ptch.exe and put it in your path
-   13. install 7z.exe from: http://www.7-zip.org
+   15. install 7z.exe from: http://www.7-zip.org
        and add it to your path
 
   Building the tree
