@@ -95,13 +95,13 @@ ARGV[1..ARGV.length].each do |arg|
         case v[0]
         when '-certType'
             certType = v[1]
-        when '-password':
+        when '-password'
             password = v[1]
             fileStart = fileStart + 1
-        when '-authKey':
+        when '-authKey'
             authKey = v[1]
             fileStart = fileStart + 1
-        when '-authenticodePassword':
+        when '-authenticodePassword'
             authenticodePassword = v[1]
             fileStart = fileStart + 1
         when '-certStore'
@@ -131,7 +131,7 @@ ENV["OPENSSL_CONF"] = File.join(ENV["BP_PLATFORM_PATH"], "external",
 curdir = Dir.getwd
 Dir.chdir(topDir) do 
     case ARGV[0]
-    when "makeCerts": 
+    when "makeCerts" 
         usage() if certType == nil
         usage() if outDir == nil
         if password
@@ -145,7 +145,7 @@ Dir.chdir(topDir) do
         # make public key (certificate)
         runCmd("#{opensslPath} req #{passIn} -new -x509 -days 5000 -key #{outDir}/#{certType}/#{signedBy}.pvk -out #{outDir}/#{certType}/#{signedBy}.crt")
 
-    when "sign":
+    when "sign"
         usage() if certType == nil
         usage() if fileStart > ARGV.length 
         if certType == "devel"
@@ -178,7 +178,7 @@ Dir.chdir(topDir) do
             end
         end
 
-    when "verify":
+    when "verify"
         usage() if fileStart > ARGV.length 
         ARGV[1..ARGV.length].each do |arg|
             thisFile = File.expand_path(arg, curdir)
