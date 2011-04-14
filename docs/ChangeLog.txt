@@ -1,3 +1,29 @@
+04/12/2011 - Changes from 2.10.13 to 2.10.14
+ * Removed an unneeded 10.4 test from browserplus.js
+ * Fix a build signing script bug for ruby 1.9
+
+04/06/2011 - Changes from 2.10.12 to 2.10.13
+ * Remove DnD support from Chrome 10 on windows.
+ * More build system refinements for multiple toolchains.
+ * Use gcc-4.2 for 10.5 builds rather than llvm, which
+   doesn't support gcov.
+
+03/25/2011 - Changes from 2.10.11 to 2.10.12
+ * Move build system to ruby 1.9
+ * Support building with either vs2008/vs2010 on Windows.
+ * Support building for 10.4/10.5 target on OSX.
+
+02/25/2011 - Changes from 2.10.9 to 2.10.11 (skipped 2.10.10?)
+ * Implemented v5 service install/uninstall hooks
+ * Fixes to v5 service api.
+ * Move to boost 1.45 for boost::filesystem
+ * Add IE9 / Firefox4 / Titanium support
+ * Permissions bundle enhancements (autoUpdatePermissions, domainPermissions)
+
+11/10/2010 - Changes from 2.10.9 to 2.10.10
+ * Fix Windows npapi plugin to not use static ctors for forced
+   breakpoint list.  Windows has issues with static ctors.
+
 10/06/2010 - Changes from 2.10.7 to 2.10.8
   * Add support to ServiceRunner for JIT debugging and breakpoints
 
