@@ -1847,7 +1847,8 @@ openReadableStream(ifstream& fstream,
                    int flags)
 {
     if (fstream.is_open()) {
-        BPLOG_WARN_STRM("openReadableStream, stream already open");
+        BPLOG_WARN_STRM("openReadableStream(" << nativeUtf8String(path)
+                        << "), stream already open");
         return false;
     }
 #ifdef WIN32
@@ -1856,7 +1857,8 @@ openReadableStream(ifstream& fstream,
     fstream.open(nativeString(path).c_str(), ios::in | (_Ios_Openmode) flags);
 #endif
     if (!fstream.is_open()) {
-        BPLOG_WARN_STRM("openReadableStream, stream open failed for " << path);
+        BPLOG_WARN_STRM("openReadableStream(" << nativeUtf8String(path)
+                        << "), stream open failed");
         return false;
     }
     return true;

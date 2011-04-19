@@ -30,6 +30,7 @@
 
 #include "bpstrutil.h"
 #include "bperrorutil.h"
+#include "BPLog.h"
 
 #include <algorithm>
 #include <ios>
@@ -403,11 +404,15 @@ bool
 loadFromFile(const boost::filesystem::path& path, std::string& sOut)
 {
     if (!bp::file::isRegularFile(path)) {
+        BPLOG_DEBUG_STRM(bp::file::nativeUtf8String(path)
+                         << " not a regular file");
         return false;
     }
 
     std::ifstream ifs;
     if (!bp::file::openReadableStream(ifs, path, std::ios::binary)) {
+        BPLOG_DEBUG_STRM("failed to open readable stream for "
+                         << bp::file::nativeUtf8String(path));
         return false;
     }
 
@@ -426,6 +431,7 @@ storeToFile(const boost::filesystem::path& path, const std::string& sIn)
 {
     std::ofstream ofs;
     if (!bp::file::openWritableStream(ofs, path, std::ios::trunc | std::ios::binary)) {
+        BPLOG_DEBUG_STRM("failed to open writable stream for " << bp::file::nativeUtf8String(path));
         return false;
     }
     ofs << sIn;
