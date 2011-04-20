@@ -12,7 +12,7 @@
 
 # if you want to update to a newer version of the bakery, fiddle this
 # sha256 to point to the commit you want
-bakery_commit = "684af78e27161d689b025f872691aebce8fa5225"
+bakery_commit = "d3499260c92ff0359829c51615b2435c7f2500d2"
 
 # END user serviceable parts
 
