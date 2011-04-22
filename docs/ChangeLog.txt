@@ -1,3 +1,8 @@
+04/2/2011 - Changes from 2.10.14 to 2.10.15
+ * Use /O2 windows optimizer, /O1 has issues on vs2010
+ * For dev/int installers, only query primary distro server.
+   Don't want to fallback to prod server.
+
 04/12/2011 - Changes from 2.10.13 to 2.10.14
  * Removed an unneeded 10.4 test from browserplus.js
  * Fix a build signing script bug for ruby 1.9
