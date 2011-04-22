@@ -177,16 +177,37 @@ subs = {
   /BP_LOG_TIME/ => "#{$logTime}"
 }
 
-[
-  File.join("update", "daemon", "BrowserPlus.config"),
-  File.join("install", "installer.config")
-].each { |f|
-  f = File.join($workDir, f)
-  puts "Updating #{f}"
-  contents = File.open(f, "r") { |myf| myf.read }
-  subs.each { |pat, rep| contents.gsub!(pat, rep) }
-  File.open(f, "w+") { |myf| myf.write contents }  
+# Special case for dev/int installers. Don't want them to have
+# secondary servers, otherwise they can hit public server
+# if internal server doesn't respond.  They should fail in this case.
+internalInstallerSubs = {
+  /BP_PRIMARY_DISTRO_SERVER_URL/ => "\"#{$primary}\"",
+  /BP_ALL_DISTRO_SERVERS/ => "\"#{$primary}\"",
+  /BP_BUILD_TYPE/ => "\"#{$buildType}\"",
+  /BP_LOG_LEVEL/ => "#{$logLevel}",
+  /BP_LOG_SIZE_KB/ => "#{$logSizeKB}",
+  /BP_LOG_DEST/ => "#{$logDest}",
+  /BP_LOG_TIME/ => "#{$logTime}"
 }
+
+# BrowserPlus.config gets all distro servers
+f = File.join($workDir, "update", "daemon", "BrowserPlus.config")
+puts "Updating #{f}"
+contents = File.open(f, "r") { |myf| myf.read }
+subs.each { |pat, rep| contents.gsub!(pat, rep) }
+File.open(f, "w+") { |myf| myf.write contents }  
+
+# dev/int installer gets only primary distro server,
+# other installers get them all (see above comment)
+f = File.join($workDir, "install", "installer.config")
+puts "Updating #{f}"
+contents = File.open(f, "r") { |myf| myf.read }
+if $buildType == "int" || $buildType == "dev"
+    internalInstallerSubs.each { |pat, rep| contents.gsub!(pat, rep) }
+else
+    subs.each { |pat, rep| contents.gsub!(pat, rep) }
+end
+File.open(f, "w+") { |myf| myf.write contents }  
 
 # copy in certStore
 [
