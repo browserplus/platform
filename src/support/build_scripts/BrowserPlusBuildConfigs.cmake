@@ -51,7 +51,7 @@ IF(WIN32)
         CACHE STRING "BrowserPlus debug CXX flags" FORCE)
     SET(CMAKE_CXX_FLAGS_CODECOVERAGE "${CMAKE_CXX_FLAGS_DEBUG}"
         CACHE STRING "BrowserPlus codecoverage CXX flags" FORCE)
-    SET(CMAKE_CXX_FLAGS_RELEASE "/MT /DNDEBUG /O1"
+    SET(CMAKE_CXX_FLAGS_RELEASE "/MT /DNDEBUG /O2"
         CACHE STRING "BrowserPlus release CXX flags" FORCE)
   
     # libs to ignore, from http://msdn.microsoft.com/en-us/library/aa267384.aspx
