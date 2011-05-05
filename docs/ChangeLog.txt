@@ -78,7 +78,6 @@
   * all temp files placed under user scoped product path to allow platform
     to run in environments where execution of binaries in temp dir is restricted
   * dnd fixes for windows/firefox
-  * move browserplus links out of start menu and into control panel on windows
 
 07/22/2010 - Changes from 2.10.1 to 2.10.2
   * fixes for v4 service api back-compatibility
@@ -110,6 +109,7 @@
     threading semantics, Install and Uninstall hooks, switches from
     file:// URIs to native paths, and includes a new type,
     BPTWritablePath.
+  * move browserplus links out of start menu and into control panel on windows
   * [yib 3711677] rework mime/type detection logic to favor "offical"
     mimetypes, addressing some complaints about uploader passing
     unexpected mime types for certain files
