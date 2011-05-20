@@ -49,7 +49,7 @@ SET(BrowserPlusPlatform_MICRO_VERSION 16)
 #  SET(BackwardCompatibleMimeTypes 
 #        mimetype1 mimetype2 ... mimetypeN)
 #
-SET(BackwardCompatibleMimeTypes)
+SET(BackwardCompatibleMimeTypes application/x-yahoo-browserplus_2)
 
 # activeX control's clsid and typelib guid
 # clsid (ActiveXGuid) should be changed EVERY TIME YOU BUMP PLATFORM VERSION
