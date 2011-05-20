@@ -1,3 +1,9 @@
+05/20/2011 - Changes from 2.10.15 to 2.10.16
+ * Fixed a bug which kept 2.10.xx platform installs from
+   being recognized by 2.9.8 version of browserplus.js.
+   Just needed to add "application/x-yahoo-browserplus_2"
+   as a mimetype.
+
 04/2/2011 - Changes from 2.10.14 to 2.10.15
  * Use /O2 windows optimizer, /O1 has issues on vs2010
  * For dev/int installers, only query primary distro server.
