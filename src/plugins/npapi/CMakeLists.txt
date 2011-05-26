@@ -24,7 +24,7 @@ PROJECT(BrowserPlusPlugin)
 
 # Manually set up include and link directories
 #SET(BP_EXTERNAL_DIR 
-#    "${CMAKE_CURRENT_SOURCE_DIR}/../../../external/${CMAKE_SYSTEM_NAME}")
+#    "${CMAKE_CURRENT_SOURCE_DIR}/../../../external/dist")
 
 INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/../../dist/include")
 LINK_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/../../dist/include")

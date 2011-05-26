@@ -30,8 +30,7 @@ MACRO (BP_USE_EXTERNAL)
   SET(BP_EXTERNAL_BINS)
   SET(BP_EXTERNAL_LIBS)
   SET(BP_EXTERNAL_INCLUDES)
-  FOREACH (binDir ${BP_EXTERNAL_DIR}/${CMAKE_SYSTEM}/bin
-                  ${BP_EXTERNAL_DIR}/${CMAKE_SYSTEM_NAME}/bin)
+  FOREACH (binDir ${BP_EXTERNAL_DIR}/dist/bin)
     IF (EXISTS ${binDir})
       LINK_DIRECTORIES(${binDir})
       LINK_DIRECTORIES(${binDir}/$ENV{EXTERNAL_SUFFIX})
@@ -40,16 +39,14 @@ MACRO (BP_USE_EXTERNAL)
     ENDIF ()
   ENDFOREACH ()
 
-  FOREACH (incDir ${BP_EXTERNAL_DIR}/${CMAKE_SYSTEM}/include
-                   ${BP_EXTERNAL_DIR}/${CMAKE_SYSTEM_NAME}/include)
+  FOREACH (incDir ${BP_EXTERNAL_DIR}/dist/include)
     IF (EXISTS ${incDir})
       INCLUDE_DIRECTORIES(${incDir})
       SET(BP_EXTERNAL_INCLUDES ${BP_EXTERNAL_INCLUDES} ${incDir})
     ENDIF ()
   ENDFOREACH ()
 
-  FOREACH (libDir ${BP_EXTERNAL_DIR}/${CMAKE_SYSTEM}/lib
-                  ${BP_EXTERNAL_DIR}/${CMAKE_SYSTEM_NAME}/lib)
+  FOREACH (libDir ${BP_EXTERNAL_DIR}/dist/lib)
     IF (EXISTS ${libDir})
       LINK_DIRECTORIES(${libDir})
       LINK_DIRECTORIES(${libDir}/$ENV{EXTERNAL_SUFFIX})

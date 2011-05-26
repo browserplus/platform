@@ -1,0 +1,3 @@
+[submodule "external/bakery"]
+	path = external/bakery
+	url = git://github.com/browserplus/bakery

@@ -77,21 +77,18 @@ ADD_SUBDIRECTORY(bins)
 ADD_SUBDIRECTORY(sdk)
 ADD_SUBDIRECTORY(javascript)
 
-# a custom step to build latest externals
-SET (pathToExtBuildRb "${CMAKE_CURRENT_SOURCE_DIR}/../external/build.rb")
-
 # XXX when 10.4 dropped, "else" clause becomes the only one
 # XXX (provided that 'osx10.4' logic removed from build.rb)
 IF (OSX10.4_BUILD)
-  ADD_CUSTOM_TARGET(
-      BuildExternals ALL
-      COMMAND ruby ${pathToExtBuildRb} osx10.4
-      COMMENT "Build 3rd party dependencies")
+  ADD_CUSTOM_TARGET(BuildExternals ALL
+                    COMMAND ruby build.rb osx10.4
+                    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../external"
+                    COMMENT Building externals...)
 ELSE ()
-  ADD_CUSTOM_TARGET(
-      BuildExternals ALL
-      COMMAND ruby ${pathToExtBuildRb}
-      COMMENT "Build 3rd party dependencies")
+  ADD_CUSTOM_TARGET(BuildExternals ALL
+                    COMMAND ruby build.rb
+                    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../external"
+                    COMMENT Building externals...)
 ENDIF ()
 
 # PerformSubstitutions should run anytime we build anything else

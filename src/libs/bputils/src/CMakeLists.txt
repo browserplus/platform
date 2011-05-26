@@ -21,7 +21,7 @@ SET(BPUtils_MAJOR_VERSION 0)
 SET(BPUtils_MINOR_VERSION 1)
 
 # We need openssl from external
-SET(BP_EXTERNAL "${CMAKE_CURRENT_SOURCE_DIR}/../../../../external/${CMAKE_SYSTEM_NAME}")
+SET(BP_EXTERNAL "${CMAKE_CURRENT_SOURCE_DIR}/../../../../external/dist")
 
 LINK_DIRECTORIES("${BP_EXTERNAL}/lib")
 

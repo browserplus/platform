@@ -23,7 +23,7 @@ Include Files (explicit includes)
 Import Library Paths (In-tree)
 ==============================
 [...]public_platform\build\dist\lib\[Debug|Release]
-[...]public_platform\external\Windows\lib\[Debug|Release]
+[...]public_platform\external\dist\lib\[Debug|Release]
 
 
 Import Libraries

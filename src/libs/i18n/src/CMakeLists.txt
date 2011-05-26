@@ -38,7 +38,7 @@ ENDIF ()
 
 # Setup some paths.
 SET(BPEXTERNAL_PATH 
-    "${CMAKE_CURRENT_SOURCE_DIR}/../../../../external/${CMAKE_SYSTEM_NAME}")
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../../../external/dist")
 
 # Setup preprocessor definitions.
 ADD_DEFINITIONS(-DU_STATIC_IMPLEMENTATION)

@@ -5,6 +5,4 @@ build
 build_codecoverage
 build_debug
 build_release
-external/Darwin
-external/Windows
-external/pax_global_header
+external/dist

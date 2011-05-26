@@ -169,21 +169,10 @@ ENDIF ()
 #
 ADD_DEFINITIONS(-DBP_PLATFORM_BUILD)
 
-# can't rely on CMAKE_SYSTEM_NAME.  It's set by calling PROJECT() or some
-# such.  So we define system name ourselves based on other, more reliable
-# cmake vars. (lth 7/27/07)
-IF (WIN32) 
-  SET (systemName "Windows")
-ELSEIF (APPLE)  
-  SET (systemName "Darwin")
-ELSE ()
-  SET (systemName "Linux")
-ENDIF ()
-
 # Stuff from global Externals is used throughout our tree. 
 #
 GET_FILENAME_COMPONENT( pathToThisFile "${CMAKE_CURRENT_LIST_FILE}" PATH )
-SET( BP_EXTERNAL "${pathToThisFile}/../../../external/${systemName}" )
+SET( BP_EXTERNAL "${pathToThisFile}/../../../external/dist" )
 INCLUDE_DIRECTORIES( "${BP_EXTERNAL}/include" )
 
 # We must link with correct Debug or Release libs, which requires that we 

@@ -24,7 +24,7 @@
 #   - compress SDK
 
 SET (BP_EXTERNAL_DIR 
-     "${CMAKE_CURRENT_SOURCE_DIR}/../external/${CMAKE_SYSTEM_NAME}")
+     "${CMAKE_CURRENT_SOURCE_DIR}/../external/dist")
 
 SET (BUILD_SCRIPTS_DIR 
      "${CMAKE_CURRENT_BINARY_DIR}/support/build_scripts")
