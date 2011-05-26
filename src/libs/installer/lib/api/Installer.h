@@ -35,6 +35,7 @@
 //          <the bits that will be copied to the versioned daemon dir>
 //      permissions
 //          BrowserPlus.crt
+//          Permissions
 //          configAutoUpatePermissions [optional]
 //          updateDomainPermissions [optional]
 //          configDomainPermissions [optional]
