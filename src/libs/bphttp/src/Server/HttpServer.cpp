@@ -63,14 +63,16 @@ public:
 
 private:
     enum State { init, created, started, stopped };
-    static void handlerCallback( struct mg_connection*,
-                                 const struct mg_request_info* info,
-                                 void* user_data );
+    static void * handlerCallback( enum mg_event event,
+                                   struct mg_connection *conn,
+                                   const struct mg_request_info *request_info );
 
     State       m_state;
     mg_context* m_pCtx;
+	std::map<const std::string, IHandler*> m_callbacks;
+	static std::map<const std::string, IHandler*> s_callbacks;
 };
-
+std::map<const std::string, IHandler*> Server::Impl::s_callbacks;
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -81,18 +83,17 @@ Server::Impl::Impl() :
     m_state( init ),
     m_pCtx( 0 )
 {
-    m_pCtx = mg_create();
+    const char* options[] = {
+      "listening_ports", "0",
+      NULL
+    };
+    m_pCtx = mg_create(&Server::Impl::handlerCallback, NULL, options);
     if (!m_pCtx) {
         BPLOG_ERROR( "mg_create failed." );
         return;
     }
     
     m_state = created;
-
-    if (mg_set_option( m_pCtx, "idle_time", "0" ) != 1) {
-        BPLOG_ERROR( "Unable to set idle time." );
-        return;
-    }
 }
 
 
@@ -102,7 +103,7 @@ Server::Impl::~Impl()
     {
         case started:   stop(); // fall through
         case created:   
-        case stopped:   mg_destroy( m_pCtx );
+        case stopped:   if ( m_pCtx != NULL) { mg_destroy( m_pCtx ); m_pCtx = NULL; }
                         break;
         case init:
         default:        break;
@@ -113,25 +114,20 @@ Server::Impl::~Impl()
 bool
 Server::Impl::bind(unsigned short& port)
 {
-    if (m_state != created) {
+	if (m_state != created) {
         BPLOG_ERROR_STRM( "Illegal call from state" << m_state );
         return false;
     }
 
-    stringstream ssPort;
-    ssPort << port;
-    int nRet = mg_set_option( m_pCtx, "ports", ssPort.str().c_str() );
-    if (!nRet) {
-        BPLOG_ERROR( "mg_set_option failed." );
-        return false;
+	if (port != 0) {
+        BPLOG_ERROR_STRM( "Called with non-ephemeral port " << port );
+        //return false;
     }
-        
-    port = (unsigned short) nRet;
+    port = atoi(mg_get_option( m_pCtx, "listening_ports" ));
     BPLOG_INFO_STRM( "port = " << port );
     
     return true;
 }
-
 
 bool
 Server::Impl::mount( const string& uriRegex, IHandler* h )
@@ -141,7 +137,7 @@ Server::Impl::mount( const string& uriRegex, IHandler* h )
         return false;
     }
 
-    mg_set_uri_callback( m_pCtx, uriRegex.c_str(), handlerCallback, (void*)h );
+	m_callbacks[uriRegex] = h;
     BPLOG_INFO_STRM( h << " mounted for " << uriRegex );
     
     return true;
@@ -156,6 +152,12 @@ Server::Impl::start()
         return false;
     }
     
+	// Enable our instance's URI handlers in static callback.
+	Server::Impl::s_callbacks.clear();
+	for (std::map<const std::string, IHandler*>::const_iterator iter = m_callbacks.begin(); iter != m_callbacks.end(); iter++) {
+		Server::Impl::s_callbacks[iter->first] = iter->second;
+	}
+
     if (!mg_start( m_pCtx )) {
         BPLOG_ERROR( "mg_start failed." );
         return false;
@@ -177,50 +179,70 @@ Server::Impl::stop()
 
     mg_stop( m_pCtx );
 
+	// Disable our instance's URI handlers in static callback.
+	Server::Impl::s_callbacks.clear();
+
     m_state = stopped;
     return true;
 }
 
 
-void
-Server::Impl::handlerCallback( struct mg_connection* conn,
-                               const struct mg_request_info* req_info,
-                               void* user_data )
+void *
+Server::Impl::handlerCallback( enum mg_event event,
+                               struct mg_connection *conn,
+                               const struct mg_request_info *request_info )
 {
+    if (event != MG_NEW_REQUEST) {
+        return NULL;
+    }
+
+	std::map<const std::string, IHandler*>::const_iterator iter = Server::Impl::s_callbacks.find(request_info->uri);
+    if (iter == Server::Impl::s_callbacks.end()) {
+		iter = Server::Impl::s_callbacks.find("*");
+		if (iter == Server::Impl::s_callbacks.end()) {
+			return NULL;
+		}
+    }
+
     /////////////////////////////////////////////
     // Setup request object for our handler.
     Request req;
     
-    req.method = safeStr( req_info->request_method );
+    req.method = safeStr( request_info->request_method );
     
-    req.url.setPath( safeStr( req_info->uri ) );
-    req.url.setQuery( safeStr( req_info->query_string ) );
+    req.url.setPath( safeStr( request_info->uri ) );
+    req.url.setQuery( safeStr( request_info->query_string ) );
 
     stringstream ss;
-    ss << "HTTP/"
-       << req_info->http_version_major << "."
-       << req_info->http_version_minor;
+    ss << "HTTP/" << request_info->http_version;
     req.version = ss.str();
     
     BPLOG_DEBUG_STRM( req.method.toString() << " " <<
                       req.url.toString() << " " <<
                       req.version.toString() );
 
-    for (int i=0; i < req_info->num_headers; ++i)
+    for (int i=0; i < request_info->num_headers; ++i)
     {
-        req.headers.add( safeStr( req_info->http_headers[i].name ),
-                         safeStr( req_info->http_headers[i].value ) );
+        req.headers.add( safeStr( request_info->http_headers[i].name ),
+                         safeStr( request_info->http_headers[i].value ) );
     }
 
-    if (req_info->post_data_len > 0) {
-        req.body.assign( (unsigned char*)req_info->post_data,
-                         req_info->post_data_len );
+    const char *cl;
+    if (strcmp(request_info->request_method, "POST") == 0 &&
+        (cl = mg_get_header(conn, "Content-Length")) != NULL) {
+        int len = atoi(cl);
+        char *buf = (char*)malloc(len);
+        if (buf != NULL) {
+            mg_read(conn, buf, len);
+            //mg_write(conn, buf, len);
+            req.body.assign( (unsigned char*)buf, len );
+            free(buf);
+        }
     }
-
 
     /////////////////////////////////
     // Call our mounted handler.
-    IHandler* hndlr = (IHandler*) user_data;
+    IHandler* hndlr = iter->second;
     Response resp;
     bool bRet = hndlr->processRequest( req, resp );
     if (!bRet) {
@@ -259,6 +281,7 @@ Server::Impl::handlerCallback( struct mg_connection* conn,
     }
 
     BPLOG_DEBUG( "Response complete." );
+    return conn;
 }
 
 

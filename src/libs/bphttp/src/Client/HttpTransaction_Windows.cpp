@@ -1471,10 +1471,13 @@ Transaction::Impl::onWininetCallback(HINTERNET /* hInternet */,
         break;
             
     case INTERNET_STATUS_REDIRECT:
-        BPLOG_INFO_STRM(m_id << ": HTTP transaction received redirect");
-        BPLOG_DEBUG_STRM("Redirect to " << (const char*) pStatusInfo);
-        (void) m_redirectUrl.parse((const char*) pStatusInfo);
-        m_hopper.invokeOnThread(redirectCB, (void *) m_id);
+		{
+			std::string s = bp::strutil::wideToUtf8((const wchar_t*) pStatusInfo);
+			BPLOG_INFO_STRM(m_id << ": HTTP transaction received redirect");
+			BPLOG_DEBUG_STRM("Redirect to " << s);
+			(void) m_redirectUrl.parse(s);
+			m_hopper.invokeOnThread(redirectCB, (void *) m_id);
+		}
         break;
 
     case INTERNET_STATUS_REQUEST_COMPLETE:
