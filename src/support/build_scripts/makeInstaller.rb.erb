@@ -265,7 +265,7 @@ else
     FileUtils.install("#{$buildDir}/dist/bin/#{$intDir}/BrowserPlusBootstrapper.exe",
                       btTgtDir, :mode => 0644, :verbose => $beVerbose)
 
-    FileUtils.install("#{externalsDir}/Windows/bin/elzma.exe",
+    FileUtils.install("#{externalsDir}/dist/bin/elzma.exe",
                       btTgtDir, :mode => 0644, :verbose => $beVerbose)
 
     FileUtils.install("#{topDir}/libs/installer/miscScripts/win/buildInstaller.rb",
