@@ -173,9 +173,16 @@ else
                  :verbose => $beVerbose)
 end
 
+# 
+# permissions
+#
 FileUtils.mkdir_p(updatePermsDir, :mode => 0755, :verbose => $beVerbose)
 FileUtils.install("#{topDir}/support/signing/devel_certs/BrowserPlus.crt", 
                   updatePermsDir, 
+                  :mode => 0644,
+                  :verbose => $beVerbose)
+FileUtils.install("#{$buildDir}/libs/permissions/permissions.json",
+                  "#{updatePermsDir}/Permissions",
                   :mode => 0644,
                   :verbose => $beVerbose)
 

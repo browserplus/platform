@@ -223,6 +223,19 @@ Installer::installPermissions()
 {
     BPLOG_DEBUG("begin Installer::installPermissions");
 
+    // Install baseline permissions if none are present.  This
+    // allows a clean install to have some clue about what 
+    // browsers it supports.
+    bfs::path permsPath = getPermissionsPath();
+    if (!bpf::pathExists(permsPath)) {
+        bfs::path newPermsPath = m_dir / "permissions" / "Permissions";
+        if (bpf::pathExists(newPermsPath)) {
+            doCopy(newPermsPath, permsPath);
+        } else {
+            BPLOG_WARN_STRM(newPermsPath << " missing!");
+        }
+    }
+
     // Install new public keys if needed.  They are needed if
     // they are not found in the current keys.
     bfs::path newCertPath = m_dir / "permissions" / "BrowserPlus.crt";
