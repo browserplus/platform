@@ -1,3 +1,11 @@
+05/31/2011 - Changes from 1.10.16 to 2.10.17
+ * Add basic perms bundle to bpkg.  Prevents race where clean install
+   can fail to init.
+ * bakery is now a git submodule
+ * external build artifacts now in external/dist, not external/<platform>
+ * updated mongoose, libcurl, libedit graphicsmagik, libpng, libarchive
+   (part of updated bakery)
+
 05/20/2011 - Changes from 2.10.15 to 2.10.16
  * Fixed a bug which kept 2.10.xx platform installs from
    being recognized by 2.9.8 version of browserplus.js.
