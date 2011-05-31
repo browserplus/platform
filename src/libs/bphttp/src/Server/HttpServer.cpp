@@ -123,7 +123,7 @@ Server::Impl::bind(unsigned short& port)
         BPLOG_ERROR_STRM( "Called with non-ephemeral port " << port );
         //return false;
     }
-    port = atoi(mg_get_option( m_pCtx, "listening_ports" ));
+    port = (short) atoi(mg_get_option( m_pCtx, "listening_ports" ));
     BPLOG_INFO_STRM( "port = " << port );
     
     return true;
