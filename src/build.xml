@@ -8,13 +8,22 @@
     <condition property="is.unix">
         <os family="unix" />
     </condition>
-    <target name="clean_make_codecoverage" unless="is.windows">
+    <target name="clean_make40_codecoverage" unless="is.windows">
         <delete dir="../build_codecoverage" />
     </target>
-    <target name="clean_make_debug" unless="is.windows">
+    <target name="clean_make42_codecoverage" unless="is.windows">
+        <delete dir="../build_codecoverage" />
+    </target>
+    <target name="clean_make40_debug" unless="is.windows">
         <delete dir="../build_debug" />
     </target>
-    <target name="clean_make_release" unless="is.windows">
+    <target name="clean_make42_debug" unless="is.windows">
+        <delete dir="../build_debug" />
+    </target>
+    <target name="clean_make40_release" unless="is.windows">
+        <delete dir="../build_release" />
+    </target>
+    <target name="clean_make42_release" unless="is.windows">
         <delete dir="../build_release" />
     </target>
     <target name="clean_vc05_codecoverage" if="is.windows">
@@ -44,7 +53,16 @@
     <target name="clean_vc10_release" if="is.windows">
         <delete dir="../build" />
     </target>
-    <target name="build_make_codecoverage" unless="is.windows">
+    <target name="build_make40_codecoverage" unless="is.windows">
+        <mkdir dir="../build_codecoverage" />
+        <exec executable="cmake" dir="../build_codecoverage" failonerror="true">
+            <arg line="-G &quot;Unix Makefiles&quot; -DCMAKE_BUILD_TYPE:STRING=Debug -DOSX10.4_BUILD=true ../src" />
+        </exec>
+        <exec executable="make" dir="../build_codecoverage" failonerror="true">
+            <arg line="-j3" />
+        </exec>
+    </target>
+    <target name="build_make42_codecoverage" unless="is.windows">
         <mkdir dir="../build_codecoverage" />
         <exec executable="cmake" dir="../build_codecoverage" failonerror="true">
             <arg line="-G &quot;Unix Makefiles&quot; -DCMAKE_BUILD_TYPE:STRING=Debug ../src" />
@@ -53,7 +71,16 @@
             <arg line="-j3" />
         </exec>
     </target>
-    <target name="build_make_debug" unless="is.windows">
+    <target name="build_make40_debug" unless="is.windows">
+        <mkdir dir="../build_debug" />
+        <exec executable="cmake" dir="../build_debug" failonerror="true">
+            <arg line="-G &quot;Unix Makefiles&quot; -DCMAKE_BUILD_TYPE:STRING=Debug -DOSX10.4_BUILD=true ../src" />
+        </exec>
+        <exec executable="make" dir="../build_debug" failonerror="true">
+            <arg line="-j3" />
+        </exec>
+    </target>
+    <target name="build_make42_debug" unless="is.windows">
         <mkdir dir="../build_debug" />
         <exec executable="cmake" dir="../build_debug" failonerror="true">
             <arg line="-G &quot;Unix Makefiles&quot; -DCMAKE_BUILD_TYPE:STRING=Debug ../src" />
@@ -62,7 +89,16 @@
             <arg line="-j3" />
         </exec>
     </target>
-    <target name="build_make_release" unless="is.windows">
+    <target name="build_make40_release" unless="is.windows">
+        <mkdir dir="../build_release" />
+        <exec executable="cmake" dir="../build_release" failonerror="true">
+            <arg line="-G &quot;Unix Makefiles&quot; -DCMAKE_BUILD_TYPE:STRING=Release -DOSX10.4_BUILD=true ../src" />
+        </exec>
+        <exec executable="make" dir="../build_release" failonerror="true">
+            <arg line="-j3" />
+        </exec>
+    </target>
+    <target name="build_make42_release" unless="is.windows">
         <mkdir dir="../build_release" />
         <exec executable="cmake" dir="../build_release" failonerror="true">
             <arg line="-G &quot;Unix Makefiles&quot; -DCMAKE_BUILD_TYPE:STRING=Release ../src" />
@@ -323,17 +359,32 @@ devenv BrowserPlus.sln /Build Release /Project ALL_BUILD
         </exec>
         <delete file="../build/x1.bat" />
     </target>
-    <target name="unittest_make_codecoverage" unless="is.windows">
+    <target name="unittest_make40_codecoverage" unless="is.windows">
         <exec executable="make" dir="../build_codecoverage" failonerror="true">
             <arg line="test" />
         </exec>
     </target>
-    <target name="unittest_make_debug" unless="is.windows">
+    <target name="unittest_make42_codecoverage" unless="is.windows">
+        <exec executable="make" dir="../build_codecoverage" failonerror="true">
+            <arg line="test" />
+        </exec>
+    </target>
+    <target name="unittest_make40_debug" unless="is.windows">
         <exec executable="make" dir="../build_debug" failonerror="true">
             <arg line="test" />
         </exec>
     </target>
-    <target name="unittest_make_release" unless="is.windows">
+    <target name="unittest_make42_debug" unless="is.windows">
+        <exec executable="make" dir="../build_debug" failonerror="true">
+            <arg line="test" />
+        </exec>
+    </target>
+    <target name="unittest_make40_release" unless="is.windows">
+        <exec executable="make" dir="../build_release" failonerror="true">
+            <arg line="test" />
+        </exec>
+    </target>
+    <target name="unittest_make42_release" unless="is.windows">
         <exec executable="make" dir="../build_release" failonerror="true">
             <arg line="test" />
         </exec>
@@ -473,17 +524,32 @@ devenv BrowserPlus.sln /Build Release /Project test
         </exec>
         <delete file="../build/x1.bat" />
     </target>
-    <target name="compress_make_codecoverage" unless="is.windows">
+    <target name="compress_make40_codecoverage" unless="is.windows">
         <exec executable="make" dir="../build_codecoverage" failonerror="true">
             <arg line="CompressSDK" />
         </exec>
     </target>
-    <target name="compress_make_debug" unless="is.windows">
+    <target name="compress_make42_codecoverage" unless="is.windows">
+        <exec executable="make" dir="../build_codecoverage" failonerror="true">
+            <arg line="CompressSDK" />
+        </exec>
+    </target>
+    <target name="compress_make40_debug" unless="is.windows">
         <exec executable="make" dir="../build_debug" failonerror="true">
             <arg line="CompressSDK" />
         </exec>
     </target>
-    <target name="compress_make_release" unless="is.windows">
+    <target name="compress_make42_debug" unless="is.windows">
+        <exec executable="make" dir="../build_debug" failonerror="true">
+            <arg line="CompressSDK" />
+        </exec>
+    </target>
+    <target name="compress_make40_release" unless="is.windows">
+        <exec executable="make" dir="../build_release" failonerror="true">
+            <arg line="CompressSDK" />
+        </exec>
+    </target>
+    <target name="compress_make42_release" unless="is.windows">
         <exec executable="make" dir="../build_release" failonerror="true">
             <arg line="CompressSDK" />
         </exec>
@@ -623,16 +689,16 @@ devenv BrowserPlus.sln /Build Release /Project CompressSDK
         </exec>
         <delete file="../build/x1.bat" />
     </target>
-    <target name="clean_codecoverage" depends="clean_make_codecoverage,clean_vc08_codecoverage" />
-    <target name="clean_debug" depends="clean_make_debug,clean_vc08_debug" />
-    <target name="clean_release" depends="clean_make_release,clean_vc08_release" />
-    <target name="build_codecoverage" depends="build_make_codecoverage,build_vc08_codecoverage" />
-    <target name="build_debug" depends="build_make_debug,build_vc08_debug" />
-    <target name="build_release" depends="build_make_release,build_vc08_release" />
-    <target name="unittest_codecoverage" depends="unittest_make_codecoverage,unittest_vc08_codecoverage" />
-    <target name="unittest_debug" depends="unittest_make_debug,unittest_vc08_debug" />
-    <target name="unittest_release" depends="unittest_make_release,unittest_vc08_release" />
-    <target name="compress_codecoverage" depends="compress_make_codecoverage,compress_vc08_codecoverage" />
-    <target name="compress_debug" depends="compress_make_debug,compress_vc08_debug" />
-    <target name="compress_release" depends="compress_make_release,compress_vc08_release" />
+    <target name="clean_codecoverage" depends="clean_make40_codecoverage,clean_vc08_codecoverage" />
+    <target name="clean_debug" depends="clean_make40_debug,clean_vc08_debug" />
+    <target name="clean_release" depends="clean_make40_release,clean_vc08_release" />
+    <target name="build_codecoverage" depends="build_make40_codecoverage,build_vc08_codecoverage" />
+    <target name="build_debug" depends="build_make40_debug,build_vc08_debug" />
+    <target name="build_release" depends="build_make40_release,build_vc08_release" />
+    <target name="unittest_codecoverage" depends="unittest_make40_codecoverage,unittest_vc08_codecoverage" />
+    <target name="unittest_debug" depends="unittest_make40_debug,unittest_vc08_debug" />
+    <target name="unittest_release" depends="unittest_make40_release,unittest_vc08_release" />
+    <target name="compress_codecoverage" depends="compress_make40_codecoverage,compress_vc08_codecoverage" />
+    <target name="compress_debug" depends="compress_make40_debug,compress_vc08_debug" />
+    <target name="compress_release" depends="compress_make40_release,compress_vc08_release" />
 </project>

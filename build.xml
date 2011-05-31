@@ -8,17 +8,29 @@
     <condition property="is.unix">
         <os family="unix" />
     </condition>
-    <target name="clean_make_codecoverage" unless="is.windows">
-        <ant dir="external" target="clean_make_codecoverage" />
-        <ant dir="src" target="clean_make_codecoverage" />
+    <target name="clean_make40_codecoverage" unless="is.windows">
+        <ant dir="external" target="clean_make40_codecoverage" />
+        <ant dir="src" target="clean_make40_codecoverage" />
     </target>
-    <target name="clean_make_debug" unless="is.windows">
-        <ant dir="external" target="clean_make_debug" />
-        <ant dir="src" target="clean_make_debug" />
+    <target name="clean_make42_codecoverage" unless="is.windows">
+        <ant dir="external" target="clean_make42_codecoverage" />
+        <ant dir="src" target="clean_make42_codecoverage" />
     </target>
-    <target name="clean_make_release" unless="is.windows">
-        <ant dir="external" target="clean_make_release" />
-        <ant dir="src" target="clean_make_release" />
+    <target name="clean_make40_debug" unless="is.windows">
+        <ant dir="external" target="clean_make40_debug" />
+        <ant dir="src" target="clean_make40_debug" />
+    </target>
+    <target name="clean_make42_debug" unless="is.windows">
+        <ant dir="external" target="clean_make42_debug" />
+        <ant dir="src" target="clean_make42_debug" />
+    </target>
+    <target name="clean_make40_release" unless="is.windows">
+        <ant dir="external" target="clean_make40_release" />
+        <ant dir="src" target="clean_make40_release" />
+    </target>
+    <target name="clean_make42_release" unless="is.windows">
+        <ant dir="external" target="clean_make42_release" />
+        <ant dir="src" target="clean_make42_release" />
     </target>
     <target name="clean_vc05_codecoverage" if="is.windows">
         <ant dir="external" target="clean_vc05_codecoverage" />
@@ -56,17 +68,29 @@
         <ant dir="external" target="clean_vc10_release" />
         <ant dir="src" target="clean_vc10_release" />
     </target>
-    <target name="build_make_codecoverage" unless="is.windows">
-        <ant dir="external" target="build_make_codecoverage" />
-        <ant dir="src" target="build_make_codecoverage" />
+    <target name="build_make40_codecoverage" unless="is.windows">
+        <ant dir="external" target="build_make40_codecoverage" />
+        <ant dir="src" target="build_make40_codecoverage" />
     </target>
-    <target name="build_make_debug" unless="is.windows">
-        <ant dir="external" target="build_make_debug" />
-        <ant dir="src" target="build_make_debug" />
+    <target name="build_make42_codecoverage" unless="is.windows">
+        <ant dir="external" target="build_make42_codecoverage" />
+        <ant dir="src" target="build_make42_codecoverage" />
     </target>
-    <target name="build_make_release" unless="is.windows">
-        <ant dir="external" target="build_make_release" />
-        <ant dir="src" target="build_make_release" />
+    <target name="build_make40_debug" unless="is.windows">
+        <ant dir="external" target="build_make40_debug" />
+        <ant dir="src" target="build_make40_debug" />
+    </target>
+    <target name="build_make42_debug" unless="is.windows">
+        <ant dir="external" target="build_make42_debug" />
+        <ant dir="src" target="build_make42_debug" />
+    </target>
+    <target name="build_make40_release" unless="is.windows">
+        <ant dir="external" target="build_make40_release" />
+        <ant dir="src" target="build_make40_release" />
+    </target>
+    <target name="build_make42_release" unless="is.windows">
+        <ant dir="external" target="build_make42_release" />
+        <ant dir="src" target="build_make42_release" />
     </target>
     <target name="build_vc05_codecoverage" if="is.windows">
         <ant dir="external" target="build_vc05_codecoverage" />
@@ -104,17 +128,29 @@
         <ant dir="external" target="build_vc10_release" />
         <ant dir="src" target="build_vc10_release" />
     </target>
-    <target name="unittest_make_codecoverage" unless="is.windows">
-        <ant dir="external" target="unittest_make_codecoverage" />
-        <ant dir="src" target="unittest_make_codecoverage" />
+    <target name="unittest_make40_codecoverage" unless="is.windows">
+        <ant dir="external" target="unittest_make40_codecoverage" />
+        <ant dir="src" target="unittest_make40_codecoverage" />
     </target>
-    <target name="unittest_make_debug" unless="is.windows">
-        <ant dir="external" target="unittest_make_debug" />
-        <ant dir="src" target="unittest_make_debug" />
+    <target name="unittest_make42_codecoverage" unless="is.windows">
+        <ant dir="external" target="unittest_make42_codecoverage" />
+        <ant dir="src" target="unittest_make42_codecoverage" />
     </target>
-    <target name="unittest_make_release" unless="is.windows">
-        <ant dir="external" target="unittest_make_release" />
-        <ant dir="src" target="unittest_make_release" />
+    <target name="unittest_make40_debug" unless="is.windows">
+        <ant dir="external" target="unittest_make40_debug" />
+        <ant dir="src" target="unittest_make40_debug" />
+    </target>
+    <target name="unittest_make42_debug" unless="is.windows">
+        <ant dir="external" target="unittest_make42_debug" />
+        <ant dir="src" target="unittest_make42_debug" />
+    </target>
+    <target name="unittest_make40_release" unless="is.windows">
+        <ant dir="external" target="unittest_make40_release" />
+        <ant dir="src" target="unittest_make40_release" />
+    </target>
+    <target name="unittest_make42_release" unless="is.windows">
+        <ant dir="external" target="unittest_make42_release" />
+        <ant dir="src" target="unittest_make42_release" />
     </target>
     <target name="unittest_vc05_codecoverage" if="is.windows">
         <ant dir="external" target="unittest_vc05_codecoverage" />
@@ -152,17 +188,29 @@
         <ant dir="external" target="unittest_vc10_release" />
         <ant dir="src" target="unittest_vc10_release" />
     </target>
-    <target name="compress_make_codecoverage" unless="is.windows">
-        <ant dir="external" target="compress_make_codecoverage" />
-        <ant dir="src" target="compress_make_codecoverage" />
+    <target name="compress_make40_codecoverage" unless="is.windows">
+        <ant dir="external" target="compress_make40_codecoverage" />
+        <ant dir="src" target="compress_make40_codecoverage" />
     </target>
-    <target name="compress_make_debug" unless="is.windows">
-        <ant dir="external" target="compress_make_debug" />
-        <ant dir="src" target="compress_make_debug" />
+    <target name="compress_make42_codecoverage" unless="is.windows">
+        <ant dir="external" target="compress_make42_codecoverage" />
+        <ant dir="src" target="compress_make42_codecoverage" />
     </target>
-    <target name="compress_make_release" unless="is.windows">
-        <ant dir="external" target="compress_make_release" />
-        <ant dir="src" target="compress_make_release" />
+    <target name="compress_make40_debug" unless="is.windows">
+        <ant dir="external" target="compress_make40_debug" />
+        <ant dir="src" target="compress_make40_debug" />
+    </target>
+    <target name="compress_make42_debug" unless="is.windows">
+        <ant dir="external" target="compress_make42_debug" />
+        <ant dir="src" target="compress_make42_debug" />
+    </target>
+    <target name="compress_make40_release" unless="is.windows">
+        <ant dir="external" target="compress_make40_release" />
+        <ant dir="src" target="compress_make40_release" />
+    </target>
+    <target name="compress_make42_release" unless="is.windows">
+        <ant dir="external" target="compress_make42_release" />
+        <ant dir="src" target="compress_make42_release" />
     </target>
     <target name="compress_vc05_codecoverage" if="is.windows">
         <ant dir="external" target="compress_vc05_codecoverage" />
@@ -200,16 +248,16 @@
         <ant dir="external" target="compress_vc10_release" />
         <ant dir="src" target="compress_vc10_release" />
     </target>
-    <target name="clean_codecoverage" depends="clean_make_codecoverage,clean_vc08_codecoverage" />
-    <target name="clean_debug" depends="clean_make_debug,clean_vc08_debug" />
-    <target name="clean_release" depends="clean_make_release,clean_vc08_release" />
-    <target name="build_codecoverage" depends="build_make_codecoverage,build_vc08_codecoverage" />
-    <target name="build_debug" depends="build_make_debug,build_vc08_debug" />
-    <target name="build_release" depends="build_make_release,build_vc08_release" />
-    <target name="unittest_codecoverage" depends="unittest_make_codecoverage,unittest_vc08_codecoverage" />
-    <target name="unittest_debug" depends="unittest_make_debug,unittest_vc08_debug" />
-    <target name="unittest_release" depends="unittest_make_release,unittest_vc08_release" />
-    <target name="compress_codecoverage" depends="compress_make_codecoverage,compress_vc08_codecoverage" />
-    <target name="compress_debug" depends="compress_make_debug,compress_vc08_debug" />
-    <target name="compress_release" depends="compress_make_release,compress_vc08_release" />
+    <target name="clean_codecoverage" depends="clean_make40_codecoverage,clean_vc08_codecoverage" />
+    <target name="clean_debug" depends="clean_make40_debug,clean_vc08_debug" />
+    <target name="clean_release" depends="clean_make40_release,clean_vc08_release" />
+    <target name="build_codecoverage" depends="build_make40_codecoverage,build_vc08_codecoverage" />
+    <target name="build_debug" depends="build_make40_debug,build_vc08_debug" />
+    <target name="build_release" depends="build_make40_release,build_vc08_release" />
+    <target name="unittest_codecoverage" depends="unittest_make40_codecoverage,unittest_vc08_codecoverage" />
+    <target name="unittest_debug" depends="unittest_make40_debug,unittest_vc08_debug" />
+    <target name="unittest_release" depends="unittest_make40_release,unittest_vc08_release" />
+    <target name="compress_codecoverage" depends="compress_make40_codecoverage,compress_vc08_codecoverage" />
+    <target name="compress_debug" depends="compress_make40_debug,compress_vc08_debug" />
+    <target name="compress_release" depends="compress_make40_release,compress_vc08_release" />
 </project>
