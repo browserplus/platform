@@ -56,7 +56,7 @@
     <target name="build_make40_codecoverage" unless="is.windows">
         <mkdir dir="../build_codecoverage" />
         <exec executable="cmake" dir="../build_codecoverage" failonerror="true">
-            <arg line="-G &quot;Unix Makefiles&quot; -DCMAKE_BUILD_TYPE:STRING=Debug -DOSX10.4_BUILD:BOOL=ON ../src" />
+            <arg line="-G &quot;Unix Makefiles&quot; -DCMAKE_BUILD_TYPE:STRING=CodeCoverage -DOSX10.4_BUILD:BOOL=ON ../src" />
         </exec>
         <exec executable="make" dir="../build_codecoverage" failonerror="true">
             <arg line="-j3" />
@@ -65,7 +65,7 @@
     <target name="build_make42_codecoverage" unless="is.windows">
         <mkdir dir="../build_codecoverage" />
         <exec executable="cmake" dir="../build_codecoverage" failonerror="true">
-            <arg line="-G &quot;Unix Makefiles&quot; -DCMAKE_BUILD_TYPE:STRING=Debug ../src" />
+            <arg line="-G &quot;Unix Makefiles&quot; -DCMAKE_BUILD_TYPE:STRING=CodeCoverage ../src" />
         </exec>
         <exec executable="make" dir="../build_codecoverage" failonerror="true">
             <arg line="-j3" />
