@@ -360,13 +360,43 @@ devenv BrowserPlus.sln /Build Release /Project ALL_BUILD
         <delete file="../build/x1.bat" />
     </target>
     <target name="unittest_make40_codecoverage" unless="is.windows">
+        <exec executable="lcov" dir="../build_codecoverage">
+            <arg line="--directory . --zerocounters" />
+        </exec>
         <exec executable="make" dir="../build_codecoverage" failonerror="true">
             <arg line="test" />
         </exec>
+        <delete dir="../build_codecoverage/lcov_results" />
+        <mkdir dir="../build_codecoverage/lcov_results" />
+        <exec executable="lcov" dir="../build_codecoverage/lcov_results">
+            <arg line="--capture --directory .. --output-file lcov.info.tmp --gcov-tool /usr/bin/gcov-4.0" />
+        </exec>
+        <exec executable="lcov" dir="../build_codecoverage/lcov_results">
+            <arg line="--remove lcov.info.tmp &quot;/Developer/*&quot; &quot;external/*&quot; --output-file lcov.info" />
+        </exec>
+        <delete dir="../build_codecoverage/lcov_results/lcov-report" />
+        <exec executable="genhtml" dir="../build_codecoverage/lcov_results">
+            <arg line="--output-directory lcov-report lcov.info" />
+        </exec>
     </target>
     <target name="unittest_make42_codecoverage" unless="is.windows">
+        <exec executable="lcov" dir="../build_codecoverage">
+            <arg line="--directory . --zerocounters" />
+        </exec>
         <exec executable="make" dir="../build_codecoverage" failonerror="true">
             <arg line="test" />
+        </exec>
+        <delete dir="../build_codecoverage/lcov_results" />
+        <mkdir dir="../build_codecoverage/lcov_results" />
+        <exec executable="lcov" dir="../build_codecoverage/lcov_results">
+            <arg line="--capture --directory .. --output-file lcov.info.tmp --gcov-tool /usr/bin/gcov-4.2" />
+        </exec>
+        <exec executable="lcov" dir="../build_codecoverage/lcov_results">
+            <arg line="--remove lcov.info.tmp &quot;/Developer/*&quot; &quot;external/*&quot; --output-file lcov.info" />
+        </exec>
+        <delete dir="../build_codecoverage/lcov_results/lcov-report" />
+        <exec executable="genhtml" dir="../build_codecoverage/lcov_results">
+            <arg line="--output-directory lcov-report lcov.info" />
         </exec>
     </target>
     <target name="unittest_make40_debug" unless="is.windows">
