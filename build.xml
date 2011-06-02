@@ -248,16 +248,16 @@
         <ant dir="external" target="compress_vc10_release" />
         <ant dir="src" target="compress_vc10_release" />
     </target>
-    <target name="clean_codecoverage" depends="clean_make40_codecoverage,clean_vc08_codecoverage" />
-    <target name="clean_debug" depends="clean_make40_debug,clean_vc08_debug" />
-    <target name="clean_release" depends="clean_make40_release,clean_vc08_release" />
-    <target name="build_codecoverage" depends="build_make40_codecoverage,build_vc08_codecoverage" />
-    <target name="build_debug" depends="build_make40_debug,build_vc08_debug" />
-    <target name="build_release" depends="build_make40_release,build_vc08_release" />
-    <target name="unittest_codecoverage" depends="unittest_make40_codecoverage,unittest_vc08_codecoverage" />
-    <target name="unittest_debug" depends="unittest_make40_debug,unittest_vc08_debug" />
-    <target name="unittest_release" depends="unittest_make40_release,unittest_vc08_release" />
-    <target name="compress_codecoverage" depends="compress_make40_codecoverage,compress_vc08_codecoverage" />
-    <target name="compress_debug" depends="compress_make40_debug,compress_vc08_debug" />
-    <target name="compress_release" depends="compress_make40_release,compress_vc08_release" />
+    <target name="clean_codecoverage" depends="clean_make42_codecoverage,clean_vc08_codecoverage" />
+    <target name="clean_debug" depends="clean_make42_debug,clean_vc08_debug" />
+    <target name="clean_release" depends="clean_make42_release,clean_vc08_release" />
+    <target name="build_codecoverage" depends="build_make42_codecoverage,build_vc08_codecoverage" />
+    <target name="build_debug" depends="build_make42_debug,build_vc08_debug" />
+    <target name="build_release" depends="build_make42_release,build_vc08_release" />
+    <target name="unittest_codecoverage" depends="unittest_make42_codecoverage,unittest_vc08_codecoverage" />
+    <target name="unittest_debug" depends="unittest_make42_debug,unittest_vc08_debug" />
+    <target name="unittest_release" depends="unittest_make42_release,unittest_vc08_release" />
+    <target name="compress_codecoverage" depends="compress_make42_codecoverage,compress_vc08_codecoverage" />
+    <target name="compress_debug" depends="compress_make42_debug,compress_vc08_debug" />
+    <target name="compress_release" depends="compress_make42_release,compress_vc08_release" />
 </project>

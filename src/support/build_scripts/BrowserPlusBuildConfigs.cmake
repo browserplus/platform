@@ -102,12 +102,16 @@ ELSE ()
       IF (OSX10.4_BUILD) 
         SET(CMAKE_C_COMPILER gcc-4.0)
         SET(CMAKE_CXX_COMPILER g++-4.0)
-        SET (CMAKE_OSX_DEPLOYMENT_TARGET "10.4"
-             CACHE STRING "Compile for tiger deployment" FORCE)
+        IF ("${CMAKE_BUILD_TYPE}" STREQUAL "CodeCoverage") 
+          MESSAGE(FATAL_ERROR "OSX CodeCoverage build not supported on 10.4 due to XCode shipping incorrect libgcov.a binary")
+        ELSE ()
+          SET (CMAKE_OSX_DEPLOYMENT_TARGET "10.4"
+               CACHE STRING "Compile for tiger deployment" FORCE)
+          SET(minVersionFlag "-mmacosx-version-min=10.4")
+        ENDIF ()
         SET(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.4u.sdk"
             CACHE STRING "Compile for tiger deployment" FORCE)
         SET(isysrootFlag "-isysroot ${CMAKE_OSX_SYSROOT}")
-        SET(minVersionFlag "-mmacosx-version-min=10.4")
         SET(CMAKE_FRAMEWORK_PATH "${CMAKE_OSX_SYSROOT}/System/Library/Frameworks"
             CACHE STRING "use 10.4 frameworks" FORCE)
         SET(CMAKE_XCODE_ATTRIBUTE_GCC_VERSION "4.0"
