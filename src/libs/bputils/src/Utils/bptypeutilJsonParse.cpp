@@ -39,10 +39,13 @@ struct ParseContext {
   if ((pc)->nodeStack.size() == 0) {                                    \
       (pc)->nodeStack.push(elem);                                       \
   } else if ((pc)->nodeStack.top()->type() == BPTList) {                \
-      dynamic_cast<bp::List *>((pc)->nodeStack.top())->append(elem);    \
+      bp::List * l = dynamic_cast<bp::List *>((pc)->nodeStack.top());   \
+      BPASSERT(l);                                                      \
+      l->append(elem);                                                  \
   } else if ((pc)->nodeStack.top()->type() == BPTMap) {                 \
-      dynamic_cast<bp::Map *>((pc)->nodeStack.top())->add(              \
-          (pc)->keyStack.top().c_str(), (elem));                        \
+      bp::Map * m = dynamic_cast<bp::Map *>((pc)->nodeStack.top());     \
+      BPASSERT(m);                                                      \
+      m->add((pc)->keyStack.top().c_str(), (elem));                     \
       (pc)->keyStack.pop();                                             \
   }                                                                     \
 }
