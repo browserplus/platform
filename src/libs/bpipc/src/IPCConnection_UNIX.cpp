@@ -307,7 +307,7 @@ Connection::connect(const std::string & location, std::string * error)
     }
     memset((void *) &unix_addr, 0, sizeof(unix_addr));
     unix_addr.sun_family = AF_UNIX;
-    ::strcpy(unix_addr.sun_path, path);
+    ::strncpy(unix_addr.sun_path, path, sizeof(unix_addr.sun_path)-1);
     
     int len;
     len =
