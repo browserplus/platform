@@ -531,8 +531,8 @@ service::Summary::clear()
 
     m_serviceLibraryPath.clear();    
     m_usesService.clear();
-    m_usesVersion.parse("");
-    m_usesMinversion.parse("");
+    (void) m_usesVersion.parse("");
+    (void) m_usesMinversion.parse("");
     m_arguments.clear();
 }
 

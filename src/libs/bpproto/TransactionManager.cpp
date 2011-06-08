@@ -240,8 +240,9 @@ TransactionManager::onResponse(bp::ipc::Channel *,
                     defs = new const BPServiceDefinition*[numDefs];
                     descs = new bp::service::Description[numDefs];
                     for (unsigned int i = 0; i < numDefs; ++i) {
-                        descs[i].fromBPObject(l[i]);
-                        defs[i] = descs[i].toBPServiceDefinition();
+                        if (descs[i].fromBPObject(l[i])) {
+                            defs[i] = descs[i].toBPServiceDefinition();
+                        }
                     }
                 }
             } else if (ec == BP_EC_EXTENDED_ERROR) {

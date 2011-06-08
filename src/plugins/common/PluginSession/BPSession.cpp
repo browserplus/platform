@@ -271,23 +271,33 @@ BPSession::variantToBPObject( const plugin::Variant* input,
         output = new bp::Null;
     } else if (input->isBoolean()) {
         bool bVal;
-        input->getBooleanValue(bVal);
+        if (!input->getBooleanValue(bVal)) {
+            return false;
+        }
         output = new bp::Bool(bVal);
     } else if (input->isInteger()) {
         int nVal;
-        input->getIntegerValue(nVal);
+        if (!input->getIntegerValue(nVal)) {
+            return false;
+        }
         output = new bp::Integer(nVal);
     } else if (input->isDouble()) {
         double dVal;
-        input->getDoubleValue(dVal);
+        if (!input->getDoubleValue(dVal)) {
+            return false;
+        }
         output = new bp::Double(dVal);
     } else if (input->isString()) {
         std::string sVal;
-        input->getStringValue(sVal);
+        if (!input->getStringValue(sVal)) {
+            return false;
+        }
         output = new bp::String(sVal);
     } else if (input->isObject()) {
         plugin::Object* p = NULL;
-        input->getObjectValue(p);
+        if (!input->getObjectValue(p)) {
+            return false;
+        }
         boost::scoped_ptr<plugin::Object> oVal(p);
            
         if (plugin().isJsFunction(oVal.get())) {

@@ -56,7 +56,7 @@ Channel::deliverMessageEvent(void * ctx)
         Response resp(ce->q->id());
         resp.setCommand(ce->q->command());
         if (l->onQuery(ce->c, *(ce->q), resp)) {
-            ce->c->sendResponse(resp);
+            (void) ce->c->sendResponse(resp);
         }
         delete ce->q;
     } else if (ce->r) {
