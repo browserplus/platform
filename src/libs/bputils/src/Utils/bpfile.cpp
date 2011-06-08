@@ -1748,6 +1748,16 @@ copyDir(const bfs::path& from,
 }
 
 
+bfs::path
+getTempPath(const bfs::path& tempDir,
+            const string& prefix)
+{
+    bfs::path p = tempDir / bfs::path(prefix + "%%%%-%%%%-%%%%-%%%%");
+    bfs::path rval = bfs::unique_path(p);
+    return rval;
+}
+
+
 bool 
 safeCopy(const bfs::path& src,
          const bfs::path& dst,
