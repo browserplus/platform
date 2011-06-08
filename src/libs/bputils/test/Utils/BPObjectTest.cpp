@@ -46,6 +46,7 @@ void BPObjectTest::boolTest()
     
     bp::Object * bp = bp::Object::fromJsonString(b.toJsonString());
 
+    CPPUNIT_ASSERT( bp );
     CPPUNIT_ASSERT( true == (bool) *bp );
     CPPUNIT_ASSERT( dynamic_cast<bp::Bool *>(bp) );
     CPPUNIT_ASSERT( dynamic_cast<bp::Bool *>(bp)->value() );    
