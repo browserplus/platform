@@ -190,7 +190,8 @@ BP_DEFINE_COMMAND_HANDLER(CommandExecutor::invoke)
 
     // first do a deep replacement of strings with file: and writable_file:
     // prefixes
-    bp::Map * argMap = (bp::Map *) replacePaths(&rawArgMap);
+    bp::Map * argMap = dynamic_cast<bp::Map *>(replacePaths(&rawArgMap));
+    BPASSERT(argMap);
     
     // fixup callbacks and file arguments
     std::list<bp::service::Argument> l = f.arguments(); 
