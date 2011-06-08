@@ -252,7 +252,8 @@ BPErrorCode BPRequire(BPProtoHand hand,
         return BP_EC_INVALID_PARAMETER;
     }
 
-    bp::Map * argsMap = (bp::Map *) bp::Object::build(args);
+    bp::Map * argsMap = dynamic_cast<bp::Map *>(bp::Object::build(args));
+    BPASSERT(argsMap);
 
     bp::ipc::Query q;
     q.setCommand("Require");
