@@ -321,7 +321,7 @@ public:
 };
 
 bool
-downloadRequires(const std::list<std::string>& distroServers, bp::service::Summary s, bfs::path& downloadPath, bfs::path& certFile, ServiceList& pathList, bool useInstalled) {
+downloadRequires(const std::list<std::string>& distroServers, const bp::service::Summary& s, bfs::path& downloadPath, bfs::path& certFile, ServiceList& pathList, bool useInstalled) {
     // generate list of ServiceRequireStatements
     std::list<ServiceRequireStatement> reqStmts;
     ServiceRequireStatement reqStmt;
