@@ -261,7 +261,10 @@ CommandParser::parse(void * ptrToCommandParser)
         }
     
         // first peel off the command (skip blank commands)
-        if (!getTok(evt->line, evt->command)) continue;
+        if (!getTok(evt->line, evt->command)) {
+            delete evt;
+            continue;
+        }
         
         std::string tok;
         while (getTok(evt->line, tok)) {

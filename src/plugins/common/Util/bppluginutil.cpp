@@ -88,6 +88,7 @@ bp::pluginutil::appendEnumerateResultsToList(const BPElement * services,
             }
             if (!hasName || !hasVersion || !hasType) {
                 // both name and version must be present
+                delete outMap;
                 rv = false;
                 break;
             }
