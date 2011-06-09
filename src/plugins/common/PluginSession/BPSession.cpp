@@ -353,16 +353,19 @@ BPSession::variantToBPObject( const plugin::Variant* input,
             for (unsigned int i = 0; i < keys.size(); i++) {
                 plugin::Variant* val = plugin().allocVariant();
                 if (!plugin().getProperty(oVal.get(), keys[i], val)) {
+                    plugin().freeVariant(val);
                     delete m;
                     return false;
                 }
                 bp::Object * value = NULL;
                 if (!variantToBPObject(val, transaction, value)) {
+                    plugin().freeVariant(val);
                     delete m;
                     return false;
                 }
-                if (value) 
+                if (value) {
                     m->add(keys[i].c_str(), value);
+                }
                 plugin().freeVariant(val);
             }
 
