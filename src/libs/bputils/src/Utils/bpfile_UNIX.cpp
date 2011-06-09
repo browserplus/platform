@@ -246,12 +246,9 @@ resolveLink(const bfs::path& path,
         }
     } catch (const string&) {
         rval = false;
-        target.clear();
     }
 
-    if (rval) {
-        target = linkVal;
-    } else {
+    if (!rval) {
         target.clear();
     }
 
