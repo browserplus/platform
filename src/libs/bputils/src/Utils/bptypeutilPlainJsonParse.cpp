@@ -35,14 +35,17 @@ struct ParseContext {
 
 // push an element to the correct place
 #define GOT_ELEMENT(pc, elem) {                                         \
-    if ((pc)->nodeStack.size() == 0) {                                  \
+  if ((pc)->nodeStack.size() == 0) {                                    \
         (pc)->nodeStack.push(elem);                                     \
   } else if ((pc)->nodeStack.top()->type() == BPTList) {                \
-        dynamic_cast<List *>((pc)->nodeStack.top())->append(elem);      \
+        List * l = dynamic_cast<List *>((pc)->nodeStack.top());         \
+        BPASSERT(l);                                                    \
+        l->append(elem);                                                \
   } else if ((pc)->nodeStack.top()->type() == BPTMap) {                 \
-        dynamic_cast<Map *>((pc)->nodeStack.top())->add(                \
-          (pc)->keyStack.top().c_str(), (elem));                        \
-      (pc)->keyStack.pop();                                             \
+        Map * m = dynamic_cast<Map *>((pc)->nodeStack.top());           \
+        BPASSERT(m);                                                    \
+        m->add((pc)->keyStack.top().c_str(), (elem));                   \
+       (pc)->keyStack.pop();                                             \
   }                                                                     \
 }
 
