@@ -33,10 +33,8 @@
 #include "bprandom.h"
 #include "BPLog.h"
 
-#ifdef LINUX
-// on linux we use openssl for true random numbers
+// we use openssl for true random numbers
 #include <openssl/rand.h>
-#endif
 
 namespace bp {
 namespace random {
@@ -45,20 +43,34 @@ namespace random {
 int
 generate()
 {
+    // Try to seed openssl RAND stuff.  If unable, fall back to rand().
+    static bool seeded = false;
+    static bool useRand = false;
+    if (!seeded) {
+        if (RAND_status()) {
+            BPLOG_DEBUG("::RAND_status() happy, no need to seed");
+        } else {
+            BPLOG_DEBUG("::RAND_status() unhappy, seeding");
+            int seed = ::rand();
+            ::RAND_seed(&seed, sizeof(seed));
+            if (::RAND_status() == 0) {
+                BPLOG_WARN("::RAND_seed() failed, reverting to ::rand()");
+                useRand = true;
+            }
+        }
+        seeded = true;
+    }
+
     unsigned int i = 0;
-#ifdef WIN32
-    if (::rand_s(&i) != 0) {
-        BPLOG_WARN("::rand_s() failed, reverting to ::rand()");
+    if (!useRand) {
+        if (::RAND_bytes((unsigned char *) &i, sizeof(i)) == 0) {
+            BPLOG_WARN("::RAND_bytes() failed, reverting to ::rand()");
+            useRand = true;
+        }
+    }
+    if (useRand) {
         i = (unsigned int) ::rand();
     }
-#elif defined(MACOSX)
-    i = ::arc4random();
-#else
-    if (0 == ::RAND_bytes((unsigned char *) &i, sizeof(i))) {
-        BPLOG_WARN("::RAND_bytes() failed, reverting to ::rand()");
-        i = (unsigned int) ::rand();
-    }
-#endif
     return(i % ((unsigned)RAND_MAX + 1));
 }
 
