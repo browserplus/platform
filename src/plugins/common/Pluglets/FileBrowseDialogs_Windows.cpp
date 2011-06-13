@@ -102,7 +102,7 @@ class MyEventHandler :
 public:
     static const DWORD kSelectButtonId = 1000;
 
-    MyEventHandler()
+    MyEventHandler() : m_paths(NULL)
     {
     }
 
@@ -193,7 +193,7 @@ public:
     }
 
 private:
-    vector<bfs::path>* m_paths;
+    vector<bfs::path>* m_paths;  // we do not own this
 };
 
 
