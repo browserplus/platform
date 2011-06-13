@@ -62,9 +62,20 @@ namespace bp {
         extern const std::string kLinkMimeType;    // "application/x-link"
         extern const std::string kBadLinkMimeType; // "application/x-badlink"
 
-        // Get strings for a path with OS format ('/' vs. '\').  Need this
-		// since boost::filesystem's native() will leave / separators
+        /** Get a string representinng the native pathname.  Needed since 
+         *  boost::filesystem::native() will leave / seperators on doze. 
+         *  Not quite sure what "native" means to boost.  Sigh.
+         *  \param p [IN] - pathname
+         *  \returns - native string for path
+         */
         boost::filesystem::path::string_type nativeString(const boost::filesystem::path& p);
+
+        /** Get a utf8 string representinng the native pathname.  Needed since 
+         *  boost::filesystem::native() will leave / seperators on doze. 
+         *  Not quite sure what "native" means to boost.  Sigh.
+         *  \param p [IN] - pathname
+         *  \returns - native utf8 string for path
+         */
         std::string nativeUtf8String(const boost::filesystem::path& p);
 
         // Regular and a recursive path visitors.
@@ -147,12 +158,20 @@ namespace bp {
          */
         std::string urlFromPath(const boost::filesystem::path& p);
 
-        // canonical form, resolves any "." and ".."
+        /** return canonical form a a path, resolves any "." and ".."
+         *  \param p [IN] - path, need not exist
+         *  \returns - canonical form of p
+         */
         boost::filesystem::path canonical(const boost::filesystem::path& p);
 
-        // return a path relative to another path
+        /** return a path relative to another path
+         *  \param p [IN] - path for which to get relative name
+         *  \param base [IN] - path that name will be relative to
+         *  \returns - name of "p" relative to "base", throws bpfs::filesystem_error
+         *             if "p" is not relative to "base"
+         */
         boost::filesystem::path relativeTo(const boost::filesystem::path& p,
-                                           const boost::filesystem::path& base); // throws bp::Exception
+                                           const boost::filesystem::path& base);
 
         /** Return the absolute form of a path.
          *  Uses boost::filesystem::system_complete().
@@ -179,7 +198,7 @@ namespace bp {
         /** Get a path within the specified dir that in not in use.
          *  \param tempDir [IN] - path to directory
          *  \param prefix [IN] - prefix to append to resulting path name
-         *  \returns - path within tempDir (throws on failure)
+         *  \returns - path within tempDir (throws boost::filesystem_error on failure)
          */
         boost::filesystem::path getTempPath(const boost::filesystem::path& tempDir,
                                             const std::string& prefix); 
