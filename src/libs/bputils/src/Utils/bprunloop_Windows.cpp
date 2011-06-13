@@ -37,6 +37,10 @@ using namespace std;
 
 struct Win32RunLoopData 
 {
+    Win32RunLoopData() : window(NULL), classInstance(NULL), className(),
+                         m_workQueue(NULL), lock(NULL),
+                         onEventFunc(NULL), onEventCookie(NULL) {
+    }
     // win32 gunk
     HWND window;
     HINSTANCE classInstance;
@@ -46,7 +50,7 @@ struct Win32RunLoopData
     std::vector<bp::runloop::Event> * m_workQueue;
     // pointer to lock used by runloop object
     bp::sync::Mutex * lock;
-    // who to deliver the event to
+    // who to deliver the event t
     bp::runloop::eventCallBack onEventFunc;
     void * onEventCookie;
 };
