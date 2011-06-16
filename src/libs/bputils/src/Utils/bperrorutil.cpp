@@ -168,13 +168,18 @@ makeExceptionEventString( const string sAction,
                           const exception& exc,
                           const string& sAddlContext )
 {
-    stringstream ssReport;
-    ssReport << sAction << " a " << typeid(exc).name() << ": " << exc.what();
-    if (!sAddlContext.empty()) {
-        ssReport << " (" << sAddlContext << ")";
+    try {
+        stringstream ssReport;
+        ssReport << sAction << " a " << typeid(exc).name() << ": "
+                 << exc.what();
+        if (!sAddlContext.empty()) {
+            ssReport << " (" << sAddlContext << ")";
+        }
+        
+        return ssReport.str();
+    } catch (const class std::ios_base::failure&) {
+        return string("makeExceptionEventString failed!");
     }
-
-    return ssReport.str();
 }
 
 
@@ -194,7 +199,10 @@ reportExceptionEvent( const string sAction,
     {
         string sLog = makeExceptionEventString( sAction, e, sAddlContext );
         LocationInfo loc( sFile, sFunc, nLine );
-        rootLogger()._forcedLog( kExcLogLevel, sLog, loc );
+        try {
+            rootLogger()._forcedLog( kExcLogLevel, sLog, loc );
+        } catch(...) {
+        }
     }
 }
 
@@ -228,16 +236,18 @@ void reportCatchUnknown( const string& sFile,
 
     const Level kExcLogLevel = LEVEL_ERROR;
 
-    if (rootLogger().isLevelEnabled( kExcLogLevel ))
-    {
-        stringstream ssReport;
-        ssReport << "Caught an unknown exception.";
-        if (!sAddlContext.empty()) {
-            ssReport << " (" << sAddlContext << ")";
+    try {
+        if (rootLogger().isLevelEnabled( kExcLogLevel )) {
+            stringstream ssReport;
+            ssReport << "Caught an unknown exception.";
+            if (!sAddlContext.empty()) {
+                ssReport << " (" << sAddlContext << ")";
+            }
+            
+            LocationInfo loc( sFile, sFunc, nLine );
+            rootLogger()._forcedLog( kExcLogLevel, ssReport.str(), loc );
         }
-
-        LocationInfo loc( sFile, sFunc, nLine );
-        rootLogger()._forcedLog( kExcLogLevel, ssReport.str(), loc );
+    } catch(...) {
     }
 }
 

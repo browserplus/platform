@@ -92,9 +92,9 @@ public:
         DISPID dwDispID;
         HRESULT hr = GetIDOfName(lpsz, &dwDispID);
         if (SUCCEEDED(hr))
-        {
-            hr = PutProperty(dwDispID, pVar);
-        }
+            {
+                hr = PutProperty(dwDispID, pVar);
+            }
         return hr;
     }
     HRESULT PutProperty(DISPID dwDispID, VARIANT* pVar) throw()
@@ -103,10 +103,14 @@ public:
     }
     HRESULT GetIDOfName(LPCOLESTR lpsz, DISPID* pdispid) throw()
     {
-        CComBSTR bstr(lpsz);
-        return p->GetDispID(bstr,
-                            fdexNameCaseSensitive | fdexNameEnsure,
-                            pdispid);
+        try {
+            CComBSTR bstr(lpsz);
+            return p->GetDispID(bstr,
+                                fdexNameCaseSensitive | fdexNameEnsure,
+                                pdispid);
+        } catch(const struct ATL::CAtlException&) {
+            return E_FAIL;
+        }
     }
     // Invoke a method by DISPID with no parameters.
     HRESULT Invoke0(DISPID dispid, VARIANT* pvarRet = NULL) throw()
