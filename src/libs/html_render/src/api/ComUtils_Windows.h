@@ -108,7 +108,7 @@ public:
             return p->GetDispID(bstr,
                                 fdexNameCaseSensitive | fdexNameEnsure,
                                 pdispid);
-        } catch(const struct ATL::CAtlException&) {
+        } catch(const class ATL::CAtlException&) {
             return E_FAIL;
         }
     }
