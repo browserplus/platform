@@ -159,6 +159,25 @@ getTempDirectory()
 
 
 bfs::path
+getTempPath(const bfs::path& tempDir,
+            const string& prefix)
+{
+    bfs::path rval;
+    bfs::path p = tempDir / bfs::path(prefix + "-XXXXXX");
+    char* tmpl = new char[p.string().size() + 1];
+    strcpy(tmpl, p.c_str());
+    char* s = ::mktemp(tmpl);
+    if (!s) {
+        boost::system::error_code ec(errno, boost::system::system_category());
+        throw bfs::filesystem_error("::mktemp fails", tempDir, bfs::path(prefix), ec);
+    }
+    rval = s;
+    delete[] s;
+    return rval;
+}
+
+
+bfs::path
 absoluteProgramPath(const bfs::path& path)
 {
     return absolutePath(path);

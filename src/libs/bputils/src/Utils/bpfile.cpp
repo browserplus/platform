@@ -1747,29 +1747,6 @@ copyDir(const bfs::path& from,
 }
 
 
-bfs::path
-getTempPath(const bfs::path& tempDir,
-            const string& prefix)
-{
-    // bfs::unique_path() doesn't actually check if path exists.
-    // Thus, we give 'kNumTries' tries at getting a pathname that doesn't
-    // exist.  It would be freakishly bad coincidence to not get
-    // a unique path.
-    const size_t kNumTries = 50;
-    bfs::path templ = tempDir / bfs::path(prefix + "-%%%%-%%%%-%%%%-%%%%");
-    for (size_t i = 0; i < kNumTries; i++) {
-        bfs::path rval = bfs::unique_path(templ);
-        if (!exists(rval)) {
-            return rval;
-        }
-    }
-    BPLOG_WARN_STRM("getTempPath failed to get unique name after " 
-                    << kNumTries << " attempts");
-    boost::system::error_code ec;
-    throw bfs::filesystem_error("getTempPath failed", templ, ec);
-}
-
-
 bool 
 safeCopy(const bfs::path& src,
          const bfs::path& dst,

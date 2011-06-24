@@ -142,6 +142,24 @@ getTempDirectory()
 }
 
 
+bfs::path
+getTempPath(const bfs::path& tempDir,
+            const string& prefix)
+{
+    bfs::path prefixPath(prefix);
+	wchar_t outBuf[MAX_PATH];
+	UINT x = GetTempFileNameW(nativeString(tempDir).c_str(),
+                              nativeString(prefixPath).c_str(), 0, outBuf);
+    if (!x) {
+        boost::system::error_code ec(GetLastError(),
+                                     boost::system::system_category());
+        throw bfs::filesystem_error("GetTempFileNameW fails",
+                                    tempDir, prefixPath, ec);
+    }
+    bfs::path path(outBuf);
+    (void) safeRemove(path);
+	return path;
+}
 
 
 bool
