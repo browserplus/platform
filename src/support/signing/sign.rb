@@ -120,13 +120,13 @@ if certType != nil
 end
 
 opensslPath = File.join(ENV["BP_PLATFORM_PATH"], "external", 
-                        platform, "bin", "openssl#{exeSuffix}")
+                        "dist", "bin", "openssl#{exeSuffix}")
 if !File.exist?(opensslPath) 
     puts "#{opensslPath} not found"
     exit -1
 end
 ENV["OPENSSL_CONF"] = File.join(ENV["BP_PLATFORM_PATH"], "external", 
-                                platform, "ssl", "openssl.cnf")
+                                "dist", "ssl", "openssl.cnf")
 
 curdir = Dir.getwd
 Dir.chdir(topDir) do 
