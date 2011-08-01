@@ -1,4 +1,10 @@
-05/31/2011 - Changes from 1.10.16 to 2.10.17
+08/01/2011 - Changes from 2.10.17 to 2.10.18
+ * new devel cert, old one expired
+ * enabled code coverage builds
+ * fixed some coverity defects
+ * use openssl for crypto random numbers
+
+05/31/2011 - Changes from 2.10.16 to 2.10.17
  * Add basic perms bundle to bpkg.  Prevents race where clean install
    can fail to init.
  * bakery is now a git submodule
